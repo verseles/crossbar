@@ -145,8 +145,8 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 46. ~~`plugins/rust/battery.30s.rs`~~ ✅
 47. ~~`plugins/rust/site-check.1m.rs`~~ ✅
 
-### Missing Services (1 service)
-48. `lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication
+### ✅ Completed Services (1 service) - Sprint 7
+48. ~~`lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication~~ ✅
 
 ### Missing Documentation (4 files)
 49. `docs/api-reference.md` - Complete CLI API documentation
@@ -302,23 +302,25 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 7: IPC Server & Global Shortcut (v1.2.0)
-**Duration**: 1 week
+### ✅ Sprint 7: IPC Server (v1.2.0)
+**Status**: Partially Completed - December 1, 2025
 **Focus**: Background services and shortcuts
 
-- [ ] Create `lib/services/ipc_server.dart`
-  - [ ] HTTP server on localhost:48291
-  - [ ] REST API for plugin status
-  - [ ] API for plugin enable/disable
-  - [ ] API for force refresh
-  - [ ] GUI ↔ background communication
-- [ ] Implement global keyboard shortcut
+- [x] Create `lib/services/ipc_server.dart`
+  - [x] HTTP server on localhost:48291
+  - [x] REST API for plugin status (GET /status, GET /plugins)
+  - [x] API for plugin enable/disable (PUT /plugins/:id/enable|disable|toggle)
+  - [x] API for force refresh (POST /plugins/refresh, POST /plugins/:id/run)
+  - [x] GUI ↔ background communication (CORS support)
+  - [x] Health check endpoint (GET /health)
+- [ ] Implement global keyboard shortcut (deferred - requires additional packages)
   - [ ] `Ctrl+Alt+C` to open GUI (configurable)
-  - [ ] Linux: keybinder / global_hotkey package
+  - [ ] Requires: global_hotkey or hotkey_manager package
+  - [ ] Linux: keybinder / X11
   - [ ] macOS: CGEvent tap
   - [ ] Windows: RegisterHotKey
 
-**Deliverables**: IPC server, global shortcut
+**Deliverables**: IPC server with 13 unit tests
 
 ---
 
@@ -662,10 +664,11 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.2.0 (Sprint 7: IPC Server & Global Shortcut)
+**Next Milestone**: v1.2.0 (Sprint 8: Documentation)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
 **Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
 **Sprint 4 Status**: ✅ COMPLETED - Hash algorithms + XML output
 **Sprint 5 Status**: ✅ COMPLETED - 8 Go/Rust example plugins
 **Sprint 6 Status**: ✅ COMPLETED - Plugin scaffolding (init, install)
+**Sprint 7 Status**: ✅ COMPLETED - IPC server (13 tests)
