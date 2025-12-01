@@ -15,20 +15,29 @@
 
 ## Project Status
 
-### ✅ Completed (v1.0.0)
+### Completed (v1.0.0 + v1.1.0 Features)
 
-All 7 phases from MASTER_PLAN.md are **100% complete**:
+All 7 phases from MASTER_PLAN.md + 10 sprints from ROADMAP.md are **100% complete**:
 
-1. ✅ **Phase 1**: Core & CLI Foundation (47 commands, 6 languages)
-2. ✅ **Phase 2**: Desktop GUI (Material Design 3, 3 tabs)
-3. ✅ **Phase 3**: Mobile & Widgets (notifications, scheduling)
-4. ✅ **Phase 4**: Extended CLI & Services (marketplace, logging)
-5. ✅ **Phase 5**: Example Plugins & i18n (24 plugins, 10 languages)
-6. ✅ **Phase 6**: Hot Reload & CI/CD (file watcher, GitHub Actions)
-7. ✅ **Phase 7**: Release & Documentation (CHANGELOG, README, ROADMAP)
+**Original Phases:**
+1. **Phase 1**: Core & CLI Foundation (75+ commands, 6 languages)
+2. **Phase 2**: Desktop GUI (Material Design 3, 3 tabs)
+3. **Phase 3**: Mobile & Widgets (notifications, scheduling)
+4. **Phase 4**: Extended CLI & Services (marketplace, logging)
+5. **Phase 5**: Example Plugins & i18n (32 plugins, 10 languages)
+6. **Phase 6**: Hot Reload & CI/CD (file watcher, GitHub Actions)
+7. **Phase 7**: Release & Documentation (CHANGELOG, README, ROADMAP)
 
-**CI Status**: ✅ All 5 platforms building successfully
-- Run: https://github.com/verseles/crossbar/actions/runs/19823996330
+**Additional Sprints (from ROADMAP.md):**
+- **Sprint 1-4**: Media controls, system controls, Bluetooth/VPN, utilities (32 new CLI commands)
+- **Sprint 5**: Go & Rust example plugins (8 plugins)
+- **Sprint 6**: Plugin scaffolding (`init`, `install` commands)
+- **Sprint 7**: IPC Server (localhost:48291 for GUI ↔ background)
+- **Sprint 8**: Documentation (4 comprehensive docs)
+- **Sprint 9**: CI/CD improvements (Codecov integration)
+- **Sprint 10**: Docker/Podman infrastructure
+
+**CI Status**: All 5 platforms building successfully
 
 ## Critical Technical Decisions
 
@@ -65,7 +74,7 @@ All 7 phases from MASTER_PLAN.md are **100% complete**:
 - `bin/launcher.dart`: Routes to appropriate binary based on args
 - `bin/crossbar.dart`: CLI entry point (pure Dart)
 - `lib/main.dart`: GUI-only entry point (Flutter)
-- `lib/cli/cli_handler.dart`: Contains all 47 CLI commands
+- `lib/cli/cli_handler.dart`: Contains all CLI commands
 
 **Why this architecture**:
 - Flutter Linux builds initialize GTK even before checking arguments
@@ -120,57 +129,157 @@ target_compile_options(${TARGET} PRIVATE -Wall -Wno-deprecated-declarations -Wno
 crossbar/
 ├── MASTER_PLAN.md          # Authoritative specification (DO NOT MODIFY)
 ├── CHANGELOG.md            # Detailed release history
-├── README.md               # User-facing documentation (509 lines)
-├── ROADMAP.md              # Future features and roadmap
+├── README.md               # User-facing documentation
+├── ROADMAP.md              # Future features and roadmap (10 sprints complete)
 ├── CONTRIBUTING.md         # Developer guidelines
+├── SECURITY.md             # Security policy & vulnerability reporting
 ├── RELEASE_NOTES_v1.0.0.md # GitHub release notes
+├── docs/
+│   ├── api-reference.md    # Complete CLI API (75+ commands)
+│   ├── plugin-development.md # Tutorial for all 6 languages
+│   └── config-schema.md    # 25+ field types documentation
 ├── lib/
 │   ├── core/               # Plugin system (manager, parser, runner)
+│   │   └── api/            # Media, System, Network, Utils APIs
 │   ├── models/             # Data models
-│   ├── services/           # 7 background services
+│   ├── services/           # 8 background services (including IPC server)
 │   ├── ui/                 # Material Design 3 interface
-│   ├── cli/                # CLI implementation (47 commands)
+│   ├── cli/                # CLI implementation (75+ commands)
 │   └── l10n/               # 10 language ARB files
-├── bin/crossbar.dart       # CLI entry point (backwards compatibility)
-├── plugins/                # 24 example plugins
-├── test/                   # 116 tests (114 passing, 2 skipped)
+├── bin/
+│   ├── crossbar.dart       # CLI entry point
+│   └── launcher.dart       # GUI/CLI router
+├── plugins/                # 32 example plugins (6 languages)
+├── test/                   # 243 tests (240 passing, 3 skipped)
+├── docker/
+│   ├── Dockerfile.linux    # Linux build container
+│   └── Dockerfile.android  # Android build container
+├── docker-compose.yml      # Docker compose (5 services)
+├── podman-compose.yml      # Podman compose (5 services)
 └── .github/workflows/      # CI/CD pipelines
 ```
 
-## Known Limitations & Future Work
+## Services Architecture
 
-### Build Status by Platform
+8 background services in `lib/services/`:
 
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Linux | ✅ Built in CI | 41MB bundle |
-| macOS | ✅ Built in CI | Requires macOS runner |
-| Windows | ✅ Built in CI | Requires Windows runner |
-| Android | ✅ Built in CI | Requires proper SDK setup locally |
-| iOS | ⚠️ Structure ready | Not built (requires macOS + Xcode) |
+| Service | Purpose |
+|---------|---------|
+| `tray_service.dart` | System tray integration |
+| `notification_service.dart` | Cross-platform notifications |
+| `scheduler_service.dart` | Plugin auto-refresh scheduling |
+| `widget_service.dart` | Home screen widgets (mobile) |
+| `marketplace_service.dart` | GitHub plugin discovery |
+| `logger_service.dart` | Rotating log files |
+| `hot_reload_service.dart` | File watcher (500ms debounce) |
+| `ipc_server.dart` | HTTP API on localhost:48291 |
 
-### Test Coverage
+### IPC Server Endpoints
 
-- **116 total tests**: 114 passing, 2 skipped
+```
+GET  /health              # Health check
+GET  /status              # App status
+GET  /plugins             # List all plugins
+GET  /plugins/:id         # Get plugin details
+PUT  /plugins/:id/enable  # Enable plugin
+PUT  /plugins/:id/disable # Disable plugin
+PUT  /plugins/:id/toggle  # Toggle plugin state
+POST /plugins/refresh     # Refresh all plugins
+POST /plugins/:id/run     # Run specific plugin
+```
+
+## Test Coverage
+
+- **243 total tests**: 240 passing, 3 skipped
+- **Coverage**: ~46% (realistic for platform-dependent code)
+- **CI Threshold**: 45% (fail build if below)
 - **Skipped tests**:
   - `NetworkApi.getPublicIp`: Requires network access
   - `NetworkApi.setWifi`: Requires system permissions
-- **Coverage**: >90% (not measured in CI yet)
+  - `NetworkApi.getPingResult`: Requires network access
 
-### Plugin System
+**Note**: Coverage is lower than typical because much of the codebase consists of platform-specific code (MPRIS, PulseAudio, D-Bus, GTK, macOS AppleScript, Windows PowerShell) that cannot be unit tested without mocking system services.
+
+## Build Status by Platform
+
+| Platform | CI Status | Notes |
+|----------|-----------|-------|
+| Linux | Built | 41MB bundle |
+| macOS | Built | Requires macOS runner |
+| Windows | Built | Requires Windows runner |
+| Android | Built | APK generated |
+| iOS | Structure ready | Not built (requires Xcode) |
+
+## Plugin System
 
 **What works**:
-- ✅ Bash, Python, Node.js, Dart plugins (Go/Rust structure ready)
-- ✅ BitBar text format parsing
-- ✅ JSON output format
-- ✅ Hot reload (500ms debounce)
-- ✅ Refresh intervals from filename (e.g., `cpu.10s.sh`)
+- Bash, Python, Node.js, Dart, Go, Rust plugins
+- BitBar text format parsing
+- JSON output format
+- XML output format (enterprise)
+- Hot reload (500ms debounce)
+- Refresh intervals from filename (e.g., `cpu.10s.sh`)
+- Plugin scaffolding (`crossbar init`)
+- GitHub installation (`crossbar install`)
 
 **What's missing**:
-- ❌ Plugin sandboxing (runs with full permissions)
-- ❌ Plugin signing/verification
-- ❌ Plugin versioning in marketplace
-- ❌ Plugin dependency management
+- Plugin sandboxing (runs with full permissions)
+- Plugin signing/verification
+- Plugin versioning in marketplace
+- Plugin dependency management
+
+## CLI Commands Summary
+
+**75+ commands** organized by category:
+
+| Category | Commands |
+|----------|----------|
+| System | `--cpu`, `--memory`, `--disk`, `--battery`, `--uptime`, `--os` |
+| Network | `--net-ip`, `--net-status`, `--wifi-ssid`, `--web` |
+| Media | `--media-play`, `--media-pause`, `--audio-volume`, `--screen-brightness` |
+| Bluetooth | `--bluetooth-status`, `--bluetooth-on`, `--bluetooth-off`, `--bluetooth-devices` |
+| Power | `--power-sleep`, `--power-restart`, `--power-shutdown` |
+| Screenshot | `--screenshot`, `--screenshot --clipboard` |
+| Wallpaper | `--wallpaper-get`, `--wallpaper-set` |
+| Notifications | `--notify`, `--dnd-status`, `--dnd-set` |
+| Open/Launch | `--open-url`, `--open-file`, `--open-app` |
+| Utilities | `--hash`, `--uuid`, `--random`, `--time`, `--date` |
+| Plugin Mgmt | `init`, `install`, `list`, `enable`, `disable` |
+| Output | `--json`, `--xml` flags for structured output |
+
+Full documentation: `docs/api-reference.md`
+
+## Docker/Podman Development
+
+### Quick Start
+
+```bash
+# Using Docker
+make docker-build    # Build images
+make docker-shell    # Interactive shell
+make docker-test     # Run tests
+make docker-linux    # Build Linux release
+
+# Using Podman (preferred on Fedora/RHEL)
+make podman-build
+make podman-shell
+make podman-test
+make podman-linux
+
+# Auto-detect compose tool
+make container-build
+make container-test
+```
+
+### Services Available
+
+| Service | Purpose |
+|---------|---------|
+| `flutter-linux` | Interactive dev environment |
+| `flutter-android` | Android dev with SDK |
+| `flutter-test` | Automated test runner |
+| `flutter-build` | Linux release builds |
+| `flutter-apk` | Android APK builds |
 
 ## Common Issues & Solutions
 
@@ -192,11 +301,12 @@ libsecret-1-dev libayatana-appindicator3-dev
 isCoreLibraryDesugaringEnabled = true
 ```
 
-### Issue: flutter analyze fails with unused import warnings
+### Issue: Coverage below threshold
 
-**Solution**: Remove unused imports. Common culprits:
-- `dart:io` in test files
-- `dart:async` when not using Futures/Streams
+**Solution**: Current threshold is 45%. Platform-dependent code (media, bluetooth, screenshots) can't be easily unit tested. Focus tests on:
+- Models (`lib/models/`) - easy to test
+- Output parser (`lib/core/output_parser.dart`) - pure logic
+- Plugin scaffolding (`lib/cli/plugin_scaffolding.dart`)
 
 ### Issue: Tests pass locally but fail in CI
 
@@ -217,6 +327,9 @@ flutter test
 # With coverage
 flutter test --coverage
 
+# Check coverage percentage
+lcov --summary coverage/lcov.info
+
 # Specific test file
 flutter test test/unit/core/plugin_manager_test.dart
 ```
@@ -224,17 +337,20 @@ flutter test test/unit/core/plugin_manager_test.dart
 ### Building
 
 ```bash
-# Linux
-flutter build linux --release
+# Linux (with launcher architecture)
+make linux
 
-# Android (requires SDK)
+# Or manually:
+flutter build linux --release
+mv build/linux/x64/release/bundle/crossbar build/linux/x64/release/bundle/crossbar-gui
+dart compile exe bin/crossbar.dart -o build/linux/x64/release/bundle/crossbar-cli
+dart compile exe bin/launcher.dart -o build/linux/x64/release/bundle/crossbar
+
+# Android
 flutter build apk --release
 
-# macOS (requires macOS)
-flutter build macos --release
-
-# Windows (requires Windows)
-flutter build windows --release
+# Test CLI after build
+make test-cli
 ```
 
 ### Code Quality
@@ -252,7 +368,7 @@ flutter pub outdated
 
 ## Git Workflow
 
-- **Main branch**: `main` (protected)
+- **Main branch**: `main`
 - **Tag format**: `v1.0.0`, `v1.1.0`, etc.
 - **Commit style**: Conventional Commits (feat, fix, docs, ci, etc.)
 - **Co-authored commits**: Do NOT add co-authors (user preference)
@@ -262,8 +378,9 @@ flutter pub outdated
 ### GitHub Actions Workflows
 
 1. **ci.yml**: Runs on push to main/develop
-   - test job: analyze + test
+   - test job: analyze + test + coverage check (45% min)
    - build jobs: Linux, macOS, Windows, Android (parallel)
+   - Codecov integration
 
 2. **release.yml**: Runs on tags `v*`
    - Multi-platform matrix builds
@@ -277,104 +394,18 @@ flutter pub outdated
 - `crossbar-windows`: Windows x64 (zip)
 - `crossbar-android`: Android APK
 
-## Package Dependencies
+## Important Notes for Future Sessions
 
-### Core Dependencies
-
-```yaml
-flutter: sdk: flutter
-flutter_localizations: sdk: flutter
-intl: ^0.20.2
-dio: ^5.7.0
-path_provider: ^2.1.4
-flutter_secure_storage: ^9.2.2
-```
-
-### Desktop Dependencies
-
-```yaml
-tray_manager: ^0.2.4      # System tray
-window_manager: ^0.4.3    # Window management
-```
-
-### Mobile Dependencies
-
-```yaml
-flutter_local_notifications: ^17.2.4
-home_widget: ^0.6.0
-```
-
-### Dev Dependencies
-
-```yaml
-flutter_test: sdk: flutter
-flutter_lints: ^4.0.0
-```
-
-**Note**: 26 packages have newer versions incompatible with constraints (this is normal)
-
-## Plugin Development
-
-### Example Plugin Structure
-
-**Bash Plugin**:
-```bash
-#!/bin/bash
-# filename: cpu.10s.sh (refreshes every 10 seconds)
-
-cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)
-echo "🖥️ CPU: $cpu%"
-echo "---"
-echo "Show Details | bash='crossbar --process-list'"
-```
-
-**Python Plugin with JSON**:
-```python
-#!/usr/bin/env python3
-# filename: weather.30m.py (refreshes every 30 minutes)
-
-import json
-import requests
-
-data = requests.get("https://api.openweathermap.org/...").json()
-print(json.dumps({
-    "icon": "🌤️",
-    "text": f"{data['main']['temp']}°C",
-    "menu": [
-        {"text": f"Feels like: {data['main']['feels_like']}°C"}
-    ]
-}))
-```
-
-### Plugin Configuration
-
-Plugins can have a `.config.json` file:
-
-```json
-// weather.30m.py.config.json
-{
-  "name": "Weather Plugin",
-  "version": "1.0.0",
-  "settings": [
-    {
-      "key": "API_KEY",
-      "type": "password",
-      "label": "OpenWeather API Key",
-      "required": true
-    }
-  ]
-}
-```
-
-## Future Development Priorities (v1.1.0)
-
-Based on ROADMAP.md, next priorities:
-
-1. **Platform builds**: Verify macOS/Windows locally
-2. **Marketplace enhancements**: Ratings, reviews, categories
-3. **Security**: Plugin sandboxing (opt-in)
-4. **Performance metrics**: Dashboard for plugin stats
-5. **Distribution**: Package managers (Homebrew, Snap, winget, AUR)
+1. **DO NOT modify MASTER_PLAN.md** - it's the authoritative spec
+2. **Always run flutter analyze before committing** - CI will fail otherwise
+3. **Test locally before pushing** - CI takes 5-10 minutes per run
+4. **Check Flutter version matches** - local vs CI mismatch causes issues
+5. **Plugins are real and functional** - 32 examples in `plugins/` directory
+6. **i18n is complete** - 10 languages with 40-70 strings each
+7. **Coverage is ~46%** - realistic for platform-dependent code
+8. **All 5 platforms build** - Linux, macOS, Windows, Android working in CI
+9. **Docker/Podman ready** - containerized dev environment available
+10. **IPC server available** - localhost:48291 for external integrations
 
 ## Commands Quick Reference
 
@@ -400,49 +431,35 @@ flutter build <platform> --release # Build release
 ### Project-Specific
 
 ```bash
-# Verify plugin examples exist
-ls plugins/
+# Build with launcher architecture
+make linux
 
-# Check i18n files
-ls lib/l10n/*.arb
+# Run tests
+make test
 
-# Count Dart lines
-wc -l lib/**/*.dart bin/*.dart | tail -1
+# Test CLI commands
+make test-cli
 
-# Run specific test
-flutter test test/unit/core/plugin_manager_test.dart
+# Container development
+make container-shell
+
+# Update repomix (if exists)
+make mix
 ```
 
-## Important Notes for Future Sessions
+## Success Metrics (Current)
 
-1. **DO NOT modify MASTER_PLAN.md** - it's the authoritative spec
-2. **Always run flutter analyze before committing** - CI will fail otherwise
-3. **Test locally before pushing** - CI takes 5-10 minutes per run
-4. **Check Flutter version matches** - local vs CI mismatch causes issues
-5. **Plugins are real and functional** - 24 examples in `plugins/` directory
-6. **i18n is complete** - 10 languages with 40-70 strings each
-7. **Coverage is good** - 116 tests, >90% coverage confirmed
-8. **All 5 platforms build** - Linux, macOS, Windows, Android working in CI
-
-## Resources
-
-- **MASTER_PLAN.md**: Complete project specification
-- **CHANGELOG.md**: Detailed feature history
-- **ROADMAP.md**: Future development plans
-- **CONTRIBUTING.md**: Contributor guidelines
-- **GitHub Actions**: https://github.com/verseles/crossbar/actions
-
-## Success Metrics (v1.0.0 Baseline)
-
-- ⭐ GitHub Stars: 0 (just released)
-- 📥 Downloads: 0 (awaiting release)
-- 🐛 Open Issues: 0
-- 👥 Contributors: 1
-- 🔌 Plugins: 24 (examples)
-- 🧪 Tests: 116 (114 passing)
-- 📊 Coverage: >90%
-- 🏗️ CI Status: ✅ Green
+- **GitHub Stars**: 0 (just released)
+- **Downloads**: 0 (awaiting release)
+- **Open Issues**: 0
+- **Contributors**: 1
+- **Plugins**: 32 (examples in 6 languages)
+- **Tests**: 243 (240 passing, 3 skipped)
+- **Coverage**: ~46%
+- **CLI Commands**: 75+
+- **Languages**: 10 (i18n)
+- **CI Status**: Green
 
 ---
 
-**For the next session**: Start by reviewing this file, checking CI status, and reading any new issues on GitHub. The project is feature-complete for v1.0.0 - focus should be on v1.1.0 features from ROADMAP.md or bug fixes.
+**For the next session**: Start by reviewing this file, checking CI status with `gh run list`, and reading any new issues on GitHub. All sprints are complete - focus on community requests, bug fixes, or v2.0.0 features from ROADMAP.md.
