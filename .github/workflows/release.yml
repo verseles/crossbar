@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-all:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+            artifact: crossbar-linux
+            path: build/linux/x64/release/bundle/
+          - os: macos-latest
+            target: macos
+            artifact: crossbar-macos
+            path: build/macos/Build/Products/Release/
+          - os: windows-latest
+            target: windows
+            artifact: crossbar-windows
+            path: build/windows/x64/runner/Release/
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Build
+        run: flutter build ${{ matrix.target }} --release
+
+      - name: Compress artifact (Unix)
+        if: matrix.target != 'windows'
+        run: |
+          cd ${{ matrix.path }}
+          tar -czvf ../../../${{ matrix.artifact }}.tar.gz .
+
+      - name: Compress artifact (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "${{ matrix.path }}/*" -DestinationPath "${{ matrix.artifact }}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            ${{ matrix.artifact }}.tar.gz
+            ${{ matrix.artifact }}.zip
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossbar-android
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  create-release:
+    needs: [build-all, build-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/crossbar-linux/*.tar.gz
+            artifacts/crossbar-macos/*.tar.gz
+            artifacts/crossbar-windows/*.zip
+            artifacts/crossbar-android/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
