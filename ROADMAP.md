@@ -66,7 +66,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 
 ## Missing from Original Plan
 
-The following **49 items** were specified in `original_plan.md` but not yet implemented:
+The following **36 items** remain from the original 63 items in `original_plan.md`:
 
 ### ✅ Completed CLI Commands (Sprint 1)
 
@@ -87,28 +87,30 @@ The following **49 items** were specified in `original_plan.md` but not yet impl
 14. `--media-play-pause` - Toggle play/pause (bonus) ✅
 15. `--audio-volume` - Get current volume (bonus) ✅
 
-### Missing CLI Commands (~24 commands)
+### ✅ Completed CLI Commands (Sprint 2)
 
-#### Power Management (3 commands)
-14. `--power-sleep` - Suspend system
-15. `--power-restart` - Restart (with confirmation)
-16. `--power-shutdown` - Shutdown (with confirmation)
+#### Power Management (3 commands) - COMPLETED December 1, 2025
+14. ~~`--power-sleep` - Suspend system~~ ✅
+15. ~~`--power-restart` - Restart (with confirmation)~~ ✅
+16. ~~`--power-shutdown` - Shutdown (with confirmation)~~ ✅
 
-#### Screenshot & Wallpaper (4 commands)
-17. `--screenshot [path]` - Take screenshot
-18. `--screenshot --clipboard` - Screenshot to clipboard
-19. `--wallpaper-get` - Get current wallpaper path
-20. `--wallpaper-set <path>` - Set wallpaper
+#### Screenshot & Wallpaper (4 commands) - COMPLETED December 1, 2025
+17. ~~`--screenshot [path]` - Take screenshot~~ ✅
+18. ~~`--screenshot --clipboard` - Screenshot to clipboard~~ ✅
+19. ~~`--wallpaper-get` - Get current wallpaper path~~ ✅
+20. ~~`--wallpaper-set <path>` - Set wallpaper~~ ✅
 
-#### Notifications & DND (3 commands)
-21. `--notify "title" "message" [--icon] [--sound] [--action] [--priority]` - Send notification
-22. `--dnd-status` - Do Not Disturb status
-23. `--dnd-set on|off` - Set DND
+#### Notifications & DND (3 commands) - COMPLETED December 1, 2025
+21. ~~`--notify "title" "message" [--icon] [--priority]` - Send notification~~ ✅
+22. ~~`--dnd-status` - Do Not Disturb status~~ ✅
+23. ~~`--dnd-set on|off` - Set DND~~ ✅
 
-#### Open/Launch (3 commands)
-24. `--open-url <url>` - Open in browser
-25. `--open-app <name>` - Launch application
-26. `--open-file <path>` - Open with default app
+#### Open/Launch (3 commands) - COMPLETED December 1, 2025
+24. ~~`--open-url <url>` - Open in browser~~ ✅
+25. ~~`--open-app <name>` - Launch application~~ ✅
+26. ~~`--open-file <path>` - Open with default app~~ ✅
+
+### Missing CLI Commands (~11 commands)
 
 #### Bluetooth (4 commands)
 27. `--bluetooth-status` - Bluetooth status
@@ -127,9 +129,9 @@ The following **49 items** were specified in `original_plan.md` but not yet impl
 36. `--location-city` - City name via geocoding
 37. `--time [fmt=12h|24h]` - Formatted time
 
-### Missing API Files (1 file)
+### ✅ Completed API Files (2 files)
 38. ~~`lib/core/api/media_api.dart` - Media control implementations~~ ✅ COMPLETED
-39. `lib/core/api/utils_api.dart` - Utility command implementations
+39. ~~`lib/core/api/utils_api.dart` - Utility command implementations~~ ✅ COMPLETED
 
 ### Missing Example Plugins (8 plugins)
 40. `plugins/go/clock.5s.go`
@@ -192,24 +194,24 @@ The following **49 items** were specified in `original_plan.md` but not yet impl
 
 ---
 
-### Sprint 2: System Controls (v1.1.0)
-**Duration**: 2 weeks
+### ✅ Sprint 2: System Controls (v1.1.0)
+**Status**: Completed - December 1, 2025
 **Focus**: Power, Screenshot, Wallpaper, Notifications
 
-- [ ] Create `lib/core/api/utils_api.dart`
-  - [ ] `--screenshot [path]`, `--screenshot --clipboard`
-  - [ ] `--wallpaper-get`, `--wallpaper-set <path>`
-  - [ ] `--power-sleep`, `--power-restart`, `--power-shutdown`
-  - [ ] `--notify "title" "message" [options]`
-  - [ ] `--dnd-status`, `--dnd-set on|off`
-- [ ] Add platform-specific implementations
-  - [ ] Linux: gnome-screenshot, gsettings, systemctl
-  - [ ] macOS: screencapture, osascript, pmset
-  - [ ] Windows: PrintScreen API, PowerShell
-- [ ] Add confirmation dialogs for destructive commands
-- [ ] Unit tests for all system commands
+- [x] Create `lib/core/api/utils_api.dart`
+  - [x] `--screenshot [path]`, `--screenshot --clipboard`
+  - [x] `--wallpaper-get`, `--wallpaper-set <path>`
+  - [x] `--power-sleep`, `--power-restart`, `--power-shutdown`
+  - [x] `--notify "title" "message" [options]`
+  - [x] `--dnd-status`, `--dnd-set on|off`
+- [x] Add platform-specific implementations
+  - [x] Linux: gnome-screenshot/scrot/spectacle, gsettings, systemctl, notify-send
+  - [x] macOS: screencapture, osascript, pmset
+  - [x] Windows: PowerShell
+- [x] Add confirmation dialogs for destructive commands (--confirm flag)
+- [x] Unit tests for all system commands (21 tests)
 
-**Deliverables**: 10 new CLI commands
+**Deliverables**: 13 new CLI commands (including open-url, open-file, open-app)
 
 ---
 
@@ -656,5 +658,6 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Sprint 2-4: System Controls, Open/Launch, Utilities)
+**Next Milestone**: v1.1.0 (Sprint 3-4: Bluetooth, VPN, Utilities)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands implemented
+**Sprint 2 Status**: ✅ COMPLETED - 13 system control commands implemented

@@ -4,6 +4,7 @@ import 'dart:io';
 import '../core/api/media_api.dart';
 import '../core/api/network_api.dart';
 import '../core/api/system_api.dart';
+import '../core/api/utils_api.dart';
 
 const String version = '1.0.0';
 
@@ -757,6 +758,131 @@ Future<int> handleCliCommand(List<String> args) async {
           print('Failed to set brightness');
         }
 
+      // ============================================================
+      // SYSTEM CONTROLS (Sprint 2)
+      // ============================================================
+
+      case '--screenshot':
+        const api = UtilsApi();
+        final path = _getPositionalArg(commandArgs, 0);
+        final toClipboard = commandArgs.contains('--clipboard');
+        final result = await api.takeScreenshot(path: path, toClipboard: toClipboard);
+        if (result != null) {
+          if (result == 'clipboard') {
+            print('Screenshot copied to clipboard');
+          } else {
+            print('Screenshot saved to: $result');
+          }
+        } else {
+          print('Failed to take screenshot');
+        }
+
+      case '--wallpaper-get':
+        const api = UtilsApi();
+        final result = await api.getWallpaper();
+        print(result);
+
+      case '--wallpaper-set':
+        final path = _getPositionalArg(commandArgs, 0);
+        if (path == null) {
+          stderr.writeln('Error: --wallpaper-set requires a file path');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.setWallpaper(path);
+        print(result ? 'Wallpaper set to $path' : 'Failed to set wallpaper');
+
+      case '--power-sleep':
+        const api = UtilsApi();
+        final result = await api.sleep();
+        print(result ? 'System going to sleep...' : 'Failed to sleep');
+
+      case '--power-restart':
+        if (!commandArgs.contains('--confirm')) {
+          stderr.writeln('Error: --power-restart requires --confirm flag for safety');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.restart(confirmed: true);
+        print(result ? 'System restarting...' : 'Failed to restart');
+
+      case '--power-shutdown':
+        if (!commandArgs.contains('--confirm')) {
+          stderr.writeln('Error: --power-shutdown requires --confirm flag for safety');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.shutdown(confirmed: true);
+        print(result ? 'System shutting down...' : 'Failed to shutdown');
+
+      case '--notify':
+        final title = _getPositionalArg(commandArgs, 0);
+        final message = _getPositionalArg(commandArgs, 1);
+        if (title == null || message == null) {
+          stderr.writeln('Error: --notify requires title and message');
+          stderr.writeln('Usage: crossbar --notify "Title" "Message" [--icon <icon>] [--priority <low|normal|critical>]');
+          return 1;
+        }
+        const api = UtilsApi();
+        final icon = _getNamedArg(commandArgs, '--icon');
+        final priority = _getNamedArg(commandArgs, '--priority') ?? 'normal';
+        final result = await api.sendNotification(
+          title: title,
+          message: message,
+          icon: icon,
+          priority: priority,
+        );
+        print(result ? 'Notification sent' : 'Failed to send notification');
+
+      case '--dnd-status':
+        const api = UtilsApi();
+        final result = await api.getDndStatus();
+        if (jsonOutput) {
+          print(jsonEncode({'dnd': result}));
+        } else {
+          print(result ? 'Do Not Disturb: ON' : 'Do Not Disturb: OFF');
+        }
+
+      case '--dnd-set':
+        final value = _getPositionalArg(commandArgs, 0);
+        if (value == null || (value != 'on' && value != 'off')) {
+          stderr.writeln('Error: --dnd-set requires on|off');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.setDnd(value == 'on');
+        print(result ? 'DND set to $value' : 'Failed to set DND');
+
+      case '--open-url':
+        final url = _getPositionalArg(commandArgs, 0);
+        if (url == null) {
+          stderr.writeln('Error: --open-url requires a URL');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.openUrl(url);
+        print(result ? 'Opened: $url' : 'Failed to open URL');
+
+      case '--open-file':
+        final path = _getPositionalArg(commandArgs, 0);
+        if (path == null) {
+          stderr.writeln('Error: --open-file requires a file path');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.openFile(path);
+        print(result ? 'Opened: $path' : 'Failed to open file');
+
+      case '--open-app':
+        final appName = _getPositionalArg(commandArgs, 0);
+        if (appName == null) {
+          stderr.writeln('Error: --open-app requires an application name');
+          return 1;
+        }
+        const api = UtilsApi();
+        final result = await api.openApp(appName);
+        print(result ? 'Launched: $appName' : 'Failed to launch app');
+
       default:
         stderr.writeln('Error: Unknown command: $command');
         _printUsage();
@@ -881,6 +1007,19 @@ Audio Controls:
 Screen:
   --screen-brightness      Get screen brightness (0-100)
   --screen-brightness-set <0-100>  Set screen brightness
+  --screenshot [path]      Take screenshot (saves to path or default)
+  --screenshot --clipboard Screenshot to clipboard
+  --wallpaper-get          Get current wallpaper path
+  --wallpaper-set <path>   Set wallpaper
+
+Power Management:
+  --power-sleep            Suspend system
+  --power-restart --confirm  Restart system (requires --confirm)
+  --power-shutdown --confirm Shutdown system (requires --confirm)
+
+Do Not Disturb:
+  --dnd-status             Get DND status (--json for format)
+  --dnd-set on|off         Set DND status
 
 Network:
   --net-status       Connection status (online/offline)
@@ -929,9 +1068,12 @@ Utilities:
   --base64-decode    Decode from base64
 
 System Actions:
-  --notify <title> <message>  Send notification
-  --open-url <url>            Open URL in browser
-  --process-count             Number of running processes
+  --notify <title> <msg> [--icon <icon>] [--priority <low|normal|critical>]
+                           Send desktop notification
+  --open-url <url>         Open URL in browser
+  --open-file <path>       Open file with default app
+  --open-app <name>        Launch application
+  --process-count          Number of running processes
 
 Options:
   --json             Output in JSON format
@@ -945,8 +1087,11 @@ Examples:
   crossbar --media-playing --json
   crossbar --audio-volume-set 50
   crossbar --screen-brightness-set 70
+  crossbar --screenshot ~/Desktop/shot.png
+  crossbar --wallpaper-set ~/Pictures/bg.jpg
+  crossbar --notify "Title" "Message" --priority critical
+  crossbar --dnd-set on
+  crossbar --open-url https://github.com
   crossbar --web https://api.github.com/users/octocat
-  crossbar --hash "hello" --algo sha256
-  crossbar --env PATH
 ''');
 }
