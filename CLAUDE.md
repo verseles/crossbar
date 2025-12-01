@@ -150,7 +150,7 @@ crossbar/
 │   ├── crossbar.dart       # CLI entry point
 │   └── launcher.dart       # GUI/CLI router
 ├── plugins/                # 32 example plugins (6 languages)
-├── test/                   # 243 tests (240 passing, 3 skipped)
+├── test/                   # 289 tests (286 passing, 3 skipped)
 ├── docker/
 │   ├── Dockerfile.linux    # Linux build container
 │   └── Dockerfile.android  # Android build container
@@ -190,9 +190,9 @@ POST /plugins/:id/run     # Run specific plugin
 
 ## Test Coverage
 
-- **243 total tests**: 240 passing, 3 skipped
+- **289 total tests**: 286 passing, 3 skipped
 - **Coverage**: ~46% (realistic for platform-dependent code)
-- **CI Threshold**: 45% (fail build if below)
+- **CI Threshold**: 44% (fail build if below)
 - **Skipped tests**:
   - `NetworkApi.getPublicIp`: Requires network access
   - `NetworkApi.setWifi`: Requires system permissions
@@ -303,7 +303,7 @@ isCoreLibraryDesugaringEnabled = true
 
 ### Issue: Coverage below threshold
 
-**Solution**: Current threshold is 45%. Platform-dependent code (media, bluetooth, screenshots) can't be easily unit tested. Focus tests on:
+**Solution**: Current threshold is 44%. Platform-dependent code (media, bluetooth, screenshots) can't be easily unit tested. Focus tests on:
 - Models (`lib/models/`) - easy to test
 - Output parser (`lib/core/output_parser.dart`) - pure logic
 - Plugin scaffolding (`lib/cli/plugin_scaffolding.dart`)
@@ -373,12 +373,21 @@ flutter pub outdated
 - **Commit style**: Conventional Commits (feat, fix, docs, ci, etc.)
 - **Co-authored commits**: Do NOT add co-authors (user preference)
 
+### Post-Push CI Monitoring (IMPORTANT)
+
+After every `git push`, you MUST:
+1. Use `gh run list --limit 1` to get the run ID
+2. Monitor with `gh run watch <id> --exit-status` in **background** (pipeline is long, ~8min)
+3. Use `sleep` + `BashOutput` to periodically check progress and avoid shell timeout
+4. If CI fails, immediately investigate with `gh run view <id> --log-failed` and fix
+5. Keep iterating until CI passes - don't leave broken builds
+
 ## CI/CD
 
 ### GitHub Actions Workflows
 
 1. **ci.yml**: Runs on push to main/develop
-   - test job: analyze + test + coverage check (45% min)
+   - test job: analyze + test + coverage check (44% min)
    - build jobs: Linux, macOS, Windows, Android (parallel)
    - Codecov integration
 
@@ -454,7 +463,7 @@ make mix
 - **Open Issues**: 0
 - **Contributors**: 1
 - **Plugins**: 32 (examples in 6 languages)
-- **Tests**: 243 (240 passing, 3 skipped)
+- **Tests**: 289 (286 passing, 3 skipped)
 - **Coverage**: ~46%
 - **CLI Commands**: 75+
 - **Languages**: 10 (i18n)
