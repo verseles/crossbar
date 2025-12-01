@@ -57,7 +57,7 @@ print(json.dumps({
 
 ### 2.1 Decisões Técnicas
 
-**Flutter 3.24+**:
+**Flutter 3.35+**:
 
 - **Por quê**: Única framework madura com suporte a 5 plataformas (desktop + mobile) nativo.
 - **Alternativas descartadas**: Electron (pesado, sem mobile), React Native (suporte desktop fraco), Tauri (sem mobile, Rust adiciona complexidade).
@@ -2083,7 +2083,7 @@ on:
     types: [published]
 
 env:
-  FLUTTER_VERSION: "3.24.0"
+  FLUTTER_VERSION: "3.35.0"
 
 jobs:
   # ==================== LINT & TEST ====================
@@ -2874,7 +2874,7 @@ Inspired by [BitBar](https://github.com/matryer/bitbar) (macOS) and [Argos](http
 
 ### 14.1 Por Que Este Plano é Executável
 
-1. **Tech stack madura**: Flutter 3.24 é estável, packages bem mantidos
+1. **Tech stack madura**: Flutter 3.35 é estável, packages bem mantidos
 2. **Arquitetura simples**: Process.run + parsers + Flutter UI (sem magia)
 3. **Inspiração comprovada**: BitBar/Argos já validaram conceito (7+ anos)
 4. **Testes obrigatórios**: 90% coverage garante qualidade desde V1
@@ -3468,7 +3468,7 @@ flutter precache --linux
 ```
 
 **Versão atual (Nov 2025)**: Flutter 3.35.2 / Dart 3.10.0[1][2]
-**Versão mínima recomendada**: Flutter 3.24.0+
+**Versão mínima recomendada**: Flutter 3.35.0+
 
 **Verificação**:
 
