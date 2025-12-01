@@ -473,30 +473,69 @@ Built with:
 
 ## 🗺️ Roadmap
 
-### v1.0.0 (Current) ✅
-- Core plugin system
-- 6 language support
-- 47 CLI commands
-- Desktop support (Linux/macOS/Windows)
-- Mobile support (Android/iOS)
-- Hot reload
-- Example plugins
+> **Full roadmap**: See [ROADMAP.md](ROADMAP.md) for detailed timeline, completed features, and technical debt tracking.
 
-### v1.1.0 (Next)
-- Enhanced marketplace with ratings
-- Plugin sandboxing (optional permissions)
-- Config sync via GitHub Gists
-- Additional CLI commands
-- Performance optimizations
-- More example plugins
+### ✅ v1.0.0 (Current - December 2025)
 
-### v2.0.0 (Future)
-- Telemetry (opt-in)
-- Package managers (Homebrew, Snap, winget)
-- Theme customization
-- Voice commands integration
-- Remote plugins (server-side execution)
-- Full-screen widgets
+**Completed**: All 7 phases from MASTER_PLAN.md
+- ✅ Core plugin system (6 languages)
+- ✅ 47 CLI commands
+- ✅ 5 platform support (structure ready)
+- ✅ Hot reload & CI/CD
+- ✅ 24 example plugins
+- ✅ i18n (10 languages)
+- ✅ Comprehensive documentation
+
+**Limitations**:
+- macOS/iOS builds require macOS with Xcode
+- Android APK requires SDK setup
+- No plugin sandboxing or signing
+
+### 🎯 v1.1.0 (Q1 2026 - Next Priority)
+
+**Focus**: Platform builds & marketplace enhancements
+
+**High Priority**:
+- 🏗️ Complete macOS/Windows/Android/iOS builds
+- ⭐ Plugin ratings and reviews in marketplace
+- 📊 Plugin performance metrics dashboard
+- 🛡️ Optional plugin sandboxing
+- 📦 Package managers (Homebrew, Snap, winget, AUR)
+
+**Also Planned**:
+- Plugin templates/wizard
+- Output history in UI
+- Auto-updater
+- Additional CLI commands (screenshot, wallpaper, notifications)
+
+### 🚀 v1.2.0 - v1.5.0 (2026)
+
+**Mid-term Goals**:
+- 🔄 Config sync via GitHub Gists (v1.2)
+- 🎨 Custom themes & theming system (v1.3)
+- 🔌 Plugin dependencies & inter-plugin communication (v1.4)
+- 📱 Enhanced mobile features (larger widgets, voice commands) (v1.5)
+
+### 🌟 v2.0.0+ (2027+)
+
+**Long-term Vision**:
+- 🌐 Remote plugins (server-side execution)
+- 📊 OpenTelemetry & Grafana integration
+- 🤖 AI-powered plugin suggestions
+- 🔗 Webhook & API platform
+- 🎮 Visual plugin editor (no-code)
+- 🌍 Browser extension & smartwatch support
+
+### 📈 Success Metrics
+
+| Milestone | Stars | Downloads | Contributors | Plugins |
+|-----------|-------|-----------|--------------|---------|
+| v1.0.0 (Now) | 0 | 0 | 1 | 24 |
+| v1.1.0 (Q1 2026) | 100+ | 500+ | 3+ | 40+ |
+| v1.5.0 (Q4 2026) | 500+ | 2.5k+ | 10+ | 100+ |
+| v2.0.0 (2027) | 1k+ | 10k+ | 20+ | 250+ |
+
+**Want to influence the roadmap?** Vote on features in [GitHub Issues](https://github.com/verseles/crossbar/issues) or join [Discussions](https://github.com/verseles/crossbar/discussions)!
 
 ## ⭐ Star History
 
