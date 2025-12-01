@@ -50,19 +50,19 @@ void main() {
     group('Screenshot', () {
       test('takeScreenshot returns String or null', () async {
         final result = await api.takeScreenshot();
-        expect(result == null || result is String, true);
+        expect(result, anyOf(isNull, isA<String>()));
       });
 
       test('takeScreenshot with clipboard option returns String or null',
           () async {
         final result = await api.takeScreenshot(toClipboard: true);
-        expect(result == null || result is String, true);
+        expect(result, anyOf(isNull, isA<String>()));
       });
 
       test('takeScreenshot with custom path returns String or null', () async {
         final tempPath = '/tmp/test_screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
         final result = await api.takeScreenshot(path: tempPath);
-        expect(result == null || result is String, true);
+        expect(result, anyOf(isNull, isA<String>()));
         // Clean up if file was created
         final file = File(tempPath);
         if (await file.exists()) {

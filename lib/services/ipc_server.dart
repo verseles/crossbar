@@ -59,7 +59,6 @@ class IpcServer {
 
     try {
       final path = request.uri.path;
-      final method = request.method;
 
       // Route the request
       switch (path) {

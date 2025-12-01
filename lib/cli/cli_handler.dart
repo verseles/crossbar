@@ -278,33 +278,7 @@ Future<int> handleCliCommand(List<String> args) async {
           print('Copied to clipboard');
         }
 
-      case '--notify':
-        final title = _getPositionalArg(commandArgs, 0) ?? 'Crossbar';
-        final message = _getPositionalArg(commandArgs, 1) ?? '';
-        if (Platform.isLinux) {
-          await Process.run('notify-send', [title, message]);
-        } else if (Platform.isMacOS) {
-          await Process.run('osascript', [
-            '-e',
-            'display notification "$message" with title "$title"',
-          ]);
-        }
-        print('Notification sent');
-
-      case '--open-url':
-        final url = _getPositionalArg(commandArgs, 0);
-        if (url == null) {
-          stderr.writeln('Error: --open-url requires URL');
-          return 1;
-        }
-        if (Platform.isLinux) {
-          await Process.run('xdg-open', [url]);
-        } else if (Platform.isMacOS) {
-          await Process.run('open', [url]);
-        } else if (Platform.isWindows) {
-          await Process.run('start', [url], runInShell: true);
-        }
-        print('Opened URL');
+      // --notify and --open-url are handled below with UtilsApi
 
       case '--process-count':
         if (Platform.isLinux || Platform.isMacOS) {
