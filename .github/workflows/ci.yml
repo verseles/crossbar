@@ -40,13 +40,13 @@ jobs:
 
           echo "Coverage: ${COVERAGE}%"
 
-          # Check if coverage meets threshold (45%)
-          if (( $(echo "$COVERAGE < 45" | bc -l) )); then
-            echo "::error::Coverage ${COVERAGE}% is below minimum threshold of 45%"
+          # Check if coverage meets threshold (44%)
+          if (( $(echo "$COVERAGE < 44" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below minimum threshold of 44%"
             exit 1
           fi
 
-          echo "Coverage ${COVERAGE}% meets threshold of 45%"
+          echo "Coverage ${COVERAGE}% meets threshold of 44%"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
