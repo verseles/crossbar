@@ -7,6 +7,7 @@ import '../core/api/media_api.dart';
 import '../core/api/network_api.dart';
 import '../core/api/system_api.dart';
 import '../core/api/utils_api.dart';
+import 'plugin_scaffolding.dart';
 
 const String version = '1.0.0';
 
@@ -940,6 +941,83 @@ Future<int> handleCliCommand(List<String> args) async {
           }
         }
 
+      // ============================================================
+      // PLUGIN MANAGEMENT (Sprint 6)
+      // ============================================================
+
+      case 'init':
+        final lang = _getNamedArg(commandArgs, '--lang');
+        final type = _getNamedArg(commandArgs, '--type') ?? 'custom';
+        final name = _getNamedArg(commandArgs, '--name');
+        final outputDir = _getNamedArg(commandArgs, '--output');
+
+        if (lang == null) {
+          stderr.writeln('Error: --lang is required');
+          stderr.writeln('Usage: crossbar init --lang <bash|python|node|dart|go|rust> --type <clock|monitor|status|api|custom> [--name <name>]');
+          stderr.writeln('');
+          stderr.writeln('Supported languages: ${PluginScaffolding.supportedLanguages.join(', ')}');
+          stderr.writeln('Supported types: ${PluginScaffolding.supportedTypes.join(', ')}');
+          return 1;
+        }
+
+        if (!PluginScaffolding.supportedLanguages.contains(lang.toLowerCase())) {
+          stderr.writeln('Error: Unsupported language: $lang');
+          stderr.writeln('Supported: ${PluginScaffolding.supportedLanguages.join(', ')}');
+          return 1;
+        }
+
+        if (!PluginScaffolding.supportedTypes.contains(type.toLowerCase())) {
+          stderr.writeln('Error: Unsupported type: $type');
+          stderr.writeln('Supported: ${PluginScaffolding.supportedTypes.join(', ')}');
+          return 1;
+        }
+
+        const scaffolding = PluginScaffolding();
+        final pluginPath = await scaffolding.createPlugin(
+          lang: lang,
+          type: type,
+          name: name,
+          outputDir: outputDir,
+        );
+
+        if (pluginPath != null) {
+          print('Plugin created: $pluginPath');
+          print('Config file: $pluginPath.config.json');
+          print('');
+          print('Next steps:');
+          print('  1. Edit the plugin file to add your logic');
+          print('  2. Customize the config file for settings');
+          print('  3. Test with: crossbar --exec "${_getInterpreterCommand(lang)} $pluginPath"');
+        } else {
+          stderr.writeln('Failed to create plugin');
+          return 1;
+        }
+
+      case 'install':
+        final url = _getPositionalArg(commandArgs, 0);
+        if (url == null) {
+          stderr.writeln('Error: URL is required');
+          stderr.writeln('Usage: crossbar install <github-url>');
+          stderr.writeln('');
+          stderr.writeln('Example: crossbar install https://github.com/user/my-crossbar-plugin');
+          return 1;
+        }
+
+        print('Installing plugin from: $url');
+        const installer = PluginInstaller();
+        final installedPath = await installer.installFromGitHub(url);
+
+        if (installedPath != null) {
+          print('Plugin installed: $installedPath');
+        } else {
+          stderr.writeln('Failed to install plugin');
+          stderr.writeln('Make sure:');
+          stderr.writeln('  - The URL is a valid GitHub repository');
+          stderr.writeln('  - The repository contains plugin files (name.interval.ext)');
+          stderr.writeln('  - git is installed and accessible');
+          return 1;
+        }
+
       default:
         stderr.writeln('Error: Unknown command: $command');
         _printUsage();
@@ -964,6 +1042,25 @@ String? _getNamedArg(List<String> args, String name) {
     return args[index + 1];
   }
   return null;
+}
+
+String _getInterpreterCommand(String lang) {
+  switch (lang.toLowerCase()) {
+    case 'bash':
+      return 'bash';
+    case 'python':
+      return 'python3';
+    case 'node':
+      return 'node';
+    case 'dart':
+      return 'dart';
+    case 'go':
+      return 'go run';
+    case 'rust':
+      return 'rustc -o /tmp/test && /tmp/test #';
+    default:
+      return lang;
+  }
 }
 
 String _computeHash(String text, String algo) {
@@ -1156,6 +1253,13 @@ Utilities:
   --random [min] [max]  Random number
   --base64-encode    Encode to base64
   --base64-decode    Decode from base64
+
+Plugin Management:
+  init --lang <lang> --type <type> [--name <name>]
+                         Create a new plugin from template
+                         Languages: bash, python, node, dart, go, rust
+                         Types: clock, monitor, status, api, custom
+  install <github-url>   Install plugin from GitHub repository
 
 System Actions:
   --notify <title> <msg> [--icon <icon>] [--priority <low|normal|critical>]
