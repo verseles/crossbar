@@ -6,24 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  build-all:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: linux
-            artifact: crossbar-linux
-            path: build/linux/x64/release/bundle/
-          - os: macos-latest
-            target: macos
-            artifact: crossbar-macos
-            path: build/macos/Build/Products/Release/
-          - os: windows-latest
-            target: windows
-            artifact: crossbar-windows
-            path: build/windows/x64/runner/Release/
-
-    runs-on: ${{ matrix.os }}
+  build-linux:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -35,57 +19,105 @@ jobs:
           cache: true
 
       - name: Install Linux dependencies
-        if: matrix.target == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev libayatana-appindicator3-dev
 
-      - name: Build
-        run: flutter build ${{ matrix.target }} --release
+      - name: Get dependencies
+        run: flutter pub get
 
-      - name: Setup binaries (Linux)
-        if: matrix.target == 'linux'
+      - name: Build Linux GUI
+        run: flutter build linux --release
+
+      - name: Setup launcher binaries
         run: |
           cd build/linux/x64/release/bundle
           mv crossbar crossbar-gui
           dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
           dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
 
-      - name: Setup binaries (macOS)
-        if: matrix.target == 'macos'
+      - name: Compress artifact
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czvf $GITHUB_WORKSPACE/crossbar-linux-x64.tar.gz .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossbar-linux
+          path: crossbar-linux-x64.tar.gz
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.3'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macOS GUI
+        run: flutter build macos --release
+
+      - name: Setup launcher binaries
         run: |
           cd build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
           mv crossbar crossbar-gui
           dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
           dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
 
-      - name: Setup binaries (Windows)
-        if: matrix.target == 'windows'
+      - name: Compress artifact
+        run: |
+          cd build/macos/Build/Products/Release
+          tar -czvf $GITHUB_WORKSPACE/crossbar-macos-universal.tar.gz crossbar.app
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossbar-macos
+          path: crossbar-macos-universal.tar.gz
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.3'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows GUI
+        run: flutter build windows --release
+
+      - name: Setup launcher binaries
         shell: pwsh
         run: |
           Rename-Item -Path "build/windows/x64/runner/Release/crossbar.exe" -NewName "crossbar-gui.exe"
           dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar-cli.exe
           dart compile exe bin/launcher.dart -o build/windows/x64/runner/Release/crossbar.exe
 
-      - name: Compress artifact (Unix)
-        if: matrix.target != 'windows'
-        run: |
-          cd ${{ matrix.path }}
-          tar -czvf ../../../${{ matrix.artifact }}.tar.gz .
-
-      - name: Compress artifact (Windows)
-        if: matrix.target == 'windows'
+      - name: Compress artifact
         shell: pwsh
         run: |
-          Compress-Archive -Path "${{ matrix.path }}/*" -DestinationPath "${{ matrix.artifact }}.zip"
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "crossbar-windows-x64.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: |
-            ${{ matrix.artifact }}.tar.gz
-            ${{ matrix.artifact }}.zip
+          name: crossbar-windows
+          path: crossbar-windows-x64.zip
 
   build-android:
     runs-on: ubuntu-latest
@@ -105,17 +137,23 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Get dependencies
+        run: flutter pub get
+
       - name: Build APK
         run: flutter build apk --release
+
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk crossbar-android.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: crossbar-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: crossbar-android.apk
 
   create-release:
-    needs: [build-all, build-android]
+    needs: [build-linux, build-macos, build-windows, build-android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -127,14 +165,19 @@ jobs:
         with:
           path: artifacts/
 
+      - name: List artifacts
+        run: find artifacts/ -type f
+
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/crossbar-linux/*.tar.gz
-            artifacts/crossbar-macos/*.tar.gz
-            artifacts/crossbar-windows/*.zip
-            artifacts/crossbar-android/*.apk
+            artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
+            artifacts/crossbar-macos/crossbar-macos-universal.tar.gz
+            artifacts/crossbar-windows/crossbar-windows-x64.zip
+            artifacts/crossbar-android/crossbar-android.apk
           generate_release_notes: true
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
