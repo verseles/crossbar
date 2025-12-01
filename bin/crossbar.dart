@@ -308,6 +308,307 @@ void main(List<String> args) async {
       case '--timezone':
         print(DateTime.now().timeZoneName);
 
+      case '--hostname':
+        print(Platform.localHostname);
+
+      case '--username':
+        print(Platform.environment['USER'] ??
+            Platform.environment['USERNAME'] ??
+            'unknown');
+
+      case '--home':
+        print(Platform.environment['HOME'] ??
+            Platform.environment['USERPROFILE'] ??
+            '~');
+
+      case '--temp':
+        print(Directory.systemTemp.path);
+
+      case '--env':
+        final name = _getPositionalArg(commandArgs, 0);
+        if (name == null) {
+          if (jsonOutput) {
+            print(jsonEncode(Platform.environment));
+          } else {
+            Platform.environment.forEach((key, value) {
+              print('$key=$value');
+            });
+          }
+        } else {
+          print(Platform.environment[name] ?? '');
+        }
+
+      case '--exec':
+        final cmd = _getPositionalArg(commandArgs, 0);
+        if (cmd == null) {
+          stderr.writeln('Error: --exec requires command');
+          exit(1);
+        }
+        final result = await Process.run(
+          Platform.isWindows ? 'cmd' : 'sh',
+          Platform.isWindows ? ['/c', cmd] : ['-c', cmd],
+        );
+        stdout.write(result.stdout);
+        stderr.write(result.stderr);
+        exit(result.exitCode);
+
+      case '--file-exists':
+        final path = _getPositionalArg(commandArgs, 0);
+        if (path == null) {
+          stderr.writeln('Error: --file-exists requires path');
+          exit(1);
+        }
+        final exists =
+            File(path).existsSync() || Directory(path).existsSync();
+        if (jsonOutput) {
+          print(jsonEncode({'exists': exists, 'path': path}));
+        } else {
+          print(exists ? 'true' : 'false');
+        }
+
+      case '--file-read':
+        final path = _getPositionalArg(commandArgs, 0);
+        if (path == null) {
+          stderr.writeln('Error: --file-read requires path');
+          exit(1);
+        }
+        final file = File(path);
+        if (!file.existsSync()) {
+          stderr.writeln('Error: File not found: $path');
+          exit(1);
+        }
+        print(file.readAsStringSync());
+
+      case '--file-size':
+        final path = _getPositionalArg(commandArgs, 0);
+        if (path == null) {
+          stderr.writeln('Error: --file-size requires path');
+          exit(1);
+        }
+        final file = File(path);
+        if (!file.existsSync()) {
+          stderr.writeln('Error: File not found: $path');
+          exit(1);
+        }
+        final size = file.lengthSync();
+        if (jsonOutput) {
+          print(jsonEncode({'size': size, 'path': path}));
+        } else {
+          if (size < 1024) {
+            print('$size B');
+          } else if (size < 1024 * 1024) {
+            print('${(size / 1024).toStringAsFixed(2)} KB');
+          } else if (size < 1024 * 1024 * 1024) {
+            print('${(size / (1024 * 1024)).toStringAsFixed(2)} MB');
+          } else {
+            print('${(size / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB');
+          }
+        }
+
+      case '--dir-list':
+        final path = _getPositionalArg(commandArgs, 0) ?? '.';
+        final dir = Directory(path);
+        if (!dir.existsSync()) {
+          stderr.writeln('Error: Directory not found: $path');
+          exit(1);
+        }
+        final entries = dir.listSync();
+        if (jsonOutput) {
+          final files = entries.map((e) {
+            final stat = e.statSync();
+            return {
+              'name': e.path.split(Platform.pathSeparator).last,
+              'path': e.path,
+              'type': e is File ? 'file' : 'directory',
+              'size': stat.size,
+              'modified': stat.modified.toIso8601String(),
+            };
+          }).toList();
+          print(jsonEncode(files));
+        } else {
+          for (final entry in entries) {
+            final name = entry.path.split(Platform.pathSeparator).last;
+            final prefix = entry is Directory ? 'd' : '-';
+            print('$prefix $name');
+          }
+        }
+
+      case '--date':
+        final fmt = _getNamedArg(commandArgs, '--fmt') ?? 'iso';
+        final now = DateTime.now();
+        switch (fmt) {
+          case 'iso':
+            print(now.toIso8601String().split('T')[0]);
+          case 'us':
+            print(
+                '${now.month}/${now.day}/${now.year}');
+          case 'eu':
+            print(
+                '${now.day}/${now.month}/${now.year}');
+          case 'unix':
+            print(now.millisecondsSinceEpoch ~/ 1000);
+          default:
+            print(now.toIso8601String().split('T')[0]);
+        }
+
+      case '--calendar':
+        final now = DateTime.now();
+        final firstDay = DateTime(now.year, now.month, 1);
+        final lastDay = DateTime(now.year, now.month + 1, 0);
+        final monthNames = [
+          '',
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ];
+        print('   ${monthNames[now.month]} ${now.year}');
+        print('Su Mo Tu We Th Fr Sa');
+        var dayOfWeek = firstDay.weekday % 7;
+        var buffer = '   ' * dayOfWeek;
+        for (var day = 1; day <= lastDay.day; day++) {
+          final dayStr = day.toString().padLeft(2);
+          if (day == now.day) {
+            buffer += '[$dayStr]';
+          } else {
+            buffer += '$dayStr ';
+          }
+          if ((dayOfWeek + day) % 7 == 0) {
+            print(buffer);
+            buffer = '';
+          }
+        }
+        if (buffer.isNotEmpty) print(buffer);
+
+      case '--countdown':
+        final seconds =
+            int.tryParse(_getPositionalArg(commandArgs, 0) ?? '0') ?? 0;
+        final target = DateTime.now().add(Duration(seconds: seconds));
+        final remaining = target.difference(DateTime.now());
+        if (jsonOutput) {
+          print(jsonEncode({
+            'remaining': remaining.inSeconds,
+            'target': target.toIso8601String(),
+          }));
+        } else {
+          if (remaining.isNegative) {
+            print('0:00');
+          } else {
+            final mins = remaining.inMinutes;
+            final secs = remaining.inSeconds % 60;
+            print('$mins:${secs.toString().padLeft(2, '0')}');
+          }
+        }
+
+      case '--kernel':
+        if (Platform.isLinux || Platform.isMacOS) {
+          final result = await Process.run('uname', ['-r']);
+          print((result.stdout as String).trim());
+        } else if (Platform.isWindows) {
+          final result = await Process.run('ver', [], runInShell: true);
+          print((result.stdout as String).trim());
+        } else {
+          print(Platform.operatingSystemVersion);
+        }
+
+      case '--arch':
+        if (Platform.isLinux || Platform.isMacOS) {
+          final result = await Process.run('uname', ['-m']);
+          print((result.stdout as String).trim());
+        } else if (Platform.isWindows) {
+          print(Platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'unknown');
+        } else {
+          print('unknown');
+        }
+
+      case '--screen-size':
+        if (Platform.isLinux) {
+          final result = await Process.run('xdpyinfo', []);
+          final output = result.stdout as String;
+          final match =
+              RegExp(r'dimensions:\s+(\d+x\d+)').firstMatch(output);
+          print(match?.group(1) ?? 'unknown');
+        } else if (Platform.isMacOS) {
+          final result =
+              await Process.run('system_profiler', ['SPDisplaysDataType']);
+          final output = result.stdout as String;
+          final match = RegExp(r'Resolution:\s+(\d+ x \d+)').firstMatch(output);
+          print(match?.group(1)?.replaceAll(' ', '') ?? 'unknown');
+        } else if (Platform.isWindows) {
+          final result = await Process.run('wmic', [
+            'path',
+            'Win32_VideoController',
+            'get',
+            'CurrentHorizontalResolution,CurrentVerticalResolution',
+            '/format:list'
+          ]);
+          final output = result.stdout as String;
+          final h =
+              RegExp(r'CurrentHorizontalResolution=(\d+)').firstMatch(output);
+          final v =
+              RegExp(r'CurrentVerticalResolution=(\d+)').firstMatch(output);
+          if (h != null && v != null) {
+            print('${h.group(1)}x${v.group(1)}');
+          } else {
+            print('unknown');
+          }
+        } else {
+          print('unknown');
+        }
+
+      case '--volume':
+        if (Platform.isLinux) {
+          final result = await Process.run(
+              'sh', ['-c', "pactl get-sink-volume @DEFAULT_SINK@"]);
+          final output = result.stdout as String;
+          final match = RegExp(r'(\d+)%').firstMatch(output);
+          print(match?.group(1) ?? 'unknown');
+        } else if (Platform.isMacOS) {
+          final result = await Process.run('osascript',
+              ['-e', 'output volume of (get volume settings)']);
+          print((result.stdout as String).trim());
+        } else if (Platform.isWindows) {
+          print('N/A');
+        } else {
+          print('unknown');
+        }
+
+      case '--brightness':
+        if (Platform.isLinux) {
+          final result = await Process.run('sh', [
+            '-c',
+            'cat /sys/class/backlight/*/brightness /sys/class/backlight/*/max_brightness 2>/dev/null | head -2'
+          ]);
+          final lines = (result.stdout as String).trim().split('\n');
+          if (lines.length >= 2) {
+            final current = int.tryParse(lines[0]) ?? 0;
+            final max = int.tryParse(lines[1]) ?? 100;
+            print('${(current * 100 / max).round()}%');
+          } else {
+            print('unknown');
+          }
+        } else if (Platform.isMacOS) {
+          final result = await Process.run(
+              'brightness', ['-l']); // requires brightness CLI tool
+          final output = result.stdout as String;
+          final match = RegExp(r'display 0: brightness ([\d.]+)').firstMatch(output);
+          if (match != null) {
+            print('${(double.parse(match.group(1)!) * 100).round()}%');
+          } else {
+            print('unknown');
+          }
+        } else {
+          print('unknown');
+        }
+
       default:
         stderr.writeln('Error: Unknown command: $command');
         _printUsage();
@@ -391,13 +692,20 @@ Version: $version
 
 Usage: crossbar <command> [options]
 
-System:
+System Info:
   --cpu              CPU usage percentage
   --memory           RAM usage (used/total)
   --battery          Battery level and status
   --uptime           System uptime
   --disk [path]      Disk usage
   --os               Operating system
+  --hostname         System hostname
+  --username         Current username
+  --kernel           Kernel version
+  --arch             System architecture
+  --screen-size      Screen resolution
+  --volume           Audio volume (Linux/macOS)
+  --brightness       Screen brightness
 
 Network:
   --net-status       Connection status (online/offline)
@@ -414,6 +722,26 @@ Network:
     --body           Request body
     --timeout        Timeout (e.g., 5s, 1m)
 
+Environment:
+  --home             Home directory
+  --temp             Temp directory
+  --env [name]       Environment variable(s)
+  --locale           System locale
+  --timezone         Timezone
+
+Files & Directories:
+  --file-exists <path>   Check if file/dir exists
+  --file-read <path>     Read file contents
+  --file-size <path>     Get file size
+  --dir-list [path]      List directory contents
+  --exec <command>       Execute shell command
+
+Date & Time:
+  --time             Current time (--fmt 12h|24h)
+  --date             Current date (--fmt iso|us|eu|unix)
+  --calendar         Current month calendar
+  --countdown <sec>  Countdown timer
+
 Clipboard:
   --clipboard        Get clipboard content
   --clipboard-set    Set clipboard content
@@ -424,9 +752,6 @@ Utilities:
   --random [min] [max]  Random number
   --base64-encode    Encode to base64
   --base64-decode    Decode from base64
-  --time             Current time (--fmt 12h|24h)
-  --locale           System locale
-  --timezone         Timezone
 
 System Actions:
   --notify <title> <message>  Send notification
@@ -443,5 +768,9 @@ Examples:
   crossbar --cpu --json
   crossbar --web https://api.github.com/users/octocat
   crossbar --hash "hello" --algo sha256
+  crossbar --env PATH
+  crossbar --file-size /etc/passwd
+  crossbar --dir-list /home --json
+  crossbar --calendar
 ''');
 }
