@@ -5,7 +5,7 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart';
+import '../models/plugin_output.dart' hide MenuItem;
 
 class TrayService with TrayListener {
   static final TrayService _instance = TrayService._internal();
