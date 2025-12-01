@@ -40,6 +40,32 @@ All 7 phases from MASTER_PLAN.md are **100% complete**:
 - **CI/CD**: Flutter 3.38.3 (in both ci.yml and release.yml)
 - **Reason**: Flutter 3.38.0 ships Dart 3.10.0-290.4.beta (pre-release), which fails `^3.10.0` constraint
 
+### Dual-Mode Execution (GUI + CLI)
+
+**Key Feature**: The main executable supports both GUI and CLI modes automatically.
+
+**How it works**:
+- `lib/main.dart` checks for command-line arguments on startup
+- **No arguments** → Launches Flutter GUI application
+- **With arguments** → Runs CLI command and exits
+
+**Usage**:
+```bash
+./crossbar              # GUI mode (launches window)
+./crossbar --cpu        # CLI mode (prints CPU usage)
+./crossbar --help       # CLI mode (shows help)
+```
+
+**Implementation**:
+- `lib/cli/cli_handler.dart`: Contains all 47 CLI commands
+- `lib/main.dart`: Routes to CLI or GUI based on args
+- `bin/crossbar.dart`: Backwards compatibility entry point
+
+**Benefits**:
+- Single executable for both modes
+- No separate binaries needed
+- Plugins can call CLI commands using the same executable
+
 ### Linux Build Dependencies
 
 Required packages for Ubuntu CI runners:
@@ -96,8 +122,9 @@ crossbar/
 │   ├── models/             # Data models
 │   ├── services/           # 7 background services
 │   ├── ui/                 # Material Design 3 interface
+│   ├── cli/                # CLI implementation (47 commands)
 │   └── l10n/               # 10 language ARB files
-├── bin/crossbar.dart       # CLI with 47 commands
+├── bin/crossbar.dart       # CLI entry point (backwards compatibility)
 ├── plugins/                # 24 example plugins
 ├── test/                   # 116 tests (114 passing, 2 skipped)
 └── .github/workflows/      # CI/CD pipelines

@@ -288,13 +288,13 @@ void main() {
    }
    ```
 
-2. **Add CLI handler** in `bin/crossbar.dart`:
+2. **Add CLI handler** in `lib/cli/cli_handler.dart` (in the switch statement):
    ```dart
    case '--hostname':
-     final api = SystemApi();
-     print(await api.getHostname());
-     break;
+     print(Platform.localHostname);
    ```
+
+   Note: The CLI is automatically available through the main executable.
 
 3. **Add tests**:
    ```dart

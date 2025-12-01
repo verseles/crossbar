@@ -86,6 +86,17 @@ flutter build linux --release
 flutter build apk --release  # Android
 ```
 
+#### Download Pre-built Binaries
+
+Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases).
+
+**Linux**: Extract `crossbar-linux.zip` and run:
+```bash
+./crossbar          # Launch GUI
+./crossbar --help   # Show CLI commands
+./crossbar --cpu    # Example CLI usage
+```
+
 ### Your First Plugin
 
 1. Create a plugin file in `~/.crossbar/plugins/`:
@@ -391,14 +402,14 @@ Future<String> getHostname() async {
 }
 ```
 
-2. Add CLI handler in `bin/crossbar.dart`:
+2. Add CLI handler in `lib/cli/cli_handler.dart` (in the switch statement):
 
 ```dart
 case '--hostname':
-  final api = SystemApi();
-  print(await api.getHostname());
-  break;
+  print(Platform.localHostname);
 ```
+
+Note: The main executable (`crossbar`) automatically supports both GUI (no args) and CLI (with args) modes.
 
 3. Add tests in `test/unit/core/api/system_api_test.dart`
 
