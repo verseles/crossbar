@@ -372,40 +372,39 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 10: Docker/Podman Infrastructure (v1.3.0) [LAST]
-**Duration**: 2 weeks
+### ✅ Sprint 10: Docker/Podman Infrastructure (v1.3.0)
+**Status**: Completed - December 1, 2025
 **Focus**: Containerized development environment
 
-- [ ] Create `docker/Dockerfile.linux`
-  - [ ] Ubuntu 22.04 base
-  - [ ] Flutter SDK 3.38+
-  - [ ] All Linux build dependencies
-  - [ ] GTK3, Clang, CMake, Ninja
-- [ ] Create `docker/Dockerfile.android`
-  - [ ] Android SDK + NDK
-  - [ ] Java 17+
-  - [ ] Flutter Android precache
-- [ ] Create `docker/Dockerfile.macos` (experimental)
-  - [ ] Docker-OSX base (if feasible)
-  - [ ] Note: Limited functionality
-- [ ] Create `docker/Dockerfile.windows`
-  - [ ] Windows container base
-  - [ ] Visual Studio Build Tools
-- [ ] Create `docker-compose.yml`
-  - [ ] flutter-dev service
-  - [ ] flutter-test service
-  - [ ] flutter-linux service
-  - [ ] flutter-android service
-  - [ ] Volume mounts for code and caches
-- [ ] Create `podman-compose.yml`
-  - [ ] Same structure as docker-compose
-  - [ ] Podman-specific adjustments
-- [ ] Update Makefile with container commands
-  - [ ] `make docker-build`
-  - [ ] `make docker-shell`
-  - [ ] `make docker-test`
+- [x] Create `docker/Dockerfile.linux`
+  - [x] Ubuntu 22.04 base
+  - [x] Flutter SDK 3.38.3
+  - [x] All Linux build dependencies (GTK3, Clang, CMake, Ninja)
+  - [x] Python3, Node.js for plugin development
+  - [x] lcov for coverage reports
+- [x] Create `docker/Dockerfile.android`
+  - [x] Ubuntu 22.04 base with Java 17
+  - [x] Android SDK 34 + NDK 25
+  - [x] Flutter Android precache
+  - [x] Android licenses auto-accepted
+- [ ] Create `docker/Dockerfile.macos` (deferred - experimental, limited feasibility)
+- [ ] Create `docker/Dockerfile.windows` (deferred - requires Windows containers)
+- [x] Create `docker-compose.yml`
+  - [x] flutter-linux service (dev environment)
+  - [x] flutter-android service (Android dev)
+  - [x] flutter-test service (automated testing)
+  - [x] flutter-build service (Linux release builds)
+  - [x] flutter-apk service (Android APK builds)
+  - [x] Volume mounts for code and caches
+- [x] Create `podman-compose.yml`
+  - [x] Same services as docker-compose
+  - [x] Podman-specific: userns_mode, SELinux labels
+- [x] Update Makefile with container commands
+  - [x] Docker: `make docker-build`, `docker-shell`, `docker-test`, `docker-linux`
+  - [x] Podman: `make podman-build`, `podman-shell`, `podman-test`, `podman-linux`
+  - [x] Generic: `make container-*` (auto-detects compose)
 
-**Deliverables**: 6 container files, updated Makefile
+**Deliverables**: 4 container files (Linux/Android Dockerfiles, docker-compose, podman-compose), updated Makefile
 
 ---
 
@@ -668,7 +667,7 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.3.0 (Sprint 10: Docker/Podman Infrastructure)
+**All Sprints Complete**: v1.3.0 features ready!
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
 **Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
@@ -678,3 +677,4 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 **Sprint 7 Status**: ✅ COMPLETED - IPC server (13 tests)
 **Sprint 8 Status**: ✅ COMPLETED - 4 documentation files
 **Sprint 9 Status**: ✅ COMPLETED - CI coverage enforcement + Codecov
+**Sprint 10 Status**: ✅ COMPLETED - Docker/Podman infrastructure

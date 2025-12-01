@@ -1,0 +1,135 @@
+# Crossbar Development Environment - Podman
+# Podman Compose configuration for containerized development
+#
+# Usage:
+#   podman-compose up -d flutter-linux    # Start Linux dev environment
+#   podman-compose run flutter-linux bash # Interactive shell
+#   podman-compose run flutter-test       # Run tests
+#   podman-compose run flutter-build      # Build Linux release
+
+services:
+  # Linux Development Environment
+  flutter-linux:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.linux
+    image: localhost/crossbar-linux:latest
+    container_name: crossbar-linux
+    volumes:
+      - .:/app:Z
+      - flutter-linux-cache:/opt/flutter/.pub-cache:Z
+      - flutter-linux-gradle:/home/developer/.gradle:Z
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
+    environment:
+      - HOME=/home/developer
+      - DISPLAY=${DISPLAY:-:0}
+    command: bash
+
+  # Android Development Environment
+  flutter-android:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.android
+    image: localhost/crossbar-android:latest
+    container_name: crossbar-android
+    volumes:
+      - .:/app:Z
+      - flutter-android-cache:/opt/flutter/.pub-cache:Z
+      - flutter-android-gradle:/home/developer/.gradle:Z
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
+    environment:
+      - HOME=/home/developer
+    command: bash
+
+  # Test Runner
+  flutter-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.linux
+    image: localhost/crossbar-linux:latest
+    container_name: crossbar-test
+    volumes:
+      - .:/app:ro,Z
+      - flutter-test-cache:/opt/flutter/.pub-cache:Z
+    working_dir: /app
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
+    environment:
+      - HOME=/home/developer
+    command: >
+      sh -c "
+        flutter pub get &&
+        flutter analyze --no-fatal-infos &&
+        flutter test --coverage &&
+        echo 'All tests passed!'
+      "
+
+  # Linux Build
+  flutter-build:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.linux
+    image: localhost/crossbar-linux:latest
+    container_name: crossbar-build
+    volumes:
+      - .:/app:Z
+      - flutter-build-cache:/opt/flutter/.pub-cache:Z
+      - ./build:/app/build:Z
+    working_dir: /app
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
+    environment:
+      - HOME=/home/developer
+    command: >
+      sh -c "
+        flutter pub get &&
+        flutter build linux --release &&
+        echo 'Linux build complete!'
+      "
+
+  # Android APK Build
+  flutter-apk:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.android
+    image: localhost/crossbar-android:latest
+    container_name: crossbar-apk
+    volumes:
+      - .:/app:Z
+      - flutter-apk-cache:/opt/flutter/.pub-cache:Z
+      - flutter-apk-gradle:/home/developer/.gradle:Z
+      - ./build:/app/build:Z
+    working_dir: /app
+    userns_mode: keep-id
+    security_opt:
+      - label=disable
+    environment:
+      - HOME=/home/developer
+    command: >
+      sh -c "
+        flutter pub get &&
+        flutter build apk --release &&
+        echo 'Android APK build complete!'
+      "
+
+volumes:
+  flutter-linux-cache:
+  flutter-linux-gradle:
+  flutter-android-cache:
+  flutter-android-gradle:
+  flutter-test-cache:
+  flutter-build-cache:
+  flutter-apk-cache:
+  flutter-apk-gradle:

@@ -1,0 +1,79 @@
+# Crossbar Android Development Container
+# Build Flutter Android apps in a containerized environment
+
+FROM ubuntu:22.04
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set versions
+ARG FLUTTER_VERSION=3.38.3
+ARG ANDROID_SDK_VERSION=11076708
+ARG ANDROID_BUILD_TOOLS_VERSION=34.0.0
+ARG ANDROID_PLATFORM_VERSION=34
+
+# Environment variables
+ENV FLUTTER_HOME=/opt/flutter
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
+ENV PATH="${FLUTTER_HOME}/bin:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build essentials
+    build-essential \
+    # Java (required for Android SDK)
+    openjdk-17-jdk \
+    # Additional utilities
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    # Python for plugins
+    python3 \
+    python3-pip \
+    # Node.js for plugins
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+# Install Android SDK
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
+    && curl -o /tmp/android-sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip \
+    && unzip -q /tmp/android-sdk.zip -d ${ANDROID_HOME}/cmdline-tools \
+    && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
+    && rm /tmp/android-sdk.zip
+
+# Accept licenses and install SDK components
+RUN yes | sdkmanager --licenses \
+    && sdkmanager \
+        "platform-tools" \
+        "platforms;android-${ANDROID_PLATFORM_VERSION}" \
+        "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+        "ndk;25.2.9519653"
+
+# Install Flutter
+RUN git clone --depth 1 --branch ${FLUTTER_VERSION} https://github.com/flutter/flutter.git ${FLUTTER_HOME} \
+    && flutter precache --android \
+    && flutter config --no-analytics \
+    && flutter doctor
+
+# Create non-root user
+RUN useradd -ms /bin/bash developer \
+    && chown -R developer:developer ${FLUTTER_HOME} \
+    && chown -R developer:developer ${ANDROID_HOME}
+USER developer
+WORKDIR /app
+
+# Accept Android licenses as developer user
+RUN yes | flutter doctor --android-licenses 2>/dev/null || true
+
+# Verify installation
+RUN flutter doctor -v
+
+# Default command
+CMD ["bash"]
