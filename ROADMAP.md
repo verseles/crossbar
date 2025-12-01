@@ -66,24 +66,28 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 
 ## Missing from Original Plan
 
-The following **63 items** were specified in `original_plan.md` but not yet implemented:
+The following **49 items** were specified in `original_plan.md` but not yet implemented:
 
-### Missing CLI Commands (~37 commands)
+### ✅ Completed CLI Commands (Sprint 1)
 
-#### Media Controls (13 commands)
-1. `--media-play` - Resume playback
-2. `--media-pause` - Pause playback
-3. `--media-stop` - Stop playback
-4. `--media-next` - Next track
-5. `--media-prev` - Previous track
-6. `--media-seek +30s` - Seek forward/backward
-7. `--media-playing --json` - Current playing info
-8. `--audio-volume-set <0-100>` - Set volume
-9. `--audio-mute` - Toggle mute
-10. `--audio-output` - Current output device
-11. `--audio-output-set <device>` - Set output device
-12. `--screen-brightness` - Get brightness
-13. `--screen-brightness-set <0-100>` - Set brightness
+#### Media Controls (14 commands) - COMPLETED December 1, 2025
+1. ~~`--media-play` - Resume playback~~ ✅
+2. ~~`--media-pause` - Pause playback~~ ✅
+3. ~~`--media-stop` - Stop playback~~ ✅
+4. ~~`--media-next` - Next track~~ ✅
+5. ~~`--media-prev` - Previous track~~ ✅
+6. ~~`--media-seek +30s` - Seek forward/backward~~ ✅
+7. ~~`--media-playing --json` - Current playing info~~ ✅
+8. ~~`--audio-volume-set <0-100>` - Set volume~~ ✅
+9. ~~`--audio-mute` - Toggle mute~~ ✅
+10. ~~`--audio-output` - Current output device~~ ✅
+11. ~~`--audio-output-set <device>` - Set output device~~ ✅
+12. ~~`--screen-brightness` - Get brightness~~ ✅
+13. ~~`--screen-brightness-set <0-100>` - Set brightness~~ ✅
+14. `--media-play-pause` - Toggle play/pause (bonus) ✅
+15. `--audio-volume` - Get current volume (bonus) ✅
+
+### Missing CLI Commands (~24 commands)
 
 #### Power Management (3 commands)
 14. `--power-sleep` - Suspend system
@@ -123,8 +127,8 @@ The following **63 items** were specified in `original_plan.md` but not yet impl
 36. `--location-city` - City name via geocoding
 37. `--time [fmt=12h|24h]` - Formatted time
 
-### Missing API Files (2 files)
-38. `lib/core/api/media_api.dart` - Media control implementations
+### Missing API Files (1 file)
+38. ~~`lib/core/api/media_api.dart` - Media control implementations~~ ✅ COMPLETED
 39. `lib/core/api/utils_api.dart` - Utility command implementations
 
 ### Missing Example Plugins (8 plugins)
@@ -166,25 +170,25 @@ The following **63 items** were specified in `original_plan.md` but not yet impl
 
 ## Sprint Planning
 
-### Sprint 1: Media & Audio Controls (v1.1.0)
-**Duration**: 2 weeks
+### ✅ Sprint 1: Media & Audio Controls (v1.1.0)
+**Status**: Completed - December 1, 2025
 **Focus**: Complete media control CLI commands
 
-- [ ] Create `lib/core/api/media_api.dart`
-  - [ ] `--media-play`, `--media-pause`, `--media-stop`
-  - [ ] `--media-next`, `--media-prev`, `--media-seek`
-  - [ ] `--media-playing --json`
-  - [ ] `--audio-volume-set`, `--audio-mute`
-  - [ ] `--audio-output`, `--audio-output-set`
-  - [ ] `--screen-brightness`, `--screen-brightness-set`
-- [ ] Add platform-specific implementations
-  - [ ] Linux: MPRIS D-Bus, PulseAudio
-  - [ ] macOS: AppleScript/MediaRemote
-  - [ ] Windows: Windows.Media.Control
-- [ ] Unit tests for all media commands
-- [ ] Update CLI handler to route media commands
+- [x] Create `lib/core/api/media_api.dart`
+  - [x] `--media-play`, `--media-pause`, `--media-stop`
+  - [x] `--media-next`, `--media-prev`, `--media-seek`
+  - [x] `--media-playing --json`
+  - [x] `--audio-volume-set`, `--audio-mute`
+  - [x] `--audio-output`, `--audio-output-set`
+  - [x] `--screen-brightness`, `--screen-brightness-set`
+- [x] Add platform-specific implementations
+  - [x] Linux: MPRIS D-Bus (playerctl), PulseAudio (pactl)
+  - [x] macOS: AppleScript/MediaRemote
+  - [x] Windows: PowerShell, Media Keys
+- [x] Unit tests for all media commands (25 tests)
+- [x] Update CLI handler to route media commands
 
-**Deliverables**: 13 new CLI commands
+**Deliverables**: 14 new CLI commands (plus `--media-play-pause` bonus)
 
 ---
 
@@ -652,4 +656,5 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Sprint 1-4: CLI Commands)
+**Next Milestone**: v1.1.0 (Sprint 2-4: System Controls, Open/Launch, Utilities)
+**Sprint 1 Status**: ✅ COMPLETED - 14 media commands implemented

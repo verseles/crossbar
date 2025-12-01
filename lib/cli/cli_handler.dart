@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../core/api/media_api.dart';
 import '../core/api/network_api.dart';
 import '../core/api/system_api.dart';
 
@@ -611,6 +612,151 @@ Future<int> handleCliCommand(List<String> args) async {
           print('unknown');
         }
 
+      // ============================================================
+      // MEDIA CONTROLS (Sprint 1)
+      // ============================================================
+
+      case '--media-play':
+        const api = MediaApi();
+        final result = await api.play();
+        print(result ? 'Playing' : 'Failed to play');
+
+      case '--media-pause':
+        const api = MediaApi();
+        final result = await api.pause();
+        print(result ? 'Paused' : 'Failed to pause');
+
+      case '--media-play-pause':
+        const api = MediaApi();
+        final result = await api.playPause();
+        print(result ? 'Toggled' : 'Failed to toggle');
+
+      case '--media-stop':
+        const api = MediaApi();
+        final result = await api.stop();
+        print(result ? 'Stopped' : 'Failed to stop');
+
+      case '--media-next':
+        const api = MediaApi();
+        final result = await api.next();
+        print(result ? 'Next track' : 'Failed to skip');
+
+      case '--media-prev':
+        const api = MediaApi();
+        final result = await api.previous();
+        print(result ? 'Previous track' : 'Failed to go back');
+
+      case '--media-seek':
+        final offset = _getPositionalArg(commandArgs, 0);
+        if (offset == null) {
+          stderr.writeln('Error: --media-seek requires offset (e.g., +30s, -10s)');
+          return 1;
+        }
+        const api = MediaApi();
+        final result = await api.seek(offset);
+        print(result ? 'Seeked $offset' : 'Failed to seek');
+
+      case '--media-playing':
+        const api = MediaApi();
+        final result = await api.getPlaying();
+        if (jsonOutput) {
+          print(jsonEncode(result));
+        } else {
+          if (result['playing'] == true) {
+            print('${result['title']} - ${result['artist']}');
+            if (result['album']?.isNotEmpty == true) {
+              print('Album: ${result['album']}');
+            }
+            if (result['position']?.isNotEmpty == true) {
+              print('${result['position']} / ${result['duration']}');
+            }
+          } else {
+            print('Not playing');
+          }
+        }
+
+      case '--audio-volume':
+        const api = MediaApi();
+        final result = await api.getVolume();
+        if (jsonOutput) {
+          print(jsonEncode({'volume': result}));
+        } else {
+          print('$result%');
+        }
+
+      case '--audio-volume-set':
+        final level = int.tryParse(_getPositionalArg(commandArgs, 0) ?? '');
+        if (level == null) {
+          stderr.writeln('Error: --audio-volume-set requires a number (0-100)');
+          return 1;
+        }
+        const api = MediaApi();
+        final result = await api.setVolume(level);
+        if (result) {
+          print('Volume set to $level%');
+        } else {
+          print('Failed to set volume');
+        }
+
+      case '--audio-mute':
+        const api = MediaApi();
+        final result = await api.toggleMute();
+        if (result) {
+          final isMuted = await api.isMuted();
+          print(isMuted ? 'Muted' : 'Unmuted');
+        } else {
+          print('Failed to toggle mute');
+        }
+
+      case '--audio-output':
+        const api = MediaApi();
+        if (commandArgs.contains('--list')) {
+          final devices = await api.listAudioOutputs();
+          if (jsonOutput) {
+            print(jsonEncode(devices));
+          } else {
+            for (final device in devices) {
+              print('${device['id']}: ${device['name']}');
+            }
+          }
+        } else {
+          final result = await api.getAudioOutput();
+          print(result);
+        }
+
+      case '--audio-output-set':
+        final device = _getPositionalArg(commandArgs, 0);
+        if (device == null) {
+          stderr.writeln('Error: --audio-output-set requires device ID');
+          return 1;
+        }
+        const api = MediaApi();
+        final result = await api.setAudioOutput(device);
+        print(result ? 'Output set to $device' : 'Failed to set output');
+
+      case '--screen-brightness':
+        const api = MediaApi();
+        final result = await api.getBrightness();
+        if (jsonOutput) {
+          print(jsonEncode({'brightness': result}));
+        } else {
+          print('$result%');
+        }
+
+      case '--screen-brightness-set':
+        final level = int.tryParse(_getPositionalArg(commandArgs, 0) ?? '');
+        if (level == null) {
+          stderr.writeln('Error: --screen-brightness-set requires a number (0-100)');
+          return 1;
+        }
+        const api = MediaApi();
+        final result = await api.setBrightness(level);
+        if (result) {
+          print('Brightness set to $level%');
+        } else {
+          print('Failed to set brightness');
+        }
+
       default:
         stderr.writeln('Error: Unknown command: $command');
         _printUsage();
@@ -712,7 +858,29 @@ System Info:
   --arch             System architecture
   --screen-size      Screen resolution
   --volume           Audio volume (Linux/macOS)
-  --brightness       Screen brightness
+  --brightness       Screen brightness (legacy, use --screen-brightness)
+
+Media Controls:
+  --media-play       Resume playback
+  --media-pause      Pause playback
+  --media-play-pause Toggle play/pause
+  --media-stop       Stop playback
+  --media-next       Next track
+  --media-prev       Previous track
+  --media-seek <offset>  Seek (e.g., +30s, -10s)
+  --media-playing    Current track info (--json for full details)
+
+Audio Controls:
+  --audio-volume     Get current volume (0-100)
+  --audio-volume-set <0-100>  Set volume
+  --audio-mute       Toggle mute
+  --audio-output     Get current output device
+  --audio-output --list  List all output devices
+  --audio-output-set <device>  Set output device
+
+Screen:
+  --screen-brightness      Get screen brightness (0-100)
+  --screen-brightness-set <0-100>  Set screen brightness
 
 Network:
   --net-status       Connection status (online/offline)
@@ -774,11 +942,11 @@ Examples:
   crossbar                # Launch GUI
   crossbar --cpu
   crossbar --cpu --json
+  crossbar --media-playing --json
+  crossbar --audio-volume-set 50
+  crossbar --screen-brightness-set 70
   crossbar --web https://api.github.com/users/octocat
   crossbar --hash "hello" --algo sha256
   crossbar --env PATH
-  crossbar --file-size /etc/passwd
-  crossbar --dir-list /home --json
-  crossbar --calendar
 ''');
 }
