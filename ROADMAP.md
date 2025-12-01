@@ -1,16 +1,17 @@
 # Crossbar Roadmap
 
-This document outlines the development roadmap for Crossbar, tracking completed work and planned features.
+This document outlines the development roadmap for Crossbar, tracking completed work, **missing features from original plan**, and planned future enhancements.
 
 ## Table of Contents
 
 1. [Completed Features (v1.0.0)](#completed-features-v100)
-2. [Current Limitations](#current-limitations)
-3. [Short-term Goals (v1.1.0)](#short-term-goals-v110)
-4. [Mid-term Goals (v1.2.0 - v1.5.0)](#mid-term-goals-v120---v150)
-5. [Long-term Vision (v2.0.0+)](#long-term-vision-v200)
-6. [Community Requests](#community-requests)
-7. [Technical Debt](#technical-debt)
+2. [Missing from Original Plan](#missing-from-original-plan)
+3. [Sprint Planning](#sprint-planning)
+4. [Integration Tests (Dev Only)](#integration-tests-dev-only)
+5. [Current Limitations](#current-limitations)
+6. [Long-term Vision (v2.0.0+)](#long-term-vision-v200)
+7. [Community Requests](#community-requests)
+8. [Technical Debt](#technical-debt)
 
 ---
 
@@ -24,29 +25,18 @@ This document outlines the development roadmap for Crossbar, tracking completed 
   - [x] Python (.py)
   - [x] Node.js (.js)
   - [x] Dart (.dart)
-  - [x] Go (.go)
-  - [x] Rust (.rs)
+  - [x] Go (.go) - structure ready
+  - [x] Rust (.rs) - structure ready
 - [x] Output Parser (BitBar text format + JSON)
 - [x] Script Runner with concurrent execution (max 10)
 - [x] Data Models (Plugin, PluginOutput, PluginConfig)
 - [x] File Watcher for hot reload
-- [x] CLI with 47 commands
-  - [x] System info (cpu, memory, battery, disk, uptime, etc.)
-  - [x] Network (status, IP, WiFi, ping, Bluetooth)
-  - [x] Device info (model, screen, locale, timezone)
-  - [x] Audio/Media controls (volume, playback)
-  - [x] Clipboard operations
-  - [x] File operations
-  - [x] Time utilities
-  - [x] Hash/encoding utilities
+- [x] CLI with 47 commands (partial implementation)
 
 ### ✅ Phase 2: Desktop GUI
 - [x] Main Window with Material Design 3
 - [x] Navigation Rail interface
-- [x] Three main tabs:
-  - [x] Plugins Tab (list, enable/disable, configure)
-  - [x] Settings Tab (theme, language, preferences)
-  - [x] Marketplace Tab (discover, install plugins)
+- [x] Three main tabs (Plugins, Settings, Marketplace)
 - [x] System Tray Service
 - [x] Plugin Configuration Dialog
 - [x] Dynamic form generation (25+ field types)
@@ -55,68 +45,475 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 - [x] Notification Service (cross-platform push)
 - [x] Widget Service (home screen widgets)
 - [x] Scheduler Service (background auto-refresh)
-- [x] Timer-based periodic execution
-- [x] Plugin lifecycle management
 
-### ✅ Phase 4: Extended CLI & Services
-- [x] Expanded CLI from 29 to 47 commands
+### ✅ Phase 4-7: Extended CLI, i18n, Hot Reload, CI/CD
 - [x] Marketplace Service
-  - [x] GitHub plugin discovery
-  - [x] Plugin installation/uninstallation
-  - [x] Search functionality
-- [x] Logger Service
-  - [x] Rotating file logs (5MB max, 5 files)
-  - [x] 4 log levels (debug, info, warning, error)
-  - [x] Search and filtering
-
-### ✅ Phase 5: Example Plugins & i18n
-- [x] 24 example plugins across 4 languages
-  - [x] 8 Bash plugins
-  - [x] 8 Python plugins
-  - [x] 6 Node.js plugins
-  - [x] 2 Dart plugins
-- [x] Internationalization (i18n)
-  - [x] 10 languages: en, pt, es, de, fr, zh, ja, ko, it, ru
-  - [x] ARB-based localization
-  - [x] Auto-detection from system
-
-### ✅ Phase 6: Hot Reload & CI/CD
-- [x] Hot Reload Service
-  - [x] File watcher integration
-  - [x] 500ms debounce
-  - [x] Auto-detect add/modify/delete events
-- [x] GitHub Actions CI/CD
-  - [x] Test pipeline (analyze + test)
-  - [x] Multi-platform build matrix
-  - [x] Release workflow (artifact upload)
-
-### ✅ Phase 7: Release & Documentation
-- [x] Comprehensive documentation
-  - [x] CHANGELOG.md
-  - [x] README.md (509 lines)
-  - [x] CONTRIBUTING.md
-  - [x] RELEASE_NOTES_v1.0.0.md
-  - [x] LICENSE (AGPLv3)
-- [x] Platform support added
-  - [x] Linux (tested, 41MB build)
-  - [x] macOS (structure ready)
-  - [x] Windows (structure ready)
-  - [x] Android (structure ready)
-  - [x] iOS (structure ready)
-- [x] Git tag v1.0.0 created
-- [x] 116 unit/integration tests (>90% coverage)
-- [x] CI/CD fully functional (all 5 platforms building)
-- [x] Artifacts generated: Linux, macOS, Windows, Android
+- [x] Logger Service (rotating logs)
+- [x] 24 example plugins (Bash, Python, Node.js, Dart)
+- [x] 10 languages i18n
+- [x] Hot Reload (500ms debounce)
+- [x] GitHub Actions CI/CD (all 5 platforms building)
+- [x] 116 tests (>90% coverage)
 
 **Final Statistics**:
 - **9,478** lines of Dart code
-- **38** Dart source files
-- **24** example plugins (Bash, Python, Node.js, Dart)
-- **10** languages (i18n ARB files)
-- **116** tests (114 passing, 2 skipped for network/permissions)
-- **4** build artifacts (iOS pending)
-- **0** analysis errors
+- **24** example plugins
+- **10** languages
+- **116** tests (114 passing)
 - **>90%** test coverage
+
+---
+
+## Missing from Original Plan
+
+The following **63 items** were specified in `original_plan.md` but not yet implemented:
+
+### Missing CLI Commands (~37 commands)
+
+#### Media Controls (13 commands)
+1. `--media-play` - Resume playback
+2. `--media-pause` - Pause playback
+3. `--media-stop` - Stop playback
+4. `--media-next` - Next track
+5. `--media-prev` - Previous track
+6. `--media-seek +30s` - Seek forward/backward
+7. `--media-playing --json` - Current playing info
+8. `--audio-volume-set <0-100>` - Set volume
+9. `--audio-mute` - Toggle mute
+10. `--audio-output` - Current output device
+11. `--audio-output-set <device>` - Set output device
+12. `--screen-brightness` - Get brightness
+13. `--screen-brightness-set <0-100>` - Set brightness
+
+#### Power Management (3 commands)
+14. `--power-sleep` - Suspend system
+15. `--power-restart` - Restart (with confirmation)
+16. `--power-shutdown` - Shutdown (with confirmation)
+
+#### Screenshot & Wallpaper (4 commands)
+17. `--screenshot [path]` - Take screenshot
+18. `--screenshot --clipboard` - Screenshot to clipboard
+19. `--wallpaper-get` - Get current wallpaper path
+20. `--wallpaper-set <path>` - Set wallpaper
+
+#### Notifications & DND (3 commands)
+21. `--notify "title" "message" [--icon] [--sound] [--action] [--priority]` - Send notification
+22. `--dnd-status` - Do Not Disturb status
+23. `--dnd-set on|off` - Set DND
+
+#### Open/Launch (3 commands)
+24. `--open-url <url>` - Open in browser
+25. `--open-app <name>` - Launch application
+26. `--open-file <path>` - Open with default app
+
+#### Bluetooth (4 commands)
+27. `--bluetooth-status` - Bluetooth status
+28. `--bluetooth-on` - Enable Bluetooth
+29. `--bluetooth-off` - Disable Bluetooth
+30. `--bluetooth-devices --json` - List paired devices
+
+#### VPN (1 command)
+31. `--vpn-status` - VPN connection status
+
+#### Utilities (6 commands)
+32. `--hash "text" --algo <md5|sha1|sha256|sha512|blake3>` - Hash with algorithm selection
+33. `--qr-generate "text"` - Generate QR code as base64 PNG
+34. `--random [min] [max]` - Random number (default 0-100)
+35. `--location --json` - GPS coordinates (mobile)
+36. `--location-city` - City name via geocoding
+37. `--time [fmt=12h|24h]` - Formatted time
+
+### Missing API Files (2 files)
+38. `lib/core/api/media_api.dart` - Media control implementations
+39. `lib/core/api/utils_api.dart` - Utility command implementations
+
+### Missing Example Plugins (8 plugins)
+40. `plugins/go/clock.5s.go`
+41. `plugins/go/cpu.10s.go`
+42. `plugins/go/battery.30s.go`
+43. `plugins/go/site-check.1m.go`
+44. `plugins/rust/clock.5s.rs`
+45. `plugins/rust/cpu.10s.rs`
+46. `plugins/rust/battery.30s.rs`
+47. `plugins/rust/site-check.1m.rs`
+
+### Missing Services (1 service)
+48. `lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication
+
+### Missing Documentation (4 files)
+49. `docs/api-reference.md` - Complete CLI API documentation
+50. `docs/plugin-development.md` - Plugin development tutorial
+51. `docs/config-schema.md` - Configuration field types documentation
+52. `SECURITY.md` - Security vulnerability reporting
+
+### Missing Features (6 features)
+53. Global keyboard shortcut `Ctrl+Alt+C` to open GUI
+54. CI coverage enforcement (fail if < 90%)
+55. `crossbar init --lang <lang> --type <type>` - Plugin scaffolding command
+56. `crossbar install <url>` - Install plugin from GitHub
+57. XML output format (`--xml` flag) for legacy/enterprise
+58. Refresh interval override in plugin config (`_crossbar_refresh_override`)
+
+### Missing Docker/Podman Infrastructure (6 files) [LAST PRIORITY]
+59. `docker/Dockerfile.linux` - Linux build container
+60. `docker/Dockerfile.android` - Android build container
+61. `docker/Dockerfile.macos` - macOS build container (experimental)
+62. `docker/Dockerfile.windows` - Windows build container
+63. `docker-compose.yml` - Docker compose configuration
+64. `podman-compose.yml` - Podman compose configuration
+
+---
+
+## Sprint Planning
+
+### Sprint 1: Media & Audio Controls (v1.1.0)
+**Duration**: 2 weeks
+**Focus**: Complete media control CLI commands
+
+- [ ] Create `lib/core/api/media_api.dart`
+  - [ ] `--media-play`, `--media-pause`, `--media-stop`
+  - [ ] `--media-next`, `--media-prev`, `--media-seek`
+  - [ ] `--media-playing --json`
+  - [ ] `--audio-volume-set`, `--audio-mute`
+  - [ ] `--audio-output`, `--audio-output-set`
+  - [ ] `--screen-brightness`, `--screen-brightness-set`
+- [ ] Add platform-specific implementations
+  - [ ] Linux: MPRIS D-Bus, PulseAudio
+  - [ ] macOS: AppleScript/MediaRemote
+  - [ ] Windows: Windows.Media.Control
+- [ ] Unit tests for all media commands
+- [ ] Update CLI handler to route media commands
+
+**Deliverables**: 13 new CLI commands
+
+---
+
+### Sprint 2: System Controls (v1.1.0)
+**Duration**: 2 weeks
+**Focus**: Power, Screenshot, Wallpaper, Notifications
+
+- [ ] Create `lib/core/api/utils_api.dart`
+  - [ ] `--screenshot [path]`, `--screenshot --clipboard`
+  - [ ] `--wallpaper-get`, `--wallpaper-set <path>`
+  - [ ] `--power-sleep`, `--power-restart`, `--power-shutdown`
+  - [ ] `--notify "title" "message" [options]`
+  - [ ] `--dnd-status`, `--dnd-set on|off`
+- [ ] Add platform-specific implementations
+  - [ ] Linux: gnome-screenshot, gsettings, systemctl
+  - [ ] macOS: screencapture, osascript, pmset
+  - [ ] Windows: PrintScreen API, PowerShell
+- [ ] Add confirmation dialogs for destructive commands
+- [ ] Unit tests for all system commands
+
+**Deliverables**: 10 new CLI commands
+
+---
+
+### Sprint 3: Open/Launch & Bluetooth (v1.1.0)
+**Duration**: 1 week
+**Focus**: Application launching and Bluetooth controls
+
+- [ ] Implement open commands
+  - [ ] `--open-url <url>` - Cross-platform URL opener
+  - [ ] `--open-app <name>` - Launch applications
+  - [ ] `--open-file <path>` - Open with default app
+- [ ] Implement Bluetooth commands (best effort)
+  - [ ] `--bluetooth-status`
+  - [ ] `--bluetooth-on`, `--bluetooth-off`
+  - [ ] `--bluetooth-devices --json`
+- [ ] Implement VPN status
+  - [ ] `--vpn-status`
+- [ ] Unit tests
+
+**Deliverables**: 7 new CLI commands
+
+---
+
+### Sprint 4: Utilities & Hash Commands (v1.1.0)
+**Duration**: 1 week
+**Focus**: Complete utility commands
+
+- [ ] Enhance hash command with algorithm selection
+  - [ ] `--hash "text" --algo <md5|sha1|sha256|sha512|blake3>`
+- [ ] Implement missing utilities
+  - [ ] `--qr-generate "text"` - QR code as base64 PNG
+  - [ ] `--random [min] [max]` - Random number generator
+  - [ ] `--time [fmt=12h|24h]` - Formatted time output
+- [ ] Mobile-specific commands
+  - [ ] `--location --json` - GPS coordinates
+  - [ ] `--location-city` - Reverse geocoding
+- [ ] Add XML output format (`--xml` flag)
+- [ ] Unit tests
+
+**Deliverables**: 6 new CLI commands, XML output support
+
+---
+
+### Sprint 5: Go & Rust Example Plugins (v1.1.0)
+**Duration**: 1 week
+**Focus**: Complete multi-language plugin examples
+
+- [ ] Create Go plugins (`plugins/go/`)
+  - [ ] `clock.5s.go` - Current time display
+  - [ ] `cpu.10s.go` - CPU usage monitor
+  - [ ] `battery.30s.go` - Battery status
+  - [ ] `site-check.1m.go` - Website availability checker
+- [ ] Create Rust plugins (`plugins/rust/`)
+  - [ ] `clock.5s.rs` - Current time display
+  - [ ] `cpu.10s.rs` - CPU usage monitor
+  - [ ] `battery.30s.rs` - Battery status
+  - [ ] `site-check.1m.rs` - Website availability checker
+- [ ] Update CI to optionally test Go/Rust plugins
+- [ ] Documentation for Go/Rust plugin development
+
+**Deliverables**: 8 new example plugins
+
+---
+
+### Sprint 6: Plugin Scaffolding & Installation (v1.2.0)
+**Duration**: 1 week
+**Focus**: Plugin management CLI commands
+
+- [ ] Implement `crossbar init`
+  - [ ] `crossbar init --lang python --type clock`
+  - [ ] `crossbar init --lang bash --type monitor`
+  - [ ] Generate plugin + config + test files
+  - [ ] Templates for all 6 languages
+- [ ] Implement `crossbar install`
+  - [ ] `crossbar install <github-url>`
+  - [ ] Clone, detect language, move to plugins dir
+  - [ ] Handle .config.json if present
+  - [ ] `chmod +x` on Unix systems
+- [ ] Implement refresh override
+  - [ ] Support `_crossbar_refresh_override` in config
+  - [ ] GUI slider for override in plugin settings
+
+**Deliverables**: Plugin scaffolding, GitHub installation
+
+---
+
+### Sprint 7: IPC Server & Global Shortcut (v1.2.0)
+**Duration**: 1 week
+**Focus**: Background services and shortcuts
+
+- [ ] Create `lib/services/ipc_server.dart`
+  - [ ] HTTP server on localhost:48291
+  - [ ] REST API for plugin status
+  - [ ] API for plugin enable/disable
+  - [ ] API for force refresh
+  - [ ] GUI ↔ background communication
+- [ ] Implement global keyboard shortcut
+  - [ ] `Ctrl+Alt+C` to open GUI (configurable)
+  - [ ] Linux: keybinder / global_hotkey package
+  - [ ] macOS: CGEvent tap
+  - [ ] Windows: RegisterHotKey
+
+**Deliverables**: IPC server, global shortcut
+
+---
+
+### Sprint 8: Documentation (v1.2.0)
+**Duration**: 1 week
+**Focus**: Complete documentation
+
+- [ ] Create `docs/api-reference.md`
+  - [ ] Document all ~82 CLI commands
+  - [ ] Include examples for each command
+  - [ ] Platform compatibility matrix
+- [ ] Create `docs/plugin-development.md`
+  - [ ] Step-by-step tutorial
+  - [ ] Examples in all 6 languages
+  - [ ] Best practices
+  - [ ] Debugging tips
+- [ ] Create `docs/config-schema.md`
+  - [ ] Document all 25+ field types
+  - [ ] Grid system explanation
+  - [ ] Examples for each type
+- [ ] Create `SECURITY.md`
+  - [ ] Security policy
+  - [ ] Vulnerability reporting process
+  - [ ] Response timeline
+- [ ] Update README with links to docs
+
+**Deliverables**: 4 documentation files
+
+---
+
+### Sprint 9: CI/CD Improvements (v1.2.0)
+**Duration**: 1 week
+**Focus**: CI enforcement and quality
+
+- [ ] Add coverage enforcement to CI
+  - [ ] Fail build if coverage < 90%
+  - [ ] Report coverage to Codecov
+  - [ ] Badge in README
+- [ ] Add coverage trend tracking
+- [ ] Automated changelog generation
+- [ ] Performance benchmarks in CI
+- [ ] Release automation improvements
+
+**Deliverables**: CI coverage enforcement, Codecov integration
+
+---
+
+### Sprint 10: Docker/Podman Infrastructure (v1.3.0) [LAST]
+**Duration**: 2 weeks
+**Focus**: Containerized development environment
+
+- [ ] Create `docker/Dockerfile.linux`
+  - [ ] Ubuntu 22.04 base
+  - [ ] Flutter SDK 3.38+
+  - [ ] All Linux build dependencies
+  - [ ] GTK3, Clang, CMake, Ninja
+- [ ] Create `docker/Dockerfile.android`
+  - [ ] Android SDK + NDK
+  - [ ] Java 17+
+  - [ ] Flutter Android precache
+- [ ] Create `docker/Dockerfile.macos` (experimental)
+  - [ ] Docker-OSX base (if feasible)
+  - [ ] Note: Limited functionality
+- [ ] Create `docker/Dockerfile.windows`
+  - [ ] Windows container base
+  - [ ] Visual Studio Build Tools
+- [ ] Create `docker-compose.yml`
+  - [ ] flutter-dev service
+  - [ ] flutter-test service
+  - [ ] flutter-linux service
+  - [ ] flutter-android service
+  - [ ] Volume mounts for code and caches
+- [ ] Create `podman-compose.yml`
+  - [ ] Same structure as docker-compose
+  - [ ] Podman-specific adjustments
+- [ ] Update Makefile with container commands
+  - [ ] `make docker-build`
+  - [ ] `make docker-shell`
+  - [ ] `make docker-test`
+
+**Deliverables**: 6 container files, updated Makefile
+
+---
+
+## Integration Tests (Dev Only)
+
+**Important**: These tests are for local development only and should **NOT** run in CI (they require real system access, network, and may have side effects).
+
+### Running Integration Tests
+
+```bash
+# Run all integration tests locally
+flutter test test/integration/ --no-coverage
+
+# Run specific integration test
+flutter test test/integration/plugin_execution_test.dart
+
+# Run with verbose output
+flutter test test/integration/ -r expanded
+```
+
+### Integration Test Structure
+
+```
+test/integration/
+├── plugin_execution_test.dart   # Execute real plugins, validate output
+├── cli_commands_test.dart       # Test CLI commands on real system
+├── marketplace_test.dart        # GitHub API integration (requires network)
+├── media_controls_test.dart     # Media playback tests (requires audio)
+├── bluetooth_test.dart          # Bluetooth operations (requires hardware)
+├── screenshot_test.dart         # Screenshot capture (requires display)
+├── ipc_server_test.dart         # IPC HTTP server tests (requires port)
+└── fixtures/
+    ├── test_plugin.sh           # Simple test plugin
+    ├── infinite_loop.sh         # Timeout test plugin
+    └── echo_env.sh              # Environment variable test
+```
+
+### Integration Tests to Implement
+
+#### Plugin Execution Tests
+- [ ] `test/integration/plugin_execution_test.dart`
+  - [ ] Execute Bash plugin and validate output
+  - [ ] Execute Python plugin and validate output
+  - [ ] Execute Node.js plugin and validate output
+  - [ ] Execute Dart plugin and validate output
+  - [ ] Test plugin timeout handling (30s)
+  - [ ] Test concurrent plugin execution (10 max)
+  - [ ] Test environment variable injection
+  - [ ] Test plugin output parsing (text and JSON)
+
+#### CLI Commands Tests
+- [ ] `test/integration/cli_commands_test.dart`
+  - [ ] Test `--cpu` returns valid percentage
+  - [ ] Test `--memory` returns valid format
+  - [ ] Test `--battery` on laptops
+  - [ ] Test `--disk` returns valid data
+  - [ ] Test `--net-ip` returns valid IP
+  - [ ] Test `--web` with real HTTP request
+  - [ ] Test `--hash` with known inputs
+  - [ ] Test `--uuid` format validation
+
+#### Marketplace Tests
+- [ ] `test/integration/marketplace_test.dart`
+  - [ ] Search GitHub for crossbar plugins
+  - [ ] Validate plugin metadata parsing
+  - [ ] Test rate limiting handling
+  - [ ] Test plugin installation flow
+
+#### System Integration Tests
+- [ ] `test/integration/media_controls_test.dart` (requires audio device)
+  - [ ] Test volume get/set
+  - [ ] Test mute toggle
+  - [ ] Test playback control (if player running)
+
+- [ ] `test/integration/screenshot_test.dart` (requires display)
+  - [ ] Take screenshot and verify file exists
+  - [ ] Test clipboard screenshot (if supported)
+
+- [ ] `test/integration/ipc_server_test.dart` (requires port 48291)
+  - [ ] Start IPC server
+  - [ ] Send HTTP requests
+  - [ ] Validate responses
+  - [ ] Test concurrent connections
+
+### Test Fixtures
+
+```bash
+# test/integration/fixtures/test_plugin.sh
+#!/bin/bash
+echo "Test: OK"
+echo "---"
+echo "Menu Item 1"
+echo "Menu Item 2"
+
+# test/integration/fixtures/infinite_loop.sh
+#!/bin/bash
+while true; do
+  sleep 1
+done
+
+# test/integration/fixtures/echo_env.sh
+#!/bin/bash
+echo "OS: $CROSSBAR_OS"
+echo "Version: $CROSSBAR_VERSION"
+echo "Plugin: $CROSSBAR_PLUGIN_ID"
+```
+
+### Skipping in CI
+
+Integration tests should be excluded from CI runs:
+
+```yaml
+# .github/workflows/ci.yml
+- name: Run unit tests
+  run: flutter test --exclude-tags=integration --coverage
+```
+
+```dart
+// In integration test files
+@Tags(['integration'])
+void main() {
+  // Tests here won't run in CI
+}
+```
 
 ---
 
@@ -128,26 +525,11 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 
 | Platform | CI Build | Local Build | Notes |
 |----------|----------|-------------|-------|
-| Linux | ✅ Working | ✅ Working | 41MB bundle, 1m24s build time |
-| macOS | ✅ Working | ⚠️ Requires macOS | Built in CI (3m8s) |
-| Windows | ✅ Working | ⚠️ Requires Windows | Built in CI (3m30s) |
-| Android | ✅ Working | ⚠️ Requires SDK | APK built in CI (6m29s) |
+| Linux | ✅ Working | ✅ Working | 41MB bundle |
+| macOS | ✅ Working | ⚠️ Requires macOS | Built in CI |
+| Windows | ✅ Working | ⚠️ Requires Windows | Built in CI |
+| Android | ✅ Working | ⚠️ Requires SDK | APK built in CI |
 | iOS | ⚠️ Structure ready | ⚠️ Requires Xcode | Not built yet |
-
-**CI Run**: [View successful build](https://github.com/verseles/crossbar/actions/runs/19823996330)
-
-**Required CI Fixes Applied**:
-- Flutter 3.38.3 (exact version, not 3.35.0 or 3.38.0-beta)
-- Linux: `libsecret-1-dev` + `libayatana-appindicator3-dev`
-- Android: Core library desugaring enabled
-- Removed unused imports causing analyze warnings
-
-### CLI Commands
-Some commands have platform limitations:
-- `--wifi-on/off`: Requires elevated permissions on most platforms
-- `--wallpaper-set`: iOS sandbox restrictions
-- `--screenshot`: iOS background restrictions
-- `--media-controls`: iOS requires foreground app
 
 ### Plugin Features
 - No plugin sandboxing (runs with full permissions)
@@ -156,253 +538,9 @@ Some commands have platform limitations:
 - No plugin dependency management
 
 ### Performance
-- Hot reload watches entire plugins directory (can be optimized)
+- Hot reload watches entire plugins directory
 - No lazy loading for large plugin lists
-- No plugin output caching (re-executes every interval)
-
-### UI/UX
-- No plugin output history/logs in UI
-- No plugin performance metrics dashboard
-- No visual plugin editor
-- No plugin templates/scaffolding tool
-
----
-
-## CI/CD Implementation Notes
-
-### Successful Build Configuration
-
-After multiple iterations, the following configuration successfully builds all platforms:
-
-#### Flutter Version
-
-```yaml
-flutter-version: '3.38.3'  # EXACT version required
-channel: 'stable'
-```
-
-**Why 3.38.3**:
-- ❌ 3.24.0: Ships Dart 3.5.0 (too old)
-- ❌ 3.35.0: Ships Dart 3.9.0 (still too old)
-- ❌ 3.38.0: Ships Dart 3.10.0-290.4.beta (pre-release, fails `^3.10.0`)
-- ✅ 3.38.3: Ships Dart 3.10.1 stable (works!)
-
-#### Linux Dependencies
-
-```bash
-sudo apt-get install -y \
-  clang cmake ninja-build pkg-config \
-  libgtk-3-dev liblzma-dev libstdc++-12-dev \
-  libsecret-1-dev \                    # flutter_secure_storage
-  libayatana-appindicator3-dev         # tray_manager
-```
-
-#### Android Configuration
-
-```kotlin
-// android/app/build.gradle.kts
-compileOptions {
-    isCoreLibraryDesugaringEnabled = true  // Required!
-}
-
-dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-}
-```
-
-#### Linux CMake
-
-```cmake
-# linux/CMakeLists.txt
-target_compile_options(${TARGET} PRIVATE
-  -Wall
-  -Wno-deprecated-declarations
-  -Wno-deprecated-literal-operator
-)
-```
-
-### Build Times (GitHub Actions)
-
-| Platform | Time | Artifact Size | Runner |
-|----------|------|---------------|---------|
-| test | 46s | N/A | ubuntu-latest |
-| Linux | 1m24s | ~41MB | ubuntu-latest |
-| macOS | 3m8s | ~50MB | macos-latest |
-| Windows | 3m30s | ~35MB | windows-latest |
-| Android | 6m29s | ~20MB (APK) | ubuntu-latest |
-
-**Total CI time**: ~10 minutes (jobs run in parallel)
-
----
-
-## Short-term Goals (v1.1.0)
-
-**Target**: Q1 2026 (3 months)
-
-### 🎯 Priority: Platform Builds
-
-**Status**: ✅ macOS, Windows, Android now building in CI!
-
-Remaining work:
-- [ ] **Local macOS build & testing**
-  - [ ] Test on macOS 13+ (Ventura, Sonoma)
-  - [ ] Sign and notarize app
-  - [ ] Create DMG installer
-- [ ] **Local Windows build & testing**
-  - [ ] Test on Windows 10/11
-  - [ ] Create installer (NSIS or WiX)
-  - [ ] Sign executable
-- [ ] **Android local testing**
-  - [ ] Test on physical device (Android 12+ / API 31+)
-  - [ ] Publish to Google Play (optional)
-- [ ] **iOS build**
-  - [ ] Add iOS CI runner (requires macOS)
-  - [ ] Test on iOS 15+ (iPhone/iPad)
-  - [ ] Submit to App Store (optional)
-
-### 🔌 Enhanced Marketplace
-- [ ] **Plugin ratings and reviews**
-  - [ ] Star rating system (1-5)
-  - [ ] User comments
-  - [ ] Report abuse mechanism
-- [ ] **Plugin categories/tags**
-  - [ ] System monitoring
-  - [ ] Productivity
-  - [ ] Entertainment
-  - [ ] DevOps
-  - [ ] Custom tags
-- [ ] **Featured plugins section**
-- [ ] **Plugin download statistics**
-- [ ] **Plugin versioning**
-  - [ ] Semantic versioning support
-  - [ ] Update notifications
-  - [ ] Changelog display
-
-### 📊 Analytics & Monitoring
-- [ ] **Plugin performance metrics**
-  - [ ] Execution time tracking
-  - [ ] Memory usage per plugin
-  - [ ] CPU impact monitoring
-- [ ] **Dashboard for metrics**
-  - [ ] Charts and graphs
-  - [ ] Performance history
-  - [ ] Resource usage alerts
-- [ ] **Plugin output history**
-  - [ ] Last 100 outputs per plugin
-  - [ ] Search and filter
-  - [ ] Export to CSV/JSON
-
-### 🛡️ Security Enhancements
-- [ ] **Plugin sandboxing (opt-in)**
-  - [ ] File system permissions
-  - [ ] Network access control
-  - [ ] Command execution limits
-- [ ] **Plugin signature verification**
-  - [ ] GPG signing support
-  - [ ] Trusted publisher system
-  - [ ] Warning for unsigned plugins
-- [ ] **Secure configuration storage**
-  - [ ] All sensitive data in Keychain
-  - [ ] Encrypted config files
-  - [ ] Audit log for config changes
-
-### 🎨 UI/UX Improvements
-- [ ] **Plugin output preview**
-  - [ ] Live preview in editor
-  - [ ] Test mode (manual execution)
-- [ ] **Plugin wizard/templates**
-  - [ ] Create from template
-  - [ ] Bash, Python, Node.js starters
-  - [ ] Interactive tutorial
-- [ ] **Dark/Light theme refinements**
-  - [ ] Custom accent colors
-  - [ ] High contrast mode
-  - [ ] OLED-friendly dark mode
-- [ ] **Keyboard shortcuts**
-  - [ ] Quick plugin toggle
-  - [ ] Refresh all plugins
-  - [ ] Focus search
-
-### 🌐 Additional CLI Commands
-- [ ] `--screenshot [path]` - Take screenshot
-- [ ] `--wallpaper-set <path>` - Set wallpaper
-- [ ] `--notify "title" "message"` - Send notification
-- [ ] `--power-sleep/restart/shutdown` - Power controls
-- [ ] `--open-url <url>` - Open URL in browser
-- [ ] `--open-app <name>` - Launch application
-- [ ] `--dnd-status` - Do Not Disturb status
-- [ ] `--location --json` - GPS coordinates (mobile)
-
-### 📦 Distribution
-- [ ] **Package managers**
-  - [ ] Homebrew formula (macOS/Linux)
-  - [ ] Snap package (Linux)
-  - [ ] Flatpak package (Linux)
-  - [ ] AUR package (Arch Linux)
-  - [ ] winget package (Windows)
-- [ ] **Auto-updater**
-  - [ ] Check for updates on startup
-  - [ ] Background update downloads
-  - [ ] One-click update installation
-
----
-
-## Mid-term Goals (v1.2.0 - v1.5.0)
-
-**Target**: Q2-Q4 2026 (6-12 months)
-
-### 🔄 Configuration Sync (v1.2.0)
-- [ ] **GitHub Gists integration**
-  - [ ] Backup configs to Gist
-  - [ ] Restore from Gist
-  - [ ] Conflict resolution
-- [ ] **Multi-device sync**
-  - [ ] Sync plugin list
-  - [ ] Sync settings
-  - [ ] Selective sync (choose what to sync)
-- [ ] **Import/Export**
-  - [ ] Export all configs as ZIP
-  - [ ] Import from BitBar/Argos format
-  - [ ] Share plugin bundles
-
-### 🎨 Theming System (v1.3.0)
-- [ ] **Custom themes**
-  - [ ] Theme editor UI
-  - [ ] Color picker for all elements
-  - [ ] Font customization
-- [ ] **Theme marketplace**
-  - [ ] Browse and install themes
-  - [ ] Share custom themes
-- [ ] **Icon packs**
-  - [ ] Replace default icons
-  - [ ] Support for icon fonts
-
-### 🔌 Advanced Plugin Features (v1.4.0)
-- [ ] **Plugin dependencies**
-  - [ ] Declare dependencies in config
-  - [ ] Auto-install missing dependencies
-  - [ ] Version constraints
-- [ ] **Inter-plugin communication**
-  - [ ] Event bus system
-  - [ ] Shared data storage
-  - [ ] Plugin composition
-- [ ] **Plugin API extensions**
-  - [ ] Native Dart plugins (no subprocess)
-  - [ ] WebAssembly plugin support
-  - [ ] Lua scripting support
-
-### 📱 Mobile Enhancements (v1.5.0)
-- [ ] **Larger widgets**
-  - [ ] 4x4 grid widgets
-  - [ ] Full-screen widgets
-  - [ ] Widget collections
-- [ ] **Lock screen widgets** (iOS 16+)
-- [ ] **Android quick settings tiles**
-- [ ] **iOS shortcuts integration**
-- [ ] **Voice commands**
-  - [ ] Siri integration (iOS)
-  - [ ] Google Assistant (Android)
-  - [ ] Alexa support
+- No plugin output caching
 
 ---
 
@@ -410,159 +548,71 @@ Remaining work:
 
 **Target**: 2027+
 
-### 🌐 Remote Plugins
-- [ ] **Server-side execution**
-  - [ ] Run plugins on remote servers
-  - [ ] Stream results to client
-  - [ ] Distributed plugin execution
-- [ ] **Cloud functions integration**
-  - [ ] AWS Lambda
-  - [ ] Google Cloud Functions
-  - [ ] Cloudflare Workers
-- [ ] **Edge computing**
-  - [ ] Run on edge nodes
-  - [ ] Low-latency execution
+### Remote Plugins
+- Server-side execution
+- Cloud functions integration (AWS Lambda, GCF)
+- Edge computing support
 
-### 📊 Telemetry & Analytics (Opt-in)
-- [ ] **OpenTelemetry integration**
-  - [ ] Distributed tracing
-  - [ ] Metrics collection
-  - [ ] Log aggregation
-- [ ] **Grafana dashboards**
-  - [ ] System performance
-  - [ ] Plugin analytics
-  - [ ] User engagement
-- [ ] **Error reporting**
-  - [ ] Sentry integration
-  - [ ] Crash reports
-  - [ ] Performance monitoring
+### Telemetry & Analytics (Opt-in)
+- OpenTelemetry integration
+- Grafana dashboards
+- Sentry error reporting
 
-### 🤖 AI/ML Features
-- [ ] **Smart plugin suggestions**
-  - [ ] ML-based recommendations
-  - [ ] Usage pattern analysis
-- [ ] **Natural language plugin creation**
-  - [ ] "Create a plugin that shows CPU usage"
-  - [ ] AI-generated code
-- [ ] **Anomaly detection**
-  - [ ] Unusual plugin behavior alerts
-  - [ ] Performance degradation detection
+### AI/ML Features
+- Smart plugin suggestions
+- Natural language plugin creation
+- Anomaly detection
 
-### 🔗 Integration Platform
-- [ ] **Webhook support**
-  - [ ] Trigger plugins via HTTP
-  - [ ] Output to webhooks
-- [ ] **IFTTT/Zapier integration**
-  - [ ] Crossbar as trigger
-  - [ ] Crossbar as action
-- [ ] **API for third-party apps**
-  - [ ] REST API
-  - [ ] GraphQL API
-  - [ ] WebSocket API
+### Integration Platform
+- Webhook support
+- IFTTT/Zapier integration
+- REST/GraphQL API
 
-### 🎮 Advanced UI Features
-- [ ] **Visual plugin editor**
-  - [ ] Drag-and-drop interface
-  - [ ] No-code plugin creation
-  - [ ] Flow-based programming
-- [ ] **Plugin gallery**
-  - [ ] Screenshots/previews
-  - [ ] Video demos
-  - [ ] Interactive samples
-- [ ] **Customizable layouts**
-  - [ ] Drag-and-drop tray icons
-  - [ ] Custom plugin grouping
-  - [ ] Multi-panel UI
-
-### 🌍 Platform Expansion
-- [ ] **Browser extension**
-  - [ ] Chrome/Firefox/Safari
-  - [ ] Cross-browser sync
-- [ ] **Smartwatch support**
-  - [ ] Apple Watch
-  - [ ] Wear OS
-- [ ] **Desktop widgets** (beyond tray)
-  - [ ] Floating desktop widgets
-  - [ ] Dashboard mode
-  - [ ] Always-on-top panels
+### Platform Expansion
+- Browser extension
+- Smartwatch support
+- Floating desktop widgets
 
 ---
 
 ## Community Requests
 
-Features requested by users (to be prioritized based on demand):
+Features requested by users (prioritized by demand):
 
-### High Priority (Many Requests)
-- [ ] **Plugin marketplace with ratings** ⭐⭐⭐⭐⭐ (40+ requests)
-- [ ] **Windows build** ⭐⭐⭐⭐⭐ (35+ requests)
-- [ ] **Auto-updater** ⭐⭐⭐⭐ (25+ requests)
-- [ ] **Plugin templates/wizard** ⭐⭐⭐⭐ (20+ requests)
+### High Priority
+- [ ] **Plugin marketplace with ratings** ⭐⭐⭐⭐⭐
+- [ ] **Auto-updater** ⭐⭐⭐⭐
+- [ ] **Plugin templates/wizard** ⭐⭐⭐⭐
 
-### Medium Priority (Some Requests)
-- [ ] **Config sync via cloud** ⭐⭐⭐ (15+ requests)
-- [ ] **Plugin sandboxing** ⭐⭐⭐ (12+ requests)
-- [ ] **Custom themes** ⭐⭐⭐ (10+ requests)
-- [ ] **Performance metrics** ⭐⭐ (8+ requests)
+### Medium Priority
+- [ ] **Config sync via cloud** ⭐⭐⭐
+- [ ] **Plugin sandboxing** ⭐⭐⭐
+- [ ] **Custom themes** ⭐⭐⭐
 
-### Low Priority (Few Requests)
-- [ ] **Browser extension** ⭐⭐ (5+ requests)
-- [ ] **Voice commands** ⭐ (3+ requests)
-- [ ] **Remote plugins** ⭐ (2+ requests)
-
-*(Note: Request counts are projections - actual tracking will begin after v1.0.0 release)*
+### Low Priority
+- [ ] **Browser extension** ⭐⭐
+- [ ] **Voice commands** ⭐
+- [ ] **Remote plugins** ⭐
 
 ---
 
 ## Technical Debt
 
-Items to address for code quality and maintainability:
-
 ### Code Quality
-- [ ] **Increase test coverage to 95%+**
-  - [ ] Add tests for edge cases
-  - [ ] Integration tests for all services
-  - [ ] E2E tests for critical flows
-- [ ] **Refactor large files**
-  - [ ] Split plugin_config_dialog.dart (406 lines)
-  - [ ] Split marketplace_service.dart (414 lines)
-  - [ ] Extract reusable components
-- [ ] **Documentation improvements**
-  - [ ] Add DartDoc to all public APIs
-  - [ ] Create architecture diagrams
-  - [ ] Video tutorials
+- [ ] Increase test coverage to 95%+
+- [ ] Refactor large files (>400 lines)
+- [ ] Add DartDoc to all public APIs
+- [ ] Create architecture diagrams
 
 ### Performance
-- [ ] **Optimize plugin discovery**
-  - [ ] Cache plugin list
-  - [ ] Incremental updates
-  - [ ] Lazy loading
-- [ ] **Reduce memory footprint**
-  - [ ] Profile memory usage
-  - [ ] Fix memory leaks
-  - [ ] Optimize image assets
-- [ ] **Improve startup time**
-  - [ ] Deferred service initialization
-  - [ ] Parallel loading
-  - [ ] Reduce initial plugin scans
+- [ ] Optimize plugin discovery
+- [ ] Reduce memory footprint
+- [ ] Improve startup time
 
 ### Dependencies
-- [ ] **Update outdated packages**
-  - [ ] Review all dependencies
-  - [ ] Update to latest stable versions
-  - [ ] Remove unused dependencies
-- [ ] **Reduce dependency count**
-  - [ ] Evaluate necessity of each package
-  - [ ] Replace heavy dependencies with lighter alternatives
-
-### Infrastructure
-- [ ] **Improve CI/CD**
-  - [ ] Add code coverage reporting
-  - [ ] Add performance benchmarks
-  - [ ] Automated release notes generation
-- [ ] **Better error handling**
-  - [ ] Centralized error handling
-  - [ ] User-friendly error messages
-  - [ ] Recovery strategies
+- [ ] Update outdated packages
+- [ ] Reduce dependency count
+- [ ] Replace heavy dependencies
 
 ---
 
@@ -571,47 +621,35 @@ Items to address for code quality and maintainability:
 ### v1.0.0 Baseline (December 2025)
 - ⭐ **0** GitHub stars
 - 📥 **0** downloads
-- 🐛 **0** open issues
-- 👥 **0** contributors
 - 🔌 **24** example plugins
+- **47** CLI commands
 
-### v1.1.0 Goals (Q1 2026)
+### v1.2.0 Goals (Q1 2026)
 - ⭐ **100+** GitHub stars
 - 📥 **500+** downloads
-- 🐛 **<10** critical issues
-- 👥 **3+** active contributors
-- 🔌 **40+** community plugins
+- 🔌 **32** example plugins
+- **~82** CLI commands
+- Complete documentation
 
-### v1.5.0 Goals (Q4 2026)
-- ⭐ **500+** GitHub stars
-- 📥 **2,500+** downloads
-- 🐛 **<5** critical issues
-- 👥 **10+** active contributors
-- 🔌 **100+** community plugins
-
-### v2.0.0 Goals (2027)
-- ⭐ **1,000+** GitHub stars
-- 📥 **10,000+** downloads
-- 🐛 **0** critical issues (>48h)
-- 👥 **20+** active contributors
-- 🔌 **250+** community plugins
+### v1.3.0 Goals (Q2 2026)
+- Full Docker/Podman support
+- Container-based development ready
+- All platforms buildable in containers
 
 ---
 
 ## How to Contribute
 
-Want to help shape Crossbar's future? Here's how:
-
 1. **Vote on features** - Comment on GitHub Issues with 👍
-2. **Request features** - Open new Issues with `[Feature Request]` tag
-3. **Submit PRs** - See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
-4. **Create plugins** - Share your plugins with the community
+2. **Request features** - Open Issues with `[Feature Request]` tag
+3. **Submit PRs** - See [CONTRIBUTING.md](CONTRIBUTING.md)
+4. **Create plugins** - Share with the community
 5. **Improve docs** - Fix typos, add examples, translate
 
-Join the discussion: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
+Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 ---
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Q1 2026)
+**Next Milestone**: v1.1.0 (Sprint 1-4: CLI Commands)
