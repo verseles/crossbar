@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/core/script_runner.dart';
 import 'package:crossbar/models/plugin.dart';
