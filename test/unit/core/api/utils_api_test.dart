@@ -7,6 +7,46 @@ void main() {
   group('UtilsApi', () {
     const api = UtilsApi();
 
+    group('Bluetooth', () {
+      test('getBluetoothStatus returns string', () async {
+        final result = await api.getBluetoothStatus();
+        expect(result, isA<String>());
+      });
+
+      test('getBluetoothStatus returns valid status', () async {
+        final result = await api.getBluetoothStatus();
+        expect(['on', 'off', 'unavailable'].contains(result), true);
+      });
+
+      test('enableBluetooth returns boolean', () async {
+        final result = await api.enableBluetooth();
+        expect(result, isA<bool>());
+      });
+
+      test('disableBluetooth returns boolean', () async {
+        final result = await api.disableBluetooth();
+        expect(result, isA<bool>());
+      });
+
+      test('listBluetoothDevices returns list', () async {
+        final result = await api.listBluetoothDevices();
+        expect(result, isA<List<Map<String, String>>>());
+      });
+    });
+
+    group('VPN', () {
+      test('getVpnStatus returns map', () async {
+        final result = await api.getVpnStatus();
+        expect(result, isA<Map<String, dynamic>>());
+      });
+
+      test('getVpnStatus contains connected key', () async {
+        final result = await api.getVpnStatus();
+        expect(result.containsKey('connected'), true);
+        expect(result['connected'], isA<bool>());
+      });
+    });
+
     group('Screenshot', () {
       test('takeScreenshot returns String or null', () async {
         final result = await api.takeScreenshot();

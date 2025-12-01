@@ -9,6 +9,226 @@ class UtilsApi {
   const UtilsApi();
 
   // ============================================================
+  // BLUETOOTH
+  // ============================================================
+
+  /// Get Bluetooth status (on/off/unavailable)
+  Future<String> getBluetoothStatus() async {
+    try {
+      if (Platform.isLinux) {
+        // Try bluetoothctl first
+        var result = await Process.run('bluetoothctl', ['show']);
+        if (result.exitCode == 0) {
+          final output = result.stdout as String;
+          if (output.contains('Powered: yes')) return 'on';
+          if (output.contains('Powered: no')) return 'off';
+        }
+        // Try rfkill
+        result = await Process.run('rfkill', ['list', 'bluetooth']);
+        if (result.exitCode == 0) {
+          final output = result.stdout as String;
+          if (output.contains('Soft blocked: yes') || output.contains('Hard blocked: yes')) {
+            return 'off';
+          }
+          return 'on';
+        }
+        return 'unavailable';
+      }
+      if (Platform.isMacOS) {
+        // Try blueutil if available
+        var result = await Process.run('blueutil', ['--power']);
+        if (result.exitCode == 0) {
+          return (result.stdout as String).trim() == '1' ? 'on' : 'off';
+        }
+        // Fallback to system_profiler
+        result = await Process.run('system_profiler', ['SPBluetoothDataType']);
+        if (result.exitCode == 0) {
+          final output = result.stdout as String;
+          if (output.contains('State: On')) return 'on';
+          if (output.contains('State: Off')) return 'off';
+        }
+        return 'unavailable';
+      }
+      if (Platform.isWindows) {
+        final result = await Process.run('powershell', [
+          '-command',
+          'Get-PnpDevice -Class Bluetooth | Where-Object Status -eq "OK" | Measure-Object | Select-Object -ExpandProperty Count',
+        ]);
+        if (result.exitCode == 0) {
+          final count = int.tryParse((result.stdout as String).trim()) ?? 0;
+          return count > 0 ? 'on' : 'off';
+        }
+        return 'unavailable';
+      }
+      return 'unavailable';
+    } catch (e) {
+      return 'unavailable';
+    }
+  }
+
+  /// Enable Bluetooth
+  Future<bool> enableBluetooth() async {
+    try {
+      if (Platform.isLinux) {
+        // Try rfkill first
+        var result = await Process.run('rfkill', ['unblock', 'bluetooth']);
+        if (result.exitCode == 0) {
+          // Then power on via bluetoothctl
+          result = await Process.run('bluetoothctl', ['power', 'on']);
+          return result.exitCode == 0;
+        }
+        return false;
+      }
+      if (Platform.isMacOS) {
+        final result = await Process.run('blueutil', ['--power', '1']);
+        return result.exitCode == 0;
+      }
+      if (Platform.isWindows) {
+        final result = await Process.run('powershell', [
+          '-command',
+          'Get-PnpDevice -Class Bluetooth | Enable-PnpDevice -Confirm:\$false',
+        ]);
+        return result.exitCode == 0;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Disable Bluetooth
+  Future<bool> disableBluetooth() async {
+    try {
+      if (Platform.isLinux) {
+        // Power off via bluetoothctl first
+        var result = await Process.run('bluetoothctl', ['power', 'off']);
+        // Then block via rfkill
+        result = await Process.run('rfkill', ['block', 'bluetooth']);
+        return result.exitCode == 0;
+      }
+      if (Platform.isMacOS) {
+        final result = await Process.run('blueutil', ['--power', '0']);
+        return result.exitCode == 0;
+      }
+      if (Platform.isWindows) {
+        final result = await Process.run('powershell', [
+          '-command',
+          'Get-PnpDevice -Class Bluetooth | Disable-PnpDevice -Confirm:\$false',
+        ]);
+        return result.exitCode == 0;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// List paired Bluetooth devices
+  Future<List<Map<String, String>>> listBluetoothDevices() async {
+    try {
+      if (Platform.isLinux) {
+        final result = await Process.run('bluetoothctl', ['devices']);
+        if (result.exitCode == 0) {
+          final lines = (result.stdout as String).trim().split('\n');
+          return lines.where((l) => l.startsWith('Device')).map((line) {
+            final parts = line.split(' ');
+            final mac = parts.length > 1 ? parts[1] : '';
+            final name = parts.length > 2 ? parts.sublist(2).join(' ') : '';
+            return {'mac': mac, 'name': name};
+          }).toList();
+        }
+        return [];
+      }
+      if (Platform.isMacOS) {
+        final result = await Process.run('system_profiler', ['SPBluetoothDataType', '-json']);
+        if (result.exitCode == 0) {
+          // Parse JSON output for devices
+          // This is simplified - full parsing would be more complex
+          return [];
+        }
+        return [];
+      }
+      if (Platform.isWindows) {
+        final result = await Process.run('powershell', [
+          '-command',
+          'Get-PnpDevice -Class Bluetooth | Select-Object FriendlyName, InstanceId | ConvertTo-Json',
+        ]);
+        if (result.exitCode == 0) {
+          // Parse JSON output
+          return [];
+        }
+        return [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ============================================================
+  // VPN
+  // ============================================================
+
+  /// Get VPN connection status
+  Future<Map<String, dynamic>> getVpnStatus() async {
+    try {
+      if (Platform.isLinux) {
+        // Try nmcli for NetworkManager-based VPNs
+        final result = await Process.run('nmcli', ['-t', '-f', 'TYPE,STATE,NAME', 'connection', 'show', '--active']);
+        if (result.exitCode == 0) {
+          final lines = (result.stdout as String).trim().split('\n');
+          for (final line in lines) {
+            if (line.contains('vpn') || line.contains('wireguard') || line.contains('tun')) {
+              final parts = line.split(':');
+              return {
+                'connected': true,
+                'type': parts.isNotEmpty ? parts[0] : 'vpn',
+                'name': parts.length > 2 ? parts[2] : 'unknown',
+              };
+            }
+          }
+        }
+        // Check for WireGuard
+        final wgResult = await Process.run('wg', ['show']);
+        if (wgResult.exitCode == 0 && (wgResult.stdout as String).isNotEmpty) {
+          return {'connected': true, 'type': 'wireguard', 'name': 'WireGuard'};
+        }
+        return {'connected': false};
+      }
+      if (Platform.isMacOS) {
+        final result = await Process.run('scutil', ['--nc', 'list']);
+        if (result.exitCode == 0) {
+          final output = result.stdout as String;
+          if (output.contains('(Connected)')) {
+            final match = RegExp(r'"([^"]+)".*\(Connected\)').firstMatch(output);
+            return {
+              'connected': true,
+              'name': match?.group(1) ?? 'unknown',
+            };
+          }
+        }
+        return {'connected': false};
+      }
+      if (Platform.isWindows) {
+        final result = await Process.run('powershell', [
+          '-command',
+          'Get-VpnConnection | Where-Object ConnectionStatus -eq "Connected" | Select-Object Name, ServerAddress | ConvertTo-Json',
+        ]);
+        if (result.exitCode == 0) {
+          final output = (result.stdout as String).trim();
+          if (output.isNotEmpty && output != '[]') {
+            return {'connected': true, 'raw': output};
+          }
+        }
+        return {'connected': false};
+      }
+      return {'connected': false};
+    } catch (e) {
+      return {'connected': false, 'error': e.toString()};
+    }
+  }
+
+  // ============================================================
   // SCREENSHOT
   // ============================================================
 

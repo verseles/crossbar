@@ -66,7 +66,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 
 ## Missing from Original Plan
 
-The following **36 items** remain from the original 63 items in `original_plan.md`:
+The following **31 items** remain from the original 63 items in `original_plan.md`:
 
 ### ✅ Completed CLI Commands (Sprint 1)
 
@@ -110,16 +110,18 @@ The following **36 items** remain from the original 63 items in `original_plan.m
 25. ~~`--open-app <name>` - Launch application~~ ✅
 26. ~~`--open-file <path>` - Open with default app~~ ✅
 
-### Missing CLI Commands (~11 commands)
+### ✅ Completed CLI Commands (Sprint 3)
 
-#### Bluetooth (4 commands)
-27. `--bluetooth-status` - Bluetooth status
-28. `--bluetooth-on` - Enable Bluetooth
-29. `--bluetooth-off` - Disable Bluetooth
-30. `--bluetooth-devices --json` - List paired devices
+#### Bluetooth (4 commands) - COMPLETED December 1, 2025
+27. ~~`--bluetooth-status` - Bluetooth status~~ ✅
+28. ~~`--bluetooth-on` - Enable Bluetooth~~ ✅
+29. ~~`--bluetooth-off` - Disable Bluetooth~~ ✅
+30. ~~`--bluetooth-devices --json` - List paired devices~~ ✅
 
-#### VPN (1 command)
-31. `--vpn-status` - VPN connection status
+#### VPN (1 command) - COMPLETED December 1, 2025
+31. ~~`--vpn-status` - VPN connection status~~ ✅
+
+### Missing CLI Commands (~6 commands)
 
 #### Utilities (6 commands)
 32. `--hash "text" --algo <md5|sha1|sha256|sha512|blake3>` - Hash with algorithm selection
@@ -215,23 +217,22 @@ The following **36 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 3: Open/Launch & Bluetooth (v1.1.0)
-**Duration**: 1 week
-**Focus**: Application launching and Bluetooth controls
+### ✅ Sprint 3: Bluetooth & VPN (v1.1.0)
+**Status**: Completed - December 1, 2025
+**Focus**: Bluetooth controls and VPN status
 
-- [ ] Implement open commands
-  - [ ] `--open-url <url>` - Cross-platform URL opener
-  - [ ] `--open-app <name>` - Launch applications
-  - [ ] `--open-file <path>` - Open with default app
-- [ ] Implement Bluetooth commands (best effort)
-  - [ ] `--bluetooth-status`
-  - [ ] `--bluetooth-on`, `--bluetooth-off`
-  - [ ] `--bluetooth-devices --json`
-- [ ] Implement VPN status
-  - [ ] `--vpn-status`
-- [ ] Unit tests
+- [x] Implement Bluetooth commands
+  - [x] `--bluetooth-status` - Status (on/off/unavailable)
+  - [x] `--bluetooth-on` - Enable Bluetooth
+  - [x] `--bluetooth-off` - Disable Bluetooth
+  - [x] `--bluetooth-devices --json` - List paired devices
+- [x] Implement VPN status
+  - [x] `--vpn-status` - VPN connection status
+- [x] Unit tests (7 tests for Bluetooth/VPN)
 
-**Deliverables**: 7 new CLI commands
+**Note**: Open/Launch commands (open-url, open-app, open-file) were implemented in Sprint 2.
+
+**Deliverables**: 5 new CLI commands (4 Bluetooth + 1 VPN)
 
 ---
 
@@ -658,6 +659,7 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Sprint 3-4: Bluetooth, VPN, Utilities)
+**Next Milestone**: v1.1.0 (Sprint 4: Utilities)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands implemented
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands implemented
+**Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands implemented

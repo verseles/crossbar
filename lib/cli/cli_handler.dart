@@ -134,9 +134,13 @@ Future<int> handleCliCommand(List<String> args) async {
         print(result ? 'WiFi disabled' : 'Failed to disable WiFi');
 
       case '--bluetooth-status':
-        const api = NetworkApi();
-        final result = await api.getBluetoothStatus();
-        print(result);
+        const utilsApi = UtilsApi();
+        final btResult = await utilsApi.getBluetoothStatus();
+        if (jsonOutput) {
+          print(jsonEncode({'bluetooth': btResult}));
+        } else {
+          print('Bluetooth: $btResult');
+        }
 
       case '--web':
         final url = _getPositionalArg(commandArgs, 0) ??
@@ -883,6 +887,49 @@ Future<int> handleCliCommand(List<String> args) async {
         final result = await api.openApp(appName);
         print(result ? 'Launched: $appName' : 'Failed to launch app');
 
+      // ============================================================
+      // BLUETOOTH & VPN (Sprint 3)
+      // ============================================================
+
+      case '--bluetooth-on':
+        const api = UtilsApi();
+        final result = await api.enableBluetooth();
+        print(result ? 'Bluetooth enabled' : 'Failed to enable Bluetooth');
+
+      case '--bluetooth-off':
+        const api = UtilsApi();
+        final result = await api.disableBluetooth();
+        print(result ? 'Bluetooth disabled' : 'Failed to disable Bluetooth');
+
+      case '--bluetooth-devices':
+        const api = UtilsApi();
+        final devices = await api.listBluetoothDevices();
+        if (jsonOutput) {
+          print(jsonEncode(devices));
+        } else {
+          if (devices.isEmpty) {
+            print('No paired devices found');
+          } else {
+            for (final device in devices) {
+              print('${device['mac']}: ${device['name']}');
+            }
+          }
+        }
+
+      case '--vpn-status':
+        const api = UtilsApi();
+        final result = await api.getVpnStatus();
+        if (jsonOutput) {
+          print(jsonEncode(result));
+        } else {
+          if (result['connected'] == true) {
+            final name = result['name'] ?? result['type'] ?? 'VPN';
+            print('VPN: Connected ($name)');
+          } else {
+            print('VPN: Disconnected');
+          }
+        }
+
       default:
         stderr.writeln('Error: Unknown command: $command');
         _printUsage();
@@ -1021,6 +1068,15 @@ Do Not Disturb:
   --dnd-status             Get DND status (--json for format)
   --dnd-set on|off         Set DND status
 
+Bluetooth:
+  --bluetooth-status       Bluetooth status (on/off/unavailable)
+  --bluetooth-on           Enable Bluetooth
+  --bluetooth-off          Disable Bluetooth
+  --bluetooth-devices      List paired devices (--json for format)
+
+VPN:
+  --vpn-status             VPN connection status (--json for details)
+
 Network:
   --net-status       Connection status (online/offline)
   --net-ip           Local IP address
@@ -1029,7 +1085,6 @@ Network:
   --net-ping <host>  Ping latency
   --wifi-on          Enable WiFi
   --wifi-off         Disable WiFi
-  --bluetooth-status Bluetooth status
   --web <url>        HTTP request
     --method         HTTP method (GET, POST, PUT, DELETE)
     --headers        JSON headers
