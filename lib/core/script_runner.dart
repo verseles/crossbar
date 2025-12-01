@@ -99,9 +99,12 @@ class ScriptRunner {
     try {
       final environment = _buildEnvironment(plugin);
 
+      // Get the appropriate executable and arguments for this interpreter
+      final (executable, arguments) = _getExecutableAndArgs(plugin);
+
       final result = await processRunner.run(
-        plugin.interpreter,
-        [plugin.path],
+        executable,
+        arguments,
         environment: environment,
         timeout: defaultTimeout,
       );
@@ -118,6 +121,29 @@ class ScriptRunner {
       return PluginOutput.error(plugin.id, 'Plugin execution timed out');
     } catch (e) {
       return PluginOutput.error(plugin.id, 'Failed to run plugin: $e');
+    }
+  }
+
+  /// Returns (executable, arguments) tuple for the given plugin interpreter
+  (String, List<String>) _getExecutableAndArgs(Plugin plugin) {
+    switch (plugin.interpreter) {
+      case 'go':
+        // Go requires 'go run file.go'
+        return ('go', ['run', plugin.path]);
+      case 'rust':
+        // For Rust, we expect a compiled binary with same name (without .rs)
+        // Or we can use 'rustc' to compile and run inline
+        final binaryPath = plugin.path.replaceAll('.rs', '');
+        if (File(binaryPath).existsSync()) {
+          return (binaryPath, []);
+        }
+        // Fallback: compile to temp and run with proper crate name
+        // Extract a valid crate name (alphanumeric and underscores only)
+        final fileName = plugin.path.split('/').last.replaceAll('.rs', '');
+        final crateName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+        return ('sh', ['-c', 'rustc --crate-name $crateName ${plugin.path} -o /tmp/crossbar_rust_$crateName && /tmp/crossbar_rust_$crateName']);
+      default:
+        return (plugin.interpreter, [plugin.path]);
     }
   }
 

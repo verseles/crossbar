@@ -135,15 +135,15 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 38. ~~`lib/core/api/media_api.dart` - Media control implementations~~ ✅ COMPLETED
 39. ~~`lib/core/api/utils_api.dart` - Utility command implementations~~ ✅ COMPLETED
 
-### Missing Example Plugins (8 plugins)
-40. `plugins/go/clock.5s.go`
-41. `plugins/go/cpu.10s.go`
-42. `plugins/go/battery.30s.go`
-43. `plugins/go/site-check.1m.go`
-44. `plugins/rust/clock.5s.rs`
-45. `plugins/rust/cpu.10s.rs`
-46. `plugins/rust/battery.30s.rs`
-47. `plugins/rust/site-check.1m.rs`
+### ✅ Completed Example Plugins (8 plugins) - Sprint 5
+40. ~~`plugins/go/clock.5s.go`~~ ✅
+41. ~~`plugins/go/cpu.10s.go`~~ ✅
+42. ~~`plugins/go/battery.30s.go`~~ ✅
+43. ~~`plugins/go/site-check.1m.go`~~ ✅
+44. ~~`plugins/rust/clock.5s.rs`~~ ✅
+45. ~~`plugins/rust/cpu.10s.rs`~~ ✅
+46. ~~`plugins/rust/battery.30s.rs`~~ ✅
+47. ~~`plugins/rust/site-check.1m.rs`~~ ✅
 
 ### Missing Services (1 service)
 48. `lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication
@@ -255,24 +255,25 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 5: Go & Rust Example Plugins (v1.1.0)
-**Duration**: 1 week
+### ✅ Sprint 5: Go & Rust Example Plugins (v1.1.0)
+**Status**: Completed - December 1, 2025
 **Focus**: Complete multi-language plugin examples
 
-- [ ] Create Go plugins (`plugins/go/`)
-  - [ ] `clock.5s.go` - Current time display
-  - [ ] `cpu.10s.go` - CPU usage monitor
-  - [ ] `battery.30s.go` - Battery status
-  - [ ] `site-check.1m.go` - Website availability checker
-- [ ] Create Rust plugins (`plugins/rust/`)
-  - [ ] `clock.5s.rs` - Current time display
-  - [ ] `cpu.10s.rs` - CPU usage monitor
-  - [ ] `battery.30s.rs` - Battery status
-  - [ ] `site-check.1m.rs` - Website availability checker
-- [ ] Update CI to optionally test Go/Rust plugins
-- [ ] Documentation for Go/Rust plugin development
+- [x] Create Go plugins (`plugins/go/`)
+  - [x] `clock.5s.go` - Current time display
+  - [x] `cpu.10s.go` - CPU usage monitor
+  - [x] `battery.30s.go` - Battery status
+  - [x] `site-check.1m.go` - Website availability checker
+- [x] Create Rust plugins (`plugins/rust/`)
+  - [x] `clock.5s.rs` - Current time display
+  - [x] `cpu.10s.rs` - CPU usage monitor
+  - [x] `battery.30s.rs` - Battery status
+  - [x] `site-check.1m.rs` - Website availability checker
+- [x] Updated script_runner.dart to properly handle Go (`go run`) and Rust (`rustc --crate-name`) compilation
+- [ ] Update CI to optionally test Go/Rust plugins (deferred - optional)
+- [ ] Documentation for Go/Rust plugin development (deferred to Sprint 8)
 
-**Deliverables**: 8 new example plugins
+**Deliverables**: 8 new example plugins, script runner enhancements
 
 ---
 
@@ -627,8 +628,8 @@ Features requested by users (prioritized by demand):
 ### v1.0.0 Baseline (December 2025)
 - ⭐ **0** GitHub stars
 - 📥 **0** downloads
-- 🔌 **24** example plugins
-- **47** CLI commands
+- 🔌 **32** example plugins (24 original + 8 Go/Rust)
+- **47+** CLI commands (32 added in Sprints 1-4)
 
 ### v1.2.0 Goals (Q1 2026)
 - ⭐ **100+** GitHub stars
@@ -658,8 +659,9 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Sprint 5-6: Plugins & Scaffolding)
+**Next Milestone**: v1.1.0 (Sprint 6: Plugin Scaffolding)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
 **Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
 **Sprint 4 Status**: ✅ COMPLETED - Hash algorithms + XML output
+**Sprint 5 Status**: ✅ COMPLETED - 8 Go/Rust example plugins
