@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart' as crypto;
+
 import '../core/api/media_api.dart';
 import '../core/api/network_api.dart';
 import '../core/api/system_api.dart';
@@ -19,6 +21,7 @@ Future<int> handleCliCommand(List<String> args) async {
   final command = args[0];
   final commandArgs = args.sublist(1);
   final jsonOutput = commandArgs.contains('--json');
+  final xmlOutput = commandArgs.contains('--xml');
 
   try {
     switch (command) {
@@ -33,10 +36,13 @@ Future<int> handleCliCommand(List<String> args) async {
       case '--cpu':
         const api = SystemApi();
         final result = await api.getCpuUsage();
+        final cpuData = {'cpu': double.tryParse(result) ?? 0};
         if (jsonOutput) {
-          print(jsonEncode({'cpu': double.parse(result)}));
+          print(jsonEncode(cpuData));
+        } else if (xmlOutput) {
+          print(_toXml(cpuData));
         } else {
-          print(result);
+          print('$result%');
         }
 
       case '--memory':
@@ -666,6 +672,8 @@ Future<int> handleCliCommand(List<String> args) async {
         final result = await api.getPlaying();
         if (jsonOutput) {
           print(jsonEncode(result));
+        } else if (xmlOutput) {
+          print(_toXml(result, root: 'media'));
         } else {
           if (result['playing'] == true) {
             print('${result['title']} - ${result['artist']}');
@@ -921,6 +929,8 @@ Future<int> handleCliCommand(List<String> args) async {
         final result = await api.getVpnStatus();
         if (jsonOutput) {
           print(jsonEncode(result));
+        } else if (xmlOutput) {
+          print(_toXml(result, root: 'vpn'));
         } else {
           if (result['connected'] == true) {
             final name = result['name'] ?? result['type'] ?? 'VPN';
@@ -961,37 +971,62 @@ String _computeHash(String text, String algo) {
 
   switch (algo.toLowerCase()) {
     case 'md5':
-      return _simpleMd5(bytes);
+      return crypto.md5.convert(bytes).toString();
     case 'sha1':
-      return _simpleSha1(bytes);
+      return crypto.sha1.convert(bytes).toString();
+    case 'sha384':
+      return crypto.sha384.convert(bytes).toString();
+    case 'sha512':
+      return crypto.sha512.convert(bytes).toString();
     case 'sha256':
     default:
-      return _simpleSha256(bytes);
+      return crypto.sha256.convert(bytes).toString();
   }
 }
 
-String _simpleMd5(List<int> bytes) {
-  var hash = 0;
-  for (final byte in bytes) {
-    hash = ((hash << 5) - hash + byte) & 0xFFFFFFFF;
-  }
-  return hash.toRadixString(16).padLeft(32, '0');
+/// Convert a Map to XML format
+String _toXml(Map<String, dynamic> data, {String root = 'crossbar'}) {
+  final buffer = StringBuffer();
+  buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+  buffer.writeln('<$root>');
+  _mapToXml(data, buffer, indent: '  ');
+  buffer.writeln('</$root>');
+  return buffer.toString();
 }
 
-String _simpleSha1(List<int> bytes) {
-  var hash = 0;
-  for (final byte in bytes) {
-    hash = ((hash << 6) - hash + byte) & 0xFFFFFFFF;
+void _mapToXml(Map<String, dynamic> data, StringBuffer buffer, {String indent = ''}) {
+  for (final entry in data.entries) {
+    final key = entry.key.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+    final value = entry.value;
+    if (value is Map<String, dynamic>) {
+      buffer.writeln('$indent<$key>');
+      _mapToXml(value, buffer, indent: '$indent  ');
+      buffer.writeln('$indent</$key>');
+    } else if (value is List) {
+      buffer.writeln('$indent<$key>');
+      for (final item in value) {
+        if (item is Map<String, dynamic>) {
+          buffer.writeln('$indent  <item>');
+          _mapToXml(item, buffer, indent: '$indent    ');
+          buffer.writeln('$indent  </item>');
+        } else {
+          buffer.writeln('$indent  <item>${_escapeXml(item.toString())}</item>');
+        }
+      }
+      buffer.writeln('$indent</$key>');
+    } else {
+      buffer.writeln('$indent<$key>${_escapeXml(value.toString())}</$key>');
+    }
   }
-  return hash.toRadixString(16).padLeft(40, '0');
 }
 
-String _simpleSha256(List<int> bytes) {
-  var hash = 0;
-  for (final byte in bytes) {
-    hash = ((hash << 7) - hash + byte) & 0xFFFFFFFF;
-  }
-  return hash.toRadixString(16).padLeft(64, '0');
+String _escapeXml(String text) {
+  return text
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
 }
 
 String _generateUuid() {
@@ -1116,7 +1151,7 @@ Clipboard:
   --clipboard-set    Set clipboard content
 
 Utilities:
-  --hash <text>      Hash text (--algo md5|sha1|sha256)
+  --hash <text>      Hash text (--algo md5|sha1|sha256|sha384|sha512)
   --uuid             Generate UUID v4
   --random [min] [max]  Random number
   --base64-encode    Encode to base64
@@ -1132,6 +1167,7 @@ System Actions:
 
 Options:
   --json             Output in JSON format
+  --xml              Output in XML format
   --version, -v      Show version
   --help, -h         Show this help
 

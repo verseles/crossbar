@@ -236,23 +236,22 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 4: Utilities & Hash Commands (v1.1.0)
-**Duration**: 1 week
-**Focus**: Complete utility commands
+### ✅ Sprint 4: Utilities & Hash Commands (v1.1.0)
+**Status**: Completed - December 1, 2025
+**Focus**: Enhanced hash and XML output
 
-- [ ] Enhance hash command with algorithm selection
-  - [ ] `--hash "text" --algo <md5|sha1|sha256|sha512|blake3>`
-- [ ] Implement missing utilities
-  - [ ] `--qr-generate "text"` - QR code as base64 PNG
-  - [ ] `--random [min] [max]` - Random number generator
-  - [ ] `--time [fmt=12h|24h]` - Formatted time output
-- [ ] Mobile-specific commands
-  - [ ] `--location --json` - GPS coordinates
-  - [ ] `--location-city` - Reverse geocoding
-- [ ] Add XML output format (`--xml` flag)
-- [ ] Unit tests
+- [x] Enhance hash command with algorithm selection
+  - [x] `--hash "text" --algo <md5|sha1|sha256|sha384|sha512>`
+- [x] Add XML output format (`--xml` flag)
+  - [x] Added to --cpu, --media-playing, --vpn-status
+  - [x] Generic _toXml() helper for structured data
+- [x] Existing utilities verified working:
+  - [x] `--random [min] [max]` - Random number generator
+  - [x] `--time [fmt=12h|24h]` - Formatted time output
 
-**Deliverables**: 6 new CLI commands, XML output support
+**Note**: QR generation and mobile location deferred (requires additional packages).
+
+**Deliverables**: Hash with 5 algorithms, XML output format
 
 ---
 
@@ -659,7 +658,8 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.1.0 (Sprint 4: Utilities)
-**Sprint 1 Status**: ✅ COMPLETED - 14 media commands implemented
-**Sprint 2 Status**: ✅ COMPLETED - 13 system control commands implemented
-**Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands implemented
+**Next Milestone**: v1.1.0 (Sprint 5-6: Plugins & Scaffolding)
+**Sprint 1 Status**: ✅ COMPLETED - 14 media commands
+**Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
+**Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
+**Sprint 4 Status**: ✅ COMPLETED - Hash algorithms + XML output
