@@ -46,8 +46,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev libayatana-appindicator3-dev
 
-      - name: Build Linux
+      - name: Build Linux GUI
         run: flutter build linux --release
+
+      - name: Rename GUI binary
+        run: mv build/linux/x64/release/bundle/crossbar build/linux/x64/release/bundle/crossbar-gui
+
+      - name: Build CLI (pure Dart, no GTK)
+        run: dart compile exe bin/crossbar.dart -o build/linux/x64/release/bundle/crossbar-cli
+
+      - name: Build Launcher
+        run: dart compile exe bin/launcher.dart -o build/linux/x64/release/bundle/crossbar
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -68,8 +77,15 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Build macOS
+      - name: Build macOS GUI
         run: flutter build macos --release
+
+      - name: Rename GUI binary and add CLI
+        run: |
+          cd build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
+          mv crossbar crossbar-gui
+          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
+          dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -90,8 +106,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Build Windows
+      - name: Build Windows GUI
         run: flutter build windows --release
+
+      - name: Rename GUI binary
+        run: Rename-Item -Path "build/windows/x64/runner/Release/crossbar.exe" -NewName "crossbar-gui.exe"
+
+      - name: Build CLI (pure Dart)
+        run: dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar-cli.exe
+
+      - name: Build Launcher
+        run: dart compile exe bin/launcher.dart -o build/windows/x64/runner/Release/crossbar.exe
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4

@@ -42,29 +42,36 @@ All 7 phases from MASTER_PLAN.md are **100% complete**:
 
 ### Dual-Mode Execution (GUI + CLI)
 
-**Key Feature**: The main executable supports both GUI and CLI modes automatically.
+**Key Feature**: The main `crossbar` executable supports both GUI and CLI modes via a launcher architecture.
+
+**Architecture** (3 binaries in one bundle):
+- `crossbar` - Launcher (routes to GUI or CLI)
+- `crossbar-gui` - Flutter GUI application
+- `crossbar-cli` - Pure Dart CLI (no GTK dependencies)
 
 **How it works**:
-- `lib/main.dart` checks for command-line arguments on startup
-- **No arguments** → Launches Flutter GUI application
-- **With arguments** → Runs CLI command and exits
+- `bin/launcher.dart` checks for command-line arguments on startup
+- **No arguments** → Executes `crossbar-gui` (Flutter app)
+- **With arguments** → Executes `crossbar-cli` (pure Dart, no GTK warnings)
 
 **Usage**:
 ```bash
 ./crossbar              # GUI mode (launches window)
-./crossbar --cpu        # CLI mode (prints CPU usage)
+./crossbar --cpu        # CLI mode (prints CPU usage, no GTK warnings)
 ./crossbar --help       # CLI mode (shows help)
 ```
 
 **Implementation**:
+- `bin/launcher.dart`: Routes to appropriate binary based on args
+- `bin/crossbar.dart`: CLI entry point (pure Dart)
+- `lib/main.dart`: GUI-only entry point (Flutter)
 - `lib/cli/cli_handler.dart`: Contains all 47 CLI commands
-- `lib/main.dart`: Routes to CLI or GUI based on args
-- `bin/crossbar.dart`: Backwards compatibility entry point
 
-**Benefits**:
-- Single executable for both modes
-- No separate binaries needed
-- Plugins can call CLI commands using the same executable
+**Why this architecture**:
+- Flutter Linux builds initialize GTK even before checking arguments
+- This caused GTK theme parsing warnings in CLI mode
+- Pure Dart CLI (`dart compile exe`) has no GTK dependencies
+- Launcher provides seamless single-command UX
 
 ### Linux Build Dependencies
 

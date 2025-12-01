@@ -43,6 +43,30 @@ jobs:
       - name: Build
         run: flutter build ${{ matrix.target }} --release
 
+      - name: Setup binaries (Linux)
+        if: matrix.target == 'linux'
+        run: |
+          cd build/linux/x64/release/bundle
+          mv crossbar crossbar-gui
+          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
+          dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
+
+      - name: Setup binaries (macOS)
+        if: matrix.target == 'macos'
+        run: |
+          cd build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
+          mv crossbar crossbar-gui
+          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
+          dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
+
+      - name: Setup binaries (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          Rename-Item -Path "build/windows/x64/runner/Release/crossbar.exe" -NewName "crossbar-gui.exe"
+          dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar-cli.exe
+          dart compile exe bin/launcher.dart -o build/windows/x64/runner/Release/crossbar.exe
+
       - name: Compress artifact (Unix)
         if: matrix.target != 'windows'
         run: |

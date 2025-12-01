@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
-import 'cli/cli_handler.dart';
 import 'core/plugin_manager.dart';
 import 'services/hot_reload_service.dart';
 import 'services/logger_service.dart';
@@ -10,13 +7,6 @@ import 'services/scheduler_service.dart';
 import 'ui/main_window.dart';
 
 void main(List<String> args) async {
-  // If CLI arguments are provided, run in CLI mode
-  if (args.isNotEmpty) {
-    final exitCode = await handleCliCommand(args);
-    exit(exitCode);
-  }
-
-  // Otherwise, run in GUI mode
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize services
