@@ -2,8 +2,10 @@
 
 > **Universal Plugin System for Taskbar/Menu Bar** - Write Once, Run Everywhere
 
+[![CI](https://github.com/verseles/crossbar/actions/workflows/ci.yml/badge.svg)](https://github.com/verseles/crossbar/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/verseles/crossbar/branch/main/graph/badge.svg)](https://codecov.io/gh/verseles/crossbar)
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
-[![Flutter](https://img.shields.io/badge/Flutter-3.35.0+-02569B?logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.38.3+-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.10.0+-0175C2?logo=dart)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20Android%20%7C%20iOS-lightgrey)](#supported-platforms)
 

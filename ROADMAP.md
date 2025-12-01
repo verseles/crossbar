@@ -351,20 +351,24 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 9: CI/CD Improvements (v1.2.0)
-**Duration**: 1 week
+### ✅ Sprint 9: CI/CD Improvements (v1.2.0)
+**Status**: Completed - December 1, 2025
 **Focus**: CI enforcement and quality
 
-- [ ] Add coverage enforcement to CI
-  - [ ] Fail build if coverage < 90%
-  - [ ] Report coverage to Codecov
-  - [ ] Badge in README
-- [ ] Add coverage trend tracking
-- [ ] Automated changelog generation
-- [ ] Performance benchmarks in CI
-- [ ] Release automation improvements
+- [x] Add coverage enforcement to CI
+  - [x] Fail build if coverage < 90%
+  - [x] Report coverage to Codecov
+  - [x] Badge in README (CI + Codecov)
+- [x] Create codecov.yml configuration
+  - [x] 90% project target
+  - [x] 80% patch target
+  - [x] Ignore test files and generated code
+- [ ] Add coverage trend tracking (deferred - Codecov handles this)
+- [ ] Automated changelog generation (deferred to v1.3.0)
+- [ ] Performance benchmarks in CI (deferred to v1.3.0)
+- [ ] Release automation improvements (deferred to v1.3.0)
 
-**Deliverables**: CI coverage enforcement, Codecov integration
+**Deliverables**: CI coverage enforcement, Codecov integration, badges
 
 ---
 
@@ -664,7 +668,7 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.2.0 (Sprint 9: CI/CD Improvements)
+**Next Milestone**: v1.3.0 (Sprint 10: Docker/Podman Infrastructure)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
 **Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
@@ -673,3 +677,4 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 **Sprint 6 Status**: ✅ COMPLETED - Plugin scaffolding (init, install)
 **Sprint 7 Status**: ✅ COMPLETED - IPC server (13 tests)
 **Sprint 8 Status**: ✅ COMPLETED - 4 documentation files
+**Sprint 9 Status**: ✅ COMPLETED - CI coverage enforcement + Codecov

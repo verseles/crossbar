@@ -25,8 +25,36 @@ jobs:
       - name: Analyze code
         run: flutter analyze --no-fatal-infos
 
-      - name: Run tests
-        run: flutter test
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Check coverage threshold
+        run: |
+          # Install lcov if not available
+          if ! command -v lcov &> /dev/null; then
+            sudo apt-get install -y lcov
+          fi
+
+          # Calculate coverage percentage
+          COVERAGE=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | grep -oP '\d+\.\d+(?=%)')
+
+          echo "Coverage: ${COVERAGE}%"
+
+          # Check if coverage meets threshold (90%)
+          if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below minimum threshold of 90%"
+            exit 1
+          fi
+
+          echo "Coverage ${COVERAGE}% meets threshold of 90%"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+          verbose: true
 
   build-linux:
     runs-on: ubuntu-latest
