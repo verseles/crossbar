@@ -290,6 +290,15 @@ WEATHER_LOCATION=São Paulo
 WEATHER_UNITS=metric
 ```
 
+### Detailed Documentation
+
+For comprehensive documentation, see:
+
+- **[API Reference](docs/api-reference.md)** - Complete CLI command documentation (~75 commands)
+- **[Plugin Development Guide](docs/plugin-development.md)** - Step-by-step tutorial for all 6 languages
+- **[Configuration Schema](docs/config-schema.md)** - 25+ field types and grid layout system
+- **[Security Policy](SECURITY.md)** - Vulnerability reporting and security considerations
+
 ## 📦 Example Plugins
 
 Crossbar includes **24 example plugins** in 4 languages:

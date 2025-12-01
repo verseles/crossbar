@@ -324,28 +324,28 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 
 ---
 
-### Sprint 8: Documentation (v1.2.0)
-**Duration**: 1 week
+### ✅ Sprint 8: Documentation (v1.2.0)
+**Status**: Completed - December 1, 2025
 **Focus**: Complete documentation
 
-- [ ] Create `docs/api-reference.md`
-  - [ ] Document all ~82 CLI commands
-  - [ ] Include examples for each command
-  - [ ] Platform compatibility matrix
-- [ ] Create `docs/plugin-development.md`
-  - [ ] Step-by-step tutorial
-  - [ ] Examples in all 6 languages
-  - [ ] Best practices
-  - [ ] Debugging tips
-- [ ] Create `docs/config-schema.md`
-  - [ ] Document all 25+ field types
-  - [ ] Grid system explanation
-  - [ ] Examples for each type
-- [ ] Create `SECURITY.md`
-  - [ ] Security policy
-  - [ ] Vulnerability reporting process
-  - [ ] Response timeline
-- [ ] Update README with links to docs
+- [x] Create `docs/api-reference.md`
+  - [x] Document all ~75 CLI commands
+  - [x] Include examples for each command
+  - [x] Platform compatibility matrix
+- [x] Create `docs/plugin-development.md`
+  - [x] Step-by-step tutorial
+  - [x] Examples in all 6 languages
+  - [x] Best practices
+  - [x] Debugging tips
+- [x] Create `docs/config-schema.md`
+  - [x] Document all 25+ field types
+  - [x] Grid system explanation
+  - [x] Examples for each type
+- [x] Create `SECURITY.md`
+  - [x] Security policy
+  - [x] Vulnerability reporting process
+  - [x] Response timeline
+- [x] Update README with links to docs
 
 **Deliverables**: 4 documentation files
 
@@ -664,7 +664,7 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 **Last Updated**: December 1, 2025
 **Current Version**: v1.0.0
-**Next Milestone**: v1.2.0 (Sprint 8: Documentation)
+**Next Milestone**: v1.2.0 (Sprint 9: CI/CD Improvements)
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
 **Sprint 2 Status**: ✅ COMPLETED - 13 system control commands
 **Sprint 3 Status**: ✅ COMPLETED - 5 Bluetooth/VPN commands
@@ -672,3 +672,4 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 **Sprint 5 Status**: ✅ COMPLETED - 8 Go/Rust example plugins
 **Sprint 6 Status**: ✅ COMPLETED - Plugin scaffolding (init, install)
 **Sprint 7 Status**: ✅ COMPLETED - IPC server (13 tests)
+**Sprint 8 Status**: ✅ COMPLETED - 4 documentation files
