@@ -24,3 +24,6 @@
 # Keep MethodChannels and EventChannels
 -keep class * extends io.flutter.plugin.common.MethodChannel { *; }
 -keep class * extends io.flutter.plugin.common.EventChannel { *; }
+
+# Ignore Play Core classes (deferred components not used)
+-dontwarn com.google.android.play.core.**
