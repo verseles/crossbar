@@ -382,6 +382,13 @@ After every `git push`, you MUST:
 4. If CI fails, immediately investigate with `gh run view <id> --log-failed` and fix
 5. Keep iterating until CI passes - don't leave broken builds
 
+**Exception**: Skip CI monitoring when ONLY documentation/text files were changed:
+- `*.md` (markdown files)
+- `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `ROADMAP.md`, etc.
+- `LICENSE`, `.gitignore`, comments-only changes
+
+These don't affect the build, so monitoring is unnecessary.
+
 ## CI/CD
 
 ### GitHub Actions Workflows
