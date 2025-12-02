@@ -2,7 +2,8 @@
     <application
         android:label="crossbar"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -42,4 +43,12 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+    <!-- Add internet permission for marketplace and network features -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Add network state permission -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Add wake lock for scheduler -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Add notification permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

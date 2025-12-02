@@ -34,8 +34,18 @@ android {
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // WARNING: Using debug signing for release can cause issues like blank screen.
+            // For development testing, this is acceptable, but for production, use proper signing.
             signingConfig = signingConfigs.getByName("debug")
+
+            // Enable minification and obfuscation for release
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
