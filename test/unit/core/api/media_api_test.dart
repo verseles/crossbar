@@ -72,10 +72,11 @@ void main() {
         expect(result, isA<int>());
       });
 
-      test('getVolume returns value in range 0-100', () async {
+      test('getVolume returns value >= 0', () async {
         final result = await api.getVolume();
         expect(result, greaterThanOrEqualTo(0));
-        expect(result, lessThanOrEqualTo(100));
+        // Note: Some systems allow volume > 100 (overamplification)
+        expect(result, lessThanOrEqualTo(200)); // Reasonable upper bound
       });
 
       test('setVolume returns boolean', () async {

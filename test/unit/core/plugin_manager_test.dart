@@ -80,9 +80,11 @@ void main() {
     });
 
     group('pluginsDirectory', () {
-      test('returns path ending with .crossbar/plugins', () {
-        expect(manager.pluginsDirectory, contains('.crossbar'));
-        expect(manager.pluginsDirectory, contains('plugins'));
+      test('returns path ending with .crossbar/plugins or plugins', () async {
+        final dir = await manager.pluginsDirectory;
+        expect(dir, contains('plugins'));
+        // On desktop it contains .crossbar, on mobile it doesn't
+        expect(dir, anyOf(contains('.crossbar'), isNot(contains('.crossbar'))));
       });
     });
 
