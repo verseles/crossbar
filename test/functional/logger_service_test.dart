@@ -31,7 +31,6 @@ void main() {
     test('init creates log file', () async {
       await logger.init(logDirectory: tempDir.path);
 
-      final logFile = File(path.join(tempDir.path, 'crossbar.log'));
       // File may or may not exist yet until first write
       expect(logger.isInitialized, isTrue);
     });
