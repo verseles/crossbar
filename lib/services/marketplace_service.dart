@@ -174,7 +174,7 @@ class MarketplaceService {
         return false;
       }
 
-      final pluginDir = _pluginManager.pluginsDirectory;
+      final pluginDir = await _pluginManager.pluginsDirectory;
       final dir = Directory(pluginDir);
       if (!dir.existsSync()) {
         dir.createSync(recursive: true);
@@ -204,7 +204,7 @@ class MarketplaceService {
     try {
       _lastError = null;
 
-      final pluginDir = _pluginManager.pluginsDirectory;
+      final pluginDir = await _pluginManager.pluginsDirectory;
       final filePath = p.join(pluginDir, pluginId);
       final file = File(filePath);
 

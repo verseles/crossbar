@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 enum LogLevel {
   debug,
@@ -26,11 +27,22 @@ class Logger {
   set minLevel(LogLevel level) => _minLevel = level;
 
   Future<void> init() async {
-    final homeDir = Platform.environment['HOME'] ??
-        Platform.environment['USERPROFILE'] ??
-        '';
+    late final String baseDir;
 
-    final logDir = Directory(path.join(homeDir, '.crossbar', 'logs'));
+    // Use appropriate directory based on platform
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Mobile: use app documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      baseDir = appDir.path;
+    } else {
+      // Desktop: use $HOME/.crossbar
+      baseDir = path.join(
+        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '',
+        '.crossbar',
+      );
+    }
+
+    final logDir = Directory(path.join(baseDir, 'logs'));
     if (!await logDir.exists()) {
       await logDir.create(recursive: true);
     }

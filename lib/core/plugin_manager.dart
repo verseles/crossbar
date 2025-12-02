@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import '../models/plugin.dart';
 import '../models/plugin_output.dart';
@@ -46,17 +47,25 @@ class PluginManager {
 
   List<Plugin> get plugins => List.unmodifiable(_plugins);
 
-  String get pluginsDirectory {
-    final homeDir = Platform.environment['HOME'] ??
-        Platform.environment['USERPROFILE'] ??
-        '';
-    return path.join(homeDir, '.crossbar', 'plugins');
+  Future<String> get pluginsDirectory async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Mobile: use app documents directory
+      final appDir = await getApplicationDocumentsDirectory();
+      return path.join(appDir.path, 'plugins');
+    } else {
+      // Desktop: use $HOME/.crossbar/plugins
+      final homeDir = Platform.environment['HOME'] ??
+          Platform.environment['USERPROFILE'] ??
+          '';
+      return path.join(homeDir, '.crossbar', 'plugins');
+    }
   }
 
   Future<void> discoverPlugins() async {
     _plugins.clear();
 
-    final pluginsDir = Directory(pluginsDirectory);
+    final pluginsDirPath = await pluginsDirectory;
+    final pluginsDir = Directory(pluginsDirPath);
 
     if (!await pluginsDir.exists()) {
       return;

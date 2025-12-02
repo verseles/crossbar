@@ -36,12 +36,20 @@ Com base na pesquisa e análise, as principais causas são:
 - ✅ Regras para manter classes Flutter
 - ✅ Regras para plugins e MethodChannels
 - ✅ Preservação da classe principal da aplicação
+- ✅ Ignora classes do Google Play Core (deferred components não utilizados)
 
 ### 5. **Tratamento de Erros** (`lib/main.dart`)
 - ✅ `FlutterError.onError` - captura erros do Flutter
 - ✅ `PlatformDispatcher.instance.onError` - captura erros não tratados
 - ✅ Try-catch na inicialização com tela de erro informativa
 - ✅ Tela de erro personalizada se falhar na inicialização
+
+### 6. **Diretórios Corretos no Android** (Múltiplos arquivos)
+- ✅ `lib/utils/logger.dart` - usa `getApplicationDocumentsDirectory()` no mobile
+- ✅ `lib/core/plugin_manager.dart` - usa path_provider em vez de $HOME
+- ✅ `lib/services/hot_reload_service.dart` - adaptado para usar diretório do app
+- ✅ `lib/services/marketplace_service.dart` - adaptado para usar diretório do app
+- ℹ️ **Desktop continua usando `$HOME/.crossbar`** (comportamento mantido)
 
 ## 🧪 Como Testar
 
@@ -150,9 +158,10 @@ O arquivo `build.gradle.kts` ainda está usando `signingConfig = signingConfigs.
 |----------|---------------|
 | Tratamento de erros | Erros em release são capturados e logados (não mais tela cinza silenciosa) |
 | Permissões | App não falha ao tentar usar recursos sem permissão |
-| ProGuard configurado | Evita crash por código obfuscado incorretamente |
+| ProGuard configurado | Evita crash por código obfuscado incorretamente + ignora classes Play Core |
 | MainActivity robusto | Plugin registration correto e captura de erros nativos |
 | Tela de erro | Mostra erro na inicialização em vez de tela cinza |
+| path_provider | Usa diretórios corretos no Android (não $HOME/.crossbar) |
 
 ## 🎯 Resultados Esperados
 

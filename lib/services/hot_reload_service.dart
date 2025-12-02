@@ -46,7 +46,8 @@ class HotReloadService {
   Future<void> init() async {
     if (_initialized) return;
 
-    final pluginsDir = Directory(_pluginManager.pluginsDirectory);
+    final pluginsDirPath = await _pluginManager.pluginsDirectory;
+    final pluginsDir = Directory(pluginsDirPath);
 
     // Create plugins directory if it doesn't exist
     if (!pluginsDir.existsSync()) {
