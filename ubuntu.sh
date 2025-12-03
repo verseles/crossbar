@@ -81,4 +81,8 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 && sudo apt update >/dev/null 2>&1 \
 && sudo apt install gh -y >/dev/null 2>&1
 
+# 9. act (Local GitHub Actions)
+# Optamos pelo binário direto para não depender de 'gh auth login' neste script
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash >/dev/null 2>&1
+
 echo "Setup concluído! Execute 'source ~/.bashrc' ou reinicie o terminal."
