@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
 import '../../core/api/media_api.dart';
-import '../cli_utils.dart';
 import 'base_command.dart';
 
 class MediaCommand extends CliCommand {
@@ -29,34 +27,58 @@ class MediaCommand extends CliCommand {
     switch (subcommand) {
       case 'play':
         final result = await api.play();
-        print(result ? 'Playing' : 'Failed to play');
+        printFormatted(
+            {'success': result, 'action': 'play'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Playing' : 'Failed to play'
+        );
         return result ? 0 : 1;
 
       case 'pause':
         final result = await api.pause();
-        print(result ? 'Paused' : 'Failed to pause');
+        printFormatted(
+            {'success': result, 'action': 'pause'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Paused' : 'Failed to pause'
+        );
         return result ? 0 : 1;
 
       case 'toggle':
       case 'play-pause': // Alias
         final result = await api.playPause();
-        print(result ? 'Toggled' : 'Failed to toggle');
+        printFormatted(
+            {'success': result, 'action': 'toggle'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Toggled' : 'Failed to toggle'
+        );
         return result ? 0 : 1;
 
       case 'stop':
         final result = await api.stop();
-        print(result ? 'Stopped' : 'Failed to stop');
+        printFormatted(
+            {'success': result, 'action': 'stop'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Stopped' : 'Failed to stop'
+        );
         return result ? 0 : 1;
 
       case 'next':
         final result = await api.next();
-        print(result ? 'Next track' : 'Failed to skip');
+        printFormatted(
+            {'success': result, 'action': 'next'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Next track' : 'Failed to skip'
+        );
         return result ? 0 : 1;
 
       case 'prev':
       case 'previous':
         final result = await api.previous();
-        print(result ? 'Previous track' : 'Failed to go back');
+        printFormatted(
+            {'success': result, 'action': 'previous'},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Previous track' : 'Failed to go back'
+        );
         return result ? 0 : 1;
 
       case 'seek':
@@ -67,28 +89,36 @@ class MediaCommand extends CliCommand {
         }
         final offset = values[0];
         final result = await api.seek(offset);
-        print(result ? 'Seeked $offset' : 'Failed to seek');
+        printFormatted(
+            {'success': result, 'action': 'seek', 'offset': offset},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Seeked $offset' : 'Failed to seek'
+        );
         return result ? 0 : 1;
 
       case 'playing':
         final result = await api.getPlaying();
-        if (jsonOutput) {
-          print(jsonEncode(result));
-        } else if (xmlOutput) {
-          print(mapToXml(result, root: 'media'));
-        } else {
-          if (result['playing'] == true) {
-            print('${result['title']} - ${result['artist']}');
-            if (result['album']?.isNotEmpty == true) {
-              print('Album: ${result['album']}');
+        printFormatted(
+            result,
+            json: jsonOutput,
+            xml: xmlOutput,
+            xmlRoot: 'media',
+            plain: (_) {
+                if (result['playing'] == true) {
+                    final buffer = StringBuffer();
+                    buffer.writeln('${result['title']} - ${result['artist']}');
+                    if (result['album']?.isNotEmpty == true) {
+                        buffer.writeln('Album: ${result['album']}');
+                    }
+                    if (result['position']?.isNotEmpty == true) {
+                        buffer.writeln('${result['position']} / ${result['duration']}');
+                    }
+                    return buffer.toString().trimRight();
+                } else {
+                    return 'Not playing';
+                }
             }
-            if (result['position']?.isNotEmpty == true) {
-              print('${result['position']} / ${result['duration']}');
-            }
-          } else {
-            print('Not playing');
-          }
-        }
+        );
         return 0;
 
       default:

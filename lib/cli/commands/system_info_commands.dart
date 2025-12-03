@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
 import '../../core/api/system_api.dart';
-import '../cli_utils.dart';
 import 'base_command.dart';
 
 class SystemInfoCommand extends CliCommand {
@@ -19,8 +17,6 @@ class SystemInfoCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    // This is a generic handler, but logic differs.
-    // Better to have subclasses or a switch here if using one class.
     return 0;
   }
 }
@@ -35,17 +31,14 @@ class CpuCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
     final result = await api.getCpuUsage();
-    final jsonOutput = args.contains('--json');
-    final xmlOutput = args.contains('--xml');
+    final val = double.tryParse(result) ?? 0;
 
-    final cpuData = {'cpu': double.tryParse(result) ?? 0};
-    if (jsonOutput) {
-      print(jsonEncode(cpuData));
-    } else if (xmlOutput) {
-      print(mapToXml(cpuData));
-    } else {
-      print('$result%');
-    }
+    printFormatted(
+      {'cpu': val},
+      json: args.contains('--json'),
+      xml: args.contains('--xml'),
+      plain: (_) => '$result%',
+    );
     return 0;
   }
 }
@@ -60,24 +53,25 @@ class MemoryCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
     final result = await api.getMemoryUsage();
-    final jsonOutput = args.contains('--json');
 
-    if (jsonOutput) {
-      final parts = result.split('/');
-      if (parts.length == 2) {
-        final used = double.tryParse(parts[0].replaceAll(' GB', '')) ?? 0;
-        final total = double.tryParse(parts[1].replaceAll(' GB', '')) ?? 0;
-        print(jsonEncode({
-          'used': used,
-          'total': total,
-          'unit': 'GB',
-        }));
-      } else {
-        print(jsonEncode({'memory': result}));
-      }
-    } else {
-      print(result);
+    Map<String, dynamic> data = {'memory': result};
+    final parts = result.split('/');
+    if (parts.length == 2) {
+      final used = double.tryParse(parts[0].replaceAll(' GB', '')) ?? 0;
+      final total = double.tryParse(parts[1].replaceAll(' GB', '')) ?? 0;
+      data = {
+        'used': used,
+        'total': total,
+        'unit': 'GB',
+      };
     }
+
+    printFormatted(
+      data,
+      json: args.contains('--json'),
+      xml: args.contains('--xml'),
+      plain: (_) => result,
+    );
     return 0;
   }
 }
@@ -92,18 +86,21 @@ class BatteryCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
     final result = await api.getBatteryStatus();
-    final jsonOutput = args.contains('--json');
 
-    if (jsonOutput) {
-      final match = RegExp(r'(\d+)%').firstMatch(result);
-      final isCharging = result.contains('⚡');
-      print(jsonEncode({
+    final match = RegExp(r'(\d+)%').firstMatch(result);
+    final isCharging = result.contains('⚡');
+    final data = {
         'level': match != null ? int.parse(match.group(1)!) : null,
         'charging': isCharging,
-      }));
-    } else {
-      print(result);
-    }
+        'status': result
+    };
+
+    printFormatted(
+      data,
+      json: args.contains('--json'),
+      xml: args.contains('--xml'),
+      plain: (_) => result,
+    );
     return 0;
   }
 }
@@ -117,7 +114,13 @@ class UptimeCommand extends CliCommand {
   @override
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
-    print(await api.getUptime());
+    final result = await api.getUptime();
+    printFormatted(
+        {'uptime': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -132,9 +135,17 @@ class DiskCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
     final values = args.where((a) => !a.startsWith('--')).toList();
-    final path = values.isNotEmpty ? values[0] : null; // null means root/default
+    final path = values.isNotEmpty ? values[0] : null;
     final result = await api.getDiskUsage(path);
-    print(result);
+
+    // Attempt to parse result to structured data if possible, currently just string
+    // "Used: 50GB, Free: 100GB" typically
+    printFormatted(
+        {'disk': result}, // Ideally parse this better but sticking to string for now if format is complex
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -148,12 +159,12 @@ class OsCommand extends CliCommand {
   @override
   Future<int> execute(List<String> args) async {
     const api = SystemApi();
-    final jsonOutput = args.contains('--json');
-    if (jsonOutput) {
-      print(jsonEncode(api.getOsDetails()));
-    } else {
-      print(api.getOs());
-    }
+    printFormatted(
+        api.getOsDetails(),
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => api.getOs()
+    );
     return 0;
   }
 }
@@ -166,15 +177,23 @@ class KernelCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
+    String resultStr;
     if (Platform.isLinux || Platform.isMacOS) {
-      final result = await Process.run('uname', ['-r']);
-      print((result.stdout as String).trim());
+      final res = await Process.run('uname', ['-r']);
+      resultStr = (res.stdout as String).trim();
     } else if (Platform.isWindows) {
-      final result = await Process.run('ver', [], runInShell: true);
-      print((result.stdout as String).trim());
+      final res = await Process.run('ver', [], runInShell: true);
+      resultStr = (res.stdout as String).trim();
     } else {
-      print(Platform.operatingSystemVersion);
+      resultStr = Platform.operatingSystemVersion;
     }
+
+    printFormatted(
+        {'kernel': resultStr},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => resultStr
+    );
     return 0;
   }
 }
@@ -187,14 +206,22 @@ class ArchCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
+    String resultStr;
     if (Platform.isLinux || Platform.isMacOS) {
-      final result = await Process.run('uname', ['-m']);
-      print((result.stdout as String).trim());
+      final res = await Process.run('uname', ['-m']);
+      resultStr = (res.stdout as String).trim();
     } else if (Platform.isWindows) {
-      print(Platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'unknown');
+      resultStr = Platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'unknown';
     } else {
-      print('unknown');
+      resultStr = 'unknown';
     }
+
+    printFormatted(
+        {'arch': resultStr},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => resultStr
+    );
     return 0;
   }
 }
@@ -207,7 +234,13 @@ class HostnameCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(Platform.localHostname);
+    final result = Platform.localHostname;
+    printFormatted(
+        {'hostname': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -220,7 +253,13 @@ class UsernameCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(Platform.environment['USER'] ?? Platform.environment['USERNAME'] ?? 'unknown');
+    final result = Platform.environment['USER'] ?? Platform.environment['USERNAME'] ?? 'unknown';
+    printFormatted(
+        {'username': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -233,7 +272,13 @@ class HomeCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '~');
+    final result = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '~';
+    printFormatted(
+        {'home': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -246,7 +291,13 @@ class TempCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(Directory.systemTemp.path);
+    final result = Directory.systemTemp.path;
+    printFormatted(
+        {'temp': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -261,18 +312,27 @@ class EnvCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     final values = args.where((a) => !a.startsWith('--')).toList();
     final name = values.isNotEmpty ? values[0] : null;
-    final jsonOutput = args.contains('--json');
+    final json = args.contains('--json');
+    final xml = args.contains('--xml');
 
     if (name == null) {
-      if (jsonOutput) {
-        print(jsonEncode(Platform.environment));
-      } else {
-        Platform.environment.forEach((key, value) {
-          print('$key=$value');
-        });
-      }
+        printFormatted(
+            Platform.environment,
+            json: json,
+            xml: xml,
+            plain: (data) {
+                final map = data as Map<String, String>;
+                return map.entries.map((e) => '${e.key}=${e.value}').join('\n');
+            }
+        );
     } else {
-      print(Platform.environment[name] ?? '');
+        final value = Platform.environment[name] ?? '';
+        printFormatted(
+            {name: value},
+            json: json,
+            xml: xml,
+            plain: (_) => value,
+        );
     }
     return 0;
   }
@@ -286,7 +346,13 @@ class LocaleCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(Platform.localeName);
+    final result = Platform.localeName;
+    printFormatted(
+        {'locale': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -299,7 +365,13 @@ class TimezoneCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    print(DateTime.now().timeZoneName);
+    final result = DateTime.now().timeZoneName;
+    printFormatted(
+        {'timezone': result},
+        json: args.contains('--json'),
+        xml: args.contains('--xml'),
+        plain: (_) => result
+    );
     return 0;
   }
 }
