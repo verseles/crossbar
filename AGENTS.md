@@ -1,0 +1,135 @@
+# Crossbar - Contexto e Regras para Agentes
+
+> **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
+> Leia-o integralmente no início de cada sessão.
+
+---
+
+## 1. Regras Operacionais (Inflexíveis)
+
+- **Idioma**: Português (pt-BR) para toda comunicação.
+- **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
+- **Testes**: **JAMAIS** commite código sem rodar testes (`flutter test`). Se alterar UI/Lógica, adicione novos testes.
+- **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
+- **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push.
+- **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
+
+---
+
+## 2. Identidade do Projeto
+
+- **Nome**: Crossbar (Universal Plugin System)
+- **Versão Atual**: `1.0.1+2`
+- **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
+- **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
+- **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
+
+---
+
+## 3. Arquitetura de Execução (Tri-Binary)
+
+O projeto compila **3 binários** para resolver problemas de dependência (GTK) e UX:
+
+1.  **`crossbar` (Launcher)**:
+    - Fonte: `bin/launcher.dart`
+    - Função: Roteador. Se houver argumentos, chama CLI. Se não, chama GUI.
+2.  **`crossbar-gui` (Flutter App)**:
+    - Fonte: `lib/main.dart`
+    - Função: Interface gráfica, Tray, Services. Depende de GTK/Cocoa.
+3.  **`crossbar-cli` (Pure Dart)**:
+    - Fonte: `bin/crossbar.dart` -> `lib/cli/cli_handler.dart`
+    - Função: Comandos de sistema (`--cpu`, `--notify`). **Zero dependências de UI**.
+
+---
+
+## 4. Estrutura de Arquivos Chave
+
+```text
+crossbar/
+├── bin/
+│   ├── launcher.dart           # Entrypoint do Launcher (Router)
+│   └── crossbar.dart           # Entrypoint da CLI
+├── lib/
+│   ├── main.dart               # Entrypoint da GUI Flutter
+│   ├── cli/
+│   │   ├── cli_handler.dart    # Switch-case gigante com ~75 comandos
+│   │   └── plugin_scaffolding.dart # Lógica de 'crossbar init'
+│   ├── core/
+│   │   ├── plugin_manager.dart # Descoberta e ciclo de vida de plugins
+│   │   ├── script_runner.dart  # Execução de scripts (Process.run com timeout)
+│   │   └── output_parser.dart  # BitBar Text parser & JSON parser
+│   ├── services/               # Singleton Services
+│   │   ├── ipc_server.dart     # REST API (localhost:48291)
+│   │   ├── tray_service.dart   # Gerenciamento de ícones de bandeja
+│   │   ├── scheduler_service.dart # Timers para refresh de plugins
+│   │   └── notification_service.dart # Notificações push
+│   └── ui/                     # Widgets Flutter (Material 3)
+├── plugins/                    # Exemplos de plugins (Go, Rust, Py, JS, Sh, Dart)
+├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
+└── Makefile                    # Comandos de dev (make linux, make test)
+```
+
+---
+
+## 5. Sistema de Plugins
+
+### Descoberta
+- Local: `~/.crossbar/plugins/` (ou pasta local em dev).
+- Identificação: Extensão (`.py`, `.sh`) ou Shebang.
+- Intervalo: Parseado do nome (ex: `cpu.10s.sh` = 10 segundos).
+
+### Execução
+- **Runner**: `lib/core/script_runner.dart`
+- **Interpreters**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
+- **Output**: Suporta formato texto legado (BitBar) OU JSON estruturado (Crossbar).
+
+### API de Plugins (CLI)
+Plugins usam a própria CLI do Crossbar para obter dados.
+- Exemplo: Um plugin python chama `subprocess.run(['crossbar', '--cpu'])`.
+- Comandos disponíveis: `docs/api-reference.md`.
+
+---
+
+## 6. Contexto de Desenvolvimento
+
+### Build & Run
+- **Linux**: `make linux` (Gera bundle com os 3 binários).
+- **Testes**: `flutter test --coverage` (Min 43% coverage, CI falha se menor).
+- **Docker/Podman**:
+    - `make container-shell`: Entra no ambiente dev containerizado.
+    - `make container-build`: Roda build clean.
+
+### Armadilhas Comuns
+1.  **Versão do Flutter**: O CI exige estritamente `3.38.3`. Versões mais novas/velhas quebram constraints do Dart `^3.10.0`.
+2.  **Dependências Linux**: Requer `libayatana-appindicator3-dev` e `libsecret-1-dev`.
+3.  **Caminhos em Mobile**: Nunca use paths absolutos (`/home/user`) em Android/iOS. Use `path_provider`.
+4.  **CLI vs GUI**: Não importe `dart:ui` ou widgets Flutter dentro de `lib/cli/`. Isso quebra o binário CLI puro.
+
+---
+
+## 7. Status do Roadmap
+
+- **Fase Atual**: Manutenção v1.0.1
+- **Features Completas**:
+    - [x] Core Plugin System (6 linguagens)
+    - [x] CLI Avançada (Mídia, Sistema, Rede, Utils)
+    - [x] GUI Desktop + Tray
+    - [x] Mobile Widgets + Notifications
+    - [x] IPC Server (HTTP)
+    - [x] CI/CD Multi-plataforma
+- **Pendente**:
+    - [ ] Atalho global (Ctrl+Alt+C)
+    - [ ] Marketplace real (Backend integration)
+    - [ ] Sandboxing de plugins
+
+---
+
+## 8. Comandos Úteis
+
+| Ação | Comando |
+|------|---------|
+| Rodar Testes | `flutter test` |
+| Verificar Coverage | `make test` |
+| Build Release (Linux) | `make linux` |
+| Analisar Código | `flutter analyze --no-fatal-infos` |
+| Monitorar CI | `gh run watch` |
