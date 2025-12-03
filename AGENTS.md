@@ -13,6 +13,8 @@
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
+- **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act`.
+- **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
 
 ---
 
@@ -104,6 +106,11 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 2.  **Dependências Linux**: Requer `libayatana-appindicator3-dev` e `libsecret-1-dev`.
 3.  **Caminhos em Mobile**: Nunca use paths absolutos (`/home/user`) em Android/iOS. Use `path_provider`.
 4.  **CLI vs GUI**: Não importe `dart:ui` ou widgets Flutter dentro de `lib/cli/`. Isso quebra o binário CLI puro.
+
+### Validação Local CI (act)
+- **Ferramenta**: `act`
+- **Função**: Permite executar os workflows do GitHub Actions localmente, utilizando Docker.
+- **Uso**: Simula o ambiente do CI/CD para testar pipelines antes de fazer `push`, prevenindo falhas remotas.
 
 ---
 
