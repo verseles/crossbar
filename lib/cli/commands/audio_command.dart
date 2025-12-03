@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import '../../core/api/media_api.dart';
@@ -20,34 +19,36 @@ class AudioCommand extends CliCommand {
 
     final subcommand = args[0];
     final commandArgs = args.sublist(1);
-    final jsonOutput = args.contains('--json'); // check full args for flag
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     const api = MediaApi();
 
     switch (subcommand) {
       case 'volume':
-        return _handleVolume(api, commandArgs, jsonOutput);
+        return _handleVolume(api, commandArgs, jsonOutput, xmlOutput);
       case 'mute':
-        return _handleMute(api, commandArgs, jsonOutput);
+        return _handleMute(api, commandArgs, jsonOutput, xmlOutput);
       case 'output':
-        return _handleOutput(api, commandArgs, jsonOutput);
+        return _handleOutput(api, commandArgs, jsonOutput, xmlOutput);
       default:
         stderr.writeln('Error: Unknown audio subcommand: $subcommand');
         return 1;
     }
   }
 
-  Future<int> _handleVolume(MediaApi api, List<String> args, bool jsonOutput) async {
+  Future<int> _handleVolume(MediaApi api, List<String> args, bool json, bool xml) async {
     final values = args.where((a) => !a.startsWith('--')).toList();
 
     if (values.isEmpty) {
       // Get
       final result = await api.getVolume();
-      if (jsonOutput) {
-        print(jsonEncode({'volume': result}));
-      } else {
-        print('$result%');
-      }
+      printFormatted(
+        {'volume': result},
+        json: json,
+        xml: xml,
+        plain: (_) => '$result%',
+      );
     } else {
       // Set
       final level = int.tryParse(values[0]);
@@ -57,7 +58,12 @@ class AudioCommand extends CliCommand {
       }
       final result = await api.setVolume(level);
       if (result) {
-        print('Volume set to $level%');
+        printFormatted(
+          {'success': true, 'volume': level},
+          json: json,
+          xml: xml,
+          plain: (_) => 'Volume set to $level%',
+        );
       } else {
         stderr.writeln('Failed to set volume');
         return 1;
@@ -66,7 +72,7 @@ class AudioCommand extends CliCommand {
     return 0;
   }
 
-  Future<int> _handleMute(MediaApi api, List<String> args, bool jsonOutput) async {
+  Future<int> _handleMute(MediaApi api, List<String> args, bool json, bool xml) async {
     final values = args.where((a) => !a.startsWith('--')).toList();
 
     if (values.isNotEmpty) {
@@ -74,12 +80,20 @@ class AudioCommand extends CliCommand {
        if (val == 'on' || val == 'true') {
            final isMuted = await api.isMuted();
            if (!isMuted) await api.toggleMute();
-           print('Muted');
+           printFormatted(
+               {'muted': true},
+               json: json, xml: xml,
+               plain: (_) => 'Muted'
+           );
            return 0;
        } else if (val == 'off' || val == 'false') {
            final isMuted = await api.isMuted();
            if (isMuted) await api.toggleMute();
-           print('Unmuted');
+           printFormatted(
+               {'muted': false},
+               json: json, xml: xml,
+               plain: (_) => 'Unmuted'
+           );
            return 0;
        }
     }
@@ -88,7 +102,11 @@ class AudioCommand extends CliCommand {
     final result = await api.toggleMute();
     if (result) {
       final isMuted = await api.isMuted();
-      print(isMuted ? 'Muted' : 'Unmuted');
+      printFormatted(
+          {'muted': isMuted},
+          json: json, xml: xml,
+          plain: (_) => isMuted ? 'Muted' : 'Unmuted'
+      );
     } else {
       stderr.writeln('Failed to toggle mute');
       return 1;
@@ -96,16 +114,20 @@ class AudioCommand extends CliCommand {
     return 0;
   }
 
-  Future<int> _handleOutput(MediaApi api, List<String> args, bool jsonOutput) async {
+  Future<int> _handleOutput(MediaApi api, List<String> args, bool json, bool xml) async {
     if (args.contains('--list') || args.contains('list')) {
       final devices = await api.listAudioOutputs();
-      if (jsonOutput) {
-        print(jsonEncode(devices));
-      } else {
-        for (final device in devices) {
-          print('${device['id']}: ${device['name']}');
-        }
-      }
+      printFormatted(
+          devices,
+          json: json, xml: xml,
+          plain: (_) {
+              final buffer = StringBuffer();
+              for (final device in devices) {
+                  buffer.writeln('${device['id']}: ${device['name']}');
+              }
+              return buffer.toString().trimRight();
+          }
+      );
       return 0;
     }
 
@@ -114,17 +136,22 @@ class AudioCommand extends CliCommand {
     if (values.isEmpty) {
       // Get
       final result = await api.getAudioOutput();
-      if (jsonOutput) {
-        print(jsonEncode({'output': result}));
-      } else {
-        print(result);
-      }
+      printFormatted(
+        {'output': result},
+        json: json,
+        xml: xml,
+        plain: (_) => result,
+      );
     } else {
       // Set
       final device = values[0];
       final result = await api.setAudioOutput(device);
       if (result) {
-        print('Output set to $device');
+        printFormatted(
+            {'success': true, 'output': device},
+            json: json, xml: xml,
+            plain: (_) => 'Output set to $device'
+        );
       } else {
         stderr.writeln('Failed to set output');
         return 1;

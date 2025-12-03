@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'base_command.dart';
@@ -20,6 +19,7 @@ class FileCommand extends CliCommand {
     final subcommand = args[0];
     final commandArgs = args.sublist(1);
     final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
     final values = commandArgs.where((a) => !a.startsWith('--')).toList();
 
     if (values.isEmpty) {
@@ -31,11 +31,12 @@ class FileCommand extends CliCommand {
     switch (subcommand) {
       case 'exists':
         final exists = File(path).existsSync() || Directory(path).existsSync();
-        if (jsonOutput) {
-          print(jsonEncode({'exists': exists, 'path': path}));
-        } else {
-          print(exists ? 'true' : 'false');
-        }
+        printFormatted(
+            {'exists': exists, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => exists ? 'true' : 'false'
+        );
         return 0;
 
       case 'read':
@@ -44,7 +45,13 @@ class FileCommand extends CliCommand {
           stderr.writeln('Error: File not found: $path');
           return 1;
         }
-        print(file.readAsStringSync());
+        final content = file.readAsStringSync();
+        printFormatted(
+            {'content': content, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => content
+        );
         return 0;
 
       case 'size':
@@ -54,19 +61,22 @@ class FileCommand extends CliCommand {
           return 1;
         }
         final size = file.lengthSync();
-        if (jsonOutput) {
-          print(jsonEncode({'size': size, 'path': path}));
-        } else {
-          if (size < 1024) {
-            print('$size B');
-          } else if (size < 1024 * 1024) {
-            print('${(size / 1024).toStringAsFixed(2)} KB');
-          } else if (size < 1024 * 1024 * 1024) {
-            print('${(size / (1024 * 1024)).toStringAsFixed(2)} MB');
-          } else {
-            print('${(size / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB');
-          }
-        }
+        printFormatted(
+            {'size': size, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) {
+                if (size < 1024) {
+                    return '$size B';
+                } else if (size < 1024 * 1024) {
+                    return '${(size / 1024).toStringAsFixed(2)} KB';
+                } else if (size < 1024 * 1024 * 1024) {
+                    return '${(size / (1024 * 1024)).toStringAsFixed(2)} MB';
+                } else {
+                    return '${(size / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+                }
+            }
+        );
         return 0;
 
       default:
@@ -93,6 +103,7 @@ class DirCommand extends CliCommand {
     final subcommand = args[0];
     final commandArgs = args.sublist(1);
     final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
     final values = commandArgs.where((a) => !a.startsWith('--')).toList();
     final path = values.isNotEmpty ? values[0] : '.';
 
@@ -103,8 +114,7 @@ class DirCommand extends CliCommand {
         return 1;
       }
       final entries = dir.listSync();
-      if (jsonOutput) {
-        final files = entries.map((e) {
+      final files = entries.map((e) {
           final stat = e.statSync();
           return {
             'name': e.path.split(Platform.pathSeparator).last,
@@ -113,15 +123,22 @@ class DirCommand extends CliCommand {
             'size': stat.size,
             'modified': stat.modified.toIso8601String(),
           };
-        }).toList();
-        print(jsonEncode(files));
-      } else {
-        for (final entry in entries) {
-          final name = entry.path.split(Platform.pathSeparator).last;
-          final prefix = entry is Directory ? 'd' : '-';
-          print('$prefix $name');
-        }
-      }
+      }).toList();
+
+      printFormatted(
+          files,
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) {
+             final buffer = StringBuffer();
+             for (final entry in entries) {
+                final name = entry.path.split(Platform.pathSeparator).last;
+                final prefix = entry is Directory ? 'd' : '-';
+                buffer.writeln('$prefix $name');
+             }
+             return buffer.toString().trimRight();
+          }
+      );
       return 0;
     } else {
       stderr.writeln('Error: Unknown dir subcommand: $subcommand');

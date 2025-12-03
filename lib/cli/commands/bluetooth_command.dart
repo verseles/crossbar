@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import '../../core/api/utils_api.dart';
@@ -15,16 +14,18 @@ class BluetoothCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = UtilsApi();
     final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
     final values = args.where((a) => !a.startsWith('--')).toList();
 
     if (values.isEmpty || values[0] == 'status') {
       // Get Status
       final status = await api.getBluetoothStatus();
-      if (jsonOutput) {
-        print(jsonEncode({'bluetooth': status}));
-      } else {
-        print('Bluetooth: $status');
-      }
+      printFormatted(
+          {'bluetooth': status},
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) => 'Bluetooth: $status'
+      );
       return 0;
     }
 
@@ -32,17 +33,19 @@ class BluetoothCommand extends CliCommand {
 
     if (val == 'devices') {
       final devices = await api.listBluetoothDevices();
-      if (jsonOutput) {
-        print(jsonEncode(devices));
-      } else {
-        if (devices.isEmpty) {
-          print('No paired devices found');
-        } else {
-          for (final device in devices) {
-            print('${device['mac']}: ${device['name']}');
+      printFormatted(
+          devices,
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) {
+              if (devices.isEmpty) return 'No paired devices found';
+              final buffer = StringBuffer();
+              for (final device in devices) {
+                  buffer.writeln('${device['mac']}: ${device['name']}');
+              }
+              return buffer.toString().trimRight();
           }
-        }
-      }
+      );
       return 0;
     }
 
@@ -63,7 +66,12 @@ class BluetoothCommand extends CliCommand {
         ? await api.enableBluetooth()
         : await api.disableBluetooth();
 
-    print(result ? 'Bluetooth set to ${newState ? 'on' : 'off'}' : 'Failed to set Bluetooth');
+    printFormatted(
+        {'success': result, 'bluetooth': newState},
+        json: jsonOutput,
+        xml: xmlOutput,
+        plain: (_) => result ? 'Bluetooth set to ${newState ? 'on' : 'off'}' : 'Failed to set Bluetooth'
+    );
     return result ? 0 : 1;
   }
 }

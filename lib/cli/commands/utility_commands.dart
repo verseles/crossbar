@@ -21,13 +21,29 @@ class ExecCommand extends CliCommand {
     }
 
     final cmd = values.join(' ');
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     final result = await Process.run(
       Platform.isWindows ? 'cmd' : 'sh',
       Platform.isWindows ? ['/c', cmd] : ['-c', cmd],
     );
-    stdout.write(result.stdout);
-    stderr.write(result.stderr);
+
+    if (jsonOutput || xmlOutput) {
+        printFormatted(
+            {
+                'stdout': result.stdout.toString(),
+                'stderr': result.stderr.toString(),
+                'exitCode': result.exitCode
+            },
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => '' // Should not be reached logic-wise if I used separate check, but here we want to suppress standard output if json/xml
+        );
+    } else {
+        stdout.write(result.stdout);
+        stderr.write(result.stderr);
+    }
     return result.exitCode;
   }
 }
@@ -54,12 +70,15 @@ class NotifyCommand extends CliCommand {
     }
 
     String? icon;
-    String priority = 'normal';
+    var priority = 'normal';
 
     for (var i = 0; i < args.length; i++) {
       if (args[i] == '--icon' && i + 1 < args.length) icon = args[i + 1];
       if (args[i] == '--priority' && i + 1 < args.length) priority = args[i + 1];
     }
+
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     const api = UtilsApi();
     final result = await api.sendNotification(
@@ -68,7 +87,13 @@ class NotifyCommand extends CliCommand {
       icon: icon,
       priority: priority,
     );
-    print(result ? 'Notification sent' : 'Failed to send notification');
+
+    printFormatted(
+        {'success': result, 'action': 'notify'},
+        json: jsonOutput,
+        xml: xmlOutput,
+        plain: (_) => result ? 'Notification sent' : 'Failed to send notification'
+    );
     return result ? 0 : 1;
   }
 }
@@ -89,6 +114,8 @@ class OpenCommand extends CliCommand {
 
     final subcommand = args[0];
     final values = args.sublist(1).where((a) => !a.startsWith('--')).toList();
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     if (values.isEmpty) {
       stderr.writeln('Error: open $subcommand requires a value');
@@ -100,15 +127,27 @@ class OpenCommand extends CliCommand {
     switch (subcommand) {
       case 'url':
         final result = await api.openUrl(target);
-        print(result ? 'Opened: $target' : 'Failed to open URL');
+        printFormatted(
+            {'success': result, 'action': 'open-url', 'target': target},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Opened: $target' : 'Failed to open URL'
+        );
         return result ? 0 : 1;
       case 'file':
         final result = await api.openFile(target);
-        print(result ? 'Opened: $target' : 'Failed to open file');
+        printFormatted(
+            {'success': result, 'action': 'open-file', 'target': target},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Opened: $target' : 'Failed to open file'
+        );
         return result ? 0 : 1;
       case 'app':
         final result = await api.openApp(target);
-        print(result ? 'Launched: $target' : 'Failed to launch app');
+        printFormatted(
+            {'success': result, 'action': 'open-app', 'target': target},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result ? 'Launched: $target' : 'Failed to launch app'
+        );
         return result ? 0 : 1;
       default:
         stderr.writeln('Error: Unknown open subcommand: $subcommand');
@@ -126,19 +165,29 @@ class TimeCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    String fmt = '24h';
+    var fmt = '24h';
     for (var i = 0; i < args.length; i++) {
       if (args[i] == '--fmt' && i + 1 < args.length) fmt = args[i + 1];
     }
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     final now = DateTime.now();
+    String result;
+
     if (fmt == '12h') {
       final hour = now.hour > 12 ? now.hour - 12 : now.hour;
       final period = now.hour >= 12 ? 'PM' : 'AM';
-      print('${hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} $period');
+      result = '${hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} $period';
     } else {
-      print('${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}');
+      result = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     }
+
+    printFormatted(
+        {'time': result, 'fmt': fmt},
+        json: jsonOutput, xml: xmlOutput,
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -152,24 +201,34 @@ class DateCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    String fmt = 'iso';
+    var fmt = 'iso';
     for (var i = 0; i < args.length; i++) {
       if (args[i] == '--fmt' && i + 1 < args.length) fmt = args[i + 1];
     }
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     final now = DateTime.now();
+    dynamic result;
+
     switch (fmt) {
       case 'iso':
-        print(now.toIso8601String().split('T')[0]);
+        result = now.toIso8601String().split('T')[0];
       case 'us':
-        print('${now.month}/${now.day}/${now.year}');
+        result = '${now.month}/${now.day}/${now.year}';
       case 'eu':
-        print('${now.day}/${now.month}/${now.year}');
+        result = '${now.day}/${now.month}/${now.year}';
       case 'unix':
-        print(now.millisecondsSinceEpoch ~/ 1000);
+        result = now.millisecondsSinceEpoch ~/ 1000;
       default:
-        print(now.toIso8601String().split('T')[0]);
+        result = now.toIso8601String().split('T')[0];
     }
+
+    printFormatted(
+        {'date': result, 'fmt': fmt},
+        json: jsonOutput, xml: xmlOutput,
+        plain: (_) => result.toString()
+    );
     return 0;
   }
 }
@@ -189,10 +248,12 @@ class HashCommand extends CliCommand {
       return 1;
     }
 
-    String algo = 'sha256';
+    var algo = 'sha256';
     for (var i = 0; i < args.length; i++) {
       if (args[i] == '--algo' && i + 1 < args.length) algo = args[i + 1];
     }
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     final text = values[0];
     final bytes = utf8.encode(text);
@@ -211,7 +272,12 @@ class HashCommand extends CliCommand {
       default:
         result = crypto.sha256.convert(bytes).toString();
     }
-    print(result);
+
+    printFormatted(
+        {'hash': result, 'algo': algo},
+        json: jsonOutput, xml: xmlOutput,
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -225,6 +291,9 @@ class UuidCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
+
     final now = DateTime.now().microsecondsSinceEpoch;
     final random = now.hashCode;
 
@@ -234,8 +303,14 @@ class UuidCommand extends CliCommand {
       hex.write(value.toRadixString(16));
     }
 
-    final uuid = hex.toString();
-    print('${uuid.substring(0, 8)}-${uuid.substring(8, 12)}-4${uuid.substring(13, 16)}-${uuid.substring(16, 20)}-${uuid.substring(20, 32)}');
+    final uuidRaw = hex.toString();
+    final result = '${uuidRaw.substring(0, 8)}-${uuidRaw.substring(8, 12)}-4${uuidRaw.substring(13, 16)}-${uuidRaw.substring(16, 20)}-${uuidRaw.substring(20, 32)}';
+
+    printFormatted(
+        {'uuid': result},
+        json: jsonOutput, xml: xmlOutput,
+        plain: (_) => result
+    );
     return 0;
   }
 }
@@ -252,9 +327,16 @@ class RandomCommand extends CliCommand {
     final values = args.where((a) => !a.startsWith('--')).toList();
     final min = values.isNotEmpty ? int.tryParse(values[0]) ?? 0 : 0;
     final max = values.length > 1 ? int.tryParse(values[1]) ?? 100 : 100;
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
-    final random = min + (DateTime.now().microsecond % (max - min + 1));
-    print(random);
+    final result = min + (DateTime.now().microsecond % (max - min + 1));
+
+    printFormatted(
+        {'random': result, 'min': min, 'max': max},
+        json: jsonOutput, xml: xmlOutput,
+        plain: (_) => result.toString()
+    );
     return 0;
   }
 }
@@ -274,6 +356,8 @@ class Base64Command extends CliCommand {
     }
     final subcommand = args[0];
     final values = args.sublist(1).where((a) => !a.startsWith('--')).toList();
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     if (values.isEmpty) {
       stderr.writeln('Error: base64 requires text');
@@ -282,10 +366,20 @@ class Base64Command extends CliCommand {
     final text = values[0];
 
     if (subcommand == 'encode') {
-      print(base64Encode(utf8.encode(text)));
+      final result = base64Encode(utf8.encode(text));
+      printFormatted(
+          {'encoded': result},
+          json: jsonOutput, xml: xmlOutput,
+          plain: (_) => result
+      );
     } else if (subcommand == 'decode') {
       try {
-        print(utf8.decode(base64Decode(text)));
+        final result = utf8.decode(base64Decode(text));
+        printFormatted(
+            {'decoded': result},
+            json: jsonOutput, xml: xmlOutput,
+            plain: (_) => result
+        );
       } catch (e) {
         stderr.writeln('Error decoding base64: $e');
         return 1;

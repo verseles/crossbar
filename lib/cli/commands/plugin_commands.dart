@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import '../plugin_scaffolding.dart';
@@ -16,7 +18,7 @@ class InitCommand extends CliCommand {
     // We need to parse flags.
 
     String? lang;
-    String type = 'custom';
+    var type = 'custom';
     String? name;
     String? outputDir;
 
@@ -26,6 +28,9 @@ class InitCommand extends CliCommand {
       if (args[i] == '--name' && i + 1 < args.length) name = args[i + 1];
       if (args[i] == '--output' && i + 1 < args.length) outputDir = args[i + 1];
     }
+
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     if (lang == null) {
       stderr.writeln('Error: --lang is required');
@@ -57,13 +62,31 @@ class InitCommand extends CliCommand {
     );
 
     if (pluginPath != null) {
-      print('Plugin created: $pluginPath');
-      print('Config file: $pluginPath.config.json');
-      print('');
-      print('Next steps:');
-      print('  1. Edit the plugin file to add your logic');
-      print('  2. Customize the config file for settings');
-      print('  3. Test with: crossbar exec "${_getInterpreterCommand(lang)} $pluginPath"');
+      printFormatted(
+          {
+            'success': true,
+            'path': pluginPath,
+            'config': '$pluginPath.config.json',
+            'instructions': [
+              'Edit the plugin file to add your logic',
+              'Customize the config file for settings',
+              'Test with: crossbar exec "${_getInterpreterCommand(lang)} $pluginPath"'
+            ]
+          },
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) {
+             final buffer = StringBuffer();
+             buffer.writeln('Plugin created: $pluginPath');
+             buffer.writeln('Config file: $pluginPath.config.json');
+             buffer.writeln('');
+             buffer.writeln('Next steps:');
+             buffer.writeln('  1. Edit the plugin file to add your logic');
+             buffer.writeln('  2. Customize the config file for settings');
+             buffer.writeln('  3. Test with: crossbar exec "${_getInterpreterCommand(lang!)} $pluginPath"');
+             return buffer.toString().trimRight();
+          }
+      );
     } else {
       stderr.writeln('Failed to create plugin');
       return 1;
@@ -109,13 +132,23 @@ class InstallCommand extends CliCommand {
       return 1;
     }
     final url = values[0];
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
-    print('Installing plugin from: $url');
+    if (!jsonOutput && !xmlOutput) {
+        print('Installing plugin from: $url');
+    }
+
     const installer = PluginInstaller();
     final installedPath = await installer.installFromGitHub(url);
 
     if (installedPath != null) {
-      print('Plugin installed: $installedPath');
+      printFormatted(
+          {'success': true, 'path': installedPath},
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) => 'Plugin installed: $installedPath'
+      );
     } else {
       stderr.writeln('Failed to install plugin');
       stderr.writeln('Make sure:');
