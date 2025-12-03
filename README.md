@@ -29,12 +29,12 @@ print(json.dumps({
 
 ### 🚀 Core Capabilities
 
-- **🌍 True Cross-Platform**: One plugin, five platforms (Linux, macOS, Windows, Android, iOS)
+- **🌍 True Cross-Platform**: One plugin, five target platforms (Linux, macOS, Windows, Android, **iOS - planned**)
 - **6️⃣ Multi-Language Support**: Write plugins in Bash, Python, Node.js, Dart, Go, or Rust
 - **⚡ Hot Reload**: Automatic plugin detection and reload (<1s)
 - **🎨 Adaptive Rendering**: Same plugin renders as tray icon, notification, or widget
 - **🔒 Secure Storage**: Passwords stored in system Keychain/KeyStore
-- **🌐 47 CLI Commands**: Unified API for system info, network, media, clipboard, and more
+- **🌐 39 CLI Commands**: Unified API for system info, network, media, clipboard, and more
 
 ### 🎯 Revolutionary Advantages Over BitBar/Argos
 
@@ -303,7 +303,7 @@ For comprehensive documentation, see:
 
 ## 📦 Example Plugins
 
-Crossbar includes **24 example plugins** in 4 languages:
+Crossbar includes **24 example plugins** in 6 languages:
 
 ### Bash (8 plugins)
 - `cpu.10s.sh` - CPU usage with color coding
@@ -352,7 +352,11 @@ crossbar/
 │   │   ├── tray_service.dart         # System tray
 │   │   ├── hot_reload_service.dart   # File watcher
 │   │   ├── marketplace_service.dart  # Plugin discovery
-│   │   └── logger_service.dart       # Rotating logs
+│   │   ├── logger_service.dart       # Rotating logs
+│   │   ├── ipc_server.dart           # Inter-process communication
+│   │   ├── notification_service.dart # Cross-platform notifications
+│   │   ├── settings_service.dart     # User settings management
+│   │   └── widget_service.dart       # Home screen widget updates
 │   ├── ui/                     # User interface
 │   └── l10n/                   # 10 languages
 ├── bin/
@@ -558,6 +562,186 @@ Built with:
 | v2.0.0 (2027) | 1k+ | 10k+ | 20+ | 250+ |
 
 **Want to influence the roadmap?** Vote on features in [GitHub Issues](https://github.com/verseles/crossbar/issues) or join [Discussions](https://github.com/verseles/crossbar/discussions)!
+
+<details>
+<summary>📜 Changelog</summary>
+
+### [1.0.0] - 2025-12-01 🎉 Initial Release
+
+First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
+
+#### ✨ Key Features Highlights:
+- **Multi-language plugin support**: Bash, Python, Node.js, Dart, Go, Rust.
+- **BitBar-compatible text format parser** & **JSON output format** for structured data.
+- **Hot reload system** with automatic plugin detection.
+- **39 CLI Commands**: Unified API for System, Network, Device, Audio/Media, Clipboard, Utilities.
+- **Desktop Support**: System tray (Linux/Windows), Menu bar (macOS).
+- **Mobile Features**: Android (Foreground service, persistent notifications), iOS (Home screen widgets - planned).
+- **Declarative plugin configs** with auto-generated UI (25+ field types), secure storage for passwords.
+- **Comprehensive test suite**: >90% coverage for core modules, 0 analysis errors.
+- **CI/CD pipelines** with multi-platform builds (Linux, macOS, Windows, Android).
+- **Internationalization**: 10 languages supported.
+
+#### 🏗️ Architecture Overview:
+- **Core**: Plugin Manager, Script Runner, Output Parser, CLI API implementations.
+- **Models**: Plugin, PluginOutput, PluginConfig.
+- **Services**: Scheduler, Tray, Hot Reload, Marketplace, Logger, IPC, Notification, Settings, Widget.
+- **UI**: Modern Material Design 3.
+
+#### 📦 By the Numbers (v1.0.0):
+- ~6,661 lines of Dart code
+- 39 CLI commands
+- 24 example plugins (in 6 languages)
+- 10 languages (i18n)
+- 4+ platforms supported (Linux, macOS, Windows, Android, iOS - planned)
+- >90% test coverage
+- <150MB memory footprint (idle, 3 plugins)
+- <50ms plugin execution overhead
+- 41MB Linux binary size
+</details>
+
+<details>
+<summary>🗺️ Roadmap</summary>
+
+This roadmap outlines the development for Crossbar, tracking completed work, current limitations, and planned future enhancements.
+
+### ✅ v1.0.0 (Current - December 2025)
+**Completed**: All 7 phases from `MASTER_PLAN.md`.
+- Core plugin system (6 languages).
+- 39 CLI commands.
+- 4+ platform support (Linux, macOS, Windows, Android, iOS - planned).
+- Hot reload & CI/CD.
+- 24 example plugins.
+- i18n (10 languages).
+- Comprehensive documentation.
+
+**Current Limitations**:
+- macOS/iOS builds require macOS with Xcode.
+- Android APK requires SDK setup.
+- No plugin sandboxing or signing.
+- No plugin versioning in marketplace.
+- No plugin dependency management.
+- No lazy loading for large plugin lists.
+- No plugin output caching.
+
+### 🎯 v1.1.0 (Q1 2026 - Próxima Prioridade)
+**Foco**: Builds de plataforma e melhorias no marketplace.
+- 🏗️ Concluir builds para macOS/Windows/Android/iOS.
+- ⭐ Classificações e avaliações de plugins no marketplace.
+- 📊 Painel de métricas de desempenho de plugins.
+- 🛡️ Sandboxing opcional de plugins.
+- 📦 Gerenciadores de pacotes (Homebrew, Snap, winget, AUR).
+- Plugins templates/wizard, histórico de saída na UI, auto-atualizador.
+- Comandos CLI adicionais (captura de tela, papel de parede, notificações).
+
+### 🌟 Visão de Longo Prazo (v2.0.0+)
+- 🌐 Plugins remotos (execução server-side).
+- 📊 Integração OpenTelemetry e Grafana.
+- 🤖 Sugestões de plugins com IA.
+- 🔗 Plataforma de integração (webhooks, IFTTT/Zapier).
+- 🎮 Editor visual de plugins (no-code).
+- 🌍 Extensão de navegador e suporte a smartwatch.
+
+**Quer influenciar o roadmap?** Vote em funcionalidades nas [GitHub Issues](https://github.com/verseles/crossbar/issues) ou participe das [Discussions](https://github.com/verseles/crossbar/discussions)!
+</details>
+
+<details>
+<summary>🔒 Security Policy</summary>
+
+Crossbar takes security seriously. If you discover a security vulnerability, please report it responsibly.
+
+### Supported Versions
+- **1.x.x**: Fully supported for security patches.
+- **< 1.0**: Not supported.
+
+### Reporting a Vulnerability
+**DO NOT** open a public GitHub issue for security vulnerabilities.
+Instead, please report security issues by emailing: **security@verseles.com**
+Alternatively, use GitHub's private vulnerability reporting: [Security tab](https://github.com/verseles/crossbar/security).
+
+**What to Include**: Description, Impact, Steps to Reproduce, Affected Versions, Possible Fix, Your Contact.
+
+**Response Timeline**:
+- **Acknowledgment**: Within 48 hours.
+- **Initial Assessment**: Within 7 days.
+- **Resolution**: Aim for 30 days for critical vulnerabilities.
+
+### Security Considerations & Known Limitations
+- **Plugin Security**: Plugins execute with the same permissions as the running user. **Only run trusted plugins.** Review third-party plugins.
+- **No Plugin Sandboxing**: Plugins run with full user permissions.
+- **Secure Storage**: Sensitive values (type `password`) are stored using platform-specific secure storage (Keychain, Credential Manager, libsecret).
+- **Network Security**: All HTTP requests use HTTPS by default. The IPC server only listens on `localhost:48291` (not remotely accessible).
+- **File Permissions**: Plugin files should have restricted permissions (`chmod 700`).
+
+### Best Practices for Users
+- Keep Crossbar updated.
+- Review plugin source code.
+- Use secure API keys.
+- Limit plugin permissions (if possible).
+- Monitor plugin behavior.
+
+### Best Practices for Plugin Developers
+- Validate all inputs.
+- Use HTTPS.
+- Don't hardcode secrets.
+- Handle errors gracefully.
+- Minimize dependencies.
+- Document security requirements.
+
+For security concerns: **security@verseles.com**
+</details>
+
+<details>
+<summary>🤝 Contributing</summary>
+
+Thank you for considering contributing to Crossbar!
+
+### How Can I Contribute?
+
+#### Reporting Bugs
+- Check existing issues first.
+- Provide a clear description, steps to reproduce, expected behavior, screenshots, and environment details.
+
+#### Suggesting Enhancements
+- Use a clear and descriptive title.
+- Provide a detailed description and explain its usefulness.
+- List similar features in other applications.
+
+#### Pull Requests (PRs)
+1.  **Before Submitting**: Check existing PRs, create an issue for major changes, follow coding style, write/update tests, update documentation.
+2.  **PR Process**:
+    - Fork the repo and create your branch from `main`.
+    - Make changes following coding standards.
+    - Add tests (`flutter test`).
+    - Ensure all tests pass and analysis is clean (`flutter analyze`).
+    - Update documentation (README.md, CHANGELOG.md, code comments).
+    - Commit using [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`.
+    - Push to your fork and submit a pull request.
+
+### Development Setup
+
+#### Prerequisites
+- Flutter 3.35.0+
+- Dart 3.10.0+
+- Git
+- Your favorite IDE
+
+#### Setup Steps
+1.  Clone your fork: `git clone https://github.com/YOUR-USERNAME/crossbar.git`
+2.  Add upstream remote: `git remote add upstream https://github.com/verseles/crossbar.git`
+3.  Install dependencies: `flutter pub get`
+4.  Run tests: `flutter test`
+5.  Run the app: `flutter run -d linux`
+
+### Coding Standards
+- Follow [Effective Dart](https://dart.dev/guides/language/effective-dart).
+- Use `flutter analyze` and `dart format`.
+- **Test Coverage**: Aim for >90% for new code.
+- **Documentation**: Document public APIs with DartDoc.
+- **Null Safety**: Use strict null safety.
+
+See `CONTRIBUTING.md` for more details.
+</details>
 
 ## ⭐ Star History
 
