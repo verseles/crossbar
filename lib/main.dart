@@ -6,6 +6,7 @@ import 'core/plugin_manager.dart';
 import 'services/hot_reload_service.dart';
 import 'services/logger_service.dart';
 import 'services/scheduler_service.dart';
+import 'services/settings_service.dart';
 import 'ui/main_window.dart';
 
 void main(List<String> args) async {
@@ -29,6 +30,11 @@ void main(List<String> args) async {
     final logger = LoggerService();
     await logger.init();
     logger.info('Crossbar starting...');
+
+    // Initialize settings
+    final settings = SettingsService();
+    await settings.init();
+    logger.info('Settings initialized');
 
     // Discover plugins
     final pluginManager = PluginManager();
