@@ -1,9 +1,16 @@
+import 'package:crossbar/services/settings_service.dart';
+import 'package:crossbar/ui/main_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:crossbar/ui/main_window.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('MainWindow', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      SettingsService().resetForTesting();
+    });
+
     testWidgets('creates MaterialApp', (tester) async {
       await tester.pumpWidget(const MainWindow());
 
@@ -25,11 +32,11 @@ void main() {
       expect(app.darkTheme, isNotNull);
     });
 
-    testWidgets('uses system theme mode', (tester) async {
+    testWidgets('uses configured theme mode (default light)', (tester) async {
       await tester.pumpWidget(const MainWindow());
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-      expect(app.themeMode, ThemeMode.system);
+      expect(app.themeMode, ThemeMode.light);
     });
 
     testWidgets('does not show debug banner', (tester) async {
