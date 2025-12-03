@@ -73,4 +73,12 @@ $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;an
 # 7. Aceitar licenças do Flutter (Requer Android SDK pronto)
 yes | flutter doctor --android-licenses >/dev/null 2>&1
 
+# 8. GitHub CLI (gh)
+type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+&& sudo apt update >/dev/null 2>&1 \
+&& sudo apt install gh -y >/dev/null 2>&1
+
 echo "Setup concluído! Execute 'source ~/.bashrc' ou reinicie o terminal."
