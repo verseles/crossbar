@@ -15,7 +15,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pluginsTab => 'Plugins';
 
   @override
-  String get settingsTab => 'Configuracoes';
+  String get settingsTab => 'Configurações';
 
   @override
   String get marketplaceTab => 'Loja';
@@ -25,7 +25,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noPluginsDescription =>
-      'Adicione plugins no diretorio ~/.crossbar/plugins';
+      'Adicione plugins ao seu diretório ~/.crossbar/plugins';
 
   @override
   String get refreshAll => 'Atualizar Todos';
@@ -49,10 +49,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get remove => 'Remover';
 
   @override
-  String get lastRun => 'Ultima Execucao';
+  String get lastRun => 'Última Execução';
 
   @override
-  String get refreshInterval => 'Intervalo de Atualizacao';
+  String get refreshInterval => 'Intervalo de Atualização';
 
   @override
   String get seconds => 'segundos';
@@ -91,7 +91,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get installed => 'Instalado';
 
   @override
-  String get notInstalled => 'Nao Instalado';
+  String get notInstalled => 'Não Instalado';
 
   @override
   String get language => 'Idioma';
@@ -109,37 +109,37 @@ class AppLocalizationsPt extends AppLocalizations {
   String get systemTheme => 'Sistema';
 
   @override
-  String get notifications => 'Notificacoes';
+  String get notifications => 'Notificações';
 
   @override
-  String get enableNotifications => 'Ativar Notificacoes';
+  String get enableNotifications => 'Ativar Notificações';
 
   @override
-  String get startOnBoot => 'Iniciar com o Sistema';
+  String get startOnBoot => 'Iniciar no Boot';
 
   @override
   String get minimizeToTray => 'Minimizar para Bandeja';
 
   @override
-  String get pluginsDirectory => 'Diretorio de Plugins';
+  String get pluginsDirectory => 'Diretório de Plugins';
 
   @override
-  String get openPluginsDirectory => 'Abrir Diretorio de Plugins';
+  String get openPluginsDirectory => 'Abrir Diretório de Plugins';
 
   @override
   String get about => 'Sobre';
 
   @override
-  String get version => 'Versao';
+  String get version => 'Versão';
 
   @override
-  String get checkForUpdates => 'Verificar Atualizacoes';
+  String get checkForUpdates => 'Verificar Atualizações';
 
   @override
-  String get noUpdatesAvailable => 'Nenhuma atualizacao disponivel';
+  String get noUpdatesAvailable => 'Nenhuma atualização disponível';
 
   @override
-  String get updateAvailable => 'Atualizacao disponivel';
+  String get updateAvailable => 'Atualização disponível';
 
   @override
   String get errorOccurred => 'Ocorreu um erro';
@@ -196,20 +196,41 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productivity => 'Produtividade';
 
   @override
-  String get finance => 'Financas';
+  String get finance => 'Finanças';
 
   @override
   String get weather => 'Clima';
 
   @override
-  String get media => 'Midia';
+  String get media => 'Mídia';
 
   @override
   String get social => 'Social';
 
   @override
-  String get utilities => 'Utilitarios';
+  String get utilities => 'Utilitários';
 
   @override
   String get other => 'Outros';
+
+  @override
+  String get appearance => 'Aparência';
+
+  @override
+  String get behavior => 'Comportamento';
+
+  @override
+  String get license => 'Licença';
+
+  @override
+  String get useDarkTheme => 'Usar tema escuro';
+
+  @override
+  String get launchOnLogin => 'Iniciar Crossbar no login';
+
+  @override
+  String get keepInTray => 'Manter ícone na bandeja ao minimizar';
+
+  @override
+  String get defaultRefreshInterval => 'Intervalo Padrão de Atualização';
 }

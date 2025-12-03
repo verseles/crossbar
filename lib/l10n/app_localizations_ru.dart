@@ -115,16 +115,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get enableNotifications => 'Включить уведомления';
 
   @override
-  String get startOnBoot => 'Запуск при загрузке';
+  String get startOnBoot => 'Запускать при загрузке';
 
   @override
-  String get minimizeToTray => 'Свернуть в трей';
+  String get minimizeToTray => 'Сворачивать в трей';
 
   @override
-  String get pluginsDirectory => 'Plugins Directory';
+  String get pluginsDirectory => 'Директория плагинов';
 
   @override
-  String get openPluginsDirectory => 'Open Plugins Directory';
+  String get openPluginsDirectory => 'Открыть директорию';
 
   @override
   String get about => 'О программе';
@@ -133,13 +133,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get version => 'Версия';
 
   @override
-  String get checkForUpdates => 'Check for Updates';
+  String get checkForUpdates => 'Проверить обновления';
 
   @override
-  String get noUpdatesAvailable => 'No updates available';
+  String get noUpdatesAvailable => 'Нет обновлений';
 
   @override
-  String get updateAvailable => 'Update available';
+  String get updateAvailable => 'Доступно обновление';
 
   @override
   String get errorOccurred => 'Произошла ошибка';
@@ -154,16 +154,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noResults => 'Нет результатов';
 
   @override
-  String get allLanguages => 'All Languages';
+  String get allLanguages => 'Все языки';
 
   @override
-  String get allCategories => 'All Categories';
+  String get allCategories => 'Все категории';
 
   @override
-  String get popular => 'Popular';
+  String get popular => 'Популярные';
 
   @override
-  String get recent => 'Recent';
+  String get recent => 'Недавние';
 
   @override
   String get bash => 'Bash';
@@ -184,32 +184,53 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rust => 'Rust';
 
   @override
-  String get system => 'System';
+  String get system => 'Система';
 
   @override
-  String get network => 'Network';
+  String get network => 'Сеть';
 
   @override
-  String get development => 'Development';
+  String get development => 'Разработка';
 
   @override
-  String get productivity => 'Productivity';
+  String get productivity => 'Продуктивность';
 
   @override
-  String get finance => 'Finance';
+  String get finance => 'Финансы';
 
   @override
-  String get weather => 'Weather';
+  String get weather => 'Погода';
 
   @override
-  String get media => 'Media';
+  String get media => 'Медиа';
 
   @override
-  String get social => 'Social';
+  String get social => 'Социальные';
 
   @override
-  String get utilities => 'Utilities';
+  String get utilities => 'Утилиты';
 
   @override
-  String get other => 'Other';
+  String get other => 'Другое';
+
+  @override
+  String get appearance => 'Внешний вид';
+
+  @override
+  String get behavior => 'Поведение';
+
+  @override
+  String get license => 'Лицензия';
+
+  @override
+  String get useDarkTheme => 'Использовать темную тему';
+
+  @override
+  String get launchOnLogin => 'Запускать Crossbar при входе';
+
+  @override
+  String get keepInTray => 'Держать в трее при сворачивании';
+
+  @override
+  String get defaultRefreshInterval => 'Интервал обновления по умолчанию';
 }

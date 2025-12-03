@@ -212,4 +212,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get other => 'Other';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get behavior => 'Behavior';
+
+  @override
+  String get license => 'License';
+
+  @override
+  String get useDarkTheme => 'Use dark theme';
+
+  @override
+  String get launchOnLogin => 'Launch Crossbar on login';
+
+  @override
+  String get keepInTray => 'Keep icon in tray when minimized';
+
+  @override
+  String get defaultRefreshInterval => 'Default Refresh Interval';
 }

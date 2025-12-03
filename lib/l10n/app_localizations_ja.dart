@@ -49,7 +49,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get remove => '削除';
 
   @override
-  String get lastRun => '最終実行';
+  String get lastRun => '前回の実行';
 
   @override
   String get refreshInterval => '更新間隔';
@@ -112,7 +112,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notifications => '通知';
 
   @override
-  String get enableNotifications => '通知を有効にする';
+  String get enableNotifications => '通知を有効化';
 
   @override
   String get startOnBoot => '起動時に開始';
@@ -121,25 +121,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get minimizeToTray => 'トレイに最小化';
 
   @override
-  String get pluginsDirectory => 'Plugins Directory';
+  String get pluginsDirectory => 'プラグインディレクトリ';
 
   @override
-  String get openPluginsDirectory => 'Open Plugins Directory';
+  String get openPluginsDirectory => 'プラグインディレクトリを開く';
 
   @override
-  String get about => 'について';
+  String get about => '情報';
 
   @override
   String get version => 'バージョン';
 
   @override
-  String get checkForUpdates => 'Check for Updates';
+  String get checkForUpdates => '更新を確認';
 
   @override
-  String get noUpdatesAvailable => 'No updates available';
+  String get noUpdatesAvailable => '更新はありません';
 
   @override
-  String get updateAvailable => 'Update available';
+  String get updateAvailable => '更新があります';
 
   @override
   String get errorOccurred => 'エラーが発生しました';
@@ -154,16 +154,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noResults => '結果なし';
 
   @override
-  String get allLanguages => 'All Languages';
+  String get allLanguages => 'すべての言語';
 
   @override
-  String get allCategories => 'All Categories';
+  String get allCategories => 'すべてのカテゴリ';
 
   @override
-  String get popular => 'Popular';
+  String get popular => '人気';
 
   @override
-  String get recent => 'Recent';
+  String get recent => '最新';
 
   @override
   String get bash => 'Bash';
@@ -184,32 +184,53 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rust => 'Rust';
 
   @override
-  String get system => 'System';
+  String get system => 'システム';
 
   @override
-  String get network => 'Network';
+  String get network => 'ネットワーク';
 
   @override
-  String get development => 'Development';
+  String get development => '開発';
 
   @override
-  String get productivity => 'Productivity';
+  String get productivity => '生産性';
 
   @override
-  String get finance => 'Finance';
+  String get finance => '金融';
 
   @override
-  String get weather => 'Weather';
+  String get weather => '天気';
 
   @override
-  String get media => 'Media';
+  String get media => 'メディア';
 
   @override
-  String get social => 'Social';
+  String get social => 'ソーシャル';
 
   @override
-  String get utilities => 'Utilities';
+  String get utilities => 'ユーティリティ';
 
   @override
-  String get other => 'Other';
+  String get other => 'その他';
+
+  @override
+  String get appearance => '外観';
+
+  @override
+  String get behavior => '動作';
+
+  @override
+  String get license => 'ライセンス';
+
+  @override
+  String get useDarkTheme => 'ダークテーマを使用';
+
+  @override
+  String get launchOnLogin => 'ログイン時にCrossbarを起動';
+
+  @override
+  String get keepInTray => '最小化時にトレイにアイコンを表示';
+
+  @override
+  String get defaultRefreshInterval => 'デフォルト更新間隔';
 }
