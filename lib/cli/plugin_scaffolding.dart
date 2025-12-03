@@ -74,14 +74,13 @@ class PluginScaffolding {
         Platform.environment['USERPROFILE'] ??
         '.';
     final pluginsDir = outputDir ?? path.join(homeDir, '.crossbar', 'plugins');
-    final langDir = path.join(pluginsDir, normalizedLang);
 
     // Create directory if needed
-    await Directory(langDir).create(recursive: true);
+    await Directory(pluginsDir).create(recursive: true);
 
     // Generate plugin content
     final content = _generateTemplate(normalizedLang, normalizedType, pluginName);
-    final filePath = path.join(langDir, fileName);
+    final filePath = path.join(pluginsDir, fileName);
 
     // Write plugin file
     await File(filePath).writeAsString(content);
@@ -321,30 +320,29 @@ class PluginInstaller {
           Platform.environment['USERPROFILE'] ??
           '.';
       final pluginsDir = path.join(homeDir, '.crossbar', 'plugins');
-      final tempDir = path.join(homeDir, '.crossbar', 'temp');
 
-      // Create temp directory
-      await Directory(tempDir).create(recursive: true);
+      // Ensure plugins dir exists
+      await Directory(pluginsDir).create(recursive: true);
 
-      // Clone repository
-      final clonePath = path.join(tempDir, repo);
+      // Target directory for the repo
+      final targetDir = path.join(pluginsDir, repo);
 
       // Remove existing clone if any
-      if (await Directory(clonePath).exists()) {
-        await Directory(clonePath).delete(recursive: true);
+      if (await Directory(targetDir).exists()) {
+        await Directory(targetDir).delete(recursive: true);
       }
 
       final cloneResult = await Process.run(
         'git',
-        ['clone', '--depth', '1', url, clonePath],
+        ['clone', '--depth', '1', url, targetDir],
       );
 
       if (cloneResult.exitCode != 0) {
         return null;
       }
 
-      // Find plugin files in cloned repo
-      final cloneDir = Directory(clonePath);
+      // Find plugin files in cloned repo to validate and chmod
+      final cloneDir = Directory(targetDir);
       final pluginFiles = <File>[];
 
       await for (final entity in cloneDir.list(recursive: true)) {
@@ -361,53 +359,19 @@ class PluginInstaller {
       }
 
       if (pluginFiles.isEmpty) {
-        // Clean up
-        await Directory(clonePath).delete(recursive: true);
+        // Clean up - no valid plugins found
+        await Directory(targetDir).delete(recursive: true);
         return null;
       }
 
-      // Detect language from first plugin file
-      final firstPlugin = pluginFiles.first;
-      final ext = path.extension(firstPlugin.path).toLowerCase();
-      final langMap = {
-        '.sh': 'bash',
-        '.py': 'python',
-        '.js': 'node',
-        '.dart': 'dart',
-        '.go': 'go',
-        '.rs': 'rust',
-      };
-      final lang = langMap[ext] ?? 'bash';
-
-      // Create language directory
-      final langDir = path.join(pluginsDir, lang);
-      await Directory(langDir).create(recursive: true);
-
-      // Copy plugin files
-      String? installedPath;
-      for (final pluginFile in pluginFiles) {
-        final fileName = path.basename(pluginFile.path);
-        final destPath = path.join(langDir, fileName);
-        await pluginFile.copy(destPath);
-
-        // Make executable
-        if (Platform.isLinux || Platform.isMacOS) {
-          await Process.run('chmod', ['+x', destPath]);
+      // Make executable
+      if (Platform.isLinux || Platform.isMacOS) {
+        for (final file in pluginFiles) {
+          await Process.run('chmod', ['+x', file.path]);
         }
-
-        // Copy config file if exists
-        final configPath = '${pluginFile.path}.config.json';
-        if (await File(configPath).exists()) {
-          await File(configPath).copy('$destPath.config.json');
-        }
-
-        installedPath ??= destPath;
       }
 
-      // Clean up temp directory
-      await Directory(clonePath).delete(recursive: true);
-
-      return installedPath;
+      return targetDir;
     } catch (e) {
       return null;
     }

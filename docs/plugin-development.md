@@ -53,8 +53,8 @@ The fastest way to create a plugin:
 crossbar init --lang python --type monitor --name my-plugin
 
 # Output:
-# Plugin created: ~/.crossbar/plugins/python/my-plugin.10s.py
-# Config file: ~/.crossbar/plugins/python/my-plugin.10s.py.config.json
+# Plugin created: ~/.crossbar/plugins/my-plugin.10s.py
+# Config file: ~/.crossbar/plugins/my-plugin.10s.py.config.json
 ```
 
 ### Available Options
@@ -117,8 +117,8 @@ Plugins follow this naming pattern:
 
 Crossbar searches for plugins in:
 
-1. `~/.crossbar/plugins/` (user plugins)
-2. `~/.crossbar/plugins/<language>/` (language-organized)
+1. `~/.crossbar/plugins/` (user plugins - flat structure)
+2. `~/.crossbar/plugins/<subdirectory>/` (git repositories or organized folders, 1 level deep)
 3. Application bundle's `plugins/` directory (bundled examples)
 
 ---

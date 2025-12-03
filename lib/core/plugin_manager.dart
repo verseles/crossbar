@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -47,7 +48,14 @@ class PluginManager {
 
   List<Plugin> get plugins => List.unmodifiable(_plugins);
 
+  String? _customPluginsDirectory;
+
+  @visibleForTesting
+  set customPluginsDirectory(String? path) => _customPluginsDirectory = path;
+
   Future<String> get pluginsDirectory async {
+    if (_customPluginsDirectory != null) return _customPluginsDirectory!;
+
     if (Platform.isAndroid || Platform.isIOS) {
       // Mobile: use app documents directory
       final appDir = await getApplicationDocumentsDirectory();
@@ -71,15 +79,20 @@ class PluginManager {
       return;
     }
 
-    for (final lang in supportedLanguages) {
-      final langDir = Directory(path.join(pluginsDir.path, lang));
-      if (!await langDir.exists()) continue;
-
-      await for (final entity in langDir.list()) {
-        if (entity is File && _isExecutableFile(entity.path)) {
-          final plugin = await _createPluginFromFile(entity);
-          if (plugin != null) {
-            _plugins.add(plugin);
+    await for (final entity in pluginsDir.list()) {
+      if (entity is File && _isExecutableFile(entity.path)) {
+        final plugin = await _createPluginFromFile(entity);
+        if (plugin != null) {
+          _plugins.add(plugin);
+        }
+      } else if (entity is Directory) {
+        // Check subdirectories (git repos) but only 1 level deep
+        await for (final subEntity in entity.list()) {
+          if (subEntity is File && _isExecutableFile(subEntity.path)) {
+            final plugin = await _createPluginFromFile(subEntity);
+            if (plugin != null) {
+              _plugins.add(plugin);
+            }
           }
         }
       }

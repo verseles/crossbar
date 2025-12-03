@@ -136,14 +136,14 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 39. ~~`lib/core/api/utils_api.dart` - Utility command implementations~~ ✅ COMPLETED
 
 ### ✅ Completed Example Plugins (8 plugins) - Sprint 5
-40. ~~`plugins/go/clock.5s.go`~~ ✅
-41. ~~`plugins/go/cpu.10s.go`~~ ✅
-42. ~~`plugins/go/battery.30s.go`~~ ✅
-43. ~~`plugins/go/site-check.1m.go`~~ ✅
-44. ~~`plugins/rust/clock.5s.rs`~~ ✅
-45. ~~`plugins/rust/cpu.10s.rs`~~ ✅
-46. ~~`plugins/rust/battery.30s.rs`~~ ✅
-47. ~~`plugins/rust/site-check.1m.rs`~~ ✅
+40. ~~`plugins/clock.5s.go`~~ ✅
+41. ~~`plugins/cpu.10s.go`~~ ✅
+42. ~~`plugins/battery.30s.go`~~ ✅
+43. ~~`plugins/site-check.1m.go`~~ ✅
+44. ~~`plugins/clock.5s.rs`~~ ✅
+45. ~~`plugins/cpu.10s.rs`~~ ✅
+46. ~~`plugins/battery.30s.rs`~~ ✅
+47. ~~`plugins/site-check.1m.rs`~~ ✅
 
 ### ✅ Completed Services (1 service) - Sprint 7
 48. ~~`lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication~~ ✅
