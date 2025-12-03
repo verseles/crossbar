@@ -87,6 +87,10 @@ void main() {
       });
 
       test('setVolume clamps values to 0-100', () async {
+        // Get current volume to restore later
+        final currentVolume = await api.getVolume();
+        addTearDown(() => api.setVolume(currentVolume));
+
         // These should not throw, just clamp
         final result1 = await api.setVolume(-10);
         final result2 = await api.setVolume(150);
@@ -100,6 +104,10 @@ void main() {
       });
 
       test('toggleMute returns boolean', () async {
+        // Restore mute state after test
+        final currentMute = await api.isMuted();
+        addTearDown(() => api.setMute(currentMute));
+
         final result = await api.toggleMute();
         expect(result, isA<bool>());
       });
@@ -148,6 +156,10 @@ void main() {
       });
 
       test('setBrightness clamps values to 0-100', () async {
+        // Get current brightness to restore later
+        final currentBrightness = await api.getBrightness();
+        addTearDown(() => api.setBrightness(currentBrightness));
+
         // These should not throw, just clamp
         final result1 = await api.setBrightness(-10);
         final result2 = await api.setBrightness(150);

@@ -117,14 +117,30 @@ void main() {
     });
 
     test('audio volume set', () async {
+      // 1. Get current volume
+      final getOutput = await _captureOutput(() => handleCliCommand(['audio', 'volume']));
+      final currentVolumeStr = getOutput.stdout.trim().replaceAll('%', '');
+      final currentVolume = int.tryParse(currentVolumeStr);
+
+      // 2. Set volume
       // We don't check success, just that code runs
       final output = await _captureOutput(() => handleCliCommand(['audio', 'volume', '50']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
+
+      // 3. Restore volume
+      if (currentVolume != null) {
+        await _captureOutput(() => handleCliCommand(['audio', 'volume', '$currentVolume']));
+      }
     });
 
     test('audio mute toggle', () async {
       final output = await _captureOutput(() => handleCliCommand(['audio', 'mute']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
+
+      // Restore (toggle again)
+      if (output.exitCode == 0) {
+        await _captureOutput(() => handleCliCommand(['audio', 'mute']));
+      }
     });
 
     test('audio mute on', () async {
@@ -186,7 +202,18 @@ void main() {
     });
 
     test('screen brightness set', () async {
+      // 1. Get current brightness
+      final getOutput = await _captureOutput(() => handleCliCommand(['screen', 'brightness']));
+      final currentBrightnessStr = getOutput.stdout.trim().replaceAll('%', '');
+      final currentBrightness = int.tryParse(currentBrightnessStr);
+
+      // 2. Set brightness
       await _captureOutput(() => handleCliCommand(['screen', 'brightness', '50']));
+
+      // 3. Restore brightness
+      if (currentBrightness != null) {
+        await _captureOutput(() => handleCliCommand(['screen', 'brightness', '$currentBrightness']));
+      }
     });
 
     test('screen size', () async {
