@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/cli/cli_handler.dart';
@@ -11,18 +10,21 @@ void main() {
   group('CLI Handler - Version & Help', () {
     test('--version returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['--version']));
+
       expect(output.stdout, contains('Crossbar version'));
       expect(output.exitCode, equals(0));
     });
 
     test('-v returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['-v']));
+
       expect(output.stdout, contains('Crossbar version'));
       expect(output.exitCode, equals(0));
     });
 
     test('--help returns usage information', () async {
       final output = await _captureOutput(() => handleCliCommand(['--help']));
+
       expect(output.stdout, contains('Usage:'));
       expect(output.stdout, contains('Audio Controls'));
       expect(output.exitCode, equals(0));
@@ -30,6 +32,7 @@ void main() {
 
     test('empty args prints usage and returns error', () async {
       final output = await _captureOutput(() => handleCliCommand([]));
+
       expect(output.stdout, contains('Usage:'));
       expect(output.exitCode, equals(1));
     });

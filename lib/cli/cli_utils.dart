@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart' as crypto;
-
 /// Convert a Map to XML format
 String mapToXml(Map<String, dynamic> data, {String root = 'crossbar'}) {
   final buffer = StringBuffer();

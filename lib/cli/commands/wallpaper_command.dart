@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import '../../core/api/utils_api.dart';
 import 'base_command.dart';
 
