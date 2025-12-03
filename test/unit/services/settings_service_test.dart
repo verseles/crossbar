@@ -22,7 +22,7 @@ void main() {
       expect(settingsService.darkMode, false);
       expect(settingsService.startWithSystem, false);
       expect(settingsService.showInTray, true);
-      expect(settingsService.language, 'en');
+      expect(settingsService.language, 'system');
     });
 
     test('Values are persisted', () async {

@@ -25,13 +25,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noPluginsDescription =>
-      'Fugen Sie Plugins zum Verzeichnis ~/.crossbar/plugins hinzu';
+      'Fügen Sie Plugins in das Verzeichnis ~/.crossbar/plugins ein';
 
   @override
-  String get refreshAll => 'Alle Aktualisieren';
+  String get refreshAll => 'Alle aktualisieren';
 
   @override
-  String get addPlugin => 'Plugin Hinzufugen';
+  String get addPlugin => 'Plugin hinzufügen';
 
   @override
   String get enabled => 'Aktiviert';
@@ -40,7 +40,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get disabled => 'Deaktiviert';
 
   @override
-  String get runNow => 'Jetzt Ausfuhren';
+  String get runNow => 'Jetzt ausführen';
 
   @override
   String get configure => 'Konfigurieren';
@@ -49,7 +49,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get remove => 'Entfernen';
 
   @override
-  String get lastRun => 'Letzte Ausfuhrung';
+  String get lastRun => 'Letzte Ausführung';
 
   @override
   String get refreshInterval => 'Aktualisierungsintervall';
@@ -76,7 +76,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get apply => 'Anwenden';
 
   @override
-  String get search => 'Suchen';
+  String get search => 'Suche';
 
   @override
   String get install => 'Installieren';
@@ -91,13 +91,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get installed => 'Installiert';
 
   @override
-  String get notInstalled => 'Nicht Installiert';
+  String get notInstalled => 'Nicht installiert';
 
   @override
   String get language => 'Sprache';
 
   @override
-  String get theme => 'Thema';
+  String get theme => 'Design';
 
   @override
   String get lightTheme => 'Hell';
@@ -112,34 +112,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get notifications => 'Benachrichtigungen';
 
   @override
-  String get enableNotifications => 'Benachrichtigungen Aktivieren';
+  String get enableNotifications => 'Benachrichtigungen aktivieren';
 
   @override
-  String get startOnBoot => 'Bei Systemstart Starten';
+  String get startOnBoot => 'Beim Start ausführen';
 
   @override
-  String get minimizeToTray => 'In Taskleiste Minimieren';
+  String get minimizeToTray => 'In System-Tray minimieren';
 
   @override
   String get pluginsDirectory => 'Plugin-Verzeichnis';
 
   @override
-  String get openPluginsDirectory => 'Plugin-Verzeichnis Offnen';
+  String get openPluginsDirectory => 'Plugin-Verzeichnis öffnen';
 
   @override
-  String get about => 'Uber';
+  String get about => 'Über';
 
   @override
   String get version => 'Version';
 
   @override
-  String get checkForUpdates => 'Nach Updates Suchen';
+  String get checkForUpdates => 'Auf Updates prüfen';
 
   @override
-  String get noUpdatesAvailable => 'No updates available';
+  String get noUpdatesAvailable => 'Keine Updates verfügbar';
 
   @override
-  String get updateAvailable => 'Update available';
+  String get updateAvailable => 'Update verfügbar';
 
   @override
   String get errorOccurred => 'Ein Fehler ist aufgetreten';
@@ -154,16 +154,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noResults => 'Keine Ergebnisse';
 
   @override
-  String get allLanguages => 'All Languages';
+  String get allLanguages => 'Alle Sprachen';
 
   @override
-  String get allCategories => 'All Categories';
+  String get allCategories => 'Alle Kategorien';
 
   @override
-  String get popular => 'Popular';
+  String get popular => 'Beliebt';
 
   @override
-  String get recent => 'Recent';
+  String get recent => 'Kürzlich';
 
   @override
   String get bash => 'Bash';
@@ -187,29 +187,50 @@ class AppLocalizationsDe extends AppLocalizations {
   String get system => 'System';
 
   @override
-  String get network => 'Network';
+  String get network => 'Netzwerk';
 
   @override
-  String get development => 'Development';
+  String get development => 'Entwicklung';
 
   @override
-  String get productivity => 'Productivity';
+  String get productivity => 'Produktivität';
 
   @override
-  String get finance => 'Finance';
+  String get finance => 'Finanzen';
 
   @override
-  String get weather => 'Weather';
+  String get weather => 'Wetter';
 
   @override
-  String get media => 'Media';
+  String get media => 'Medien';
 
   @override
-  String get social => 'Social';
+  String get social => 'Sozial';
 
   @override
-  String get utilities => 'Utilities';
+  String get utilities => 'Dienstprogramme';
 
   @override
-  String get other => 'Other';
+  String get other => 'Andere';
+
+  @override
+  String get appearance => 'Aussehen';
+
+  @override
+  String get behavior => 'Verhalten';
+
+  @override
+  String get license => 'Lizenz';
+
+  @override
+  String get useDarkTheme => 'Dunkles Design verwenden';
+
+  @override
+  String get launchOnLogin => 'Crossbar beim Login starten';
+
+  @override
+  String get keepInTray => 'Symbol im Tray behalten';
+
+  @override
+  String get defaultRefreshInterval => 'Standard-Aktualisierungsintervall';
 }

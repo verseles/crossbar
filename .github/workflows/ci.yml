@@ -43,6 +43,9 @@ jobs:
             sudo apt-get install -y lcov
           fi
 
+          # Remove generated files from coverage to match codecov.yml
+          lcov --remove coverage/lcov.info 'lib/l10n/*' 'lib/models/*.g.dart' '**/generated_plugin_registrant.dart' -o coverage/lcov.info --ignore-errors unused
+
           # Calculate coverage percentage
           COVERAGE=$(lcov --summary coverage/lcov.info 2>/dev/null | grep "lines" | grep -oP '\d+\.\d+(?=%)')
 
