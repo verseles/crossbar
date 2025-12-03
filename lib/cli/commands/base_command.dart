@@ -1,3 +1,5 @@
+import 'dart:async';
+
 /// Abstract base class for CLI commands
 abstract class CliCommand {
   /// The command name (e.g., 'audio', 'cpu')
