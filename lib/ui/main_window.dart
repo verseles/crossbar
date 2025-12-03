@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'tabs/marketplace_tab.dart';
@@ -50,6 +51,46 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Mobile Layout (Android/iOS)
+    if (Platform.isAndroid || Platform.isIOS) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Crossbar'),
+          centerTitle: true,
+          notificationPredicate: (notification) => notification.depth == 1,
+          scrolledUnderElevation: 4.0,
+          shadowColor: Theme.of(context).shadowColor,
+        ),
+        body: _tabs[_currentIndex],
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.extension_outlined),
+              selectedIcon: Icon(Icons.extension),
+              label: 'Plugins',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.store_outlined),
+              selectedIcon: Icon(Icons.store),
+              label: 'Marketplace',
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Desktop Layout (Linux/Windows/macOS)
     return Scaffold(
       body: Row(
         children: [
