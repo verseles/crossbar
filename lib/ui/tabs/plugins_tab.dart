@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/plugin_manager.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
 
 class PluginsTab extends StatefulWidget {
@@ -39,14 +40,15 @@ class _PluginsTabState extends State<PluginsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plugins'),
+        title: Text(l10n.pluginsTab),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _isLoading ? null : _refreshPlugins,
-            tooltip: 'Refresh plugins',
+            tooltip: l10n.refreshAll,
           ),
         ],
       ),
@@ -56,7 +58,7 @@ class _PluginsTabState extends State<PluginsTab> {
           _showAddPluginDialog(context);
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Plugin'),
+        label: Text(l10n.addPlugin),
       ),
     );
   }
@@ -92,6 +94,7 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -103,12 +106,12 @@ class _PluginsTabState extends State<PluginsTab> {
           ),
           const SizedBox(height: 24),
           Text(
-            'No plugins found',
+            l10n.noPluginsFound,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Place your plugins in ~/.crossbar/plugins/',
+            l10n.noPluginsDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
@@ -119,7 +122,7 @@ class _PluginsTabState extends State<PluginsTab> {
               _showAddPluginDialog(context);
             },
             icon: const Icon(Icons.add),
-            label: const Text('Add Plugin'),
+            label: Text(l10n.addPlugin),
           ),
         ],
       ),
@@ -127,10 +130,11 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   void _showAddPluginDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Plugin'),
+        title: Text(l10n.addPlugin),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,12 +147,12 @@ class _PluginsTabState extends State<PluginsTab> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _LanguageChip(label: 'Bash', extension: '.sh'),
-                _LanguageChip(label: 'Python', extension: '.py'),
-                _LanguageChip(label: 'Node.js', extension: '.js'),
-                _LanguageChip(label: 'Dart', extension: '.dart'),
-                _LanguageChip(label: 'Go', extension: '.go'),
-                _LanguageChip(label: 'Rust', extension: '.rs'),
+                _LanguageChip(label: l10n.bash, extension: '.sh'),
+                _LanguageChip(label: l10n.python, extension: '.py'),
+                _LanguageChip(label: l10n.node, extension: '.js'),
+                _LanguageChip(label: l10n.dart, extension: '.dart'),
+                _LanguageChip(label: l10n.go, extension: '.go'),
+                _LanguageChip(label: l10n.rust, extension: '.rs'),
               ],
             ),
             const SizedBox(height: 16),
@@ -174,7 +178,7 @@ class _PluginsTabState extends State<PluginsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -182,6 +186,7 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   void _showPluginDetails(BuildContext context, Plugin plugin) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => Padding(
@@ -221,17 +226,17 @@ class _PluginsTabState extends State<PluginsTab> {
             _DetailRow(label: 'Path', value: plugin.path),
             _DetailRow(label: 'Interpreter', value: plugin.interpreter),
             _DetailRow(
-              label: 'Refresh',
+              label: l10n.refreshInterval,
               value: _formatInterval(plugin.refreshInterval),
             ),
             if (plugin.lastRun != null)
               _DetailRow(
-                label: 'Last Run',
+                label: l10n.lastRun,
                 value: _formatDateTime(plugin.lastRun!),
               ),
             if (plugin.lastError != null)
               _DetailRow(
-                label: 'Last Error',
+                label: l10n.errorOccurred,
                 value: plugin.lastError!,
                 isError: true,
               ),
@@ -241,7 +246,7 @@ class _PluginsTabState extends State<PluginsTab> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+                  child: Text(l10n.cancel),
                 ),
                 const SizedBox(width: 8),
                 FilledButton.icon(
@@ -251,7 +256,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     setState(() {});
                   },
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Run Now'),
+                  label: Text(l10n.runNow),
                 ),
               ],
             ),
