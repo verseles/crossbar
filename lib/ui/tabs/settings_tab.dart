@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/settings_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -8,11 +9,6 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  bool _startWithSystem = false;
-  bool _showInTray = true;
-  bool _darkMode = false;
-  String _selectedLanguage = 'en';
-
   final List<Map<String, String>> _languages = [
     {'code': 'en', 'name': 'English'},
     {'code': 'pt_BR', 'name': 'Portugu\u00eas (Brasil)'},
@@ -28,119 +24,119 @@ class _SettingsTabState extends State<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSection(
-            title: 'Appearance',
-            icon: Icons.palette,
+    return ListenableBuilder(
+      listenable: SettingsService(),
+      builder: (context, _) {
+        final settings = SettingsService();
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Settings'),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              SwitchListTile(
-                title: const Text('Dark Mode'),
-                subtitle: const Text('Use dark theme'),
-                value: _darkMode,
-                onChanged: (value) {
-                  setState(() {
-                    _darkMode = value;
-                  });
-                },
+              _buildSection(
+                title: 'Appearance',
+                icon: Icons.palette,
+                children: [
+                  SwitchListTile(
+                    title: const Text('Dark Mode'),
+                    subtitle: const Text('Use dark theme'),
+                    value: settings.darkMode,
+                    onChanged: (value) {
+                      settings.darkMode = value;
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Language'),
+                    subtitle: Text(_languages.firstWhere(
+                      (l) => l['code'] == settings.language,
+                      orElse: () => {'name': 'English'},
+                    )['name']!),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showLanguageDialog(),
+                  ),
+                ],
               ),
-              ListTile(
-                title: const Text('Language'),
-                subtitle: Text(_languages.firstWhere(
-                  (l) => l['code'] == _selectedLanguage,
-                  orElse: () => {'name': 'English'},
-                )['name']!),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showLanguageDialog(),
+              const SizedBox(height: 16),
+              _buildSection(
+                title: 'Behavior',
+                icon: Icons.tune,
+                children: [
+                  SwitchListTile(
+                    title: const Text('Start with system'),
+                    subtitle: const Text('Launch Crossbar on login'),
+                    value: settings.startWithSystem,
+                    onChanged: (value) {
+                      settings.startWithSystem = value;
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('Show in system tray'),
+                    subtitle: const Text('Keep icon in tray when minimized'),
+                    value: settings.showInTray,
+                    onChanged: (value) {
+                      settings.showInTray = value;
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSection(
+                title: 'Plugins',
+                icon: Icons.extension,
+                children: [
+                  ListTile(
+                    title: const Text('Plugins Directory'),
+                    subtitle: const Text('~/.crossbar/plugins'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.folder_open),
+                      onPressed: () {
+                        // TODO: Open folder
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Default Refresh Interval'),
+                    subtitle: const Text('5 minutes'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      // TODO: Show interval picker
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSection(
+                title: 'About',
+                icon: Icons.info,
+                children: [
+                  ListTile(
+                    title: const Text('Version'),
+                    subtitle: const Text('1.0.0'),
+                  ),
+                  ListTile(
+                    title: const Text('License'),
+                    subtitle: const Text('AGPLv3'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      _showLicenseDialog();
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('GitHub'),
+                    subtitle: const Text('verseles/crossbar'),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () {
+                      // TODO: Open GitHub
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _buildSection(
-            title: 'Behavior',
-            icon: Icons.tune,
-            children: [
-              SwitchListTile(
-                title: const Text('Start with system'),
-                subtitle: const Text('Launch Crossbar on login'),
-                value: _startWithSystem,
-                onChanged: (value) {
-                  setState(() {
-                    _startWithSystem = value;
-                  });
-                },
-              ),
-              SwitchListTile(
-                title: const Text('Show in system tray'),
-                subtitle: const Text('Keep icon in tray when minimized'),
-                value: _showInTray,
-                onChanged: (value) {
-                  setState(() {
-                    _showInTray = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            title: 'Plugins',
-            icon: Icons.extension,
-            children: [
-              ListTile(
-                title: const Text('Plugins Directory'),
-                subtitle: const Text('~/.crossbar/plugins'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.folder_open),
-                  onPressed: () {
-                    // TODO: Open folder
-                  },
-                ),
-              ),
-              ListTile(
-                title: const Text('Default Refresh Interval'),
-                subtitle: const Text('5 minutes'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Show interval picker
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            title: 'About',
-            icon: Icons.info,
-            children: [
-              ListTile(
-                title: const Text('Version'),
-                subtitle: const Text('1.0.0'),
-              ),
-              ListTile(
-                title: const Text('License'),
-                subtitle: const Text('AGPLv3'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  _showLicenseDialog();
-                },
-              ),
-              ListTile(
-                title: const Text('GitHub'),
-                subtitle: const Text('verseles/crossbar'),
-                trailing: const Icon(Icons.open_in_new),
-                onTap: () {
-                  // TODO: Open GitHub
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -174,6 +170,7 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 
   void _showLanguageDialog() {
+    final settings = SettingsService();
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -188,11 +185,9 @@ class _SettingsTabState extends State<SettingsTab> {
               return RadioListTile<String>(
                 title: Text(lang['name']!),
                 value: lang['code']!,
-                groupValue: _selectedLanguage,
+                groupValue: settings.language,
                 onChanged: (value) {
-                  setState(() {
-                    _selectedLanguage = value!;
-                  });
+                  settings.language = value!;
                   Navigator.pop(context);
                 },
               );
