@@ -10,21 +10,18 @@ void main() {
   group('CLI Handler - Version & Help', () {
     test('--version returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['--version']));
-
       expect(output.stdout, contains('Crossbar version'));
       expect(output.exitCode, equals(0));
     });
 
     test('-v returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['-v']));
-
       expect(output.stdout, contains('Crossbar version'));
       expect(output.exitCode, equals(0));
     });
 
     test('--help returns usage information', () async {
       final output = await _captureOutput(() => handleCliCommand(['--help']));
-
       expect(output.stdout, contains('Usage:'));
       expect(output.stdout, contains('Audio Controls'));
       expect(output.exitCode, equals(0));
@@ -32,7 +29,6 @@ void main() {
 
     test('empty args prints usage and returns error', () async {
       final output = await _captureOutput(() => handleCliCommand([]));
-
       expect(output.stdout, contains('Usage:'));
       expect(output.exitCode, equals(1));
     });
@@ -114,21 +110,41 @@ void main() {
   });
 
   group('CLI Handler - Audio', () {
-    test('audio volume returns value', () async {
+    test('audio volume get', () async {
       final output = await _captureOutput(() => handleCliCommand(['audio', 'volume']));
       expect(output.stdout, matches(RegExp(r'\d+%|Unknown')));
       expect(output.exitCode, equals(0));
     });
 
-    test('audio mute toggles', () async {
-      final output = await _captureOutput(() => handleCliCommand(['audio', 'mute']));
-      // Expect "Muted" or "Unmuted" or error
+    test('audio volume set', () async {
+      // We don't check success, just that code runs
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'volume', '50']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
     });
 
-    test('audio output --list lists devices', () async {
+    test('audio mute toggle', () async {
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'mute']));
+      expect(output.exitCode, anyOf(equals(0), equals(1)));
+    });
+
+    test('audio mute on', () async {
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'on']));
+      expect(output.exitCode, anyOf(equals(0), equals(1)));
+    });
+
+    test('audio mute off', () async {
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'off']));
+      expect(output.exitCode, anyOf(equals(0), equals(1)));
+    });
+
+    test('audio output --list', () async {
       final output = await _captureOutput(() => handleCliCommand(['audio', 'output', '--list']));
       expect(output.exitCode, equals(0));
+    });
+
+    test('audio output set', () async {
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'output', 'dummy_device']));
+      expect(output.exitCode, anyOf(equals(0), equals(1)));
     });
   });
 
@@ -138,16 +154,39 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
-    test('media play (safe to call)', () async {
-      // Might fail on CI but code should execute
+    test('media play', () async {
       await _captureOutput(() => handleCliCommand(['media', 'play']));
+    });
+
+    test('media pause', () async {
+      await _captureOutput(() => handleCliCommand(['media', 'pause']));
+    });
+
+    test('media stop', () async {
+      await _captureOutput(() => handleCliCommand(['media', 'stop']));
+    });
+
+    test('media next', () async {
+      await _captureOutput(() => handleCliCommand(['media', 'next']));
+    });
+
+    test('media prev', () async {
+      await _captureOutput(() => handleCliCommand(['media', 'prev']));
+    });
+
+    test('media seek', () async {
+      await _captureOutput(() => handleCliCommand(['media', 'seek', '+10s']));
     });
   });
 
   group('CLI Handler - Screen', () {
-    test('screen brightness', () async {
+    test('screen brightness get', () async {
       final output = await _captureOutput(() => handleCliCommand(['screen', 'brightness']));
       expect(output.exitCode, equals(0));
+    });
+
+    test('screen brightness set', () async {
+      await _captureOutput(() => handleCliCommand(['screen', 'brightness', '50']));
     });
 
     test('screen size', () async {
@@ -157,17 +196,14 @@ void main() {
   });
 
   group('CLI Handler - Power', () {
-    // We don't want to actually sleep/restart in tests, but we can test flag validation
     test('power restart requires confirm', () async {
       final output = await _captureOutput(() => handleCliCommand(['power', 'restart']));
       expect(output.exitCode, equals(1));
-      // stderr isn't captured by _captureOutput
     });
 
     test('power shutdown requires confirm', () async {
       final output = await _captureOutput(() => handleCliCommand(['power', 'shutdown']));
       expect(output.exitCode, equals(1));
-      // stderr isn't captured by _captureOutput
     });
   });
 
@@ -177,14 +213,30 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
+    test('wallpaper set', () async {
+      await _captureOutput(() => handleCliCommand(['wallpaper', '/tmp/bg.jpg']));
+    });
+
     test('dnd status', () async {
       final output = await _captureOutput(() => handleCliCommand(['dnd']));
       expect(output.exitCode, equals(0));
     });
+
+    test('dnd set on', () async {
+      await _captureOutput(() => handleCliCommand(['dnd', 'on']));
+    });
+
+    test('dnd set off', () async {
+      await _captureOutput(() => handleCliCommand(['dnd', 'off']));
+    });
+
+    test('dnd toggle', () async {
+      await _captureOutput(() => handleCliCommand(['dnd', 'toggle']));
+    });
   });
 
   group('CLI Handler - Network & Wifi', () {
-    test('net status returns online/offline', () async {
+    test('net status', () async {
       final output = await _captureOutput(() => handleCliCommand(['net', 'status']));
       expect(output.stdout.trim(), anyOf(equals('online'), equals('offline')));
       expect(output.exitCode, equals(0));
@@ -200,7 +252,7 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
-    test('wifi ssid returns SSID', () async {
+    test('wifi ssid', () async {
       final output = await _captureOutput(() => handleCliCommand(['wifi', 'ssid']));
       expect(output.stdout, isNotEmpty);
       expect(output.exitCode, equals(0));
@@ -212,10 +264,38 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
+    test('wifi on', () async {
+      await _captureOutput(() => handleCliCommand(['wifi', 'on']));
+    });
+
+    test('wifi off', () async {
+      await _captureOutput(() => handleCliCommand(['wifi', 'off']));
+    });
+
+    test('wifi toggle', () async {
+      await _captureOutput(() => handleCliCommand(['wifi', 'toggle']));
+    });
+
     test('bluetooth status', () async {
       final output = await _captureOutput(() => handleCliCommand(['bluetooth']));
       expect(output.stdout, contains('Bluetooth:'));
       expect(output.exitCode, equals(0));
+    });
+
+    test('bluetooth on', () async {
+      await _captureOutput(() => handleCliCommand(['bluetooth', 'on']));
+    });
+
+    test('bluetooth off', () async {
+      await _captureOutput(() => handleCliCommand(['bluetooth', 'off']));
+    });
+
+    test('bluetooth toggle', () async {
+      await _captureOutput(() => handleCliCommand(['bluetooth', 'toggle']));
+    });
+
+    test('bluetooth devices', () async {
+      await _captureOutput(() => handleCliCommand(['bluetooth', 'devices']));
     });
 
     test('vpn status', () async {
@@ -251,6 +331,12 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
+    test('base64 decode', () async {
+      final output = await _captureOutput(() => handleCliCommand(['base64', 'decode', 'aGVsbG8=']));
+      expect(output.stdout.trim(), equals('hello'));
+      expect(output.exitCode, equals(0));
+    });
+
     test('time', () async {
       final output = await _captureOutput(() => handleCliCommand(['time']));
       expect(output.exitCode, equals(0));
@@ -262,8 +348,23 @@ void main() {
     });
 
     test('clipboard (get)', () async {
-      // Calls xclip/pbpaste, might fail but code runs
       await _captureOutput(() => handleCliCommand(['clipboard']));
+    });
+
+    test('clipboard (set)', () async {
+      await _captureOutput(() => handleCliCommand(['clipboard', 'test']));
+    });
+
+    test('exec', () async {
+      await _captureOutput(() => handleCliCommand(['exec', 'echo test']));
+    });
+
+    test('notify', () async {
+      await _captureOutput(() => handleCliCommand(['notify', 'title', 'msg']));
+    });
+
+    test('open url', () async {
+      await _captureOutput(() => handleCliCommand(['open', 'url', 'http://example.com']));
     });
   });
 
@@ -272,6 +373,15 @@ void main() {
       final output = await _captureOutput(() => handleCliCommand(['file', 'exists', '/etc/passwd']));
       expect(output.stdout.trim(), equals('true'));
       expect(output.exitCode, equals(0));
+    });
+
+    test('file read', () async {
+      // Just check it runs, we know it might fail on CI if file missing
+      await _captureOutput(() => handleCliCommand(['file', 'read', '/etc/hosts']));
+    });
+
+    test('file size', () async {
+      await _captureOutput(() => handleCliCommand(['file', 'size', '/etc/hosts']));
     });
 
     test('dir list', () async {
