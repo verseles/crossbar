@@ -22,7 +22,7 @@ class SettingsService extends ChangeNotifier {
   static const bool _defaultDarkMode = false;
   static const bool _defaultStartWithSystem = false;
   static const bool _defaultShowInTray = true;
-  static const String _defaultLanguage = 'en';
+  static const String _defaultLanguage = 'system';
 
   // State
   bool _darkMode = _defaultDarkMode;

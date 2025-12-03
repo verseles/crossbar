@@ -5,10 +5,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_bn.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_ja.dart';
 import 'app_localizations_ko.dart';
@@ -102,10 +105,13 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('bn'),
     Locale('de'),
     Locale('en'),
     Locale('es'),
     Locale('fr'),
+    Locale('hi'),
     Locale('it'),
     Locale('ja'),
     Locale('ko'),
@@ -521,6 +527,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get other;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @behavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Behavior'**
+  String get behavior;
+
+  /// No description provided for @license.
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get license;
+
+  /// No description provided for @useDarkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Use dark theme'**
+  String get useDarkTheme;
+
+  /// No description provided for @launchOnLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch Crossbar on login'**
+  String get launchOnLogin;
+
+  /// No description provided for @keepInTray.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep icon in tray when minimized'**
+  String get keepInTray;
+
+  /// No description provided for @defaultRefreshInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Refresh Interval'**
+  String get defaultRefreshInterval;
 }
 
 class _AppLocalizationsDelegate
@@ -534,10 +582,13 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
+    'ar',
+    'bn',
     'de',
     'en',
     'es',
     'fr',
+    'hi',
     'it',
     'ja',
     'ko',
@@ -553,6 +604,10 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'bn':
+      return AppLocalizationsBn();
     case 'de':
       return AppLocalizationsDe();
     case 'en':
@@ -561,6 +616,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEs();
     case 'fr':
       return AppLocalizationsFr();
+    case 'hi':
+      return AppLocalizationsHi();
     case 'it':
       return AppLocalizationsIt();
     case 'ja':

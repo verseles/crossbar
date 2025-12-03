@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -9,71 +10,84 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  final List<Map<String, String>> _languages = [
+  final List<Map<String, String>> _staticLanguages = [
     {'code': 'en', 'name': 'English'},
-    {'code': 'pt_BR', 'name': 'Portugu\u00eas (Brasil)'},
-    {'code': 'es', 'name': 'Espa\u00f1ol'},
-    {'code': 'fr', 'name': 'Fran\u00e7ais'},
-    {'code': 'zh', 'name': '\u4e2d\u6587'},
-    {'code': 'hi', 'name': '\u0939\u093f\u0902\u0926\u0940'},
-    {'code': 'ar', 'name': '\u0627\u0644\u0639\u0631\u0628\u064a\u0629'},
-    {'code': 'bn', 'name': '\u09ac\u09be\u0982\u09b2\u09be'},
-    {'code': 'ru', 'name': '\u0420\u0443\u0441\u0441\u043a\u0438\u0439'},
-    {'code': 'ja', 'name': '\u65e5\u672c\u8a9e'},
+    {'code': 'ar', 'name': 'العربية'},
+    {'code': 'bn', 'name': 'বাংলা'},
+    {'code': 'de', 'name': 'Deutsch'},
+    {'code': 'es', 'name': 'Español'},
+    {'code': 'fr', 'name': 'Français'},
+    {'code': 'hi', 'name': 'हिन्दी'},
+    {'code': 'it', 'name': 'Italiano'},
+    {'code': 'ja', 'name': '日本語'},
+    {'code': 'ko', 'name': '한국어'},
+    {'code': 'pt', 'name': 'Português (Brasil)'},
+    {'code': 'ru', 'name': 'Русский'},
+    {'code': 'zh', 'name': '中文'},
   ];
+
+  List<Map<String, String>> _getLanguages(AppLocalizations l10n) {
+    return [
+      {'code': 'system', 'name': '${l10n.system} (Auto)'},
+      ..._staticLanguages,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListenableBuilder(
       listenable: SettingsService(),
       builder: (context, _) {
         final settings = SettingsService();
+        final languages = _getLanguages(l10n);
+
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Settings'),
+            title: Text(l10n.settingsTab),
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               _buildSection(
-                title: 'Appearance',
+                title: l10n.appearance,
                 icon: Icons.palette,
                 children: [
                   SwitchListTile(
-                    title: const Text('Dark Mode'),
-                    subtitle: const Text('Use dark theme'),
+                    title: Text(l10n.darkTheme),
+                    subtitle: Text(l10n.useDarkTheme),
                     value: settings.darkMode,
                     onChanged: (value) {
                       settings.darkMode = value;
                     },
                   ),
                   ListTile(
-                    title: const Text('Language'),
-                    subtitle: Text(_languages.firstWhere(
+                    title: Text(l10n.language),
+                    subtitle: Text(languages.firstWhere(
                       (l) => l['code'] == settings.language,
-                      orElse: () => {'name': 'English'},
+                      orElse: () => languages.first,
                     )['name']!),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showLanguageDialog(),
+                    onTap: () => _showLanguageDialog(l10n),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               _buildSection(
-                title: 'Behavior',
+                title: l10n.behavior,
                 icon: Icons.tune,
                 children: [
                   SwitchListTile(
-                    title: const Text('Start with system'),
-                    subtitle: const Text('Launch Crossbar on login'),
+                    title: Text(l10n.startOnBoot),
+                    subtitle: Text(l10n.launchOnLogin),
                     value: settings.startWithSystem,
                     onChanged: (value) {
                       settings.startWithSystem = value;
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('Show in system tray'),
-                    subtitle: const Text('Keep icon in tray when minimized'),
+                    title: Text(l10n.minimizeToTray),
+                    subtitle: Text(l10n.keepInTray),
                     value: settings.showInTray,
                     onChanged: (value) {
                       settings.showInTray = value;
@@ -83,11 +97,11 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               const SizedBox(height: 16),
               _buildSection(
-                title: 'Plugins',
+                title: l10n.pluginsTab,
                 icon: Icons.extension,
                 children: [
                   ListTile(
-                    title: const Text('Plugins Directory'),
+                    title: Text(l10n.pluginsDirectory),
                     subtitle: const Text('~/.crossbar/plugins'),
                     trailing: IconButton(
                       icon: const Icon(Icons.folder_open),
@@ -97,7 +111,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     ),
                   ),
                   ListTile(
-                    title: const Text('Default Refresh Interval'),
+                    title: Text(l10n.defaultRefreshInterval),
                     subtitle: const Text('5 minutes'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
@@ -108,15 +122,15 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               const SizedBox(height: 16),
               _buildSection(
-                title: 'About',
+                title: l10n.about,
                 icon: Icons.info,
                 children: [
                   ListTile(
-                    title: const Text('Version'),
+                    title: Text(l10n.version),
                     subtitle: const Text('1.0.0'),
                   ),
                   ListTile(
-                    title: const Text('License'),
+                    title: Text(l10n.license),
                     subtitle: const Text('AGPLv3'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
@@ -169,19 +183,20 @@ class _SettingsTabState extends State<SettingsTab> {
     );
   }
 
-  void _showLanguageDialog() {
+  void _showLanguageDialog(AppLocalizations l10n) {
     final settings = SettingsService();
+    final languages = _getLanguages(l10n);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(l10n.language),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: _languages.length,
+            itemCount: languages.length,
             itemBuilder: (context, index) {
-              final lang = _languages[index];
+              final lang = languages[index];
               return RadioListTile<String>(
                 title: Text(lang['name']!),
                 value: lang['code']!,
@@ -197,7 +212,7 @@ class _SettingsTabState extends State<SettingsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),

@@ -18,7 +18,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsTab => '설정';
 
   @override
-  String get marketplaceTab => '마켓';
+  String get marketplaceTab => '마켓플레이스';
 
   @override
   String get noPluginsFound => '플러그인을 찾을 수 없습니다';
@@ -48,7 +48,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get remove => '제거';
 
   @override
-  String get lastRun => '마지막 실행';
+  String get lastRun => '최근 실행';
 
   @override
   String get refreshInterval => '새로고침 간격';
@@ -90,7 +90,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get installed => '설치됨';
 
   @override
-  String get notInstalled => '미설치';
+  String get notInstalled => '설치되지 않음';
 
   @override
   String get language => '언어';
@@ -114,16 +114,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get enableNotifications => '알림 활성화';
 
   @override
-  String get startOnBoot => '시작 시 실행';
+  String get startOnBoot => '부팅 시 시작';
 
   @override
   String get minimizeToTray => '트레이로 최소화';
 
   @override
-  String get pluginsDirectory => 'Plugins Directory';
+  String get pluginsDirectory => '플러그인 디렉토리';
 
   @override
-  String get openPluginsDirectory => 'Open Plugins Directory';
+  String get openPluginsDirectory => '플러그인 디렉토리 열기';
 
   @override
   String get about => '정보';
@@ -132,19 +132,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get version => '버전';
 
   @override
-  String get checkForUpdates => 'Check for Updates';
+  String get checkForUpdates => '업데이트 확인';
 
   @override
-  String get noUpdatesAvailable => 'No updates available';
+  String get noUpdatesAvailable => '업데이트 없음';
 
   @override
-  String get updateAvailable => 'Update available';
+  String get updateAvailable => '업데이트 가능';
 
   @override
   String get errorOccurred => '오류가 발생했습니다';
 
   @override
-  String get retry => '다시 시도';
+  String get retry => '재시도';
 
   @override
   String get loading => '로딩 중...';
@@ -153,16 +153,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noResults => '결과 없음';
 
   @override
-  String get allLanguages => 'All Languages';
+  String get allLanguages => '모든 언어';
 
   @override
-  String get allCategories => 'All Categories';
+  String get allCategories => '모든 카테고리';
 
   @override
-  String get popular => 'Popular';
+  String get popular => '인기';
 
   @override
-  String get recent => 'Recent';
+  String get recent => '최신';
 
   @override
   String get bash => 'Bash';
@@ -183,32 +183,53 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rust => 'Rust';
 
   @override
-  String get system => 'System';
+  String get system => '시스템';
 
   @override
-  String get network => 'Network';
+  String get network => '네트워크';
 
   @override
-  String get development => 'Development';
+  String get development => '개발';
 
   @override
-  String get productivity => 'Productivity';
+  String get productivity => '생산성';
 
   @override
-  String get finance => 'Finance';
+  String get finance => '금융';
 
   @override
-  String get weather => 'Weather';
+  String get weather => '날씨';
 
   @override
-  String get media => 'Media';
+  String get media => '미디어';
 
   @override
-  String get social => 'Social';
+  String get social => '소셜';
 
   @override
-  String get utilities => 'Utilities';
+  String get utilities => '유틸리티';
 
   @override
-  String get other => 'Other';
+  String get other => '기타';
+
+  @override
+  String get appearance => '모양';
+
+  @override
+  String get behavior => '동작';
+
+  @override
+  String get license => '라이선스';
+
+  @override
+  String get useDarkTheme => '다크 테마 사용';
+
+  @override
+  String get launchOnLogin => '로그인 시 Crossbar 실행';
+
+  @override
+  String get keepInTray => '최소화 시 트레이 아이콘 유지';
+
+  @override
+  String get defaultRefreshInterval => '기본 새로고침 간격';
 }

@@ -67,5 +67,12 @@
   "media": "Media",
   "social": "Social",
   "utilities": "Utilities",
-  "other": "Other"
+  "other": "Other",
+  "appearance": "Appearance",
+  "behavior": "Behavior",
+  "license": "License",
+  "useDarkTheme": "Use dark theme",
+  "launchOnLogin": "Launch Crossbar on login",
+  "keepInTray": "Keep icon in tray when minimized",
+  "defaultRefreshInterval": "Default Refresh Interval"
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 class MarketplaceTab extends StatefulWidget {
   const MarketplaceTab({super.key});
@@ -12,15 +13,17 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
   String _selectedLanguage = 'all';
   bool _isLoading = false;
 
-  final List<Map<String, String>> _languages = [
-    {'code': 'all', 'name': 'All Languages'},
-    {'code': 'shell', 'name': 'Bash'},
-    {'code': 'python', 'name': 'Python'},
-    {'code': 'javascript', 'name': 'Node.js'},
-    {'code': 'dart', 'name': 'Dart'},
-    {'code': 'go', 'name': 'Go'},
-    {'code': 'rust', 'name': 'Rust'},
-  ];
+  List<Map<String, String>> _getLanguages(AppLocalizations l10n) {
+    return [
+      {'code': 'all', 'name': l10n.allLanguages},
+      {'code': 'shell', 'name': l10n.bash},
+      {'code': 'python', 'name': l10n.python},
+      {'code': 'javascript', 'name': l10n.node},
+      {'code': 'dart', 'name': l10n.dart},
+      {'code': 'go', 'name': l10n.go},
+      {'code': 'rust', 'name': l10n.rust},
+    ];
+  }
 
   @override
   void dispose() {
@@ -30,9 +33,12 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final languages = _getLanguages(l10n);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace'),
+        title: Text(l10n.marketplaceTab),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(72),
           child: Padding(
@@ -43,7 +49,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search plugins...',
+                      hintText: '${l10n.search}...',
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -60,7 +66,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
                 const SizedBox(width: 12),
                 DropdownButton<String>(
                   value: _selectedLanguage,
-                  items: _languages.map((lang) {
+                  items: languages.map((lang) {
                     return DropdownMenuItem(
                       value: lang['code'],
                       child: Text(lang['name']!),
@@ -82,6 +88,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
   }
 
   Widget _buildBody() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -97,7 +104,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Crossbar Marketplace',
+            'Crossbar ${l10n.marketplaceTab}',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
@@ -118,7 +125,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           FilledButton.icon(
             onPressed: _search,
             icon: const Icon(Icons.search),
-            label: const Text('Search Plugins'),
+            label: Text('${l10n.search} ${l10n.pluginsTab}'),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -153,6 +160,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
   }
 
   void _showInstallFromUrlDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final urlController = TextEditingController();
 
     showDialog<void>(
@@ -184,14 +192,14 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
               _installFromUrl(urlController.text);
             },
-            child: const Text('Install'),
+            child: Text(l10n.install),
           ),
         ],
       ),
