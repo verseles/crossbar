@@ -51,3 +51,9 @@ coverage/
 *.apk
 *.aab
 *.ipa
+
+# Keystore and Secrets
+*.jks
+*.keystore
+key.properties
+android/key.properties

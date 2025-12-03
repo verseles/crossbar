@@ -140,6 +140,15 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Download Android Keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+
       - name: Build APK
         run: flutter build apk --release
 
