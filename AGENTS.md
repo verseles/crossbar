@@ -100,6 +100,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 - **Docker/Podman**:
     - `make container-shell`: Entra no ambiente dev containerizado.
     - `make container-build`: Roda build clean.
+    - **Alternativa**: Se `podman` ou `podman-compose` não forem encontrados, tente usar `docker` e `docker-compose` como fallback.
 
 ### Armadilhas Comuns
 1.  **Versão do Flutter**: O CI exige estritamente `3.38.3`. Versões mais novas/velhas quebram constraints do Dart `^3.10.0`.
