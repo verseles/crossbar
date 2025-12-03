@@ -14,17 +14,29 @@ class WifiCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     const api = NetworkApi();
     final values = args.where((a) => !a.startsWith('--')).toList();
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     if (values.isEmpty) {
       // Get Status
       final status = await _getWifiStatus();
-      print(status ? 'WiFi: On' : 'WiFi: Off');
+      printFormatted(
+          {'wifi': status},
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) => status ? 'WiFi: On' : 'WiFi: Off'
+      );
     } else {
       final val = values[0].toLowerCase();
 
       if (val == 'ssid') {
         final ssid = await api.getWifiSsid();
-        print(ssid);
+        printFormatted(
+            {'ssid': ssid},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => ssid
+        );
         return 0;
       }
 
@@ -43,8 +55,12 @@ class WifiCommand extends CliCommand {
 
       final result = await api.setWifi(newState);
       if (result) {
-        // Wait a bit? No, just report.
-        print(result ? 'WiFi set to ${newState ? 'on' : 'off'}' : 'Failed to set WiFi');
+        printFormatted(
+            {'success': true, 'wifi': newState},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => 'WiFi set to ${newState ? 'on' : 'off'}'
+        );
       } else {
         stderr.writeln('Failed to set WiFi');
         return 1;

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import '../../core/api/media_api.dart';
@@ -21,30 +20,32 @@ class ScreenCommand extends CliCommand {
     final subcommand = args[0];
     final commandArgs = args.sublist(1);
     final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     switch (subcommand) {
       case 'brightness':
-        return _handleBrightness(commandArgs, jsonOutput);
+        return _handleBrightness(commandArgs, jsonOutput, xmlOutput);
       case 'size':
-        return _handleSize(jsonOutput);
+        return _handleSize(jsonOutput, xmlOutput);
       default:
         stderr.writeln('Error: Unknown screen subcommand: $subcommand');
         return 1;
     }
   }
 
-  Future<int> _handleBrightness(List<String> args, bool jsonOutput) async {
+  Future<int> _handleBrightness(List<String> args, bool json, bool xml) async {
     const api = MediaApi();
     final values = args.where((a) => !a.startsWith('--')).toList();
 
     if (values.isEmpty) {
       // Get
       final result = await api.getBrightness();
-      if (jsonOutput) {
-        print(jsonEncode({'brightness': result}));
-      } else {
-        print('$result%');
-      }
+      printFormatted(
+          {'brightness': result},
+          json: json,
+          xml: xml,
+          plain: (_) => '$result%'
+      );
     } else {
       // Set
       final level = int.tryParse(values[0]);
@@ -54,7 +55,12 @@ class ScreenCommand extends CliCommand {
       }
       final result = await api.setBrightness(level);
       if (result) {
-        print('Brightness set to $level%');
+        printFormatted(
+            {'success': true, 'brightness': level},
+            json: json,
+            xml: xml,
+            plain: (_) => 'Brightness set to $level%'
+        );
       } else {
         stderr.writeln('Failed to set brightness');
         return 1;
@@ -63,8 +69,8 @@ class ScreenCommand extends CliCommand {
     return 0;
   }
 
-  Future<int> _handleSize(bool jsonOutput) async {
-    String resultStr = 'unknown';
+  Future<int> _handleSize(bool json, bool xml) async {
+    var resultStr = 'unknown';
 
     try {
       if (Platform.isLinux) {
@@ -93,20 +99,24 @@ class ScreenCommand extends CliCommand {
       // ignore
     }
 
-    if (jsonOutput) {
-      final parts = resultStr.split('x');
-      if (parts.length == 2) {
-        print(jsonEncode({
+    Map<String, dynamic> data;
+    final parts = resultStr.split('x');
+    if (parts.length == 2) {
+        data = {
           'width': int.tryParse(parts[0]),
           'height': int.tryParse(parts[1]),
           'resolution': resultStr
-        }));
-      } else {
-        print(jsonEncode({'resolution': resultStr}));
-      }
+        };
     } else {
-      print(resultStr);
+        data = {'resolution': resultStr};
     }
+
+    printFormatted(
+        data,
+        json: json,
+        xml: xml,
+        plain: (_) => resultStr
+    );
     return 0;
   }
 }

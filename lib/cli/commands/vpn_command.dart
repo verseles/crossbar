@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
-import '../../core/api/utils_api.dart'; // Vpn logic is in UtilsApi? Yes, I checked.
-import '../cli_utils.dart'; // for mapToXml if needed
+import '../../core/api/utils_api.dart';
 import 'base_command.dart';
 
 class VpnCommand extends CliCommand {
@@ -14,15 +12,8 @@ class VpnCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    // Command: crossbar vpn status
-    // Old CLI had --vpn-status
+    final subcommand = args.isNotEmpty ? args[0] : 'status';
 
-    if (args.isEmpty) {
-       // Default to status?
-       return _status(args);
-    }
-
-    final subcommand = args[0];
     if (subcommand == 'status') {
       return _status(args);
     } else {
@@ -37,18 +28,20 @@ class VpnCommand extends CliCommand {
     final xmlOutput = args.contains('--xml');
 
     final result = await api.getVpnStatus();
-    if (jsonOutput) {
-      print(jsonEncode(result));
-    } else if (xmlOutput) {
-      print(mapToXml(result, root: 'vpn'));
-    } else {
-      if (result['connected'] == true) {
-        final name = result['name'] ?? result['type'] ?? 'VPN';
-        print('VPN: Connected ($name)');
-      } else {
-        print('VPN: Disconnected');
-      }
-    }
+    printFormatted(
+        result,
+        json: jsonOutput,
+        xml: xmlOutput,
+        xmlRoot: 'vpn',
+        plain: (_) {
+           if (result['connected'] == true) {
+             final name = result['name'] ?? result['type'] ?? 'VPN';
+             return 'VPN: Connected ($name)';
+           } else {
+             return 'VPN: Disconnected';
+           }
+        }
+    );
     return 0;
   }
 }

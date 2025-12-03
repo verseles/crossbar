@@ -19,23 +19,31 @@ class NetworkCommand extends CliCommand {
 
     final subcommand = args[0];
     final commandArgs = args.sublist(1);
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
 
     const api = NetworkApi();
 
     switch (subcommand) {
       case 'status':
         final result = await api.getNetStatus();
-        print(result);
+        printFormatted(
+            {'status': result},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => result
+        );
         return 0;
 
       case 'ip':
-        if (commandArgs.contains('--public')) {
-          final result = await api.getPublicIp();
-          print(result);
-        } else {
-          final result = await api.getLocalIp();
-          print(result);
-        }
+        final isPublic = commandArgs.contains('--public');
+        final result = isPublic ? await api.getPublicIp() : await api.getLocalIp();
+        printFormatted(
+            {'ip': result, 'type': isPublic ? 'public' : 'local'},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => result
+        );
         return 0;
 
       case 'ping':
@@ -46,7 +54,12 @@ class NetworkCommand extends CliCommand {
         }
         final host = values[0];
         final result = await api.ping(host);
-        print(result);
+        printFormatted(
+            {'ping': result, 'host': host},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => result
+        );
         return 0;
 
       default:
