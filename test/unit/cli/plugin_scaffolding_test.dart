@@ -121,7 +121,7 @@ void main() {
         expect(await File('$path.config.json').exists(), true);
       });
 
-      test('creates plugin in correct language directory', () async {
+      test('creates plugin in root directory', () async {
         final path = await scaffolding.createPlugin(
           lang: 'dart',
           type: 'status',
@@ -129,7 +129,10 @@ void main() {
           outputDir: tempDir.path,
         );
 
-        expect(path, contains('/dart/'));
+        // Should not be in language subdirectory anymore
+        expect(path, isNot(contains('/dart/')));
+        // Should be directly in output dir
+        expect(path, startsWith(tempDir.path));
       });
 
       test('uses correct interval for type', () async {

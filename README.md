@@ -101,7 +101,7 @@ Download the latest release from [GitHub Releases](https://github.com/verseles/c
 
 ### Your First Plugin
 
-1. Create a plugin file in `~/.crossbar/plugins/`:
+1. Create a plugin file in `~/.crossbar/plugins/` (plugins can be files in the root or inside subdirectories):
 
 ```bash
 #!/bin/bash
