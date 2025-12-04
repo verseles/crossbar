@@ -122,33 +122,72 @@ void main() {
       final currentVolumeStr = getOutput.stdout.trim().replaceAll('%', '');
       final currentVolume = int.tryParse(currentVolumeStr);
 
+      if (currentVolume != null) {
+        addTearDown(() async {
+          await _captureOutput(() => handleCliCommand(['audio', 'volume', '$currentVolume']));
+        });
+      }
+
       // 2. Set volume
       // We don't check success, just that code runs
       final output = await _captureOutput(() => handleCliCommand(['audio', 'volume', '50']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
+    });
 
-      // 3. Restore volume
-      if (currentVolume != null) {
-        await _captureOutput(() => handleCliCommand(['audio', 'volume', '$currentVolume']));
-      }
+    test('audio mute status', () async {
+      final output = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'status']));
+      expect(output.stdout.trim(), anyOf(equals('Muted'), equals('Unmuted')));
+      expect(output.exitCode, equals(0));
     });
 
     test('audio mute toggle', () async {
+      // 1. Get initial status
+      final getOutput = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'status']));
+      final wasMuted = getOutput.stdout.trim() == 'Muted';
+
+      addTearDown(() async {
+        final currentOutput = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'status']));
+        final isMuted = currentOutput.stdout.trim() == 'Muted';
+        if (isMuted != wasMuted) {
+          await _captureOutput(() => handleCliCommand(['audio', 'mute']));
+        }
+      });
+
+      // 2. Toggle
       final output = await _captureOutput(() => handleCliCommand(['audio', 'mute']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
-
-      // Restore (toggle again)
-      if (output.exitCode == 0) {
-        await _captureOutput(() => handleCliCommand(['audio', 'mute']));
-      }
     });
 
     test('audio mute on', () async {
+      // 1. Get initial status
+      final getOutput = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'status']));
+      final wasMuted = getOutput.stdout.trim() == 'Muted';
+
+      addTearDown(() async {
+        if (wasMuted) {
+          await _captureOutput(() => handleCliCommand(['audio', 'mute', 'on']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['audio', 'mute', 'off']));
+        }
+      });
+
       final output = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'on']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
     });
 
     test('audio mute off', () async {
+      // 1. Get initial status
+      final getOutput = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'status']));
+      final wasMuted = getOutput.stdout.trim() == 'Muted';
+
+      addTearDown(() async {
+        if (wasMuted) {
+          await _captureOutput(() => handleCliCommand(['audio', 'mute', 'on']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['audio', 'mute', 'off']));
+        }
+      });
+
       final output = await _captureOutput(() => handleCliCommand(['audio', 'mute', 'off']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
     });
@@ -159,6 +198,16 @@ void main() {
     });
 
     test('audio output set', () async {
+      // 1. Get current output
+      final getOutput = await _captureOutput(() => handleCliCommand(['audio', 'output']));
+      final currentOutput = getOutput.stdout.trim();
+
+      if (currentOutput.isNotEmpty && currentOutput != 'dummy_device') {
+        addTearDown(() async {
+          await _captureOutput(() => handleCliCommand(['audio', 'output', currentOutput]));
+        });
+      }
+
       final output = await _captureOutput(() => handleCliCommand(['audio', 'output', 'dummy_device']));
       expect(output.exitCode, anyOf(equals(0), equals(1)));
     });
@@ -207,13 +256,14 @@ void main() {
       final currentBrightnessStr = getOutput.stdout.trim().replaceAll('%', '');
       final currentBrightness = int.tryParse(currentBrightnessStr);
 
+      if (currentBrightness != null) {
+        addTearDown(() async {
+          await _captureOutput(() => handleCliCommand(['screen', 'brightness', '$currentBrightness']));
+        });
+      }
+
       // 2. Set brightness
       await _captureOutput(() => handleCliCommand(['screen', 'brightness', '50']));
-
-      // 3. Restore brightness
-      if (currentBrightness != null) {
-        await _captureOutput(() => handleCliCommand(['screen', 'brightness', '$currentBrightness']));
-      }
     });
 
     test('screen size', () async {
@@ -241,6 +291,17 @@ void main() {
     });
 
     test('wallpaper set', () async {
+      // 1. Get current wallpaper
+      final getOutput = await _captureOutput(() => handleCliCommand(['wallpaper']));
+      final currentWallpaper = getOutput.stdout.trim();
+
+      if (currentWallpaper.isNotEmpty && currentWallpaper != '/tmp/bg.jpg') {
+        addTearDown(() async {
+          await _captureOutput(() => handleCliCommand(['wallpaper', currentWallpaper]));
+        });
+      }
+
+      // 2. Set wallpaper
       await _captureOutput(() => handleCliCommand(['wallpaper', '/tmp/bg.jpg']));
     });
 
@@ -250,14 +311,53 @@ void main() {
     });
 
     test('dnd set on', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['dnd']));
+      final wasDnd = getOutput.stdout.contains('ON');
+
+      addTearDown(() async {
+        if (!wasDnd) {
+          await _captureOutput(() => handleCliCommand(['dnd', 'off']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['dnd', 'on']));
+        }
+      });
+
+      // 2. Set On
       await _captureOutput(() => handleCliCommand(['dnd', 'on']));
     });
 
     test('dnd set off', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['dnd']));
+      final wasDnd = getOutput.stdout.contains('ON');
+
+      addTearDown(() async {
+        if (wasDnd) {
+          await _captureOutput(() => handleCliCommand(['dnd', 'on']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['dnd', 'off']));
+        }
+      });
+
+      // 2. Set Off
       await _captureOutput(() => handleCliCommand(['dnd', 'off']));
     });
 
     test('dnd toggle', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['dnd']));
+      final wasDnd = getOutput.stdout.contains('ON');
+
+      addTearDown(() async {
+        final currentOutput = await _captureOutput(() => handleCliCommand(['dnd']));
+        final isDnd = currentOutput.stdout.contains('ON');
+        if (isDnd != wasDnd) {
+          await _captureOutput(() => handleCliCommand(['dnd', 'toggle']));
+        }
+      });
+
+      // 2. Toggle
       await _captureOutput(() => handleCliCommand(['dnd', 'toggle']));
     });
   });
@@ -292,14 +392,53 @@ void main() {
     });
 
     test('wifi on', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['wifi']));
+      final wasOn = getOutput.stdout.toLowerCase().contains('on');
+
+      addTearDown(() async {
+        if (!wasOn) {
+          await _captureOutput(() => handleCliCommand(['wifi', 'off']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['wifi', 'on']));
+        }
+      });
+
+      // 2. Set On
       await _captureOutput(() => handleCliCommand(['wifi', 'on']));
     });
 
     test('wifi off', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['wifi']));
+      final wasOn = getOutput.stdout.toLowerCase().contains('on');
+
+      addTearDown(() async {
+        if (wasOn) {
+          await _captureOutput(() => handleCliCommand(['wifi', 'on']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['wifi', 'off']));
+        }
+      });
+
+      // 2. Set Off
       await _captureOutput(() => handleCliCommand(['wifi', 'off']));
     });
 
     test('wifi toggle', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['wifi']));
+      final wasOn = getOutput.stdout.toLowerCase().contains('on');
+
+      addTearDown(() async {
+        final currentOutput = await _captureOutput(() => handleCliCommand(['wifi']));
+        final isOn = currentOutput.stdout.toLowerCase().contains('on');
+        if (isOn != wasOn) {
+          await _captureOutput(() => handleCliCommand(['wifi', 'toggle']));
+        }
+      });
+
+      // 2. Toggle
       await _captureOutput(() => handleCliCommand(['wifi', 'toggle']));
     });
 
@@ -310,14 +449,53 @@ void main() {
     });
 
     test('bluetooth on', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['bluetooth']));
+      final wasOn = getOutput.stdout.toLowerCase().contains(': on');
+
+      addTearDown(() async {
+        if (!wasOn) {
+          await _captureOutput(() => handleCliCommand(['bluetooth', 'off']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['bluetooth', 'on']));
+        }
+      });
+
+      // 2. Set On
       await _captureOutput(() => handleCliCommand(['bluetooth', 'on']));
     });
 
     test('bluetooth off', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['bluetooth']));
+      final wasOn = getOutput.stdout.toLowerCase().contains(': on');
+
+      addTearDown(() async {
+        if (wasOn) {
+          await _captureOutput(() => handleCliCommand(['bluetooth', 'on']));
+        } else {
+          await _captureOutput(() => handleCliCommand(['bluetooth', 'off']));
+        }
+      });
+
+      // 2. Set Off
       await _captureOutput(() => handleCliCommand(['bluetooth', 'off']));
     });
 
     test('bluetooth toggle', () async {
+      // 1. Get status
+      final getOutput = await _captureOutput(() => handleCliCommand(['bluetooth']));
+      final wasOn = getOutput.stdout.toLowerCase().contains(': on');
+
+      addTearDown(() async {
+        final currentOutput = await _captureOutput(() => handleCliCommand(['bluetooth']));
+        final isOn = currentOutput.stdout.toLowerCase().contains(': on');
+        if (isOn != wasOn) {
+          await _captureOutput(() => handleCliCommand(['bluetooth', 'toggle']));
+        }
+      });
+
+      // 2. Toggle
       await _captureOutput(() => handleCliCommand(['bluetooth', 'toggle']));
     });
 
@@ -379,6 +557,17 @@ void main() {
     });
 
     test('clipboard (set)', () async {
+      // 1. Get current content
+      final getOutput = await _captureOutput(() => handleCliCommand(['clipboard']));
+      final currentContent = getOutput.stdout.trim();
+
+      if (currentContent.isNotEmpty && currentContent != 'test') {
+        addTearDown(() async {
+          await _captureOutput(() => handleCliCommand(['clipboard', currentContent]));
+        });
+      }
+
+      // 2. Set
       await _captureOutput(() => handleCliCommand(['clipboard', 'test']));
     });
 
