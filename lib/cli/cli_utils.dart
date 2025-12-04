@@ -10,7 +10,7 @@ String mapToXml(Map<String, dynamic> data, {String root = 'crossbar'}) {
 
 void _mapToXml(Map<String, dynamic> data, StringBuffer buffer, {String indent = ''}) {
   for (final entry in data.entries) {
-    final key = entry.key.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+    final key = entry.key.replaceAll(RegExp('[^a-zA-Z0-9_]'), '_');
     final value = entry.value;
     if (value is Map<String, dynamic>) {
       buffer.writeln('$indent<$key>');

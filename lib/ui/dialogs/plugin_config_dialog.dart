@@ -5,9 +5,6 @@ import '../../models/plugin_config.dart';
 import '../widgets/config_fields/config_field.dart';
 
 class PluginConfigDialog extends StatefulWidget {
-  final Plugin plugin;
-  final PluginConfig config;
-  final Map<String, String> initialValues;
 
   const PluginConfigDialog({
     super.key,
@@ -15,6 +12,9 @@ class PluginConfigDialog extends StatefulWidget {
     required this.config,
     this.initialValues = const {},
   });
+  final Plugin plugin;
+  final PluginConfig config;
+  final Map<String, String> initialValues;
 
   static Future<Map<String, String>?> show({
     required BuildContext context,
@@ -189,11 +189,6 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
 }
 
 class PluginInfoDialog extends StatelessWidget {
-  final Plugin plugin;
-  final VoidCallback? onConfigure;
-  final VoidCallback? onToggle;
-  final VoidCallback? onRun;
-  final VoidCallback? onDelete;
 
   const PluginInfoDialog({
     super.key,
@@ -203,6 +198,11 @@ class PluginInfoDialog extends StatelessWidget {
     this.onRun,
     this.onDelete,
   });
+  final Plugin plugin;
+  final VoidCallback? onConfigure;
+  final VoidCallback? onToggle;
+  final VoidCallback? onRun;
+  final VoidCallback? onDelete;
 
   static Future<void> show({
     required BuildContext context,
@@ -365,15 +365,15 @@ class PluginInfoDialog extends StatelessWidget {
 }
 
 class _DetailItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isError;
 
   const _DetailItem({
     required this.label,
     required this.value,
     this.isError = false,
   });
+  final String label;
+  final String value;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {

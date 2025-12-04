@@ -133,9 +133,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     title: Text(l10n.license),
                     subtitle: const Text('AGPLv3'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      _showLicenseDialog();
-                    },
+                    onTap: _showLicenseDialog,
                   ),
                   ListTile(
                     title: const Text('GitHub'),

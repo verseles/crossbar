@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/utils/file_watcher.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FileWatcher', () {
@@ -39,7 +39,7 @@ void main() {
       watcher.dispose();
 
       // Should not throw
-      expect(() => watcher.dispose(), returnsNormally);
+      expect(watcher.dispose, returnsNormally);
     });
 
     test('stop can be called multiple times', () {

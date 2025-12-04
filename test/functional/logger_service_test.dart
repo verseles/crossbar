@@ -297,7 +297,7 @@ void main() {
 Future<String> _getLogContent(Directory dir) async {
   final logFile = File(path.join(dir.path, 'crossbar.log'));
   if (await logFile.exists()) {
-    return await logFile.readAsString();
+    return logFile.readAsString();
   }
   return '';
 }
@@ -318,15 +318,9 @@ class TestableLoggerService {
 
   String? _logDirectory;
   File? _currentLogFile;
-  LogLevel _minLevel = LogLevel.info;
-  bool _consoleOutput = false;
+  LogLevel minLevel = LogLevel.info;
+  bool consoleOutput = false;
   bool _initialized = false;
-
-  LogLevel get minLevel => _minLevel;
-  set minLevel(LogLevel level) => _minLevel = level;
-
-  bool get consoleOutput => _consoleOutput;
-  set consoleOutput(bool value) => _consoleOutput = value;
 
   bool get isInitialized => _initialized;
 
@@ -368,7 +362,7 @@ class TestableLoggerService {
     Object? error,
     StackTrace? stackTrace,
   ]) {
-    if (level.index < _minLevel.index) return;
+    if (level.index < minLevel.index) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(7);

@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/services/marketplace_service.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('MarketplacePlugin', () {

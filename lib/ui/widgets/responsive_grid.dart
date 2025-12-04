@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ResponsiveGrid extends StatelessWidget {
-  final List<Widget> children;
-  final int minItemsPerRow;
-  final int maxItemsPerRow;
-  final double itemMinWidth;
-  final double spacing;
-  final double runSpacing;
 
   const ResponsiveGrid({
     super.key,
@@ -17,6 +11,12 @@ class ResponsiveGrid extends StatelessWidget {
     this.spacing = 16,
     this.runSpacing = 16,
   });
+  final List<Widget> children;
+  final int minItemsPerRow;
+  final int maxItemsPerRow;
+  final double itemMinWidth;
+  final double spacing;
+  final double runSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +47,6 @@ class ResponsiveGrid extends StatelessWidget {
 }
 
 class PluginGrid extends StatelessWidget {
-  final List<Widget> plugins;
-  final int minColumns;
-  final int maxColumns;
-  final double minPluginWidth;
-  final double spacing;
 
   const PluginGrid({
     super.key,
@@ -61,6 +56,11 @@ class PluginGrid extends StatelessWidget {
     this.minPluginWidth = 180,
     this.spacing = 12,
   });
+  final List<Widget> plugins;
+  final int minColumns;
+  final int maxColumns;
+  final double minPluginWidth;
+  final double spacing;
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +96,6 @@ class PluginGrid extends StatelessWidget {
 }
 
 class AdaptiveLayout extends StatelessWidget {
-  final Widget? mobile;
-  final Widget? tablet;
-  final Widget desktop;
-  final double mobileBreakpoint;
-  final double tabletBreakpoint;
 
   const AdaptiveLayout({
     super.key,
@@ -110,6 +105,11 @@ class AdaptiveLayout extends StatelessWidget {
     this.mobileBreakpoint = 600,
     this.tabletBreakpoint = 900,
   });
+  final Widget? mobile;
+  final Widget? tablet;
+  final Widget desktop;
+  final double mobileBreakpoint;
+  final double tabletBreakpoint;
 
   @override
   Widget build(BuildContext context) {
@@ -128,14 +128,6 @@ class AdaptiveLayout extends StatelessWidget {
 }
 
 class FlexibleGridView extends StatelessWidget {
-  final List<Widget> children;
-  final double minCrossAxisExtent;
-  final double mainAxisExtent;
-  final double crossAxisSpacing;
-  final double mainAxisSpacing;
-  final EdgeInsetsGeometry padding;
-  final bool shrinkWrap;
-  final ScrollPhysics? physics;
 
   const FlexibleGridView({
     super.key,
@@ -148,6 +140,14 @@ class FlexibleGridView extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
   });
+  final List<Widget> children;
+  final double minCrossAxisExtent;
+  final double mainAxisExtent;
+  final double crossAxisSpacing;
+  final double mainAxisSpacing;
+  final EdgeInsetsGeometry padding;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
 
   @override
   Widget build(BuildContext context) {
@@ -168,12 +168,12 @@ class FlexibleGridView extends StatelessWidget {
 }
 
 class BreakpointBuilder extends StatelessWidget {
-  final Widget Function(BuildContext context, Breakpoint breakpoint) builder;
 
   const BreakpointBuilder({
     super.key,
     required this.builder,
   });
+  final Widget Function(BuildContext context, Breakpoint breakpoint) builder;
 
   @override
   Widget build(BuildContext context) {
@@ -193,10 +193,10 @@ enum Breakpoint {
   lg(992, 1200),
   xl(1200, double.infinity);
 
+  const Breakpoint(this.min, this.max);
+
   final double min;
   final double max;
-
-  const Breakpoint(this.min, this.max);
 
   static Breakpoint fromWidth(double width) {
     if (width < sm.min) return xs;

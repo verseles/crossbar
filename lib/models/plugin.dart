@@ -1,11 +1,4 @@
 class Plugin {
-  final String id;
-  final String path;
-  final String interpreter;
-  final Duration refreshInterval;
-  final bool enabled;
-  final DateTime? lastRun;
-  final String? lastError;
 
   const Plugin({
     required this.id,
@@ -31,18 +24,6 @@ class Plugin {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'path': path,
-      'interpreter': interpreter,
-      'refreshInterval': refreshInterval.inMilliseconds,
-      'enabled': enabled,
-      'lastRun': lastRun?.toIso8601String(),
-      'lastError': lastError,
-    };
-  }
-
   factory Plugin.fromJson(Map<String, dynamic> json) {
     return Plugin(
       id: json['id'] as String,
@@ -56,6 +37,25 @@ class Plugin {
           : null,
       lastError: json['lastError'] as String?,
     );
+  }
+  final String id;
+  final String path;
+  final String interpreter;
+  final Duration refreshInterval;
+  final bool enabled;
+  final DateTime? lastRun;
+  final String? lastError;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'path': path,
+      'interpreter': interpreter,
+      'refreshInterval': refreshInterval.inMilliseconds,
+      'enabled': enabled,
+      'lastRun': lastRun?.toIso8601String(),
+      'lastError': lastError,
+    };
   }
 
   Plugin copyWith({

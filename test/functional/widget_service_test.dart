@@ -1,7 +1,7 @@
+import 'package:crossbar/models/plugin_output.dart';
+import 'package:crossbar/services/widget_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:crossbar/services/widget_service.dart';
-import 'package:crossbar/models/plugin_output.dart';
 
 void main() {
   group('WidgetDataBuilder', () {
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('fromPluginOutput creates builder from PluginOutput', () {
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: 'disk-space',
         text: '250 GB free',
         icon: '💾',
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('fromPluginOutput handles null icon', () {
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: 'test',
         text: 'Hello',
         icon: '📦',
@@ -103,11 +103,11 @@ void main() {
     });
 
     test('fromPluginOutput converts color to hex string', () {
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: 'test',
         text: 'Test',
         icon: '🎨',
-        color: const Color(0xFFFF5733),
+        color: Color(0xFFFF5733),
         hasError: false,
         menu: [],
       );
@@ -118,7 +118,7 @@ void main() {
     });
 
     test('fromPluginOutput creates correct deepLink', () {
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: 'weather-widget',
         text: '25°C',
         icon: '🌤️',
@@ -132,7 +132,7 @@ void main() {
     });
 
     test('fromPluginOutput handles empty text', () {
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: 'empty-plugin',
         text: '',
         icon: '',

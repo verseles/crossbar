@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:crossbar/core/api/system_api.dart';
 import 'package:crossbar/core/api/network_api.dart';
+import 'package:crossbar/core/api/system_api.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Functional tests for CLI commands.
 /// These tests execute real system commands and validate their output.
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('getOs returns operating system name', () async {
-      final os = await systemApi.getOs();
+      final os = systemApi.getOs();
 
       expect(os, isNotEmpty);
       if (Platform.isLinux) {
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('getOsDetails returns detailed OS info', () async {
-      final details = await systemApi.getOsDetails();
+      final details = systemApi.getOsDetails();
 
       expect(details, isNotEmpty);
     });

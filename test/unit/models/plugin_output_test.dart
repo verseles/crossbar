@@ -1,6 +1,6 @@
+import 'package:crossbar/models/plugin_output.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:crossbar/models/plugin_output.dart';
 
 void main() {
   group('PluginOutput', () {

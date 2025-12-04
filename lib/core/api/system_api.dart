@@ -43,7 +43,7 @@ class SystemApi {
 
     if (totalDelta == 0) return '0.0';
 
-    final usage = ((totalDelta - idleDelta) / totalDelta * 100);
+    final usage = (totalDelta - idleDelta) / totalDelta * 100;
     return usage.toStringAsFixed(1);
   }
 
@@ -220,7 +220,7 @@ class SystemApi {
     if (!await capacityFile.exists()) return 'N/A';
 
     final capacity = (await capacityFile.readAsString()).trim();
-    String status = '';
+    var status = '';
 
     if (await statusFile.exists()) {
       final statusValue = (await statusFile.readAsString()).trim().toLowerCase();

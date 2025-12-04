@@ -1,21 +1,21 @@
 import 'dart:io';
 
-import 'commands/base_command.dart';
 import 'commands/audio_command.dart';
-import 'commands/media_command.dart';
-import 'commands/screen_command.dart';
-import 'commands/power_command.dart';
-import 'commands/dnd_command.dart';
-import 'commands/wallpaper_command.dart';
-import 'commands/network_command.dart';
-import 'commands/wifi_command.dart';
+import 'commands/base_command.dart';
 import 'commands/bluetooth_command.dart';
-import 'commands/vpn_command.dart';
 import 'commands/clipboard_command.dart';
+import 'commands/dnd_command.dart';
 import 'commands/filesystem_commands.dart';
-import 'commands/utility_commands.dart';
-import 'commands/system_info_commands.dart';
+import 'commands/media_command.dart';
+import 'commands/network_command.dart';
 import 'commands/plugin_commands.dart';
+import 'commands/power_command.dart';
+import 'commands/screen_command.dart';
+import 'commands/system_info_commands.dart';
+import 'commands/utility_commands.dart';
+import 'commands/vpn_command.dart';
+import 'commands/wallpaper_command.dart';
+import 'commands/wifi_command.dart';
 
 const String version = '1.1.0';
 

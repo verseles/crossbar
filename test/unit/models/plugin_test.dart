@@ -1,14 +1,14 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/models/plugin.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Plugin', () {
     test('creates plugin with required parameters', () {
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       expect(plugin.id, 'test.10s.sh');
@@ -60,11 +60,11 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       final json = plugin.toJson();
@@ -116,11 +116,11 @@ void main() {
     });
 
     test('copyWith creates new instance with updated values', () {
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       final updated = plugin.copyWith(enabled: false);
@@ -131,11 +131,11 @@ void main() {
     });
 
     test('copyWith preserves original values when not specified', () {
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
         enabled: false,
       );
 
@@ -150,11 +150,11 @@ void main() {
     });
 
     test('toString returns readable representation', () {
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       expect(plugin.toString(), contains('test.10s.sh'));
@@ -162,25 +162,25 @@ void main() {
     });
 
     test('equality comparison works correctly', () {
-      final plugin1 = Plugin(
+      const plugin1 = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
-      final plugin2 = Plugin(
+      const plugin2 = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
-      final plugin3 = Plugin(
+      const plugin3 = Plugin(
         id: 'other.5m.py',
         path: '/path/to/other.5m.py',
         interpreter: 'python3',
-        refreshInterval: const Duration(minutes: 5),
+        refreshInterval: Duration(minutes: 5),
       );
 
       expect(plugin1, equals(plugin2));
@@ -188,18 +188,18 @@ void main() {
     });
 
     test('hashCode is consistent', () {
-      final plugin1 = Plugin(
+      const plugin1 = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
-      final plugin2 = Plugin(
+      const plugin2 = Plugin(
         id: 'test.10s.sh',
         path: '/path/to/test.10s.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       expect(plugin1.hashCode, equals(plugin2.hashCode));

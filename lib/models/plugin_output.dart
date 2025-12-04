@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 
 class PluginOutput {
-  final String pluginId;
-  final String icon;
-  final String? text;
-  final Color? color;
-  final String? trayTooltip;
-  final List<MenuItem> menu;
-  final bool hasError;
-  final String? errorMessage;
 
   const PluginOutput({
     required this.pluginId,
@@ -38,6 +30,14 @@ class PluginOutput {
       text: '',
     );
   }
+  final String pluginId;
+  final String icon;
+  final String? text;
+  final Color? color;
+  final String? trayTooltip;
+  final List<MenuItem> menu;
+  final bool hasError;
+  final String? errorMessage;
 
   PluginOutput copyWith({
     String? pluginId,
@@ -81,12 +81,6 @@ class PluginOutput {
 }
 
 class MenuItem {
-  final String? text;
-  final bool separator;
-  final String? bash;
-  final String? href;
-  final String? color;
-  final List<MenuItem>? submenu;
 
   const MenuItem({
     this.text,
@@ -101,17 +95,6 @@ class MenuItem {
     return const MenuItem(separator: true);
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      if (text != null) 'text': text,
-      'separator': separator,
-      if (bash != null) 'bash': bash,
-      if (href != null) 'href': href,
-      if (color != null) 'color': color,
-      if (submenu != null) 'submenu': submenu!.map((s) => s.toJson()).toList(),
-    };
-  }
-
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
       text: json['text'] as String?,
@@ -123,6 +106,23 @@ class MenuItem {
           ?.map((s) => MenuItem.fromJson(s as Map<String, dynamic>))
           .toList(),
     );
+  }
+  final String? text;
+  final bool separator;
+  final String? bash;
+  final String? href;
+  final String? color;
+  final List<MenuItem>? submenu;
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (text != null) 'text': text,
+      'separator': separator,
+      if (bash != null) 'bash': bash,
+      if (href != null) 'href': href,
+      if (color != null) 'color': color,
+      if (submenu != null) 'submenu': submenu!.map((s) => s.toJson()).toList(),
+    };
   }
 
   MenuItem copyWith({

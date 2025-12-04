@@ -284,15 +284,15 @@ class _PluginsTabState extends State<PluginsTab> {
 }
 
 class _PluginCard extends StatelessWidget {
-  final Plugin plugin;
-  final VoidCallback onToggle;
-  final VoidCallback onTap;
 
   const _PluginCard({
     required this.plugin,
     required this.onToggle,
     required this.onTap,
   });
+  final Plugin plugin;
+  final VoidCallback onToggle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -329,13 +329,13 @@ class _PluginCard extends StatelessWidget {
 }
 
 class _LanguageChip extends StatelessWidget {
-  final String label;
-  final String extension;
 
   const _LanguageChip({
     required this.label,
     required this.extension,
   });
+  final String label;
+  final String extension;
 
   @override
   Widget build(BuildContext context) {
@@ -347,15 +347,15 @@ class _LanguageChip extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isError;
 
   const _DetailRow({
     required this.label,
     required this.value,
     this.isError = false,
   });
+  final String label;
+  final String value;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {

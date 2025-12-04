@@ -30,7 +30,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
         ]);
         return result.exitCode == 0;
       }
@@ -57,7 +57,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
         ]);
         return result.exitCode == 0;
       }
@@ -84,7 +84,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB3)',
         ]);
         return result.exitCode == 0;
       }
@@ -111,7 +111,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB2)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB2)',
         ]);
         return result.exitCode == 0;
       }
@@ -138,7 +138,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB0)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB0)',
         ]);
         return result.exitCode == 0;
       }
@@ -165,7 +165,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]0xB1)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]0xB1)',
         ]);
         return result.exitCode == 0;
       }
@@ -330,7 +330,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'[Audio]::Volume * 100',
+          '[Audio]::Volume * 100',
         ]);
         return int.tryParse((result.stdout as String).trim()) ?? 0;
       }
@@ -397,7 +397,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'[Audio]::Mute',
+          '[Audio]::Mute',
         ]);
         return (result.stdout as String).trim().toLowerCase() == 'true';
       }
@@ -431,7 +431,7 @@ class MediaApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          r'(New-Object -ComObject WScript.Shell).SendKeys([char]173)',
+          '(New-Object -ComObject WScript.Shell).SendKeys([char]173)',
         ]);
         return result.exitCode == 0;
       }

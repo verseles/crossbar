@@ -129,9 +129,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () {
-              _showInstallFromUrlDialog();
-            },
+            onPressed: _showInstallFromUrlDialog,
             icon: const Icon(Icons.link),
             label: const Text('Install from URL'),
           ),

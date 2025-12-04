@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/services/ipc_server.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Functional tests for IPC Server.
 /// These tests start a real HTTP server and make real HTTP requests.

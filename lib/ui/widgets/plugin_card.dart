@@ -4,11 +4,6 @@ import '../../models/plugin.dart';
 import '../../models/plugin_output.dart';
 
 class PluginCard extends StatelessWidget {
-  final Plugin plugin;
-  final PluginOutput? output;
-  final VoidCallback? onTap;
-  final VoidCallback? onToggle;
-  final VoidCallback? onRefresh;
 
   const PluginCard({
     super.key,
@@ -18,6 +13,11 @@ class PluginCard extends StatelessWidget {
     this.onToggle,
     this.onRefresh,
   });
+  final Plugin plugin;
+  final PluginOutput? output;
+  final VoidCallback? onTap;
+  final VoidCallback? onToggle;
+  final VoidCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -184,9 +184,6 @@ class PluginCard extends StatelessWidget {
 }
 
 class PluginTile extends StatelessWidget {
-  final Plugin plugin;
-  final PluginOutput? output;
-  final VoidCallback? onTap;
 
   const PluginTile({
     super.key,
@@ -194,6 +191,9 @@ class PluginTile extends StatelessWidget {
     this.output,
     this.onTap,
   });
+  final Plugin plugin;
+  final PluginOutput? output;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

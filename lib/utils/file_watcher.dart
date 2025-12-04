@@ -4,15 +4,15 @@ import 'dart:io';
 typedef FileChangeCallback = void Function(String path, FileSystemEvent event);
 
 class FileWatcher {
-  final Map<String, Timer> _debouncer = {};
-  final Duration _debounceDelay;
-  StreamSubscription<FileSystemEvent>? _subscription;
-  final FileChangeCallback? onFileChanged;
 
   FileWatcher({
     Duration debounceDelay = const Duration(seconds: 1),
     this.onFileChanged,
   }) : _debounceDelay = debounceDelay;
+  final Map<String, Timer> _debouncer = {};
+  final Duration _debounceDelay;
+  StreamSubscription<FileSystemEvent>? _subscription;
+  final FileChangeCallback? onFileChanged;
 
   static const List<String> _watchedExtensions = [
     '.sh',
