@@ -9,7 +9,8 @@
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
-- **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test`) e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
+- **Leitura Inicial**: Sempre leia `original_plan.md` e `MASTER_PLAN.md` no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test --coverage`), verificar coverage mínimo de 43% e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
@@ -136,8 +137,8 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 | Ação | Comando |
 |------|---------|
-| Rodar Testes | `flutter test` |
-| Verificar Coverage | `make test` |
+| Rodar Testes | `flutter test --coverage` |
+| Verificar Coverage | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info) |
 | Build Release (Linux) | `make linux` |
 | Analisar Código | `flutter analyze --no-fatal-infos` |
 | Monitorar CI | `gh run watch` |
