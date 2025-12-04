@@ -9,7 +9,7 @@
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
-- **Testes**: **JAMAIS** commite código sem rodar testes (`flutter test`). Se alterar UI/Lógica, adicione novos testes.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test`) e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
