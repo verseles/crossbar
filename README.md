@@ -94,7 +94,8 @@ Download the latest release from [GitHub Releases](https://github.com/verseles/c
 
 **Linux**: Extract `crossbar-linux.zip` and run:
 ```bash
-./crossbar          # Launch GUI
+./crossbar          # Launch (Start in Tray)
+./crossbar gui      # Launch GUI (Open Window)
 ./crossbar --help   # Show CLI commands
 ./crossbar --cpu    # Example CLI usage
 ```

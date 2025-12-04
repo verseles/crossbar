@@ -1,12 +1,11 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:tray_manager/tray_manager.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart' hide MenuItem;
 import 'scheduler_service.dart';
+import 'window_service.dart';
 
 class TrayService with TrayListener {
   factory TrayService() => _instance;
@@ -17,9 +16,6 @@ class TrayService with TrayListener {
 
   final PluginManager _pluginManager = PluginManager();
   final Map<String, PluginOutput> _pluginOutputs = {};
-
-  VoidCallback? onShowWindow;
-  VoidCallback? onQuit;
 
   bool _initialized = false;
 
@@ -49,6 +45,7 @@ class TrayService with TrayListener {
     }
 
     final iconFile = File(iconPath);
+    // ignore: avoid_slow_async_io
     if (await iconFile.exists()) {
       await trayManager.setIcon(iconPath);
     }
@@ -117,7 +114,7 @@ class TrayService with TrayListener {
         .firstOrNull;
 
     if (firstEnabled?.id == pluginId) {
-      String title = '';
+      var title = '';
       // Use emoji icon from plugin output if available
       if (output.icon.isNotEmpty && output.icon != '⚙️') {
         title += '${output.icon} ';
@@ -136,7 +133,7 @@ class TrayService with TrayListener {
 
   @override
   void onTrayIconMouseDown() {
-    onShowWindow?.call();
+    WindowService().show();
   }
 
   @override
@@ -148,11 +145,11 @@ class TrayService with TrayListener {
   void onTrayMenuItemClick(MenuItem menuItem) {
     switch (menuItem.key) {
       case 'show':
-        onShowWindow?.call();
+        WindowService().show();
       case 'refresh':
         _refreshAllPlugins();
       case 'quit':
-        onQuit?.call();
+        WindowService().quit();
     }
   }
 
@@ -166,80 +163,6 @@ class TrayService with TrayListener {
 
     trayManager.removeListener(this);
     await trayManager.destroy();
-    _initialized = false;
-  }
-}
-
-class WindowService with WindowListener {
-  factory WindowService() => _instance;
-
-  WindowService._internal();
-
-  static final WindowService _instance = WindowService._internal();
-
-  bool _initialized = false;
-  bool minimizeToTray = true;
-
-  Future<void> init() async {
-    if (_initialized) return;
-    if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) {
-      return;
-    }
-
-    await windowManager.ensureInitialized();
-
-    const windowOptions = WindowOptions(
-      size: Size(900, 600),
-      minimumSize: Size(600, 400),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal,
-      title: 'Crossbar',
-    );
-
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-
-    windowManager.addListener(this);
-    _initialized = true;
-  }
-
-  Future<void> show() async {
-    await windowManager.show();
-    await windowManager.focus();
-  }
-
-  Future<void> hide() async {
-    await windowManager.hide();
-  }
-
-  Future<void> close() async {
-    await windowManager.close();
-  }
-
-  @override
-  void onWindowClose() async {
-    if (minimizeToTray) {
-      await hide();
-    } else {
-      await windowManager.destroy();
-    }
-  }
-
-  @override
-  void onWindowMinimize() {
-    if (minimizeToTray) {
-      hide();
-    }
-  }
-
-  Future<void> dispose() async {
-    if (!_initialized) return;
-
-    windowManager.removeListener(this);
     _initialized = false;
   }
 }

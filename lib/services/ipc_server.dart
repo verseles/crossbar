@@ -3,10 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../core/plugin_manager.dart';
+import 'window_service.dart';
 
 /// IPC Server for GUI ↔ background communication
 /// Runs on localhost:48291 and provides REST API for plugin management
 class IpcServer {
+  IpcServer({
+    PluginManager? pluginManager,
+    this.port = defaultPort,
+  }) : _pluginManager = pluginManager ?? PluginManager();
+
   static const int defaultPort = 48291;
   static const String host = 'localhost';
 
@@ -15,11 +21,6 @@ class IpcServer {
   final int port;
 
   bool get isRunning => _server != null;
-
-  IpcServer({
-    PluginManager? pluginManager,
-    this.port = defaultPort,
-  }) : _pluginManager = pluginManager ?? PluginManager();
 
   /// Start the IPC server
   Future<bool> start() async {
@@ -70,6 +71,12 @@ class IpcServer {
           await _handleRefresh(request);
         case '/health':
           await _handleHealth(request);
+        case '/window/show':
+          await _handleWindowAction(request, 'show');
+        case '/window/hide':
+          await _handleWindowAction(request, 'hide');
+        case '/window/quit':
+          await _handleWindowAction(request, 'quit');
         default:
           if (path.startsWith('/plugins/')) {
             await _handlePluginAction(request, path);
@@ -142,6 +149,28 @@ class IpcServer {
     }
 
     _sendJson(request, {'status': 'healthy', 'timestamp': DateTime.now().toIso8601String()});
+  }
+
+  /// Handle window actions (show, hide, quit)
+  Future<void> _handleWindowAction(HttpRequest request, String action) async {
+    if (request.method != 'GET' && request.method != 'POST') {
+      _sendError(request, HttpStatus.methodNotAllowed, 'Method not allowed');
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'show':
+          await WindowService().show();
+        case 'hide':
+          await WindowService().hide();
+        case 'quit':
+          await WindowService().quit();
+      }
+      _sendJson(request, {'status': 'ok', 'action': action});
+    } catch (e) {
+      _sendError(request, HttpStatus.internalServerError, e.toString());
+    }
   }
 
   /// Handle plugin-specific actions
