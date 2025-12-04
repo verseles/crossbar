@@ -77,7 +77,15 @@ class AudioCommand extends CliCommand {
 
     if (values.isNotEmpty) {
        final val = values[0].toLowerCase();
-       if (val == 'on' || val == 'true') {
+       if (val == 'status') {
+         final isMuted = await api.isMuted();
+         printFormatted(
+             {'muted': isMuted},
+             json: json, xml: xml,
+             plain: (_) => isMuted ? 'Muted' : 'Unmuted'
+         );
+         return 0;
+       } else if (val == 'on' || val == 'true') {
            final isMuted = await api.isMuted();
            if (!isMuted) await api.toggleMute();
            printFormatted(
