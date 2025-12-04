@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'core/plugin_manager.dart';
 import 'services/hot_reload_service.dart';
+import 'services/ipc_server.dart';
 import 'services/logger_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
+import 'services/tray_service.dart';
 import 'ui/main_window.dart';
 
 void main(List<String> args) async {
@@ -41,10 +43,24 @@ void main(List<String> args) async {
     await pluginManager.discoverPlugins();
     logger.info('Discovered ${pluginManager.plugins.length} plugins');
 
+    // Initialize tray service
+    final trayService = TrayService();
+    await trayService.init();
+    logger.info('Tray service initialized');
+
     // Start scheduler
     final scheduler = SchedulerService();
+    // Connect tray to scheduler before starting, so we catch initial runs if any
+    scheduler.addListener((pluginId, output) {
+      trayService.updatePluginOutput(pluginId, output);
+    });
     await scheduler.start();
     logger.info('Scheduler started');
+
+    // Initialize IPC server
+    final ipcServer = IpcServer();
+    await ipcServer.start();
+    logger.info('IPC server started on port ${ipcServer.port}');
 
     // Initialize hot reload
     final hotReload = HotReloadService();

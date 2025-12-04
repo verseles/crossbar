@@ -6,16 +6,18 @@ import 'package:window_manager/window_manager.dart';
 
 import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart' hide MenuItem;
+import 'scheduler_service.dart';
 
 class TrayService with TrayListener {
-  static final TrayService _instance = TrayService._internal();
-
   factory TrayService() => _instance;
 
   TrayService._internal();
 
+  static final TrayService _instance = TrayService._internal();
+
   final PluginManager _pluginManager = PluginManager();
   final Map<String, PluginOutput> _pluginOutputs = {};
+
   VoidCallback? onShowWindow;
   VoidCallback? onQuit;
 
@@ -93,6 +95,7 @@ class TrayService with TrayListener {
   void updatePluginOutput(String pluginId, PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _updateMenu();
+    _updateTitle(pluginId, output);
 
     // Update tray tooltip
     if (_pluginOutputs.isNotEmpty) {
@@ -104,6 +107,25 @@ class TrayService with TrayListener {
         }
       }
       trayManager.setToolTip(tooltipParts.join(' | '));
+    }
+  }
+
+  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
+    // Find the first enabled plugin to use as the main tray title
+    final firstEnabled = _pluginManager.plugins
+        .where((p) => p.enabled)
+        .firstOrNull;
+
+    if (firstEnabled?.id == pluginId) {
+      String title = '';
+      // Use emoji icon from plugin output if available
+      if (output.icon.isNotEmpty && output.icon != '⚙️') {
+        title += '${output.icon} ';
+      }
+      if (output.text != null) {
+        title += output.text!;
+      }
+      await trayManager.setTitle(title);
     }
   }
 
@@ -135,10 +157,8 @@ class TrayService with TrayListener {
   }
 
   Future<void> _refreshAllPlugins() async {
-    final outputs = await _pluginManager.runAllEnabled();
-    for (final output in outputs) {
-      updatePluginOutput(output.pluginId, output);
-    }
+    // Delegate to SchedulerService to ensure consistency
+    await SchedulerService().refreshAll();
   }
 
   Future<void> dispose() async {
@@ -151,17 +171,14 @@ class TrayService with TrayListener {
 }
 
 class WindowService with WindowListener {
-  static final WindowService _instance = WindowService._internal();
-
   factory WindowService() => _instance;
 
   WindowService._internal();
 
-  bool _initialized = false;
-  bool _minimizeToTray = true;
+  static final WindowService _instance = WindowService._internal();
 
-  bool get minimizeToTray => _minimizeToTray;
-  set minimizeToTray(bool value) => _minimizeToTray = value;
+  bool _initialized = false;
+  bool minimizeToTray = true;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -205,7 +222,7 @@ class WindowService with WindowListener {
 
   @override
   void onWindowClose() async {
-    if (_minimizeToTray) {
+    if (minimizeToTray) {
       await hide();
     } else {
       await windowManager.destroy();
@@ -214,7 +231,7 @@ class WindowService with WindowListener {
 
   @override
   void onWindowMinimize() {
-    if (_minimizeToTray) {
+    if (minimizeToTray) {
       hide();
     }
   }
