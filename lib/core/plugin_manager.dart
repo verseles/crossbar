@@ -80,7 +80,7 @@ class PluginManager {
     }
 
     await for (final entity in pluginsDir.list()) {
-      if (entity is File && _isExecutableFile(entity.path)) {
+      if (entity is File && _isValidPluginFile(entity.path)) {
         final plugin = await _createPluginFromFile(entity);
         if (plugin != null) {
           _plugins.add(plugin);
@@ -88,7 +88,7 @@ class PluginManager {
       } else if (entity is Directory) {
         // Check subdirectories (git repos) but only 1 level deep
         await for (final subEntity in entity.list()) {
-          if (subEntity is File && _isExecutableFile(subEntity.path)) {
+          if (subEntity is File && _isValidPluginFile(subEntity.path)) {
             final plugin = await _createPluginFromFile(subEntity);
             if (plugin != null) {
               _plugins.add(plugin);
@@ -99,7 +99,7 @@ class PluginManager {
     }
   }
 
-  bool _isExecutableFile(String filePath) {
+  bool _isValidPluginFile(String filePath) {
     final ext = path.extension(filePath).toLowerCase();
     return allowedExtensions.contains(ext);
   }
@@ -112,12 +112,33 @@ class PluginManager {
 
     final refreshInterval = _parseRefreshInterval(fileName);
 
+    // Determine enabled state
+    bool isEnabled = true;
+
+    // 1. Check filename for .off.
+    if (fileName.contains('.off.')) {
+      isEnabled = false;
+    }
+    // 2. Check permissions on Unix
+    else if (Platform.isLinux || Platform.isMacOS) {
+      try {
+        final stat = await file.stat();
+        // Check if executable bit is set for user (00100 -> 0x40)
+        // 0x49 = 0111 octal (user, group, other exec)
+        if ((stat.mode & 0x49) == 0) {
+          isEnabled = false;
+        }
+      } catch (_) {
+        // Ignore errors, default to true
+      }
+    }
+
     return Plugin(
       id: fileName,
       path: file.path,
       interpreter: interpreter,
       refreshInterval: refreshInterval,
-      enabled: true,
+      enabled: isEnabled,
     );
   }
 
@@ -217,26 +238,99 @@ class PluginManager {
     }
   }
 
-  void togglePlugin(String pluginId) {
-    final index = _plugins.indexWhere((p) => p.id == pluginId);
+  Future<void> togglePlugin(String pluginId) async {
+    final plugin = getPlugin(pluginId);
+    if (plugin == null) return;
+
+    if (plugin.enabled) {
+      await disablePlugin(pluginId);
+    } else {
+      await enablePlugin(pluginId);
+    }
+  }
+
+  Future<void> enablePlugin(String pluginId) async {
+    final plugin = getPlugin(pluginId);
+    if (plugin == null) return;
+
+    var newPath = plugin.path;
+    var newId = plugin.id;
+
+    // 1. Rename if contains .off.
+    if (plugin.id.contains('.off.')) {
+      newId = plugin.id.replaceFirst('.off.', '.');
+      final dir = path.dirname(plugin.path);
+      newPath = path.join(dir, newId);
+
+      try {
+        await File(plugin.path).rename(newPath);
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error renaming file: $e');
+        return;
+      }
+    }
+
+    // 2. Chmod +x
+    if (Platform.isLinux || Platform.isMacOS) {
+      try {
+        await Process.run('chmod', ['+x', newPath]);
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error chmod +x: $e');
+      }
+    }
+
+    // 3. Update list
+    _updatePluginInList(pluginId, newId, newPath, true);
+  }
+
+  Future<void> disablePlugin(String pluginId) async {
+    final plugin = getPlugin(pluginId);
+    if (plugin == null) return;
+
+    var newPath = plugin.path;
+    var newId = plugin.id;
+
+    // 1. Rename to add .off. if not present
+    if (!plugin.id.contains('.off.')) {
+      final ext = path.extension(plugin.id);
+      final base = path.withoutExtension(plugin.id);
+      newId = '$base.off$ext';
+      final dir = path.dirname(plugin.path);
+      newPath = path.join(dir, newId);
+
+      try {
+        await File(plugin.path).rename(newPath);
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error renaming: $e');
+        return;
+      }
+    }
+
+    // 2. Chmod -x
+    if (Platform.isLinux || Platform.isMacOS) {
+      try {
+        await Process.run('chmod', ['-x', newPath]);
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error chmod -x: $e');
+      }
+    }
+
+    // 3. Update list
+    _updatePluginInList(pluginId, newId, newPath, false);
+  }
+
+  void _updatePluginInList(String oldId, String newId, String newPath, bool enabled) {
+    final index = _plugins.indexWhere((p) => p.id == oldId);
     if (index >= 0) {
       _plugins[index] = _plugins[index].copyWith(
-        enabled: !_plugins[index].enabled,
+        id: newId,
+        path: newPath,
+        enabled: enabled,
       );
-    }
-  }
-
-  void enablePlugin(String pluginId) {
-    final index = _plugins.indexWhere((p) => p.id == pluginId);
-    if (index >= 0) {
-      _plugins[index] = _plugins[index].copyWith(enabled: true);
-    }
-  }
-
-  void disablePlugin(String pluginId) {
-    final index = _plugins.indexWhere((p) => p.id == pluginId);
-    if (index >= 0) {
-      _plugins[index] = _plugins[index].copyWith(enabled: false);
     }
   }
 

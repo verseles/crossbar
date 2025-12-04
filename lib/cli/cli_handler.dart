@@ -76,6 +76,7 @@ void _registerCommands() {
   // Plugin
   _register(InitCommand());
   _register(InstallCommand());
+  _register(RunPluginCommand());
 }
 
 void _register(CliCommand command) {

@@ -81,9 +81,11 @@ class _PluginsTabState extends State<PluginsTab> {
         final plugin = plugins[index];
         return _PluginCard(
           plugin: plugin,
-          onToggle: () {
-            _pluginManager.togglePlugin(plugin.id);
-            setState(() {});
+          onToggle: () async {
+            await _pluginManager.togglePlugin(plugin.id);
+            if (mounted) {
+              await _refreshPlugins();
+            }
           },
           onTap: () {
             _showPluginDetails(context, plugin);

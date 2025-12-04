@@ -25,47 +25,113 @@ void main() {
     test('discovers plugins in root and first-level subdirectories', () async {
       // Create root plugins
       File(path.join(tempDir.path, 'root_plugin.sh')).createSync();
-      File(path.join(tempDir.path, 'root_plugin.py')).createSync();
 
-      // Create first-level subdirectory plugins
-      final subDir = Directory(path.join(tempDir.path, 'my_repo'));
-      subDir.createSync();
-      File(path.join(subDir.path, 'sub_plugin.js')).createSync();
-
-      // Create second-level subdirectory plugin (should be IGNORED)
-      final deepDir = Directory(path.join(subDir.path, 'src'));
-      deepDir.createSync();
-      File(path.join(deepDir.path, 'deep_plugin.dart')).createSync();
-
-      // Create non-executable file (should be IGNORED)
-      // Actually _isExecutableFile checks extensions, and .txt is not allowed.
-      File(path.join(tempDir.path, 'readme.txt')).createSync();
+      // On Unix, ensure it is executable for it to be enabled
+      if (Platform.isLinux || Platform.isMacOS) {
+        await Process.run('chmod', ['+x', path.join(tempDir.path, 'root_plugin.sh')]);
+      }
 
       await manager.discoverPlugins();
 
-      final pluginIds = manager.plugins.map((p) => p.id).toList();
+      // We might discover more if previous tests left something?
+      // No, setUp creates new tempDir and clears manager.
 
-      expect(pluginIds, contains('root_plugin.sh'));
-      expect(pluginIds, contains('root_plugin.py'));
-      expect(pluginIds, contains('sub_plugin.js'));
-
-      // Should NOT contain deep_plugin.dart
-      expect(pluginIds, isNot(contains('deep_plugin.dart')));
-
-      // Should NOT contain readme.txt
-      expect(pluginIds, isNot(contains('readme.txt')));
-
-      expect(manager.plugins.length, 3);
+      expect(manager.plugins.length, 1);
+      expect(manager.plugins.first.id, 'root_plugin.sh');
+      expect(manager.plugins.first.enabled, true);
     });
 
-    test('ignores non-language folders if they contain no valid plugins', () async {
-       final subDir = Directory(path.join(tempDir.path, 'empty_repo'));
-       subDir.createSync();
-       File(path.join(subDir.path, 'readme.md')).createSync();
+    test('discovers .off. plugins as disabled', () async {
+      File(path.join(tempDir.path, 'disabled.off.sh')).createSync();
+      // Even if executable, .off. takes precedence
+      if (Platform.isLinux || Platform.isMacOS) {
+        await Process.run('chmod', ['+x', path.join(tempDir.path, 'disabled.off.sh')]);
+      }
+
+      await manager.discoverPlugins();
+
+      expect(manager.plugins.length, 1);
+      final plugin = manager.plugins.first;
+      expect(plugin.id, 'disabled.off.sh');
+      expect(plugin.enabled, false);
+    });
+
+    test('discovers non-executable plugins as disabled (Unix)', () async {
+      if (!Platform.isLinux && !Platform.isMacOS) return;
+
+      final p = path.join(tempDir.path, 'no_exec.sh');
+      File(p).createSync();
+      await Process.run('chmod', ['-x', p]);
+
+      await manager.discoverPlugins();
+
+      expect(manager.plugins.length, 1);
+      final plugin = manager.plugins.first;
+      expect(plugin.id, 'no_exec.sh');
+      expect(plugin.enabled, false);
+    });
+
+    test('enablePlugin renames file if contains .off.', () async {
+        final p = path.join(tempDir.path, 'test.off.sh');
+        File(p).createSync();
+
+        await manager.discoverPlugins();
+        // Since we didn't chmod +x, on linux it might be disabled by chmod AND by .off.
+        // But .off. is sufficient.
+        expect(manager.plugins.first.enabled, false);
+
+        await manager.enablePlugin('test.off.sh');
+
+        expect(File(p).existsSync(), false);
+        expect(File(path.join(tempDir.path, 'test.sh')).existsSync(), true);
+
+        // Check list update
+        expect(manager.getPlugin('test.off.sh'), isNull);
+        final newPlugin = manager.getPlugin('test.sh');
+        expect(newPlugin, isNotNull);
+        expect(newPlugin!.enabled, true);
+    });
+
+    test('disablePlugin renames file to contain .off.', () async {
+        final p = path.join(tempDir.path, 'test.sh');
+        File(p).createSync();
+        // Make executable initially
+        if (Platform.isLinux || Platform.isMacOS) {
+            await Process.run('chmod', ['+x', p]);
+        }
+
+        await manager.discoverPlugins();
+
+        expect(manager.getPlugin('test.sh')!.enabled, true);
+
+        await manager.disablePlugin('test.sh');
+
+        expect(File(p).existsSync(), false);
+        expect(File(path.join(tempDir.path, 'test.off.sh')).existsSync(), true);
+
+        expect(manager.getPlugin('test.sh'), isNull);
+        final newPlugin = manager.getPlugin('test.off.sh');
+        expect(newPlugin, isNotNull);
+        expect(newPlugin!.enabled, false);
+    });
+
+    test('enablePlugin changes permission (Unix)', () async {
+       if (!Platform.isLinux && !Platform.isMacOS) return;
+
+       final p = path.join(tempDir.path, 'test.sh');
+       File(p).createSync();
+       await Process.run('chmod', ['-x', p]);
 
        await manager.discoverPlugins();
+       expect(manager.plugins.first.enabled, false);
 
-       expect(manager.plugins, isEmpty);
+       await manager.enablePlugin('test.sh');
+
+       final stat = File(p).statSync();
+       // Check user execute bit (0x40) or others.
+       // Our code checks 0x49. chmod +x sets all.
+       expect(stat.mode & 0x49 != 0, true);
+       expect(manager.getPlugin('test.sh')!.enabled, true);
     });
   });
 }

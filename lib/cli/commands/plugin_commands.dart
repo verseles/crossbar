@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import '../../core/plugin_manager.dart';
 import '../plugin_scaffolding.dart';
 import 'base_command.dart';
 
@@ -158,5 +159,68 @@ class InstallCommand extends CliCommand {
       return 1;
     }
     return 0;
+  }
+}
+
+class RunPluginCommand extends CliCommand {
+  @override
+  String get name => 'run';
+
+  @override
+  String get description => 'Run a specific plugin immediately';
+
+  @override
+  Future<int> execute(List<String> args) async {
+    final values = args.where((a) => !a.startsWith('--')).toList();
+
+    if (values.isEmpty) {
+      stderr.writeln('Error: Plugin ID is required');
+      stderr.writeln('Usage: crossbar run <plugin-id>');
+      return 1;
+    }
+
+    final pluginId = values[0];
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
+
+    // We need to initialize PluginManager and discover plugins
+    final manager = PluginManager();
+    await manager.discoverPlugins();
+
+    final plugin = manager.getPlugin(pluginId);
+    if (plugin == null) {
+        stderr.writeln('Error: Plugin not found: $pluginId');
+        return 1;
+    }
+
+    // We run it regardless of enabled state (manual run)
+    final output = await manager.runPlugin(pluginId);
+
+    if (output == null) {
+         stderr.writeln('Error: Failed to run plugin');
+         return 1;
+    }
+
+    printFormatted(
+        {
+          'success': !output.hasError,
+          'plugin': pluginId,
+          'output': {
+             'text': output.text,
+             'icon': output.icon,
+             'error': output.errorMessage
+          }
+        },
+        json: jsonOutput,
+        xml: xmlOutput,
+        plain: (_) {
+            if (output.hasError) {
+                return 'Error: ${output.errorMessage}';
+            }
+            return '${output.icon} ${output.text ?? ""}';
+        }
+    );
+
+    return output.hasError ? 1 : 0;
   }
 }
