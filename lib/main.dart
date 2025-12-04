@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'services/logger_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
 import 'services/tray_service.dart';
+import 'services/window_service.dart';
 import 'ui/main_window.dart';
 
 void main(List<String> args) async {
@@ -32,6 +34,12 @@ void main(List<String> args) async {
     final logger = LoggerService();
     await logger.init();
     logger.info('Crossbar starting...');
+
+    // Initialize WindowService
+    final startMinimized = args.contains('--minimized');
+    final windowService = WindowService();
+    await windowService.init(startMinimized: startMinimized);
+    logger.info('Window service initialized (minimized: $startMinimized)');
 
     // Initialize settings
     final settings = SettingsService();
@@ -59,7 +67,32 @@ void main(List<String> args) async {
 
     // Initialize IPC server
     final ipcServer = IpcServer();
-    await ipcServer.start();
+    final ipcStarted = await ipcServer.start();
+
+    if (!ipcStarted) {
+      logger.info('IPC server failed to start (port busy). Another instance is likely running.');
+
+      if (!startMinimized) {
+        // If we wanted to start visible, try to tell the existing instance to show itself
+        logger.info('Attempting to signal existing instance to show window...');
+        try {
+          final client = HttpClient();
+          final request = await client.getUrl(Uri.parse('http://localhost:${IpcServer.defaultPort}/window/show'));
+          final response = await request.close();
+          if (response.statusCode == HttpStatus.ok) {
+            logger.info('Signal sent successfully.');
+          } else {
+            logger.info('Signal sent but received status ${response.statusCode}');
+          }
+        } catch (e) {
+          logger.info('Failed to contact existing instance: $e');
+        }
+      }
+
+      logger.info('Exiting application.');
+      exit(0);
+    }
+
     logger.info('IPC server started on port ${ipcServer.port}');
 
     // Initialize hot reload
