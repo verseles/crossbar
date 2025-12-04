@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/utils/logger.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Logger', () {

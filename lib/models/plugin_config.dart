@@ -1,9 +1,4 @@
 class PluginConfig {
-  final String name;
-  final String description;
-  final String icon;
-  final String configRequired;
-  final List<Setting> settings;
 
   const PluginConfig({
     required this.name,
@@ -12,16 +7,6 @@ class PluginConfig {
     required this.configRequired,
     required this.settings,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description,
-      'icon': icon,
-      'config_required': configRequired,
-      'settings': settings.map((s) => s.toJson()).toList(),
-    };
-  }
 
   factory PluginConfig.fromJson(Map<String, dynamic> json) {
     return PluginConfig(
@@ -34,6 +19,21 @@ class PluginConfig {
               .toList() ??
           [],
     );
+  }
+  final String name;
+  final String description;
+  final String icon;
+  final String configRequired;
+  final List<Setting> settings;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'description': description,
+      'icon': icon,
+      'config_required': configRequired,
+      'settings': settings.map((s) => s.toJson()).toList(),
+    };
   }
 
   PluginConfig copyWith({
@@ -59,15 +59,6 @@ class PluginConfig {
 }
 
 class Setting {
-  final String key;
-  final String label;
-  final String type;
-  final String? defaultValue;
-  final bool required;
-  final Map<String, dynamic>? options;
-  final int? width;
-  final String? placeholder;
-  final String? help;
 
   const Setting({
     required this.key,
@@ -81,20 +72,6 @@ class Setting {
     this.help,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'key': key,
-      'label': label,
-      'type': type,
-      if (defaultValue != null) 'default': defaultValue,
-      'required': required,
-      if (options != null) 'options': options,
-      if (width != null) 'width': width,
-      if (placeholder != null) 'placeholder': placeholder,
-      if (help != null) 'help': help,
-    };
-  }
-
   factory Setting.fromJson(Map<String, dynamic> json) {
     return Setting(
       key: json['key'] as String,
@@ -107,6 +84,29 @@ class Setting {
       placeholder: json['placeholder'] as String?,
       help: json['help'] as String?,
     );
+  }
+  final String key;
+  final String label;
+  final String type;
+  final String? defaultValue;
+  final bool required;
+  final Map<String, dynamic>? options;
+  final int? width;
+  final String? placeholder;
+  final String? help;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'key': key,
+      'label': label,
+      'type': type,
+      if (defaultValue != null) 'default': defaultValue,
+      'required': required,
+      if (options != null) 'options': options,
+      if (width != null) 'width': width,
+      if (placeholder != null) 'placeholder': placeholder,
+      if (help != null) 'help': help,
+    };
   }
 
   Setting copyWith({

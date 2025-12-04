@@ -60,13 +60,13 @@ class SystemProcessRunner implements IProcessRunner {
 }
 
 class MockProcessRunner implements IProcessRunner {
-  final Map<String, String> mockOutputs;
-  final Map<String, int> mockExitCodes;
 
   const MockProcessRunner({
     this.mockOutputs = const {},
     this.mockExitCodes = const {},
   });
+  final Map<String, String> mockOutputs;
+  final Map<String, int> mockExitCodes;
 
   @override
   Future<ProcessResult> run(
@@ -89,11 +89,11 @@ class MockProcessRunner implements IProcessRunner {
 }
 
 class ScriptRunner {
+
+  const ScriptRunner({this.processRunner = const SystemProcessRunner()});
   final IProcessRunner processRunner;
   static const Duration defaultTimeout = Duration(seconds: 30);
   static const String crossbarVersion = '1.0.0';
-
-  const ScriptRunner({this.processRunner = const SystemProcessRunner()});
 
   Future<PluginOutput> run(Plugin plugin) async {
     try {
@@ -140,7 +140,7 @@ class ScriptRunner {
         // Fallback: compile to temp and run with proper crate name
         // Extract a valid crate name (alphanumeric and underscores only)
         final fileName = plugin.path.split('/').last.replaceAll('.rs', '');
-        final crateName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
+        final crateName = fileName.replaceAll(RegExp('[^a-zA-Z0-9_]'), '_');
         return ('sh', ['-c', 'rustc --crate-name $crateName ${plugin.path} -o /tmp/crossbar_rust_$crateName && /tmp/crossbar_rust_$crateName']);
       default:
         return (plugin.interpreter, [plugin.path]);

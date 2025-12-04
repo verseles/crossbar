@@ -186,7 +186,7 @@ function main() {
     const color = value === "OK" ? "green" : "red";
 
     // Output in BitBar format
-    console.log(\`✓ \${value} | color=\${color}\`);
+    console.log(`✓ \${value} | color=\${color}`);
     console.log("---");
     console.log("Plugin: $name");
     console.log("Type: $type");

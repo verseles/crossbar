@@ -86,7 +86,7 @@ class UtilsApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          'Get-PnpDevice -Class Bluetooth | Enable-PnpDevice -Confirm:\$false',
+          r'Get-PnpDevice -Class Bluetooth | Enable-PnpDevice -Confirm:$false',
         ]);
         return result.exitCode == 0;
       }
@@ -113,7 +113,7 @@ class UtilsApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          'Get-PnpDevice -Class Bluetooth | Disable-PnpDevice -Confirm:\$false',
+          r'Get-PnpDevice -Class Bluetooth | Disable-PnpDevice -Confirm:$false',
         ]);
         return result.exitCode == 0;
       }
@@ -259,19 +259,19 @@ class UtilsApi {
     if (toClipboard) {
       // Try gnome-screenshot with clipboard
       try {
-        var result = await Process.run('gnome-screenshot', ['-c']);
+        final result = await Process.run('gnome-screenshot', ['-c']);
         if (result.exitCode == 0) return 'clipboard';
       } catch (_) {}
 
       // Try spectacle (KDE)
       try {
-        var result = await Process.run('spectacle', ['-b', '-c']);
+        final result = await Process.run('spectacle', ['-b', '-c']);
         if (result.exitCode == 0) return 'clipboard';
       } catch (_) {}
 
       // Try scrot with xclip
       try {
-        var result = await Process.run('sh', ['-c', 'scrot -o /tmp/screenshot.png && xclip -selection clipboard -t image/png /tmp/screenshot.png']);
+        final result = await Process.run('sh', ['-c', 'scrot -o /tmp/screenshot.png && xclip -selection clipboard -t image/png /tmp/screenshot.png']);
         if (result.exitCode == 0) return 'clipboard';
       } catch (_) {}
 
@@ -280,17 +280,17 @@ class UtilsApi {
 
     // Save to file
     try {
-      var result = await Process.run('gnome-screenshot', ['-f', path]);
+      final result = await Process.run('gnome-screenshot', ['-f', path]);
       if (result.exitCode == 0) return path;
     } catch (_) {}
 
     try {
-      var result = await Process.run('spectacle', ['-b', '-n', '-o', path]);
+      final result = await Process.run('spectacle', ['-b', '-n', '-o', path]);
       if (result.exitCode == 0) return path;
     } catch (_) {}
 
     try {
-      var result = await Process.run('scrot', ['-o', path]);
+      final result = await Process.run('scrot', ['-o', path]);
       if (result.exitCode == 0) return path;
     } catch (_) {}
 
@@ -310,7 +310,7 @@ class UtilsApi {
     if (toClipboard) {
       final result = await Process.run('powershell', [
         '-command',
-        'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen | ForEach-Object { \$bitmap = New-Object System.Drawing.Bitmap(\$_.Bounds.Width, \$_.Bounds.Height); \$graphics = [System.Drawing.Graphics]::FromImage(\$bitmap); \$graphics.CopyFromScreen(\$_.Bounds.Location, [System.Drawing.Point]::Empty, \$_.Bounds.Size); [System.Windows.Forms.Clipboard]::SetImage(\$bitmap) }',
+        r'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen | ForEach-Object { $bitmap = New-Object System.Drawing.Bitmap($_.Bounds.Width, $_.Bounds.Height); $graphics = [System.Drawing.Graphics]::FromImage($bitmap); $graphics.CopyFromScreen($_.Bounds.Location, [System.Drawing.Point]::Empty, $_.Bounds.Size); [System.Windows.Forms.Clipboard]::SetImage($bitmap) }',
       ]);
       return result.exitCode == 0 ? 'clipboard' : null;
     }
@@ -387,7 +387,7 @@ class UtilsApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          '(Get-ItemProperty -Path "HKCU:\\Control Panel\\Desktop" -Name Wallpaper).Wallpaper',
+          r'(Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper).Wallpaper',
         ]);
         return result.exitCode == 0
             ? (result.stdout as String).trim()
@@ -494,7 +494,7 @@ class UtilsApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState("Suspend", \$false, \$false)',
+          r'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState("Suspend", $false, $false)',
         ]);
         return result.exitCode == 0;
       }
@@ -651,7 +651,7 @@ class UtilsApi {
       if (Platform.isWindows) {
         final result = await Process.run('powershell', [
           '-command',
-          'Get-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings" -Name "NOC_GLOBAL_SETTING_TOASTS_ENABLED" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NOC_GLOBAL_SETTING_TOASTS_ENABLED',
+          r'Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings" -Name "NOC_GLOBAL_SETTING_TOASTS_ENABLED" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NOC_GLOBAL_SETTING_TOASTS_ENABLED',
         ]);
         if (result.exitCode == 0) {
           // 0 means DND is ON (toasts disabled)

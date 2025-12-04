@@ -7,11 +7,11 @@ import 'package:path/path.dart' as p;
 import '../core/plugin_manager.dart';
 
 class MarketplaceService {
-  static final MarketplaceService _instance = MarketplaceService._internal();
 
   factory MarketplaceService() => _instance;
 
   MarketplaceService._internal();
+  static final MarketplaceService _instance = MarketplaceService._internal();
 
   static const String _defaultRepoOwner = 'verseles';
   static const String _defaultRepoName = 'crossbar-plugins';
@@ -306,7 +306,7 @@ class MarketplaceService {
     name = name.replaceAll(RegExp(r'\.\d+[smhd]$'), '');
     // Convert snake_case/kebab-case to Title Case
     name = name
-        .replaceAll(RegExp(r'[_-]'), ' ')
+        .replaceAll(RegExp('[_-]'), ' ')
         .split(' ')
         .map((w) => w.isNotEmpty
             ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}'
@@ -317,19 +317,6 @@ class MarketplaceService {
 }
 
 class MarketplacePlugin {
-  final String id;
-  final String name;
-  final String description;
-  final String author;
-  final String language;
-  final String category;
-  final String version;
-  final String downloadUrl;
-  final int stars;
-  final int downloads;
-  final String? readme;
-  final String? screenshot;
-  final List<String> tags;
 
   const MarketplacePlugin({
     required this.id,
@@ -367,6 +354,19 @@ class MarketplacePlugin {
           [],
     );
   }
+  final String id;
+  final String name;
+  final String description;
+  final String author;
+  final String language;
+  final String category;
+  final String version;
+  final String downloadUrl;
+  final int stars;
+  final int downloads;
+  final String? readme;
+  final String? screenshot;
+  final List<String> tags;
 
   Map<String, dynamic> toJson() {
     return {

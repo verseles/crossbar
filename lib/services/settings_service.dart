@@ -1,13 +1,13 @@
+import 'package:crossbar/services/logger_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:crossbar/services/logger_service.dart';
 
 class SettingsService extends ChangeNotifier {
-  static final SettingsService _instance = SettingsService._internal();
 
   factory SettingsService() => _instance;
 
   SettingsService._internal();
+  static final SettingsService _instance = SettingsService._internal();
 
   late SharedPreferences _prefs;
   bool _initialized = false;

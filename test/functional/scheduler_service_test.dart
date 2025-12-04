@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' show TimeOfDay;
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/models/plugin.dart';
 import 'package:crossbar/models/plugin_output.dart';
 import 'package:crossbar/services/scheduler_service.dart';
+import 'package:flutter/material.dart' show TimeOfDay;
+import 'package:flutter_test/flutter_test.dart';
 
 /// Functional tests for Scheduler Service.
 /// These tests verify scheduling logic and callback behavior.
@@ -23,13 +23,13 @@ void main() {
       });
 
       test('custom config preserves values', () {
-        final config = PluginScheduleConfig(
-          interval: const Duration(seconds: 30),
+        const config = PluginScheduleConfig(
+          interval: Duration(seconds: 30),
           runOnStart: false,
           runInBackground: false,
-          startTime: const TimeOfDay(hour: 9, minute: 0),
-          endTime: const TimeOfDay(hour: 17, minute: 0),
-          daysOfWeek: const [1, 2, 3, 4, 5],
+          startTime: TimeOfDay(hour: 9, minute: 0),
+          endTime: TimeOfDay(hour: 17, minute: 0),
+          daysOfWeek: [1, 2, 3, 4, 5],
         );
 
         expect(config.interval, equals(const Duration(seconds: 30)));
@@ -100,13 +100,13 @@ void main() {
 
     group('JSON Serialization', () {
       test('toJson produces valid JSON', () {
-        final config = PluginScheduleConfig(
-          interval: const Duration(minutes: 10),
+        const config = PluginScheduleConfig(
+          interval: Duration(minutes: 10),
           runOnStart: false,
           runInBackground: true,
-          startTime: const TimeOfDay(hour: 8, minute: 30),
-          endTime: const TimeOfDay(hour: 18, minute: 0),
-          daysOfWeek: const [1, 2, 3, 4, 5],
+          startTime: TimeOfDay(hour: 8, minute: 30),
+          endTime: TimeOfDay(hour: 18, minute: 0),
+          daysOfWeek: [1, 2, 3, 4, 5],
         );
 
         final json = config.toJson();
@@ -156,13 +156,13 @@ void main() {
       });
 
       test('roundtrip serialization preserves data', () {
-        final original = PluginScheduleConfig(
-          interval: const Duration(seconds: 45),
+        const original = PluginScheduleConfig(
+          interval: Duration(seconds: 45),
           runOnStart: false,
           runInBackground: true,
-          startTime: const TimeOfDay(hour: 6, minute: 15),
-          endTime: const TimeOfDay(hour: 22, minute: 45),
-          daysOfWeek: const [2, 4, 6],
+          startTime: TimeOfDay(hour: 6, minute: 15),
+          endTime: TimeOfDay(hour: 22, minute: 45),
+          daysOfWeek: [2, 4, 6],
         );
 
         final json = original.toJson();
@@ -309,11 +309,11 @@ void main() {
       final scheduler = TestableSchedulerService();
       var runCount = 0;
 
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test-plugin',
         path: '/test/path.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(milliseconds: 100),
+        refreshInterval: Duration(milliseconds: 100),
       );
 
       scheduler.schedulePlugin(plugin, () async {
@@ -333,11 +333,11 @@ void main() {
       final scheduler = TestableSchedulerService();
       var runCount = 0;
 
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test-plugin',
         path: '/test/path.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(milliseconds: 50),
+        refreshInterval: Duration(milliseconds: 50),
       );
 
       scheduler.schedulePlugin(plugin, () async {
@@ -348,11 +348,11 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 75));
 
       // Reschedule with longer interval
-      final newPlugin = Plugin(
+      const newPlugin = Plugin(
         id: 'test-plugin',
         path: '/test/path.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(seconds: 10),
+        refreshInterval: Duration(seconds: 10),
       );
 
       final countAtReschedule = runCount;
@@ -372,11 +372,11 @@ void main() {
       final scheduler = TestableSchedulerService();
       var runCount = 0;
 
-      final plugin = Plugin(
+      const plugin = Plugin(
         id: 'test-plugin',
         path: '/test/path.sh',
         interpreter: 'bash',
-        refreshInterval: const Duration(milliseconds: 50),
+        refreshInterval: Duration(milliseconds: 50),
       );
 
       scheduler.schedulePlugin(plugin, () async {

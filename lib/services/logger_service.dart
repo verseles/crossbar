@@ -10,11 +10,11 @@ enum LogLevel {
 }
 
 class LoggerService {
-  static final LoggerService _instance = LoggerService._internal();
 
   factory LoggerService() => _instance;
 
   LoggerService._internal();
+  static final LoggerService _instance = LoggerService._internal();
 
   static const int _maxFileSize = 5 * 1024 * 1024; // 5MB
   static const int _maxFiles = 5;
@@ -56,7 +56,7 @@ class LoggerService {
       final home = Platform.environment['HOME'] ?? '/tmp';
       return path.join(home, 'Library', 'Logs', 'Crossbar');
     } else if (Platform.isWindows) {
-      final appData = Platform.environment['LOCALAPPDATA'] ?? 'C:\\';
+      final appData = Platform.environment['LOCALAPPDATA'] ?? r'C:\';
       return path.join(appData, 'Crossbar', 'logs');
     } else {
       return path.join(Directory.systemTemp.path, 'crossbar', 'logs');

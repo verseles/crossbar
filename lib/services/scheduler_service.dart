@@ -11,11 +11,11 @@ import 'widget_service.dart';
 typedef PluginOutputCallback = void Function(String pluginId, PluginOutput output);
 
 class SchedulerService {
-  static final SchedulerService _instance = SchedulerService._internal();
 
   factory SchedulerService() => _instance;
 
   SchedulerService._internal();
+  static final SchedulerService _instance = SchedulerService._internal();
 
   final PluginManager _pluginManager = PluginManager();
   final NotificationService _notificationService = NotificationService();
@@ -155,12 +155,6 @@ class SchedulerService {
 }
 
 class PluginScheduleConfig {
-  final Duration interval;
-  final bool runOnStart;
-  final bool runInBackground;
-  final TimeOfDay? startTime;
-  final TimeOfDay? endTime;
-  final List<int> daysOfWeek;
 
   const PluginScheduleConfig({
     this.interval = const Duration(minutes: 5),
@@ -170,6 +164,36 @@ class PluginScheduleConfig {
     this.endTime,
     this.daysOfWeek = const [1, 2, 3, 4, 5, 6, 7],
   });
+
+  factory PluginScheduleConfig.fromJson(Map<String, dynamic> json) {
+    return PluginScheduleConfig(
+      interval: Duration(milliseconds: json['interval'] as int? ?? 300000),
+      runOnStart: json['runOnStart'] as bool? ?? true,
+      runInBackground: json['runInBackground'] as bool? ?? true,
+      startTime: json['startTime'] != null
+          ? TimeOfDay(
+              hour: json['startTime']['hour'] as int,
+              minute: json['startTime']['minute'] as int,
+            )
+          : null,
+      endTime: json['endTime'] != null
+          ? TimeOfDay(
+              hour: json['endTime']['hour'] as int,
+              minute: json['endTime']['minute'] as int,
+            )
+          : null,
+      daysOfWeek: (json['daysOfWeek'] as List<dynamic>?)
+              ?.map((d) => d as int)
+              .toList() ??
+          [1, 2, 3, 4, 5, 6, 7],
+    );
+  }
+  final Duration interval;
+  final bool runOnStart;
+  final bool runInBackground;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
+  final List<int> daysOfWeek;
 
   bool shouldRunNow() {
     final now = DateTime.now();
@@ -199,30 +223,6 @@ class PluginScheduleConfig {
     }
 
     return true;
-  }
-
-  factory PluginScheduleConfig.fromJson(Map<String, dynamic> json) {
-    return PluginScheduleConfig(
-      interval: Duration(milliseconds: json['interval'] as int? ?? 300000),
-      runOnStart: json['runOnStart'] as bool? ?? true,
-      runInBackground: json['runInBackground'] as bool? ?? true,
-      startTime: json['startTime'] != null
-          ? TimeOfDay(
-              hour: json['startTime']['hour'] as int,
-              minute: json['startTime']['minute'] as int,
-            )
-          : null,
-      endTime: json['endTime'] != null
-          ? TimeOfDay(
-              hour: json['endTime']['hour'] as int,
-              minute: json['endTime']['minute'] as int,
-            )
-          : null,
-      daysOfWeek: (json['daysOfWeek'] as List<dynamic>?)
-              ?.map((d) => d as int)
-              .toList() ??
-          [1, 2, 3, 4, 5, 6, 7],
-    );
   }
 
   Map<String, dynamic> toJson() {

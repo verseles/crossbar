@@ -15,11 +15,11 @@ enum HotReloadEvent {
 }
 
 class HotReloadService {
-  static final HotReloadService _instance = HotReloadService._internal();
 
   factory HotReloadService() => _instance;
 
   HotReloadService._internal();
+  static final HotReloadService _instance = HotReloadService._internal();
 
   final PluginManager _pluginManager = PluginManager();
   final SchedulerService _schedulerService = SchedulerService();

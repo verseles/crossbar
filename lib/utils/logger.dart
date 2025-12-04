@@ -11,20 +11,17 @@ enum LogLevel {
 }
 
 class Logger {
-  static final Logger _instance = Logger._internal();
 
   factory Logger() => _instance;
 
   Logger._internal();
+  static final Logger _instance = Logger._internal();
 
   static const int _maxFileSize = 5 * 1024 * 1024;
   static const int _maxBackupFiles = 7;
 
   File? _logFile;
-  LogLevel _minLevel = LogLevel.info;
-
-  LogLevel get minLevel => _minLevel;
-  set minLevel(LogLevel level) => _minLevel = level;
+  LogLevel minLevel = LogLevel.info;
 
   Future<void> init() async {
     late final String baseDir;
@@ -65,7 +62,7 @@ class Logger {
   }
 
   void _log(LogLevel level, String message) {
-    if (level.index < _minLevel.index) return;
+    if (level.index < minLevel.index) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(7);

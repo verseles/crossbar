@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
 
   factory NotificationService() => _instance;
 
   NotificationService._internal();
+  static final NotificationService _instance = NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -182,12 +182,6 @@ class NotificationService {
 }
 
 class PluginNotificationConfig {
-  final bool enabled;
-  final bool onError;
-  final bool onOutput;
-  final bool onThreshold;
-  final double? threshold;
-  final NotificationPriority priority;
 
   const PluginNotificationConfig({
     this.enabled = false,
@@ -211,6 +205,12 @@ class PluginNotificationConfig {
       ),
     );
   }
+  final bool enabled;
+  final bool onError;
+  final bool onOutput;
+  final bool onThreshold;
+  final double? threshold;
+  final NotificationPriority priority;
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/core/plugin_manager.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('PluginManager', () {
@@ -71,7 +71,7 @@ void main() {
       test('returns unmodifiable list', () {
         final plugins = manager.plugins;
 
-        expect(() => plugins.clear(), throwsUnsupportedError);
+        expect(plugins.clear, throwsUnsupportedError);
       });
 
       test('initially empty', () {

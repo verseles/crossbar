@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/models/plugin_config.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('PluginConfig', () {
     test('creates plugin config with required parameters', () {
-      final config = PluginConfig(
+      const config = PluginConfig(
         name: 'Weather Widget',
         description: 'Shows weather for your location',
         icon: '',
@@ -20,19 +20,19 @@ void main() {
     });
 
     test('creates plugin config with settings', () {
-      final config = PluginConfig(
+      const config = PluginConfig(
         name: 'Weather Widget',
         description: 'Shows weather',
         icon: '',
         configRequired: 'optional',
         settings: [
-          const Setting(
+          Setting(
             key: 'API_KEY',
             label: 'API Key',
             type: 'password',
             required: true,
           ),
-          const Setting(
+          Setting(
             key: 'LOCATION',
             label: 'Location',
             type: 'text',
@@ -47,13 +47,13 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      final config = PluginConfig(
+      const config = PluginConfig(
         name: 'Test Plugin',
         description: 'Test description',
         icon: '',
         configRequired: 'optional',
         settings: [
-          const Setting(
+          Setting(
             key: 'TEST_KEY',
             label: 'Test',
             type: 'text',
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('copyWith creates new instance', () {
-      final config = PluginConfig(
+      const config = PluginConfig(
         name: 'Original',
         description: 'Original description',
         icon: '',
@@ -124,13 +124,13 @@ void main() {
     });
 
     test('toString returns readable representation', () {
-      final config = PluginConfig(
+      const config = PluginConfig(
         name: 'Test Plugin',
         description: 'Test',
         icon: '',
         configRequired: 'optional',
         settings: [
-          const Setting(key: 'KEY', label: 'Label', type: 'text'),
+          Setting(key: 'KEY', label: 'Label', type: 'text'),
         ],
       );
 

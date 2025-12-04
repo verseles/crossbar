@@ -9,11 +9,11 @@ import '../models/plugin_output.dart';
 import 'script_runner.dart';
 
 class PluginManager {
-  static final PluginManager _instance = PluginManager._internal();
 
   factory PluginManager() => _instance;
 
   PluginManager._internal();
+  static final PluginManager _instance = PluginManager._internal();
 
   final List<Plugin> _plugins = [];
   final ScriptRunner _scriptRunner = const ScriptRunner();
@@ -178,7 +178,7 @@ class PluginManager {
     for (var i = 0; i < enabledPlugins.length; i += maxConcurrent) {
       final batch = enabledPlugins.skip(i).take(maxConcurrent);
       final batchOutputs = await Future.wait(
-        batch.map((plugin) => _runPlugin(plugin)),
+        batch.map(_runPlugin),
       );
       outputs.addAll(batchOutputs.whereType<PluginOutput>());
     }

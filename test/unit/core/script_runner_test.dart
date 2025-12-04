@@ -1,21 +1,21 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/core/script_runner.dart';
 import 'package:crossbar/models/plugin.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ScriptRunner', () {
     group('with MockProcessRunner', () {
       test('runs plugin and returns parsed output', () async {
-        final mockRunner = MockProcessRunner(
+        const mockRunner = MockProcessRunner(
           mockOutputs: {'/path/to/test.sh': '{"icon":"","text":"45%"}'},
         );
 
-        final scriptRunner = ScriptRunner(processRunner: mockRunner);
-        final plugin = Plugin(
+        const scriptRunner = ScriptRunner(processRunner: mockRunner);
+        const plugin = Plugin(
           id: 'test.sh',
           path: '/path/to/test.sh',
           interpreter: 'bash',
-          refreshInterval: const Duration(seconds: 10),
+          refreshInterval: Duration(seconds: 10),
         );
 
         final output = await scriptRunner.run(plugin);
@@ -27,17 +27,17 @@ void main() {
       });
 
       test('handles non-zero exit code', () async {
-        final mockRunner = MockProcessRunner(
+        const mockRunner = MockProcessRunner(
           mockOutputs: {'/path/to/test.sh': 'error output'},
           mockExitCodes: {'/path/to/test.sh': 1},
         );
 
-        final scriptRunner = ScriptRunner(processRunner: mockRunner);
-        final plugin = Plugin(
+        const scriptRunner = ScriptRunner(processRunner: mockRunner);
+        const plugin = Plugin(
           id: 'test.sh',
           path: '/path/to/test.sh',
           interpreter: 'bash',
-          refreshInterval: const Duration(seconds: 10),
+          refreshInterval: Duration(seconds: 10),
         );
 
         final output = await scriptRunner.run(plugin);
@@ -47,16 +47,16 @@ void main() {
       });
 
       test('returns empty output for empty script result', () async {
-        final mockRunner = MockProcessRunner(
+        const mockRunner = MockProcessRunner(
           mockOutputs: {'/path/to/test.sh': ''},
         );
 
-        final scriptRunner = ScriptRunner(processRunner: mockRunner);
-        final plugin = Plugin(
+        const scriptRunner = ScriptRunner(processRunner: mockRunner);
+        const plugin = Plugin(
           id: 'test.sh',
           path: '/path/to/test.sh',
           interpreter: 'bash',
-          refreshInterval: const Duration(seconds: 10),
+          refreshInterval: Duration(seconds: 10),
         );
 
         final output = await scriptRunner.run(plugin);
@@ -66,7 +66,7 @@ void main() {
       });
 
       test('parses BitBar text format', () async {
-        final mockRunner = MockProcessRunner(
+        const mockRunner = MockProcessRunner(
           mockOutputs: {
             '/path/to/test.sh': ''' 45% | color=orange
 ---
@@ -75,12 +75,12 @@ Details | bash=/usr/bin/top
           },
         );
 
-        final scriptRunner = ScriptRunner(processRunner: mockRunner);
-        final plugin = Plugin(
+        const scriptRunner = ScriptRunner(processRunner: mockRunner);
+        const plugin = Plugin(
           id: 'test.sh',
           path: '/path/to/test.sh',
           interpreter: 'bash',
-          refreshInterval: const Duration(seconds: 10),
+          refreshInterval: Duration(seconds: 10),
         );
 
         final output = await scriptRunner.run(plugin);
@@ -105,7 +105,7 @@ Details | bash=/usr/bin/top
 
   group('MockProcessRunner', () {
     test('returns configured output', () async {
-      final runner = MockProcessRunner(
+      const runner = MockProcessRunner(
         mockOutputs: {'/test': 'output'},
         mockExitCodes: {'/test': 0},
       );

@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../models/plugin_config.dart';
 
 abstract class ConfigField extends StatelessWidget {
-  final Setting setting;
-  final String? value;
-  final ValueChanged<String> onChanged;
 
   const ConfigField({
     super.key,
@@ -79,6 +76,9 @@ abstract class ConfigField extends StatelessWidget {
         );
     }
   }
+  final Setting setting;
+  final String? value;
+  final ValueChanged<String> onChanged;
 }
 
 class TextConfigField extends ConfigField {
@@ -125,11 +125,6 @@ class PasswordConfigField extends ConfigField {
 }
 
 class _PasswordField extends StatefulWidget {
-  final String? initialValue;
-  final String label;
-  final String? placeholder;
-  final String? help;
-  final ValueChanged<String> onChanged;
 
   const _PasswordField({
     this.initialValue,
@@ -138,6 +133,11 @@ class _PasswordField extends StatefulWidget {
     this.help,
     required this.onChanged,
   });
+  final String? initialValue;
+  final String label;
+  final String? placeholder;
+  final String? help;
+  final ValueChanged<String> onChanged;
 
   @override
   State<_PasswordField> createState() => _PasswordFieldState();
@@ -246,7 +246,7 @@ class CheckboxConfigField extends ConfigField {
       subtitle: setting.help != null ? Text(setting.help!) : null,
       value: isChecked,
       onChanged: (newValue) {
-        onChanged(newValue == true ? 'true' : 'false');
+        onChanged(newValue ?? false ? 'true' : 'false');
       },
       controlAffinity: ListTileControlAffinity.leading,
       contentPadding: EdgeInsets.zero,
@@ -344,10 +344,6 @@ class FileConfigField extends ConfigField {
 }
 
 class ConfigFormBuilder extends StatelessWidget {
-  final List<Setting> settings;
-  final Map<String, String> values;
-  final ValueChanged<MapEntry<String, String>> onFieldChanged;
-  final int columns;
 
   const ConfigFormBuilder({
     super.key,
@@ -356,6 +352,10 @@ class ConfigFormBuilder extends StatelessWidget {
     required this.onFieldChanged,
     this.columns = 2,
   });
+  final List<Setting> settings;
+  final Map<String, String> values;
+  final ValueChanged<MapEntry<String, String>> onFieldChanged;
+  final int columns;
 
   @override
   Widget build(BuildContext context) {

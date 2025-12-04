@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/cli/cli_handler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Functional tests for CLI handler.
 /// These tests execute real CLI commands via handleCliCommand().
@@ -616,15 +616,15 @@ void main() {
 
 /// Helper class to capture stdout, stderr, and exit code
 class _CapturedOutput {
-  final String stdout;
-  final String stderr;
-  final int exitCode;
 
   _CapturedOutput({
     required this.stdout,
     required this.stderr,
     required this.exitCode,
   });
+  final String stdout;
+  final String stderr;
+  final int exitCode;
 }
 
 /// Captures stdout and stderr during command execution
@@ -632,7 +632,7 @@ Future<_CapturedOutput> _captureOutput(Future<int> Function() command) async {
   final stdoutBuffer = StringBuffer();
   final stderrBuffer = StringBuffer();
 
-  int exitCode = 0;
+  var exitCode = 0;
 
   await runZonedGuarded(
     () async {

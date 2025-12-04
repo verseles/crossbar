@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:crossbar/core/output_parser.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('OutputParser', () {

@@ -7,11 +7,11 @@ import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart';
 
 class WidgetService {
-  static final WidgetService _instance = WidgetService._internal();
 
   factory WidgetService() => _instance;
 
   WidgetService._internal();
+  static final WidgetService _instance = WidgetService._internal();
 
   static const String appGroupId = 'group.crossbar.widgets';
   static const String iOSWidgetName = 'CrossbarWidget';
@@ -140,13 +140,6 @@ class WidgetService {
 }
 
 class WidgetDataBuilder {
-  final String pluginId;
-  final String? icon;
-  final String? title;
-  final String? subtitle;
-  final String? value;
-  final String? color;
-  final String? deepLink;
 
   const WidgetDataBuilder({
     required this.pluginId,
@@ -158,6 +151,24 @@ class WidgetDataBuilder {
     this.deepLink,
   });
 
+  factory WidgetDataBuilder.fromPluginOutput(PluginOutput output) {
+    return WidgetDataBuilder(
+      pluginId: output.pluginId,
+      icon: output.icon,
+      title: output.pluginId,
+      value: output.text,
+      color: output.color?.value.toRadixString(16),
+      deepLink: 'crossbar://plugin/${output.pluginId}',
+    );
+  }
+  final String pluginId;
+  final String? icon;
+  final String? title;
+  final String? subtitle;
+  final String? value;
+  final String? color;
+  final String? deepLink;
+
   Map<String, dynamic> toJson() {
     return {
       'pluginId': pluginId,
@@ -168,16 +179,5 @@ class WidgetDataBuilder {
       'color': color,
       'deepLink': deepLink,
     };
-  }
-
-  factory WidgetDataBuilder.fromPluginOutput(PluginOutput output) {
-    return WidgetDataBuilder(
-      pluginId: output.pluginId,
-      icon: output.icon,
-      title: output.pluginId,
-      value: output.text,
-      color: output.color?.value.toRadixString(16),
-      deepLink: 'crossbar://plugin/${output.pluginId}',
-    );
   }
 }
