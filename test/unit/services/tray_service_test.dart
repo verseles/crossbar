@@ -29,6 +29,9 @@ void main() {
       tempDir = Directory.systemTemp.createTempSync();
       final pluginFile = File('${tempDir.path}/test_plugin.sh');
       pluginFile.writeAsStringSync('#!/bin/bash\necho "test"');
+      if (Platform.isLinux || Platform.isMacOS) {
+        Process.runSync('chmod', ['+x', pluginFile.path]);
+      }
 
       final pm = PluginManager();
       pm.clear();

@@ -216,15 +216,15 @@ class IpcServer {
 
     switch (action) {
       case 'enable':
-        _pluginManager.enablePlugin(pluginId);
+        await _pluginManager.enablePlugin(pluginId);
         _sendJson(request, {'status': 'ok', 'message': 'Plugin enabled', 'id': pluginId});
 
       case 'disable':
-        _pluginManager.disablePlugin(pluginId);
+        await _pluginManager.disablePlugin(pluginId);
         _sendJson(request, {'status': 'ok', 'message': 'Plugin disabled', 'id': pluginId});
 
       case 'toggle':
-        _pluginManager.togglePlugin(pluginId);
+        await _pluginManager.togglePlugin(pluginId);
         final p = _pluginManager.getPlugin(pluginId);
         _sendJson(request, {
           'status': 'ok',
