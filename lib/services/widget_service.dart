@@ -157,7 +157,7 @@ class WidgetDataBuilder {
       icon: output.icon,
       title: output.pluginId,
       value: output.text,
-      color: output.color?.value.toRadixString(16),
+      color: output.color?.toRadixString(16),
       deepLink: 'crossbar://plugin/${output.pluginId}',
     );
   }

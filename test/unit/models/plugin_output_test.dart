@@ -1,5 +1,4 @@
 import 'package:crossbar/models/plugin_output.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,7 +21,7 @@ void main() {
         pluginId: 'test.sh',
         icon: '',
         text: '45%',
-        color: Colors.orange,
+        color: 0xFFFFA500, // Colors.orange
         trayTooltip: 'CPU: 45%',
         menu: [MenuItem(text: 'Details')],
         hasError: false,
@@ -31,7 +30,7 @@ void main() {
       expect(output.pluginId, 'test.sh');
       expect(output.icon, '');
       expect(output.text, '45%');
-      expect(output.color, Colors.orange);
+      expect(output.color, 0xFFFFA500);
       expect(output.trayTooltip, 'CPU: 45%');
       expect(output.menu.length, 1);
       expect(output.hasError, false);

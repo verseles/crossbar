@@ -140,7 +140,7 @@ class PluginCard extends StatelessWidget {
       child: Text(
         output!.text!,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: output!.color,
+              color: output!.color != null ? Color(output!.color!) : null,
               fontWeight: FontWeight.w500,
             ),
         maxLines: 2,
@@ -212,7 +212,9 @@ class PluginTile extends StatelessWidget {
           ? Text(
               output!.text!,
               style: TextStyle(
-                color: hasError ? Colors.red : output!.color,
+                color: hasError
+                    ? Colors.red
+                    : (output!.color != null ? Color(output!.color!) : null),
               ),
             )
           : Text('${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}'),

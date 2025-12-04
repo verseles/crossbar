@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class PluginOutput {
 
   const PluginOutput({
@@ -33,7 +31,7 @@ class PluginOutput {
   final String pluginId;
   final String icon;
   final String? text;
-  final Color? color;
+  final int? color;
   final String? trayTooltip;
   final List<MenuItem> menu;
   final bool hasError;
@@ -43,7 +41,7 @@ class PluginOutput {
     String? pluginId,
     String? icon,
     String? text,
-    Color? color,
+    int? color,
     String? trayTooltip,
     List<MenuItem>? menu,
     bool? hasError,
@@ -66,7 +64,7 @@ class PluginOutput {
       'pluginId': pluginId,
       'icon': icon,
       'text': text,
-      'color': color?.value,
+      'color': color,
       'trayTooltip': trayTooltip,
       'menu': menu.map((m) => m.toJson()).toList(),
       'hasError': hasError,

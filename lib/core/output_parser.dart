@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import '../models/plugin_output.dart';
 
 class OutputParser {
@@ -240,22 +238,22 @@ class OutputParser {
     }).toList();
   }
 
-  static Color? _parseColor(String? colorString) {
+  static int? _parseColor(String? colorString) {
     if (colorString == null || colorString.isEmpty) return null;
 
-    final colors = <String, Color>{
-      'red': Colors.red,
-      'green': Colors.green,
-      'blue': Colors.blue,
-      'yellow': Colors.yellow,
-      'orange': Colors.orange,
-      'purple': Colors.purple,
-      'pink': Colors.pink,
-      'cyan': Colors.cyan,
-      'white': Colors.white,
-      'black': Colors.black,
-      'grey': Colors.grey,
-      'gray': Colors.grey,
+    final colors = <String, int>{
+      'red': 0xFFFF0000,
+      'green': 0xFF00FF00,
+      'blue': 0xFF0000FF,
+      'yellow': 0xFFFFFF00,
+      'orange': 0xFFFFA500,
+      'purple': 0xFF800080,
+      'pink': 0xFFFFC0CB,
+      'cyan': 0xFF00FFFF,
+      'white': 0xFFFFFFFF,
+      'black': 0xFF000000,
+      'grey': 0xFF808080,
+      'gray': 0xFF808080,
     };
 
     final lowerColor = colorString.toLowerCase();
@@ -272,7 +270,7 @@ class OutputParser {
         if (hex.length == 6) {
           hex = 'FF$hex';
         }
-        return Color(int.parse(hex, radix: 16));
+        return int.parse(hex, radix: 16);
       } catch (_) {
         return null;
       }

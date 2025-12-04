@@ -1,6 +1,5 @@
 import 'package:crossbar/models/plugin_output.dart';
 import 'package:crossbar/services/widget_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -73,7 +72,7 @@ void main() {
         pluginId: 'disk-space',
         text: '250 GB free',
         icon: '💾',
-        color: Colors.green,
+        color: 0xFF4CAF50,
         hasError: false,
         menu: [],
       );
@@ -107,7 +106,7 @@ void main() {
         pluginId: 'test',
         text: 'Test',
         icon: '🎨',
-        color: Color(0xFFFF5733),
+        color: 0xFFFF5733,
         hasError: false,
         menu: [],
       );
@@ -159,16 +158,4 @@ void main() {
       expect(WidgetService.androidWidgetName, equals('CrossbarWidgetProvider'));
     });
   });
-
-  // Note: Full testing of WidgetService methods requires mocking HomeWidget
-  // and Platform checks, which is complex. The tests above ensure:
-  // - WidgetDataBuilder correctly transforms data
-  // - JSON serialization works properly
-  // - Integration with PluginOutput is correct
-  // - Constants are properly defined
-  //
-  // For integration tests of actual widget updates, we would need:
-  // 1. Mock for HomeWidget package
-  // 2. Platform.isAndroid/Platform.isIOS mocks
-  // 3. Test environment for Android/iOS specific code
 }
