@@ -206,3 +206,45 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.
 - Pare após 3 tentativas falhas e reavalie.
+
+---
+
+## 10. Integração com Context7 API (Verificação Estrita e Recuperação)
+
+Se a context7 não estiver disponível no sistema, faça o seguinte:
+
+### Filosofia Central: ZERO SUPOSIÇÕES
+- **Verificação Obrigatória**: Você está **PROIBIDO** de escrever código baseado apenas em dados de treinamento internos para bibliotecas externas.
+- **Cobertura Universal**: Antes de planejar ou codificar, você **DEVE** buscar documentação ao vivo para **CADA** biblioteca ou ferramenta envolvida na tarefa.
+- **Maximizar Contexto**: Não otimize para economia de tokens. Otimize para **precisão** e **detalhe**. Sempre solicite contexto profundo e abrangente.
+
+### Protocolo de Execução
+
+1.  **Identificar e Isolar**:
+    - Liste todas as bibliotecas necessárias (por exemplo, se a tarefa usa `Actix`, `Serde` e `Tokio`, busque documentação para TODAS as três).
+    - Determine a versão exata a partir de `pubspec.yaml`, `Cargo.toml`, `package.json`, etc.
+
+2.  **Construindo a Requisição**:
+    - **URL Base**: `https://context7.com/api/v1/{owner}/{repo}/{version}`
+    - **Tópico**: Use `topic` para focar no detalhe de implementação específico (ex: `topic=advanced+error+handling`).
+    - **Tokens**: SEMPRE defina um limite de tokens ALTO (ex: `tokens=25000`) para garantir que a resposta não seja truncada. Precisamos do contexto completo.
+    - **Autenticação**: `-H "Authorization: Bearer $CONTEXT7_API_KEY"`
+
+3.  **Fluxo de Trabalho Curl Obrigatório**:
+    Para cada biblioteca identificada, execute um comando curl ANTES de propor código:
+
+    ```
+    curl "https://context7.com/api/v1/owner/repo?topic=feature+details&tokens=25000" \
+      -H "Authorization: Bearer $CONTEXT7_API_KEY"
+    ```
+
+### Tratamento de Erros e Autocorreção (Crítico)
+
+- **Limites de Taxa (429)**: Respeite o campo `retryAfterSeconds` implicitamente. Aguarde. Não pule.
+- **Fonte da Verdade da Documentação**:
+    - Se encontrar erros inesperados (400 Bad Request, 404 Not Found) ou se o comportamento da API parecer ter mudado, **PARE IMEDIATAMENTE**.
+    - **Buscar o Guia Oficial**: Execute uma requisição para ler a documentação da API para depurar seus parâmetros:
+      ```
+      curl -L "https://context7.com/docs/api-guide"
+      ```
+    - Use o guia recuperado para corrigir o formato da sua requisição à API antes de tentar novamente.
