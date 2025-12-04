@@ -12,7 +12,7 @@ void main() {
   group('TrayService', () {
     late TrayService trayService;
     late Directory tempDir;
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     setUp(() async {
       // Mock TrayManager channel
@@ -97,9 +97,9 @@ void main() {
     });
 
     test('updatePluginOutput does NOT update title for other plugins', () async {
-      final otherPluginId = 'other_plugin.sh';
+      const otherPluginId = 'other_plugin.sh';
 
-      final output = PluginOutput(
+      const output = PluginOutput(
         pluginId: otherPluginId,
         icon: '👾',
         text: 'Alien Output',

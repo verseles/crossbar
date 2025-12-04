@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:tray_manager/tray_manager.dart';
 
 import '../core/plugin_manager.dart';
@@ -46,6 +45,7 @@ class TrayService with TrayListener {
     }
 
     final iconFile = File(iconPath);
+    // ignore: avoid_slow_async_io
     if (await iconFile.exists()) {
       await trayManager.setIcon(iconPath);
     }
@@ -114,7 +114,7 @@ class TrayService with TrayListener {
         .firstOrNull;
 
     if (firstEnabled?.id == pluginId) {
-      String title = '';
+      var title = '';
       // Use emoji icon from plugin output if available
       if (output.icon.isNotEmpty && output.icon != '⚙️') {
         title += '${output.icon} ';

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowService with WindowListener {
-  static final WindowService _instance = WindowService._internal();
   factory WindowService() => _instance;
+
   WindowService._internal();
+
+  static final WindowService _instance = WindowService._internal();
 
   bool _isInitialized = false;
   final bool _minimizeToTray = true;

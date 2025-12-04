@@ -8,6 +8,11 @@ import 'window_service.dart';
 /// IPC Server for GUI ↔ background communication
 /// Runs on localhost:48291 and provides REST API for plugin management
 class IpcServer {
+  IpcServer({
+    PluginManager? pluginManager,
+    this.port = defaultPort,
+  }) : _pluginManager = pluginManager ?? PluginManager();
+
   static const int defaultPort = 48291;
   static const String host = 'localhost';
 
@@ -16,11 +21,6 @@ class IpcServer {
   final int port;
 
   bool get isRunning => _server != null;
-
-  IpcServer({
-    PluginManager? pluginManager,
-    this.port = defaultPort,
-  }) : _pluginManager = pluginManager ?? PluginManager();
 
   /// Start the IPC server
   Future<bool> start() async {

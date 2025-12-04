@@ -7,7 +7,7 @@ void main() {
 
   group('WindowService', () {
     late WindowService windowService;
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     setUp(() async {
       // Mock WindowManager channel
@@ -42,9 +42,7 @@ void main() {
       windowService = WindowService();
     });
 
-    tearDown(() {
-      log.clear();
-    });
+    tearDown(log.clear);
 
     test('show calls show and focus', () async {
       await windowService.show();

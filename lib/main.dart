@@ -14,6 +14,7 @@ import 'services/window_service.dart';
 import 'ui/main_window.dart';
 
 void main(List<String> args) async {
+  // ignore: unnecessary_lambdas
   FlutterError.onError = (details) {
     // Log Flutter errors to console/file in debug mode
     FlutterError.dumpErrorToConsole(details);
@@ -22,7 +23,9 @@ void main(List<String> args) async {
 
   PlatformDispatcher.instance.onError = (error, stack) {
     // Log unhandled errors
+    // ignore: avoid_print
     print('Uncaught error: $error');
+    // ignore: avoid_print
     print('Stack trace: $stack');
     return true;
   };
@@ -59,9 +62,7 @@ void main(List<String> args) async {
     // Start scheduler
     final scheduler = SchedulerService();
     // Connect tray to scheduler before starting, so we catch initial runs if any
-    scheduler.addListener((pluginId, output) {
-      trayService.updatePluginOutput(pluginId, output);
-    });
+    scheduler.addListener(trayService.updatePluginOutput);
     await scheduler.start();
     logger.info('Scheduler started');
 
@@ -103,7 +104,9 @@ void main(List<String> args) async {
     runApp(const CrossbarApp());
   } catch (e, stack) {
     // Catch any errors during initialization
+    // ignore: avoid_print
     print('Failed to initialize: $e');
+    // ignore: avoid_print
     print('Stack trace: $stack');
 
     // Run app with error screen
