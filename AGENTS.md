@@ -141,3 +141,68 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 | Build Release (Linux) | `make linux` |
 | Analisar Código | `flutter analyze --no-fatal-infos` |
 | Monitorar CI | `gh run watch` |
+
+---
+
+## 9. Diretrizes de Desenvolvimento (Development Guidelines)
+
+### Filosofia
+
+#### Crenças Centrais
+- **Progresso incremental sobre grandes mudanças** - Pequenas alterações que compilam e passam nos testes.
+- **Aprender com o código existente** - Estude e planeje antes de implementar.
+- **Pragmático sobre dogmático** - Adapte-se à realidade do projeto.
+- **Intenção clara sobre código "esperto"** - Seja chato e óbvio.
+
+#### Simplicidade
+- **Responsabilidade única** por função/classe.
+- **Evite abstrações prematuras**.
+- **Sem truques "espertos"** - escolha a solução chata.
+- Se você precisa explicar, é complexo demais.
+
+### Padrões Técnicos
+
+#### Princípios de Arquitetura
+- **Composição sobre herança** - Use injeção de dependência.
+- **Interfaces sobre singletons** - Habilite testes e flexibilidade.
+- **Explícito sobre implícito** - Fluxo de dados e dependências claros.
+- **Test-driven quando possível** - Nunca desabilite testes, conserte-os.
+
+#### Tratamento de Erros
+- **Falhe rápido** com mensagens descritivas.
+- **Inclua contexto** para depuração.
+- **Trate erros** no nível apropriado.
+- **Nunca** engula exceções silenciosamente.
+
+### Integração com o Projeto
+
+#### Aprenda a Base de Código
+- Encontre recursos/componentes similares.
+- Identifique padrões e convenções comuns.
+- Use as mesmas bibliotecas/utilitários quando possível.
+- Siga padrões de teste existentes.
+
+#### Ferramentas
+- Use o sistema de build existente do projeto.
+- Use o framework de teste existente do projeto.
+- Use as configurações de formatador/linter do projeto.
+- Não introduza novas ferramentas sem forte justificativa.
+
+#### Estilo de Código
+- Siga convenções existentes no projeto.
+- Consulte configurações de linter e .editorconfig, se presentes.
+- Arquivos de texto devem sempre terminar com uma linha vazia.
+
+### Lembretes Importantes
+
+**NUNCA**:
+- Use `--no-verify` para ignorar hooks de commit.
+- Desabilite testes em vez de consertá-los.
+- Commite código que não compila.
+- Faça suposições - verifique com o código existente.
+
+**SEMPRE**:
+- Commite código funcional incrementalmente.
+- Atualize a documentação do plano conforme avança.
+- Aprenda com implementações existentes.
+- Pare após 3 tentativas falhas e reavalie.
