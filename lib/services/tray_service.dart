@@ -188,7 +188,6 @@ class TrayService {
     _initialized = false;
     _activeTrays.clear();
     _pluginOutputs.clear();
-    _settings.resetForTesting();
   }
 }
 
