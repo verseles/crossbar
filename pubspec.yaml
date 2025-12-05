@@ -47,6 +47,7 @@ dependencies:
 
   meta: any
   system_tray: ^2.0.3
+  uuid: ^3.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

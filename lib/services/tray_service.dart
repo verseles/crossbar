@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import 'package:crossbar/core/plugin_manager.dart';
 import 'package:crossbar/models/plugin.dart';
 import 'package:crossbar/models/plugin_output.dart' as model;
+import 'package:crossbar/services/logger_service.dart';
 import 'package:crossbar/services/scheduler_service.dart';
 import 'package:crossbar/services/settings_service.dart';
 import 'package:crossbar/services/window_service.dart';
@@ -63,7 +64,6 @@ class TrayService {
     } else {
       LoggerService().info('Tray icon resolved to: $_iconPath');
     }
-    }
 
     _settings.addListener(_onSettingsChanged);
     _initialized = true;
@@ -80,11 +80,13 @@ class TrayService {
     _reconcile();
   }
 
+  @visibleForTesting
   void updatePluginOutput(String pluginId, model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _reconcile();
   }
 
+  @visibleForTesting
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
     _reconcile();
