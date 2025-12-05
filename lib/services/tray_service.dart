@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'package:crossbar/core/plugin_manager.dart';
 import 'package:crossbar/models/plugin.dart';
 import 'package:crossbar/models/plugin_output.dart' as model;
@@ -10,7 +12,6 @@ import 'package:crossbar/services/window_service.dart';
 import 'package:meta/meta.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:uuid/uuid.dart';
-
 class TrayService {
   factory TrayService() => _instance;
   TrayService._internal();
@@ -30,19 +31,49 @@ class TrayService {
     if (_initialized) return;
 
     // Resolve icon path once
+    String candidate = 'assets/icons/tray_icon.ico';
     if (Platform.isLinux) {
-      _iconPath = 'assets/icons/tray_icon.png';
+      candidate = 'assets/icons/tray_icon.png';
     } else if (Platform.isMacOS) {
-      _iconPath = 'assets/icons/tray_icon_macos.png';
+      candidate = 'assets/icons/tray_icon_macos.png';
+    }
+
+    // Check existence
+    if (await File(candidate).exists()) {
+      _iconPath = candidate;
     } else {
-      _iconPath = 'assets/icons/tray_icon.ico';
+      // Try to find in bundle (Linux/Windows specific structure)
+      if (Platform.isLinux || Platform.isWindows) {
+        try {
+          final exeDir = path.dirname(Platform.resolvedExecutable);
+          final bundlePath = path.join(exeDir, 'data', 'flutter_assets', candidate);
+          if (await File(bundlePath).exists()) {
+            _iconPath = bundlePath;
+          }
+        } catch (_) {
+          // Ignore resolution errors
+        }
+      }
+    }
+
+    // Fallback if still not found (log warning)
+    if (_iconPath == null) {
+      LoggerService().warning('Tray icon not found at $candidate. Tray may fail to initialize.');
+      _iconPath = candidate;
+    } else {
+      LoggerService().info('Tray icon resolved to: $_iconPath');
+    }
     }
 
     _settings.addListener(_onSettingsChanged);
     _initialized = true;
 
     // Initial reconciliation
-    await _reconcile();
+    try {
+      await _reconcile();
+    } catch (e, stack) {
+      LoggerService().error('Failed to initialize tray', e, stack);
+    }
   }
 
   void _onSettingsChanged() {
