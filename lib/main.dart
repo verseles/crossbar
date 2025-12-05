@@ -56,8 +56,16 @@ void main(List<String> args) async {
 
     // Initialize tray service
     final trayService = TrayService();
-    await trayService.init();
-    logger.info('Tray service initialized');
+    // Do not await tray initialization to prevent blocking UI startup
+    // Also add a small delay to ensure window is ready
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      try {
+        await trayService.init();
+        logger.info('Tray service initialized');
+      } catch (e, stack) {
+        logger.error('Failed to initialize tray service', e, stack);
+      }
+    });
 
     // Start scheduler
     final scheduler = SchedulerService();
