@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' show TimeOfDay;
+import 'package:meta/meta.dart';
 
 import '../core/plugin_manager.dart';
 import '../models/plugin.dart';
@@ -148,6 +149,13 @@ class SchedulerService {
   }
 
   void dispose() {
+    stop();
+    _listeners.clear();
+    _lastOutputs.clear();
+  }
+
+  @visibleForTesting
+  void resetForTesting() {
     stop();
     _listeners.clear();
     _lastOutputs.clear();
