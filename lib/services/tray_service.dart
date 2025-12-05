@@ -80,13 +80,11 @@ class TrayService {
     _reconcile();
   }
 
-  @visibleForTesting
   void updatePluginOutput(String pluginId, model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _reconcile();
   }
 
-  @visibleForTesting
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
     _reconcile();
