@@ -204,8 +204,7 @@ class SelectConfigField extends ConfigField {
 
   @override
   Widget build(BuildContext context) {
-    final options = setting.options ?? {};
-    final entries = options.entries.toList();
+    final options = setting.options ?? [];
 
     return DropdownButtonFormField<String>(
       value: value ?? setting.defaultValue,
@@ -214,10 +213,10 @@ class SelectConfigField extends ConfigField {
         helperText: setting.help,
         border: const OutlineInputBorder(),
       ),
-      items: entries.map((entry) {
+      items: options.map((option) {
         return DropdownMenuItem(
-          value: entry.key,
-          child: Text(entry.value.toString()),
+          value: option.value,
+          child: Text(option.label),
         );
       }).toList(),
       onChanged: (newValue) {

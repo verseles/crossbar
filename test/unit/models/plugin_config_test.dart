@@ -161,7 +161,10 @@ void main() {
         type: 'select',
         defaultValue: 'metric',
         required: true,
-        options: {'metric': 'Celsius', 'imperial': 'Fahrenheit'},
+        options: [
+          SelectOption(value: 'metric', label: 'Celsius'),
+          SelectOption(value: 'imperial', label: 'Fahrenheit'),
+        ],
         width: 50,
         placeholder: 'Select units',
         help: 'Choose temperature units',
@@ -171,6 +174,7 @@ void main() {
       expect(setting.defaultValue, 'metric');
       expect(setting.required, true);
       expect(setting.options, isNotNull);
+      expect(setting.options!.length, 2);
       expect(setting.width, 50);
       expect(setting.placeholder, 'Select units');
       expect(setting.help, 'Choose temperature units');

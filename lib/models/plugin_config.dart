@@ -58,6 +58,26 @@ class PluginConfig {
   }
 }
 
+/// Represents a single configuration option for select fields.
+class SelectOption {
+  const SelectOption({
+    required this.value,
+    required this.label,
+  });
+
+  factory SelectOption.fromJson(Map<String, dynamic> json) {
+    return SelectOption(
+      value: json['value'] as String,
+      label: json['label'] as String,
+    );
+  }
+
+  final String value;
+  final String label;
+
+  Map<String, dynamic> toJson() => {'value': value, 'label': label};
+}
+
 class Setting {
 
   const Setting({
@@ -65,6 +85,7 @@ class Setting {
     required this.label,
     required this.type,
     this.defaultValue,
+    this.description,
     this.required = false,
     this.options,
     this.width,
@@ -73,13 +94,21 @@ class Setting {
   });
 
   factory Setting.fromJson(Map<String, dynamic> json) {
+    List<SelectOption>? options;
+    if (json['options'] != null) {
+      options = (json['options'] as List<dynamic>)
+          .map((o) => SelectOption.fromJson(o as Map<String, dynamic>))
+          .toList();
+    }
+
     return Setting(
       key: json['key'] as String,
       label: json['label'] as String,
       type: json['type'] as String,
       defaultValue: json['default'] as String?,
+      description: json['description'] as String?,
       required: json['required'] as bool? ?? false,
-      options: json['options'] as Map<String, dynamic>?,
+      options: options,
       width: json['width'] as int?,
       placeholder: json['placeholder'] as String?,
       help: json['help'] as String?,
@@ -89,8 +118,9 @@ class Setting {
   final String label;
   final String type;
   final String? defaultValue;
+  final String? description;
   final bool required;
-  final Map<String, dynamic>? options;
+  final List<SelectOption>? options;
   final int? width;
   final String? placeholder;
   final String? help;
@@ -101,8 +131,9 @@ class Setting {
       'label': label,
       'type': type,
       if (defaultValue != null) 'default': defaultValue,
+      if (description != null) 'description': description,
       'required': required,
-      if (options != null) 'options': options,
+      if (options != null) 'options': options!.map((o) => o.toJson()).toList(),
       if (width != null) 'width': width,
       if (placeholder != null) 'placeholder': placeholder,
       if (help != null) 'help': help,
@@ -114,8 +145,9 @@ class Setting {
     String? label,
     String? type,
     String? defaultValue,
+    String? description,
     bool? required,
-    Map<String, dynamic>? options,
+    List<SelectOption>? options,
     int? width,
     String? placeholder,
     String? help,
@@ -125,6 +157,7 @@ class Setting {
       label: label ?? this.label,
       type: type ?? this.type,
       defaultValue: defaultValue ?? this.defaultValue,
+      description: description ?? this.description,
       required: required ?? this.required,
       options: options ?? this.options,
       width: width ?? this.width,
@@ -138,3 +171,4 @@ class Setting {
     return 'Setting(key: $key, type: $type, required: $required)';
   }
 }
+
