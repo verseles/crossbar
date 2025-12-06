@@ -1,110 +1,148 @@
-# Crossbar Roadmap
+# Crossbar Technical Roadmap
 
-Este documento descreve o roteiro de desenvolvimento do Crossbar. Ele começa com uma auditoria honesta do estado atual do projeto (v1.0.0), identifica funcionalidades cruciais que foram planejadas mas não implementadas, e estabelece um plano de ação claro e faseado para torná-las realidade.
+Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-## Auditoria do Estado Atual (v1.0.0)
-
-O plano original descrevia um sistema robusto onde plugins poderiam declarar suas configurações em um arquivo JSON. O Crossbar seria responsável por gerar a UI de configuração, salvar os valores preenchidos pelo usuário e injetá-los como variáveis de ambiente na execução do plugin.
-
-Após uma auditoria completa, o sistema de configuração é atualmente uma **"casca" funcional na UI, mas sem o "motor" no backend**.
-
-### O que está Implementado (A "Casca"):
-
--   [x] **Modelos de Dados:** As classes `PluginConfig` e `Setting` existem em `lib/models/plugin_config.dart`.
--   [x] **Geração de UI:** O `PluginConfigDialog` e o `ConfigFormBuilder` em `lib/ui/` conseguem renderizar um formulário a partir de um objeto `PluginConfig`.
--   [x] **Scaffolding:** O comando `crossbar init` gera um arquivo `.config.json` de exemplo.
-
-### O que está Ausente (O "Motor"):
-
--   [ ] **Descoberta de Configuração:** O `PluginManager` não lê os arquivos `.config.json`.
--   [ ] **Persistência de Valores:** Não há lógica para salvar ou carregar os valores de configuração dos plugins.
--   [ ] **Injeção de Variáveis:** O `ScriptRunner` não injeta as configurações do usuário nos plugins.
--   [ ] **Segurança para Senhas:** O `flutter_secure_storage` não está sendo usado para campos do tipo `password`.
--   [ ] **Conexão UI ↔ Backend:** O diálogo de configuração não salva os dados em lugar nenhum.
+**Status Atual:** v1.0.0 (MVP lançado)
+**Próximo Ciclo:** v1.1.0 (Configuration Engine)
 
 ---
 
-## Epic: v1.1.0 - The Configuration Engine
+## 🔍 Auditoria do Estado Atual (v1.0.0)
 
-**Objetivo:** Implementar de ponta a ponta o sistema de configuração declarativa de plugins. Ao final deste epic, um usuário poderá configurar um plugin através da UI, e o plugin receberá esses valores como variáveis de ambiente.
+Antes de avançar, reconhecemos o que existe e o que falta para atingir a promessa do "Write Once, Run Everywhere".
 
----
+### ✅ O que está Sólido
+- **Core Architecture:** `PluginManager` e `ScriptRunner` funcionam bem.
+- **CLI Foundation:** Estrutura de comandos e parser de argumentos robustos.
+- **UI Desktop:** Janela principal e abas implementadas.
+- **Tray Básico:** Ícone único e menu funcionam via `tray_manager`.
 
-### Fase 1: Core de Configuração e Persistência
-
-**Meta:** Fazer o backend reconhecer as configurações dos plugins e ser capaz de salvar os valores inseridos pelo usuário em disco.
-
-#### Tarefa 1.1: Vincular Configuração ao Plugin
-
--   [ ] **Modelo:** Em `lib/models/plugin.dart`, adicionar o campo `final PluginConfig? config;` à classe `Plugin`.
--   [ ] **Modelo:** Atualizar o construtor, `copyWith`, `fromJson`, `toJson` para incluir o novo campo `config`.
--   [ ] **Lógica:** Em `lib/core/plugin_manager.dart`, no método `_createPluginFromFile`, implementar a lógica para procurar um arquivo `[plugin_name].config.json`.
--   [ ] **Lógica:** Se o arquivo de configuração existir, fazer o parse do JSON para um objeto `PluginConfig`.
--   [ ] **Lógica:** Associar o objeto `PluginConfig` ao criar e retornar o objeto `Plugin`.
--   [ ] **Testes:** Em `test/unit/core/plugin_manager_test.dart`:
-    -   [ ] Adicionar um teste que cria um plugin com um arquivo `.config.json` e verifica se o campo `plugin.config` não é nulo.
-    -   [ ] Adicionar um teste para um plugin sem arquivo de configuração e verificar se `plugin.config` é nulo.
-
-#### Tarefa 1.2: Criar Serviço de Persistência de Valores
-
--   [ ] **Estrutura:** Criar o novo arquivo `lib/services/plugin_config_service.dart`.
--   [ ] **Lógica:** Implementar a classe `PluginConfigService` como um singleton.
--   [ ] **Lógica:** Implementar um método `Future<String> _getConfigPath(String pluginId)` para retornar o caminho `~/.crossbar/configs/[plugin_id].values.json`.
--   [ ] **Lógica:** Implementar o método `Future<Map<String, dynamic>> loadValues(String pluginId)`.
--   [ ] **Lógica:** Implementar o método `Future<void> saveValues(String pluginId, Map<String, dynamic> values)`.
--   [ ] **Testes:** Criar o novo arquivo `test/unit/services/plugin_config_service_test.dart`.
-    -   [ ] Adicionar um teste para `saveValues` e verificar se o arquivo `.values.json` é criado com o conteúdo correto.
-    -   [ ] Adicionar um teste para `loadValues` que lê o arquivo salvo anteriormente.
-    -   [ ] Adicionar um teste para `loadValues` de um plugin sem configuração salva, garantindo que retorne um mapa vazio.
+### 🚧 O que é "Fachada" (Precisa de Implementação)
+- **Configuração:** UI existe, mas não salva dados nem injeta no plugin.
+- **Mobile Widgets:** `WidgetService` existe mas não comunica com layouts nativos (XML/SwiftUI).
+- **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
+- **API Gaps:** Comandos como `--location` (geocoding) e `--qr` não têm lógica implementada.
 
 ---
 
-### Fase 2: Injeção de Configurações na Execução
+## 🎯 Epic v1.1.0: The Configuration Engine
 
-**Meta:** Fazer com que os valores salvos na Fase 1 cheguem efetivamente ao ambiente de execução do plugin.
+**Objetivo:** Permitir que plugins declarem configurações (JSON), o usuário preencha (UI), e o sistema injete (ENV vars) com segurança.
 
-#### Tarefa 2.1: Modificar o ScriptRunner para Injetar Configs
+### Fase 1: Persistência e Segurança
+- [ ] **Criar Service:** `lib/services/plugin_config_service.dart`.
+    - [ ] Implementar `loadValues(pluginId)` lendo de `~/.crossbar/configs/`.
+    - [ ] Implementar `saveValues(pluginId, map)` escrevendo JSON.
+    - [ ] Integrar `flutter_secure_storage` para detectar chaves definidas como `type: password` no schema e salvar separadamente.
+- [ ] **Vincular Plugin:** Em `lib/core/plugin_manager.dart`:
+    - [ ] No método `_createPluginFromFile`, verificar existência de `[plugin].config.json`.
+    - [ ] Parsear JSON para `PluginConfig` object.
+    - [ ] Adicionar campo `PluginConfig? config` ao model `Plugin`.
+- [ ] **Teste Unitário:** `test/unit/services/plugin_config_service_test.dart` cobrindo criptografia e I/O.
 
--   [ ] **Lógica:** Em `lib/core/script_runner.dart`, no método `_buildEnvironment`, injetar a dependência do `PluginConfigService`.
--   [ ] **Lógica:** Dentro de `_buildEnvironment`, chamar `pluginConfigService.loadValues(plugin.id)` para obter as configurações salvas.
--   [ ] **Lógica:** Iterar sobre os valores carregados e adicioná-los ao mapa de `environment`.
--   [ ] **Testes:** Criar um novo arquivo de fixture `test/functional/fixtures/config_check.1s.sh` que faz `echo "MY_VAR_IS=$MY_VAR"`.
--   [ ] **Testes:** Em `test/functional/plugin_execution_test.dart`, adicionar um novo teste que:
-    -   [ ] Salva um valor de configuração `{'MY_VAR': 'hello_world'}` usando o `PluginConfigService`.
-    -   [ ] Executa o plugin `config_check.1s.sh` através do `ScriptRunner`.
-    -   [ ] Verifica se a saída do plugin (`output.text`) contém `MY_VAR_IS=hello_world`.
+### Fase 2: Injeção de Variáveis
+- [ ] **Update Runner:** Em `lib/core/script_runner.dart`:
+    - [ ] Injetar `PluginConfigService` no construtor.
+    - [ ] No método `run`, chamar `loadValues`.
+    - [ ] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
+- [ ] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
 
----
-
-### Fase 3: Integração da UI e Segurança
-
-**Meta:** Conectar a interface do usuário ao novo sistema de persistência e implementar o armazenamento seguro de senhas.
-
-#### Tarefa 3.1: Conectar a UI ao Backend de Configuração
-
--   [ ] **UI:** Em `lib/ui/tabs/plugins_tab.dart`, implementar a ação do botão "Configurar" em `_showPluginDetails` ou `_PluginCard`.
--   [ ] **UI:** Antes de abrir o diálogo, usar o `PluginConfigService` para carregar os valores já salvos para aquele plugin.
--   [ ] **UI:** Abrir o `PluginConfigDialog`, passando o `plugin.config` e os valores carregados.
--   [ ] **UI:** Ao receber os novos valores do diálogo, chamar `PluginConfigService.saveValues()`.
--   [ ] **Testes:** Em `test/widget/plugins_tab_test.dart`, adicionar um teste de widget que simula o clique, a abertura do diálogo e a chamada do método `saveValues`.
-
-#### Tarefa 3.2: Implementar Armazenamento Seguro para Senhas
-
--   [ ] **Lógica:** Em `lib/services/plugin_config_service.dart`, modificar o método `saveValues`:
-    -   [ ] Receber o `PluginConfig` como parâmetro para saber o tipo de cada campo.
-    -   [ ] Se um campo for do tipo `password`, salvá-lo usando `flutter_secure_storage.write()` e removê-lo do mapa que vai para o JSON.
--   [ ] **Lógica:** Em `lib/services/plugin_config_service.dart`, modificar o método `loadValues`:
-    -   [ ] Receber o `PluginConfig` como parâmetro.
-    -   [ ] Após carregar do JSON, iterar sobre os campos `password` e carregar seus valores usando `flutter_secure_storage.read()`.
--   [ ] **Lógica:** Assegurar que `lib/core/script_runner.dart` chame a nova versão de `loadValues` para que as senhas sejam injetadas no ambiente.
--   [ ] **Testes:** Em `test/unit/services/plugin_config_service_test.dart`, mockar o `FlutterSecureStorage` e adicionar testes para verificar se `write` e `read` são chamados para campos de senha, e que esses campos não estão no arquivo JSON.
+### Fase 3: Conexão UI
+- [ ] **Plugins Tab:** Em `lib/ui/tabs/plugins_tab.dart`:
+    - [ ] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
+    - [ ] Carregar valores atuais antes de abrir o dialog.
+    - [ ] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
 
 ---
 
-## Backlog de Features (Pós v1.1.0)
+## 📱 Epic v1.2.0: Mobile Mastery (Widgets & Services)
 
--   [ ] **Global Hotkey:** Implementar o atalho `Ctrl+Alt+C` para abrir a GUI.
--   [ ] **Refresh Override:** Permitir que o usuário sobrescreva o intervalo de atualização de um plugin.
--   [ ] **Utilitários CLI:** Implementar os comandos restantes (`--qr-generate`, `--location`, etc.).
--   [ ] **Documentação:** Finalizar os guias em `docs/`.
--   [ ] **Docker/Podman:** Finalizar a infraestrutura de contêineres.
+**Objetivo:** Transformar o Crossbar em um cidadão de primeira classe no Android e iOS, usando o package `home_widget` corretamente.
+
+### Fase 1: Android Native (XML & Receiver)
+- [ ] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
+    - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
+    - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
+    - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
+- [ ] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
+    - [ ] Implementar lógica de atualização via `RemoteViews`.
+    - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
+- [ ] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
+
+### Fase 2: iOS Native (WidgetKit)
+- [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS.
+- [ ] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
+- [ ] **SwiftUI View:** Implementar `CrossbarWidget.swift`.
+    - [ ] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
+    - [ ] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
+
+### Fase 3: Widget Service Logic
+- [ ] **Serialização:** Em `lib/services/widget_service.dart`:
+    - [ ] Implementar `updateWidget(pluginId, output)`.
+    - [ ] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
+    - [ ] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
+- [ ] **Background Sync:** Garantir que o `SchedulerService` chame `updateWidget` mesmo quando o app está em background (Android Headless Task).
+
+---
+
+## 🖥️ Epic v1.3.0: Advanced Desktop UI
+
+**Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
+
+### Fase 1: Global Hotkey
+- [ ] **Dependência:** Adicionar `hotkey_manager` ao `pubspec.yaml`.
+- [ ] **Implementação:** Em `lib/services/window_service.dart`:
+    - [ ] Registrar `Ctrl+Alt+C` (ou `Cmd+Alt+C` no macOS).
+    - [ ] Handler deve fazer toggle de `show()` / `hide()`.
+- [ ] **Settings:** Adicionar opção na aba Settings para customizar/desativar o atalho.
+
+### Fase 2: Tray Overflow Logic
+- [ ] **Lógica:** Em `lib/services/tray_service.dart`:
+    - [ ] Implementar lógica para `TrayDisplayMode.smartOverflow`.
+    - [ ] Se `plugins.length > threshold`, renderizar apenas 1 ícone genérico na tray.
+    - [ ] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
+- [ ] **Menu Builder:** Refatorar a construção do menu para suportar aninhamento dinâmico (Plugin A -> [Output, Actions]).
+
+### Fase 3: Window State Persistence
+- [ ] **Persistência:** Em `lib/services/window_service.dart`:
+    - [ ] Salvar `Rect` (posição e tamanho) no `shared_preferences` ao fechar/ocultar.
+    - [ ] Restaurar `Rect` ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
+
+---
+
+## 🌐 Epic v1.4.0: API & Marketplace Completion
+
+**Objetivo:** Preencher as lacunas nos comandos CLI e tornar o Marketplace funcional.
+
+### Fase 1: CLI Gaps
+- [ ] **Geolocation:** Implementar `lib/cli/commands/location_command.dart`.
+    - [ ] Usar `geolocator` (se permissão concedida) ou API IP-based (ipapi.co) como fallback.
+    - [ ] Implementar geocoding reverso (lat/long -> Cidade).
+- [ ] **QR Code:** Implementar `lib/cli/commands/utility_commands.dart` (subcomando `qr`).
+    - [ ] Gerar QR code em ASCII para terminal.
+    - [ ] Gerar PNG base64 se flag `--image` for passada.
+- [ ] **Screenshot:** Finalizar implementação multiplataforma em `lib/core/api/utils_api.dart`.
+    - [ ] Linux: `gnome-screenshot` ou `scrot` ou `import` (ImageMagick).
+    - [ ] Windows: PowerShell snippet para captura.
+    - [ ] macOS: `screencapture`.
+
+### Fase 2: Marketplace Engine
+- [ ] **GitHub API:** Em `lib/services/marketplace_service.dart`:
+    - [ ] Implementar busca real usando `api.github.com/search/code?q=crossbar+extension:sh`.
+    - [ ] Implementar cache de resultados para evitar rate limiting.
+- [ ] **Instalação:** Melhorar `InstallCommand`:
+    - [ ] Clonar repositório temporariamente.
+    - [ ] Validar integridade do arquivo.
+    - [ ] Copiar para `~/.crossbar/plugins`.
+    - [ ] Executar `chmod +x` automaticamente.
+
+---
+
+## 🧪 Estratégia de Qualidade
+
+Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
+
+1.  **Código:** Implementado seguindo `flutter_lints`.
+2.  **Testes Unitários:** Classes de lógica (Services, ViewModels) com >90% coverage.
+3.  **Testes de Integração:** Pelo menos 1 teste end-to-end para o fluxo crítico (ex: Salvar config -> Executar Plugin -> Verificar Output).
+4.  **Multi-plataforma:** Verificar se a implementação não quebra o build em Linux/Android (CI matrix).

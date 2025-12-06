@@ -5,11 +5,18 @@
 
 ---
 
+Plano granndioso e teorico:
+@./original_plan.md
+Plano de execucao baseado em original_plan.md, pode estar defasado:
+@./MASTER_PLAN.md
+Roadmap de implementacao, atualizado regularmente:
+@./ROADMAP.md
+
 ## 1. Regras Operacionais (Inflexíveis)
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
-- **Leitura Inicial**: Sempre leia `original_plan.md` e `MASTER_PLAN.md` no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
+- **Leitura Inicial**: Sempre leia @./original_plan.md, @./MASTER_PLAN.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test --coverage`), verificar coverage mínimo de 43% e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
@@ -247,6 +254,7 @@ pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/rel
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.
 - Pare após 3 tentativas falhas e reavalie.
+- Atualize o roadmap conforme avança.
 
 ---
 
