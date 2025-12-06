@@ -12,6 +12,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 6. [Long-term Vision (v2.0.0+)](#long-term-vision-v200)
 7. [Community Requests](#community-requests)
 8. [Technical Debt](#technical-debt)
+9. [Session Notes](#session-notes)
 
 ---
 
@@ -20,6 +21,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 **Release Date**: December 1, 2025
 
 ### ✅ Phase 1: Core & CLI Foundation
+
 - [x] Plugin Manager with multi-language support
   - [x] Bash (.sh)
   - [x] Python (.py)
@@ -34,6 +36,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 - [x] CLI with 47 commands (partial implementation)
 
 ### ✅ Phase 2: Desktop GUI
+
 - [x] Main Window with Material Design 3
 - [x] Navigation Rail interface
 - [x] Three main tabs (Plugins, Settings, Marketplace)
@@ -42,11 +45,13 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 - [x] Dynamic form generation (25+ field types)
 
 ### ✅ Phase 3: Mobile & Widgets
+
 - [x] Notification Service (cross-platform push)
 - [x] Widget Service (home screen widgets)
 - [x] Scheduler Service (background auto-refresh)
 
 ### ✅ Phase 4-7: Extended CLI, i18n, Hot Reload, CI/CD
+
 - [x] Marketplace Service
 - [x] Logger Service (rotating logs)
 - [x] 24 example plugins (Bash, Python, Node.js, Dart)
@@ -56,6 +61,7 @@ This document outlines the development roadmap for Crossbar, tracking completed 
 - [x] 116 tests (>45% coverage)
 
 **Final Statistics**:
+
 - **9,478** lines of Dart code
 - **24** example plugins
 - **10** languages
@@ -71,6 +77,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ### ✅ Completed CLI Commands (Sprint 1)
 
 #### Media Controls (14 commands) - COMPLETED December 1, 2025
+
 1. ~~`--media-play` - Resume playback~~ ✅
 2. ~~`--media-pause` - Pause playback~~ ✅
 3. ~~`--media-stop` - Stop playback~~ ✅
@@ -90,22 +97,26 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ### ✅ Completed CLI Commands (Sprint 2)
 
 #### Power Management (3 commands) - COMPLETED December 1, 2025
+
 14. ~~`--power-sleep` - Suspend system~~ ✅
 15. ~~`--power-restart` - Restart (with confirmation)~~ ✅
 16. ~~`--power-shutdown` - Shutdown (with confirmation)~~ ✅
 
 #### Screenshot & Wallpaper (4 commands) - COMPLETED December 1, 2025
+
 17. ~~`--screenshot [path]` - Take screenshot~~ ✅
 18. ~~`--screenshot --clipboard` - Screenshot to clipboard~~ ✅
 19. ~~`--wallpaper-get` - Get current wallpaper path~~ ✅
 20. ~~`--wallpaper-set <path>` - Set wallpaper~~ ✅
 
 #### Notifications & DND (3 commands) - COMPLETED December 1, 2025
+
 21. ~~`--notify "title" "message" [--icon] [--priority]` - Send notification~~ ✅
 22. ~~`--dnd-status` - Do Not Disturb status~~ ✅
 23. ~~`--dnd-set on|off` - Set DND~~ ✅
 
 #### Open/Launch (3 commands) - COMPLETED December 1, 2025
+
 24. ~~`--open-url <url>` - Open in browser~~ ✅
 25. ~~`--open-app <name>` - Launch application~~ ✅
 26. ~~`--open-file <path>` - Open with default app~~ ✅
@@ -113,17 +124,20 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ### ✅ Completed CLI Commands (Sprint 3)
 
 #### Bluetooth (4 commands) - COMPLETED December 1, 2025
+
 27. ~~`--bluetooth-status` - Bluetooth status~~ ✅
 28. ~~`--bluetooth-on` - Enable Bluetooth~~ ✅
 29. ~~`--bluetooth-off` - Disable Bluetooth~~ ✅
 30. ~~`--bluetooth-devices --json` - List paired devices~~ ✅
 
 #### VPN (1 command) - COMPLETED December 1, 2025
+
 31. ~~`--vpn-status` - VPN connection status~~ ✅
 
 ### Missing CLI Commands (~6 commands)
 
 #### Utilities (6 commands)
+
 32. `--hash "text" --algo <md5|sha1|sha256|sha512|blake3>` - Hash with algorithm selection
 33. `--qr-generate "text"` - Generate QR code as base64 PNG
 34. `--random [min] [max]` - Random number (default 0-100)
@@ -132,10 +146,12 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 37. `--time [fmt=12h|24h]` - Formatted time
 
 ### ✅ Completed API Files (2 files)
+
 38. ~~`lib/core/api/media_api.dart` - Media control implementations~~ ✅ COMPLETED
 39. ~~`lib/core/api/utils_api.dart` - Utility command implementations~~ ✅ COMPLETED
 
 ### ✅ Completed Example Plugins (8 plugins) - Sprint 5
+
 40. ~~`plugins/clock.5s.go`~~ ✅
 41. ~~`plugins/cpu.10s.go`~~ ✅
 42. ~~`plugins/battery.30s.go`~~ ✅
@@ -146,25 +162,30 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 47. ~~`plugins/site-check.1m.rs`~~ ✅
 
 ### ✅ Completed Services (1 service) - Sprint 7
+
 48. ~~`lib/services/ipc_server.dart` - HTTP server on localhost:48291 for GUI ↔ background communication~~ ✅
 
 ### Missing Documentation (4 files)
+
 49. `docs/api-reference.md` - Complete CLI API documentation
 50. `docs/plugin-development.md` - Plugin development tutorial
 51. `docs/config-schema.md` - Configuration field types documentation
 52. `SECURITY.md` - Security vulnerability reporting
 
 ### ✅ Completed Features (3 features) - Sprint 4, Sprint 6
+
 55. ~~`crossbar init --lang <lang> --type <type>` - Plugin scaffolding command~~ ✅
 56. ~~`crossbar install <url>` - Install plugin from GitHub~~ ✅
 57. ~~XML output format (`--xml` flag) for legacy/enterprise~~ ✅ (Sprint 4)
 
 ### Missing Features (3 features)
+
 53. Global keyboard shortcut `Ctrl+Alt+C` to open GUI
 54. CI coverage enforcement (fail if < 45%)
-58. Refresh interval override in plugin config (`_crossbar_refresh_override`)
+55. Refresh interval override in plugin config (`_crossbar_refresh_override`)
 
 ### Missing Docker/Podman Infrastructure (6 files) [LAST PRIORITY]
+
 59. `docker/Dockerfile.linux` - Linux build container
 60. `docker/Dockerfile.android` - Android build container
 61. `docker/Dockerfile.macos` - macOS build container (experimental)
@@ -177,6 +198,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ## Sprint Planning
 
 ### ✅ Sprint 1: Media & Audio Controls (v1.1.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Complete media control CLI commands
 
@@ -199,6 +221,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 2: System Controls (v1.1.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Power, Screenshot, Wallpaper, Notifications
 
@@ -220,6 +243,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 3: Bluetooth & VPN (v1.1.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Bluetooth controls and VPN status
 
@@ -239,6 +263,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 4: Utilities & Hash Commands (v1.1.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Enhanced hash and XML output
 
@@ -246,7 +271,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
   - [x] `--hash "text" --algo <md5|sha1|sha256|sha384|sha512>`
 - [x] Add XML output format (`--xml` flag)
   - [x] Added to --cpu, --media-playing, --vpn-status
-  - [x] Generic _toXml() helper for structured data
+  - [x] Generic \_toXml() helper for structured data
 - [x] Existing utilities verified working:
   - [x] `--random [min] [max]` - Random number generator
   - [x] `--time [fmt=12h|24h]` - Formatted time output
@@ -258,6 +283,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 5: Go & Rust Example Plugins (v1.1.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Complete multi-language plugin examples
 
@@ -280,6 +306,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 6: Plugin Scaffolding & Installation (v1.2.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Plugin management CLI commands
 
@@ -303,6 +330,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 7: IPC Server (v1.2.0)
+
 **Status**: Partially Completed - December 1, 2025
 **Focus**: Background services and shortcuts
 
@@ -325,6 +353,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 8: Documentation (v1.2.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Complete documentation
 
@@ -352,6 +381,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 9: CI/CD Improvements (v1.2.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: CI enforcement and quality
 
@@ -373,6 +403,7 @@ The following **31 items** remain from the original 63 items in `original_plan.m
 ---
 
 ### ✅ Sprint 10: Docker/Podman Infrastructure (v1.3.0)
+
 **Status**: Completed - December 1, 2025
 **Focus**: Containerized development environment
 
@@ -445,6 +476,7 @@ test/integration/
 ### Integration Tests to Implement
 
 #### Plugin Execution Tests
+
 - [ ] `test/integration/plugin_execution_test.dart`
   - [ ] Execute Bash plugin and validate output
   - [ ] Execute Python plugin and validate output
@@ -456,6 +488,7 @@ test/integration/
   - [ ] Test plugin output parsing (text and JSON)
 
 #### CLI Commands Tests
+
 - [ ] `test/integration/cli_commands_test.dart`
   - [ ] Test `--cpu` returns valid percentage
   - [ ] Test `--memory` returns valid format
@@ -467,6 +500,7 @@ test/integration/
   - [ ] Test `--uuid` format validation
 
 #### Marketplace Tests
+
 - [ ] `test/integration/marketplace_test.dart`
   - [ ] Search GitHub for crossbar plugins
   - [ ] Validate plugin metadata parsing
@@ -474,12 +508,15 @@ test/integration/
   - [ ] Test plugin installation flow
 
 #### System Integration Tests
+
 - [ ] `test/integration/media_controls_test.dart` (requires audio device)
+
   - [ ] Test volume get/set
   - [ ] Test mute toggle
   - [ ] Test playback control (if player running)
 
 - [ ] `test/integration/screenshot_test.dart` (requires display)
+
   - [ ] Take screenshot and verify file exists
   - [ ] Test clipboard screenshot (if supported)
 
@@ -538,21 +575,23 @@ void main() {
 
 **CI Status**: ✅ All platforms building successfully in GitHub Actions
 
-| Platform | CI Build | Local Build | Notes |
-|----------|----------|-------------|-------|
-| Linux | ✅ Working | ✅ Working | 41MB bundle |
-| macOS | ✅ Working | ⚠️ Requires macOS | Built in CI |
-| Windows | ✅ Working | ⚠️ Requires Windows | Built in CI |
-| Android | ✅ Working | ⚠️ Requires SDK | APK built in CI |
-| iOS | ⚠️ Structure ready | ⚠️ Requires Xcode | Not built yet |
+| Platform | CI Build           | Local Build         | Notes           |
+| -------- | ------------------ | ------------------- | --------------- |
+| Linux    | ✅ Working         | ✅ Working          | 41MB bundle     |
+| macOS    | ✅ Working         | ⚠️ Requires macOS   | Built in CI     |
+| Windows  | ✅ Working         | ⚠️ Requires Windows | Built in CI     |
+| Android  | ✅ Working         | ⚠️ Requires SDK     | APK built in CI |
+| iOS      | ⚠️ Structure ready | ⚠️ Requires Xcode   | Not built yet   |
 
 ### Plugin Features
+
 - No plugin sandboxing (runs with full permissions)
 - No plugin signing/verification
 - No plugin versioning in marketplace
 - No plugin dependency management
 
 ### Performance
+
 - Hot reload watches entire plugins directory
 - No lazy loading for large plugin lists
 - No plugin output caching
@@ -564,26 +603,31 @@ void main() {
 **Target**: 2027+
 
 ### Remote Plugins
+
 - Server-side execution
 - Cloud functions integration (AWS Lambda, GCF)
 - Edge computing support
 
 ### Telemetry & Analytics (Opt-in)
+
 - OpenTelemetry integration
 - Grafana dashboards
 - Sentry error reporting
 
 ### AI/ML Features
+
 - Smart plugin suggestions
 - Natural language plugin creation
 - Anomaly detection
 
 ### Integration Platform
+
 - Webhook support
 - IFTTT/Zapier integration
 - REST/GraphQL API
 
 ### Platform Expansion
+
 - Browser extension
 - Smartwatch support
 - Floating desktop widgets
@@ -595,16 +639,19 @@ void main() {
 Features requested by users (prioritized by demand):
 
 ### High Priority
+
 - [ ] **Plugin marketplace with ratings** ⭐⭐⭐⭐⭐
 - [ ] **Auto-updater** ⭐⭐⭐⭐
 - [ ] **Plugin templates/wizard** ⭐⭐⭐⭐
 
 ### Medium Priority
+
 - [ ] **Config sync via cloud** ⭐⭐⭐
 - [ ] **Plugin sandboxing** ⭐⭐⭐
 - [ ] **Custom themes** ⭐⭐⭐
 
 ### Low Priority
+
 - [ ] **Browser extension** ⭐⭐
 - [ ] **Voice commands** ⭐
 - [ ] **Remote plugins** ⭐
@@ -614,17 +661,20 @@ Features requested by users (prioritized by demand):
 ## Technical Debt
 
 ### Code Quality
+
 - [ ] Increase test coverage to 95%+
 - [ ] Refactor large files (>400 lines)
 - [ ] Add DartDoc to all public APIs
 - [ ] Create architecture diagrams
 
 ### Performance
+
 - [ ] Optimize plugin discovery
 - [ ] Reduce memory footprint
 - [ ] Improve startup time
 
 ### Dependencies
+
 - [ ] Update outdated packages
 - [ ] Reduce dependency count
 - [ ] Replace heavy dependencies
@@ -634,12 +684,14 @@ Features requested by users (prioritized by demand):
 ## Success Metrics
 
 ### v1.0.0 Baseline (December 2025)
+
 - ⭐ **0** GitHub stars
 - 📥 **0** downloads
 - 🔌 **32** example plugins (24 original + 8 Go/Rust)
 - **47+** CLI commands (32 added in Sprints 1-4)
 
 ### v1.2.0 Goals (Q1 2026)
+
 - ⭐ **100+** GitHub stars
 - 📥 **500+** downloads
 - 🔌 **32** example plugins
@@ -647,6 +699,7 @@ Features requested by users (prioritized by demand):
 - Complete documentation
 
 ### v1.3.0 Goals (Q2 2026)
+
 - Full Docker/Podman support
 - Container-based development ready
 - All platforms buildable in containers
@@ -665,7 +718,76 @@ Join: [GitHub Discussions](https://github.com/verseles/crossbar/discussions)
 
 ---
 
-**Last Updated**: December 1, 2025
+## Session Notes
+
+> **Last Session**: December 5, 2025
+
+### 🔧 Tray Service Fix (December 5, 2025)
+
+#### Problem Resolved
+
+The application was crashing on Linux after switching from `tray_manager` to `system_tray` library. The crash occurred during `initSystemTray` with a segmentation fault.
+
+#### Root Cause
+
+The `system_tray` library has a bug on Linux (GitHub issue #64) that causes crashes during initialization, even with valid icon paths.
+
+#### Solution Applied
+
+Reverted to `tray_manager` for stable single-icon tray support. The `xdg_status_notifier_item` package was kept as a dependency for future multi-icon implementation.
+
+#### Key Files Modified
+
+- `lib/services/tray_service.dart` - Simplified to use tray_manager
+- `lib/services/settings_service.dart` - Default changed to `TrayDisplayMode.unified`
+- `lib/main.dart` - IPC check moved before scheduler/tray init
+
+### 📋 Next Session: Multi-Icon Tray for Linux
+
+#### Goal
+
+Implement support for multiple tray icons on Linux using `xdg_status_notifier_item` (D-Bus StatusNotifierItem).
+
+#### Strategy
+
+| Platform    | Single Icon              | Multiple Icons                        |
+| ----------- | ------------------------ | ------------------------------------- |
+| **Linux**   | `tray_manager` (unified) | `xdg_status_notifier_item` (separate) |
+| **Windows** | `tray_manager` (unified) | Not supported                         |
+| **macOS**   | `tray_manager` (unified) | Not supported                         |
+
+#### Implementation Steps
+
+1. Create `LinuxTrayService` using `xdg_status_notifier_item`
+2. Each plugin gets a unique `StatusNotifierItemClient` with ID `crossbar-plugin-{pluginId}`
+3. When `TrayDisplayMode.separate` is selected on Linux, switch to `LinuxTrayService`
+4. Keep `tray_manager` as fallback for `TrayDisplayMode.unified` and other platforms
+
+#### Dependencies Ready
+
+- `xdg_status_notifier_item: ^0.0.1` - Already in pubspec.yaml
+- `tray_manager: ^0.5.2` - Currently in use
+
+#### Test Commands
+
+```bash
+# Build and test
+flutter build linux --release
+./build/linux/x64/release/bundle/crossbar
+
+# Check D-Bus registrations
+dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames | grep -i statusnotifier
+```
+
+#### References
+
+- [xdg_status_notifier_item](https://pub.dev/packages/xdg_status_notifier_item)
+- [StatusNotifierItem Spec](https://www.freedesktop.org/wiki/Specifications/StatusNotifierItem/)
+- Session conversation: Tray icon crash investigation and fix
+
+---
+
+**Last Updated**: December 5, 2025
 **Current Version**: v1.0.0
 **All Sprints Complete**: v1.3.0 features ready!
 **Sprint 1 Status**: ✅ COMPLETED - 14 media commands
