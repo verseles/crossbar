@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.2.0-dev (Mobile Widgets - Android ✅, iOS 🚧)
-**Próximo Ciclo:** v1.3.0 (Advanced Desktop UI)
+**Status Atual:** v1.3.0-dev (Universal Plugins 🚧)
+**Próximo Ciclo:** v1.4.0 (Advanced Desktop UI)
 
 ---
 
@@ -103,7 +103,126 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ---
 
-## 🖥️ Epic v1.3.0: Advanced Desktop UI
+## � Epic v1.3.0: Universal Plugins (Multi-Runner Architecture)
+
+**Status: 🚧 EM PROGRESSO**
+
+**Objetivo:** Permitir que plugins funcionem em TODAS as plataformas através de múltiplos runners e uso extensivo da API CLI do Crossbar.
+
+### Fase 1: Reescrever Plugins Exemplo (API-First) ✅
+
+> **Problema:** Plugins atuais usam `curl`, `top`, `/proc` diretamente, quebrando portabilidade.
+> **Solução:** Reescrever para usar `crossbar --cpu`, `crossbar --web`, etc.
+
+- [x] **Definir Catálogo:** 6 plugins × 6 linguagens = 36 arquivos
+  - [x] clock (tempo) - 6 linguagens
+  - [x] cpu (sistema) - 6 linguagens
+  - [x] battery (sistema) - 6 linguagens
+  - [x] memory (sistema) - 6 linguagens
+  - [x] weather (API + config) - 6 linguagens + schema
+  - [x] bitcoin (API) - 6 linguagens
+- [x] **Reescrever Bash:** Usar `$(crossbar --cpu)` em vez de `top | grep`
+- [x] **Reescrever Python:** Usar `subprocess.run(['crossbar', '--cpu'])`
+- [x] **Reescrever Node:** Usar `execSync('crossbar --cpu')`
+- [x] **Reescrever Dart:** Usar `Process.runSync('crossbar', ['--cpu'])`
+- [x] **Reescrever Go:** Usar `exec.Command("crossbar", "--cpu")`
+- [x] **Reescrever Rust:** Usar `Command::new("crossbar").arg("--cpu")`
+- [x] **Estrutura de Pastas:** Reorganizar `plugins/` por funcionalidade
+
+### Fase 2: Sistema de Tags/Categorias Unificado
+
+- [ ] **Modelo:** Criar `PluginMetadata` com category, tags, language, type
+- [ ] **Reutilização:** Extrair `PluginFilterWidget` compartilhado
+  - [ ] Usar em `PluginsTab` (plugins instalados)
+  - [ ] Usar em `SamplePluginsDialog` (plugins exemplo)
+- [ ] **Filtros:** Categoria, Linguagem, Tipo, Busca texto
+- [ ] **Agrupamento:** Por linguagem, por configurável, por categoria
+
+### Fase 3: EmbeddedApi (API Dart Nativa)
+
+> **Objetivo:** Implementar comandos da CLI diretamente em Dart para mobile.
+
+- [ ] **Criar:** `lib/core/api/embedded_api.dart`
+  - [ ] `EmbeddedApi.cpu()` - Uso de CPU
+  - [ ] `EmbeddedApi.memory()` - RAM livre/total
+  - [ ] `EmbeddedApi.battery()` - Nível e status
+  - [ ] `EmbeddedApi.web(url, headers)` - HTTP requests via Dio
+  - [ ] `EmbeddedApi.time(format)` - Hora atual
+  - [ ] `EmbeddedApi.uptime()` - Tempo desde boot
+  - [ ] `EmbeddedApi.os()` - Info do sistema
+- [ ] **Platform Channels:** Implementar para Android (Kotlin) e iOS (Swift) quando necessário
+- [ ] **Fallback:** Desktop usa Process.run como backup
+
+### Fase 4: DartRunner
+
+> **Objetivo:** Executar plugins `.dart` via Isolate com acesso à EmbeddedApi.
+
+- [ ] **Criar:** `lib/core/runners/dart_runner.dart`
+- [ ] **Isolate:** Executar código Dart em isolate separado
+- [ ] **API Access:** Expor `EmbeddedApi` para plugins
+- [ ] **Sandbox:** Limitar acesso a filesystem/network
+- [ ] **Testes:** Validar execução em Android/iOS
+
+### Fase 5: DeclarativeRunner (Plugins YAML)
+
+> **Objetivo:** Plugins sem código, apenas configuração.
+
+- [ ] **Formato YAML:** Definir schema
+  ```yaml
+  name: Weather
+  interval: 30m
+  source:
+    type: http # ou "system"
+    url: "https://api..."
+  output:
+    icon: "🌡️"
+    text: "${response.main.temp}°C"
+  ```
+- [ ] **Criar:** `lib/core/runners/declarative_runner.dart`
+- [ ] **Providers System:**
+  - [ ] `http` - Fetch de APIs
+  - [ ] `system` - cpu, memory, battery, etc (via EmbeddedApi)
+- [ ] **JSONPath:** Suporte a extração de dados `${response.data.value}`
+- [ ] **Conditions:** Cores condicionais baseadas em valores
+- [ ] **Versões YAML:** Criar para os 6 plugins exemplo
+
+### Fase 6: TermuxRunner (Android - Opcional)
+
+> **Objetivo:** Para usuários avançados que têm Termux instalado.
+
+- [ ] **Intent:** Usar `com.termux.RUN_COMMAND` para executar scripts
+- [ ] **Permissões:** Documentar setup necessário
+- [ ] **Fallback:** Se Termux não disponível, guiar para DeclarativeRunner
+- [ ] **Detecção:** Auto-detectar se Termux está instalado
+
+### Fase 7: Plugin Executor Unificado
+
+- [ ] **Interface:** `abstract class PluginRunner { canRun(); run(); }`
+- [ ] **Implementações:**
+  - [ ] `ScriptRunner` (desktop only - já existe)
+  - [ ] `DartRunner` (todas plataformas)
+  - [ ] `DeclarativeRunner` (todas plataformas)
+  - [ ] `TermuxRunner` (Android com Termux)
+- [ ] **Auto-seleção:** Escolher runner baseado em extensão + plataforma
+- [ ] **Prioridade:** Declarative > Dart > Script > Termux
+
+### Fase 8: UI de Samples Melhorada
+
+- [ ] **Indicadores:** Mostrar quais linguagens estão disponíveis por plugin
+- [ ] **Compatibilidade:** Indicar "✅ Funciona nesta plataforma"
+- [ ] **Agrupamento:** Por funcionalidade (todos os "clock" juntos)
+- [ ] **Seleção de Variante:** Usuário escolhe linguagem preferida
+
+### Fase 9: Documentação
+
+- [ ] **README:** Seção "Plugin Types" explicando runners
+- [ ] **docs/plugin-runners.md:** Guia detalhado
+- [ ] **docs/writing-portable-plugins.md:** Best practices
+- [ ] **GUI Onboarding:** Wizard ao adicionar primeiro plugin
+
+---
+
+## �🖥️ Epic v1.4.0: Advanced Desktop UI
 
 **Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
 
@@ -131,7 +250,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ---
 
-## 🌐 Epic v1.4.0: API & Marketplace Completion
+## 🌐 Epic v1.5.0: API & Marketplace Completion
 
 **Objetivo:** Preencher as lacunas nos comandos CLI e tornar o Marketplace funcional.
 
