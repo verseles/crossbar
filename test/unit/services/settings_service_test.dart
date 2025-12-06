@@ -57,17 +57,17 @@ void main() {
     test('Tray settings are persisted', () async {
       await settingsService.init();
 
-      expect(settingsService.trayDisplayMode, TrayDisplayMode.separate); // default
+      expect(settingsService.trayDisplayMode, TrayDisplayMode.unified); // default
       expect(settingsService.trayClusterThreshold, 3); // default
 
-      settingsService.trayDisplayMode = TrayDisplayMode.unified;
-      expect(settingsService.trayDisplayMode, TrayDisplayMode.unified);
+      settingsService.trayDisplayMode = TrayDisplayMode.separate;
+      expect(settingsService.trayDisplayMode, TrayDisplayMode.separate);
 
       settingsService.trayClusterThreshold = 5;
       expect(settingsService.trayClusterThreshold, 5);
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('tray_display_mode'), 'unified');
+      expect(prefs.getString('tray_display_mode'), 'separate');
       expect(prefs.getInt('tray_cluster_threshold'), 5);
     });
   });

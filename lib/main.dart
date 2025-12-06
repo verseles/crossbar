@@ -38,8 +38,9 @@ void main(List<String> args) async {
     await logger.init();
     logger.info('Crossbar starting...');
 
-    // Initialize WindowService
     final startMinimized = args.contains('--minimized');
+
+    // Initialize WindowService first
     final windowService = WindowService();
     await windowService.init(startMinimized: startMinimized);
     logger.info('Window service initialized (minimized: $startMinimized)');
@@ -49,32 +50,7 @@ void main(List<String> args) async {
     await settings.init();
     logger.info('Settings initialized');
 
-    // Discover plugins
-    final pluginManager = PluginManager();
-    await pluginManager.discoverPlugins();
-    logger.info('Discovered ${pluginManager.plugins.length} plugins');
-
-    // Initialize tray service
-    final trayService = TrayService();
-    // Do not await tray initialization to prevent blocking UI startup
-    // Also add a small delay to ensure window is ready
-    Future.delayed(const Duration(milliseconds: 500), () async {
-      try {
-        await trayService.init();
-        logger.info('Tray service initialized');
-      } catch (e, stack) {
-        logger.error('Failed to initialize tray service', e, stack);
-      }
-    });
-
-    // Start scheduler
-    final scheduler = SchedulerService();
-    // Connect tray to scheduler before starting, so we catch initial runs if any
-    scheduler.addListener(trayService.updatePluginOutput);
-    await scheduler.start();
-    logger.info('Scheduler started');
-
-    // Initialize IPC server
+    // Check for existing instance EARLY - before initializing scheduler/tray
     final ipcServer = IpcServer();
     final ipcStarted = await ipcServer.start();
 
@@ -103,6 +79,33 @@ void main(List<String> args) async {
     }
 
     logger.info('IPC server started on port ${ipcServer.port}');
+
+    // Now that we know we're the primary instance, continue initialization
+
+    // Discover plugins
+    final pluginManager = PluginManager();
+    await pluginManager.discoverPlugins();
+    logger.info('Discovered ${pluginManager.plugins.length} plugins');
+
+    // Initialize tray service
+    final trayService = TrayService();
+    // Do not await tray initialization to prevent blocking UI startup
+    // Also add a small delay to ensure window is ready
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      try {
+        await trayService.init();
+        logger.info('Tray service initialized');
+      } catch (e, stack) {
+        logger.error('Failed to initialize tray service', e, stack);
+      }
+    });
+
+    // Start scheduler
+    final scheduler = SchedulerService();
+    // Connect tray to scheduler before starting, so we catch initial runs if any
+    scheduler.addListener(trayService.updatePluginOutput);
+    await scheduler.start();
+    logger.info('Scheduler started');
 
     // Initialize hot reload
     final hotReload = HotReloadService();

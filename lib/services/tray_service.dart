@@ -1,53 +1,67 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
+import 'package:tray_manager/tray_manager.dart';
 
-import 'package:crossbar/core/plugin_manager.dart';
-import 'package:crossbar/models/plugin.dart';
-import 'package:crossbar/models/plugin_output.dart' as model;
-import 'package:crossbar/services/logger_service.dart';
-import 'package:crossbar/services/scheduler_service.dart';
-import 'package:crossbar/services/settings_service.dart';
-import 'package:crossbar/services/window_service.dart';
-import 'package:meta/meta.dart';
-import 'package:system_tray/system_tray.dart';
-import 'package:uuid/uuid.dart';
-class TrayService {
+import '../core/plugin_manager.dart';
+import '../models/plugin_output.dart' hide MenuItem;
+import 'logger_service.dart';
+import 'scheduler_service.dart';
+import 'window_service.dart';
+
+/// TrayService - Manages a single system tray icon using tray_manager.
+///
+/// Uses tray_manager for all desktop platforms (Linux, Windows, macOS).
+/// Shows plugin outputs in a unified menu under a single tray icon.
+class TrayService with TrayListener {
   factory TrayService() => _instance;
+
   TrayService._internal();
+
   static final TrayService _instance = TrayService._internal();
 
   final PluginManager _pluginManager = PluginManager();
-  final SettingsService _settings = SettingsService();
-  final Map<String, model.PluginOutput> _pluginOutputs = {};
-
-  // Logical Key -> Tray Instance
-  final Map<String, _TrayInstance> _activeTrays = {};
+  final Map<String, PluginOutput> _pluginOutputs = {};
 
   bool _initialized = false;
   String? _iconPath;
 
   Future<void> init() async {
     if (_initialized) return;
+    if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) {
+      return;
+    }
 
-    // Resolve icon path once
-    String candidate = 'assets/icons/tray_icon.ico';
+    trayManager.addListener(this);
+
+    await _resolveAndSetIcon();
+    await _updateMenu();
+
+    _initialized = true;
+    LoggerService().info('Tray service initialized');
+  }
+
+  Future<void> _resolveAndSetIcon() async {
+    String candidate;
+
     if (Platform.isLinux) {
       candidate = 'assets/icons/tray_icon.png';
     } else if (Platform.isMacOS) {
       candidate = 'assets/icons/tray_icon_macos.png';
+    } else {
+      candidate = 'assets/icons/tray_icon.ico';
     }
 
-    // Check existence
+    // Check if icon exists at relative path (dev mode)
     if (await File(candidate).exists()) {
       _iconPath = candidate;
     } else {
-      // Try to find in bundle (Linux/Windows specific structure)
+      // Try to find in bundle (release mode)
       if (Platform.isLinux || Platform.isWindows) {
         try {
-          final exeDir = path.dirname(Platform.resolvedExecutable);
-          final bundlePath = path.join(exeDir, 'data', 'flutter_assets', candidate);
+          final exeDir = p.dirname(Platform.resolvedExecutable);
+          final bundlePath =
+              p.join(exeDir, 'data', 'flutter_assets', candidate);
           if (await File(bundlePath).exists()) {
             _iconPath = bundlePath;
           }
@@ -57,245 +71,147 @@ class TrayService {
       }
     }
 
-    // Fallback if still not found (log warning)
     if (_iconPath == null) {
-      LoggerService().warning('Tray icon not found at $candidate. Tray may fail to initialize.');
-      _iconPath = candidate;
+      LoggerService().warning(
+          'Tray icon not found at $candidate. Tray icon may not display.');
+      _iconPath = candidate; // Use anyway as fallback
     } else {
       LoggerService().info('Tray icon resolved to: $_iconPath');
     }
 
-    _settings.addListener(_onSettingsChanged);
-    _initialized = true;
-
-    // Initial reconciliation
     try {
-      await _reconcile();
-    } catch (e, stack) {
-      LoggerService().error('Failed to initialize tray', e, stack);
+      await trayManager.setIcon(_iconPath!);
+    } catch (e) {
+      LoggerService().warning('Failed to set tray icon: $e');
     }
   }
 
-  void _onSettingsChanged() {
-    _reconcile();
+  Future<void> _updateMenu() async {
+    final menuItems = <MenuItem>[];
+
+    // Plugin outputs - show enabled plugins
+    for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+      final output = _pluginOutputs[plugin.id];
+      if (output != null && output.text != null && output.text!.isNotEmpty) {
+        menuItems.add(MenuItem(
+          label: '${output.icon} ${output.text}',
+          disabled: true,
+        ));
+      }
+    }
+
+    if (menuItems.isNotEmpty) {
+      menuItems.add(MenuItem.separator());
+    }
+
+    // Standard menu items
+    menuItems.addAll([
+      MenuItem(
+        key: 'show',
+        label: 'Show Crossbar',
+      ),
+      MenuItem(
+        key: 'refresh',
+        label: 'Refresh All Plugins',
+      ),
+      MenuItem.separator(),
+      MenuItem(
+        key: 'quit',
+        label: 'Quit',
+      ),
+    ]);
+
+    try {
+      await trayManager.setContextMenu(Menu(items: menuItems));
+    } catch (e) {
+      LoggerService().warning('Failed to set tray context menu: $e');
+    }
   }
 
-  void updatePluginOutput(String pluginId, model.PluginOutput output) {
+  void updatePluginOutput(String pluginId, PluginOutput output) {
     _pluginOutputs[pluginId] = output;
-    _reconcile();
+    _updateMenu();
+    _updateTitle(pluginId, output);
+    _updateTooltip();
+  }
+
+  void _updateTooltip() {
+    if (_pluginOutputs.isEmpty) return;
+
+    final tooltipParts = <String>[];
+    for (final entry in _pluginOutputs.entries.take(3)) {
+      final output = entry.value;
+      if (output.text != null) {
+        tooltipParts.add('${output.icon} ${output.text}');
+      }
+    }
+
+    try {
+      trayManager.setToolTip(tooltipParts.join(' | '));
+    } catch (e) {
+      LoggerService().warning('Failed to set tray tooltip: $e');
+    }
+  }
+
+  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
+    // Find the first enabled plugin to use as the main tray title
+    final firstEnabled =
+        _pluginManager.plugins.where((p) => p.enabled).firstOrNull;
+
+    if (firstEnabled?.id == pluginId) {
+      var title = '';
+      // Use emoji icon from plugin output if available
+      if (output.icon.isNotEmpty && output.icon != '⚙️') {
+        title += '${output.icon} ';
+      }
+      if (output.text != null) {
+        title += output.text!;
+      }
+
+      try {
+        await trayManager.setTitle(title);
+      } catch (e) {
+        LoggerService().warning('Failed to set tray title: $e');
+      }
+    }
   }
 
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
-    _reconcile();
+    _updateMenu();
   }
 
-  Future<void> _reconcile() async {
-    if (!_initialized || _iconPath == null) return;
+  @override
+  void onTrayIconMouseDown() {
+    WindowService().show();
+  }
 
-    // 1. Determine Desired Layout
-    final enabledPlugins = _pluginManager.plugins.where((p) => p.enabled).toList();
-    final mode = _settings.trayDisplayMode;
-    final threshold = _settings.trayClusterThreshold;
+  @override
+  void onTrayIconRightMouseDown() {
+    trayManager.popUpContextMenu();
+  }
 
-    final desiredTrays = <String, _TrayContent>{}; // Key -> Content
-
-    if (mode == TrayDisplayMode.unified) {
-      desiredTrays['unified'] = _buildUnifiedContent(enabledPlugins);
-    } else if (mode == TrayDisplayMode.separate) {
-      for (final p in enabledPlugins) {
-        desiredTrays['plugin:${p.id}'] = _buildPluginContent(p);
-      }
-    } else if (mode == TrayDisplayMode.smartCollapse) {
-      if (enabledPlugins.length > threshold) {
-        desiredTrays['unified'] = _buildUnifiedContent(enabledPlugins);
-      } else {
-        for (final p in enabledPlugins) {
-          desiredTrays['plugin:${p.id}'] = _buildPluginContent(p);
-        }
-      }
-    } else if (mode == TrayDisplayMode.smartOverflow) {
-      if (enabledPlugins.length > threshold) {
-        // First N separate
-        for (var i = 0; i < threshold; i++) {
-          final p = enabledPlugins[i];
-          desiredTrays['plugin:${p.id}'] = _buildPluginContent(p);
-        }
-        // Rest in overflow
-        final overflowPlugins = enabledPlugins.sublist(threshold);
-        desiredTrays['overflow'] = _buildUnifiedContent(overflowPlugins, isOverflow: true);
-      } else {
-         for (final p in enabledPlugins) {
-          desiredTrays['plugin:${p.id}'] = _buildPluginContent(p);
-        }
-      }
-    }
-
-    // 2. Diff and Apply
-
-    // Remove old trays
-    final keysToRemove = _activeTrays.keys.where((k) => !desiredTrays.containsKey(k)).toList();
-    for (final key in keysToRemove) {
-      await _activeTrays[key]?.destroy();
-      _activeTrays.remove(key);
-    }
-
-    // Create or Update trays
-    for (final entry in desiredTrays.entries) {
-      final key = entry.key;
-      final content = entry.value;
-
-      if (!_activeTrays.containsKey(key)) {
-         // Create new
-         final tray = _TrayInstance();
-         await tray.init(key, _iconPath!);
-         _activeTrays[key] = tray;
-      }
-
-      // Update content
-      await _activeTrays[key]?.update(content);
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) {
+    switch (menuItem.key) {
+      case 'show':
+        WindowService().show();
+      case 'refresh':
+        SchedulerService().refreshAll();
+      case 'quit':
+        WindowService().quit();
     }
   }
 
-  _TrayContent _buildPluginContent(Plugin p) {
-    final output = _pluginOutputs[p.id];
-    String title = '';
-    String tooltip = p.id;
-    List<model.MenuItem> menuItems = [];
+  Future<void> dispose() async {
+    if (!_initialized) return;
 
-    if (output != null) {
-       title = output.icon + (output.text != null ? ' ${output.text}' : '');
-       // Clean up title (remove double spaces)
-       title = title.trim();
-       if (title.isEmpty) title = p.id;
-
-       tooltip = output.trayTooltip ?? '${p.id}: ${output.text ?? ""}';
-       menuItems = output.menu;
-    } else {
-      title = p.id;
+    trayManager.removeListener(this);
+    try {
+      await trayManager.destroy();
+    } catch (e) {
+      LoggerService().warning('Failed to destroy tray: $e');
     }
-
-    return _TrayContent(
-      title: title,
-      tooltip: tooltip,
-      menuItems: menuItems,
-      appendGlobalActions: true,
-    );
-  }
-
-  _TrayContent _buildUnifiedContent(List<Plugin> plugins, {bool isOverflow = false}) {
-     String title = isOverflow ? '...' : '';
-
-     // Build menu: Submenus for each plugin
-     List<model.MenuItem> menuItems = [];
-
-     for (final p in plugins) {
-        final output = _pluginOutputs[p.id];
-        String label = p.id;
-        List<model.MenuItem>? submenu;
-
-        if (output != null) {
-           label = '${output.icon} ${output.text ?? p.id}';
-           submenu = output.menu;
-        }
-
-        menuItems.add(model.MenuItem(
-           text: label,
-           submenu: submenu ?? [],
-        ));
-     }
-
-     return _TrayContent(
-       title: title,
-       tooltip: isOverflow ? 'More Plugins' : 'Crossbar',
-       menuItems: menuItems,
-       appendGlobalActions: true,
-     );
-  }
-
-  @visibleForTesting
-  void resetForTesting() {
-    _settings.removeListener(_onSettingsChanged);
     _initialized = false;
-    _activeTrays.clear();
-    _pluginOutputs.clear();
-  }
-}
-
-class _TrayContent {
-  final String title;
-  final String tooltip;
-  final List<model.MenuItem> menuItems;
-  final bool appendGlobalActions;
-
-  _TrayContent({required this.title, required this.tooltip, required this.menuItems, this.appendGlobalActions = true});
-}
-
-class _TrayInstance {
-  final SystemTray _systemTray = SystemTray();
-  // ignore: unused_field
-  final String _uuid = const Uuid().v4();
-
-  Future<void> init(String key, String iconPath) async {
-     await _systemTray.initSystemTray(
-       title: '',
-       iconPath: iconPath,
-       toolTip: '',
-     );
-
-     _systemTray.registerSystemTrayEventHandler((eventName) {
-       if (eventName == kSystemTrayEventClick) {
-          _systemTray.popUpContextMenu();
-       } else if (eventName == kSystemTrayEventRightClick) {
-          _systemTray.popUpContextMenu();
-       }
-     });
-  }
-
-  Future<void> update(_TrayContent content) async {
-     await _systemTray.setTitle(content.title);
-     await _systemTray.setToolTip(content.tooltip);
-
-     final menu = Menu();
-     final items = <MenuItemBase>[];
-
-     // Convert model.MenuItem to system_tray.MenuItemBase
-     for (final item in content.menuItems) {
-       items.add(_convertMenuItem(item));
-     }
-
-     if (content.appendGlobalActions) {
-       if (items.isNotEmpty) items.add(MenuSeparator());
-       items.addAll([
-         MenuItemLabel(label: 'Show Crossbar', onClicked: (_) => WindowService().show()),
-         MenuItemLabel(label: 'Refresh All', onClicked: (_) => SchedulerService().refreshAll()),
-         MenuSeparator(),
-         MenuItemLabel(label: 'Quit', onClicked: (_) => WindowService().quit()),
-       ]);
-     }
-
-     await menu.buildFrom(items);
-     await _systemTray.setContextMenu(menu);
-  }
-
-  MenuItemBase _convertMenuItem(model.MenuItem item) {
-    if (item.separator) return MenuSeparator();
-
-    if (item.submenu != null && item.submenu!.isNotEmpty) {
-      return SubMenu(
-        label: item.text ?? '',
-        children: item.submenu!.map(_convertMenuItem).toList(),
-      );
-    }
-
-    return MenuItemLabel(
-      label: item.text ?? '',
-      onClicked: (_) {},
-      enabled: item.bash != null || item.href != null,
-    );
-  }
-
-  Future<void> destroy() async {
-    await _systemTray.destroy();
   }
 }

@@ -1,6 +1,6 @@
 name: crossbar
 description: Universal Plugin System for Taskbar/Menu Bar - Cross-platform BitBar/Argos alternative
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.1+2
 
 environment:
@@ -46,8 +46,9 @@ dependencies:
   url_launcher: ^6.3.1
 
   meta: any
-  system_tray: ^2.0.3
   uuid: ^3.0.7
+  tray_manager: ^0.5.2
+  xdg_status_notifier_item: ^0.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,3 +63,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/icons/
