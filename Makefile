@@ -79,7 +79,7 @@ rebuild: clean linux
 
 # Mix (update repomix if exists)
 mix:
-	@if [ -f repomix-output.xml ]; then npx repomix; fi
+	@if [ -f repomix-output.xml ]; then npx repomix --truncate-base64 --include-logs --top-files-len 20; fi
 
 # Generate all icons from source files (requires imagemagick)
 # Source: assets/icons/icon.png (transparent) and icon_opaque.png (with background)

@@ -1,0 +1,9 @@
+macos/Runner*
+./crossbar-cli
+pubspec.lock
+LICENSE
+CONTRIBUTING.md
+docs/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
