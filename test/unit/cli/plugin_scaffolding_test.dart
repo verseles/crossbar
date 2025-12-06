@@ -118,7 +118,7 @@ void main() {
         );
 
         expect(path, isNotNull);
-        expect(await File('$path.config.json').exists(), true);
+        expect(await File('$path.schema.json').exists(), true);
       });
 
       test('creates plugin in root directory', () async {

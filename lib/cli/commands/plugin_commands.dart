@@ -67,7 +67,7 @@ class InitCommand extends CliCommand {
           {
             'success': true,
             'path': pluginPath,
-            'config': '$pluginPath.config.json',
+            'config': '$pluginPath.schema.json',
             'instructions': [
               'Edit the plugin file to add your logic',
               'Customize the config file for settings',
@@ -79,7 +79,7 @@ class InitCommand extends CliCommand {
           plain: (_) {
              final buffer = StringBuffer();
              buffer.writeln('Plugin created: $pluginPath');
-             buffer.writeln('Config file: $pluginPath.config.json');
+             buffer.writeln('Config file: $pluginPath.schema.json');
              buffer.writeln('');
              buffer.writeln('Next steps:');
              buffer.writeln('  1. Edit the plugin file to add your logic');

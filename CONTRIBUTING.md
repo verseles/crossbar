@@ -20,6 +20,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '....'
 3. See error
@@ -31,11 +32,12 @@ What you expected to happen.
 If applicable, add screenshots.
 
 **Environment:**
- - OS: [e.g., Linux, macOS, Windows, Android, iOS]
- - OS Version: [e.g., Ubuntu 22.04, macOS Sonoma 14.1]
- - Flutter Version: [e.g., 3.35.0]
- - Dart Version: [e.g., 3.10.0]
- - Crossbar Version: [e.g., 1.0.0]
+
+- OS: [e.g., Linux, macOS, Windows, Android, iOS]
+- OS Version: [e.g., Ubuntu 22.04, macOS Sonoma 14.1]
+- Flutter Version: [e.g., 3.35.0]
+- Dart Version: [e.g., 3.10.0]
+- Crossbar Version: [e.g., 1.0.0]
 
 **Additional context**
 Add any other context about the problem here.
@@ -63,6 +65,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 #### PR Process
 
 1. Fork the repo and create your branch from `main`:
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
@@ -70,11 +73,13 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 2. Make your changes following our coding standards
 
 3. Add tests for your changes:
+
    ```bash
    flutter test
    ```
 
 4. Ensure all tests pass and code analysis is clean:
+
    ```bash
    flutter analyze
    flutter test
@@ -83,6 +88,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 5. Update documentation (README.md, CHANGELOG.md, code comments)
 
 6. Commit your changes using clear commit messages:
+
    ```bash
    git commit -m "feat: Add amazing feature
 
@@ -108,6 +114,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore:` Maintenance tasks
 
 Examples:
+
 ```
 feat: Add --screenshot CLI command
 fix: Handle timeout in plugin execution
@@ -128,22 +135,26 @@ refactor: Extract tray menu builder to separate method
 ### Setup Steps
 
 1. **Clone your fork**:
+
    ```bash
    git clone https://github.com/YOUR-USERNAME/crossbar.git
    cd crossbar
    ```
 
 2. **Add upstream remote**:
+
    ```bash
    git remote add upstream https://github.com/verseles/crossbar.git
    ```
 
 3. **Install dependencies**:
+
    ```bash
    flutter pub get
    ```
 
 4. **Run tests**:
+
    ```bash
    flutter test
    ```
@@ -195,7 +206,7 @@ crossbar/
 
 ### Example Code Style
 
-```dart
+````dart
 /// Executes a plugin and returns the parsed output.
 ///
 /// Throws [PluginExecutionException] if execution fails.
@@ -224,7 +235,7 @@ Future<PluginOutput> execute(
     throw PluginExecutionException('Failed to execute plugin: $e');
   }
 }
-```
+````
 
 ## Testing
 
@@ -280,6 +291,7 @@ void main() {
 ### Adding a CLI Command
 
 1. **Add API method** in `lib/core/api/`:
+
    ```dart
    // lib/core/api/system_api.dart
    Future<String> getHostname() async {
@@ -289,6 +301,7 @@ void main() {
    ```
 
 2. **Add CLI handler** in `lib/cli/cli_handler.dart` (in the switch statement):
+
    ```dart
    case '--hostname':
      print(Platform.localHostname);
@@ -297,6 +310,7 @@ void main() {
    Note: The CLI is automatically available through the main executable.
 
 3. **Add tests**:
+
    ```dart
    test('getHostname returns machine name', () async {
      final api = SystemApi();
@@ -310,6 +324,7 @@ void main() {
 ### Adding a Service
 
 1. Create service in `lib/services/`:
+
    ```dart
    class MyService {
      static final MyService _instance = MyService._internal();
@@ -329,7 +344,7 @@ void main() {
 ### Creating Example Plugins
 
 1. Add plugin to `plugins/` directory
-2. Include `.config.json` if needed
+2. Include `.schema.json` if needed
 3. Make executable: `chmod +x plugins/myplugin.sh`
 4. Test with: `./plugins/myplugin.sh`
 5. Document in README under "Example Plugins"
@@ -339,11 +354,13 @@ void main() {
 ### Adding a New Language
 
 1. Create ARB file in `lib/l10n/`:
+
    ```
    lib/l10n/app_pl.arb  # Polish
    ```
 
 2. Copy structure from `app_en.arb`:
+
    ```json
    {
      "appTitle": "Crossbar",
@@ -353,6 +370,7 @@ void main() {
    ```
 
 3. Run code generation:
+
    ```bash
    flutter gen-l10n
    ```
@@ -383,7 +401,7 @@ Make sure your PR passes all CI checks before requesting review.
 
 ### DartDoc Comments
 
-```dart
+````dart
 /// Parses plugin output in BitBar text format.
 ///
 /// The format supports the following attributes:
@@ -402,7 +420,7 @@ Make sure your PR passes all CI checks before requesting review.
 PluginOutput parseTextFormat(String output) {
   // Implementation
 }
-```
+````
 
 ## Community
 

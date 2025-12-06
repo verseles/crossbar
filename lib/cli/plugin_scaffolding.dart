@@ -92,7 +92,7 @@ class PluginScaffolding {
 
     // Generate config file
     final configContent = _generateConfig(pluginName, normalizedType);
-    final configPath = '$filePath.config.json';
+    final configPath = '$filePath.schema.json';
     await File(configPath).writeAsString(configContent);
 
     return filePath;

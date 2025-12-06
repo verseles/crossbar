@@ -54,7 +54,7 @@ crossbar init --lang python --type monitor --name my-plugin
 
 # Output:
 # Plugin created: ~/.crossbar/plugins/my-plugin.10s.py
-# Config file: ~/.crossbar/plugins/my-plugin.10s.py.config.json
+# Config file: ~/.crossbar/plugins/my-plugin.10s.py.schema.json
 ```
 
 ### Available Options
@@ -81,6 +81,7 @@ crossbar init --lang <language> --type <type> [--name <name>] [--output <dir>]
 3. Place it in `~/.crossbar/plugins/` or the language subdirectory
 
 **Example** - `hello.30s.sh`:
+
 ```bash
 #!/bin/bash
 echo "Hello World"
@@ -99,6 +100,7 @@ Plugins follow this naming pattern:
 ```
 
 **Examples**:
+
 - `cpu.10s.sh` - CPU monitor, refreshes every 10 seconds
 - `weather.30m.py` - Weather, refreshes every 30 minutes
 - `clock.1s.js` - Clock, refreshes every second
@@ -165,18 +167,18 @@ Bold item | font=bold
 
 **Supported Attributes**:
 
-| Attribute | Description | Example |
-|-----------|-------------|---------|
-| `color` | Text color (name or hex) | `color=red`, `color=#FF5733` |
-| `size` | Font size | `size=14` |
-| `font` | Font name or style | `font=Monaco`, `font=bold` |
-| `href` | URL to open on click | `href=https://github.com` |
-| `bash` | Shell command to run | `bash=/usr/bin/open -a Safari` |
-| `terminal` | Run in terminal | `terminal=true` |
-| `refresh` | Refresh plugin on click | `refresh=true` |
-| `image` | Base64 encoded image | `image=iVBORw0KGgo...` |
-| `templateImage` | Template image (macOS) | `templateImage=...` |
-| `dropdown` | Include in dropdown | `dropdown=false` |
+| Attribute       | Description              | Example                        |
+| --------------- | ------------------------ | ------------------------------ |
+| `color`         | Text color (name or hex) | `color=red`, `color=#FF5733`   |
+| `size`          | Font size                | `size=14`                      |
+| `font`          | Font name or style       | `font=Monaco`, `font=bold`     |
+| `href`          | URL to open on click     | `href=https://github.com`      |
+| `bash`          | Shell command to run     | `bash=/usr/bin/open -a Safari` |
+| `terminal`      | Run in terminal          | `terminal=true`                |
+| `refresh`       | Refresh plugin on click  | `refresh=true`                 |
+| `image`         | Base64 encoded image     | `image=iVBORw0KGgo...`         |
+| `templateImage` | Template image (macOS)   | `templateImage=...`            |
+| `dropdown`      | Include in dropdown      | `dropdown=false`               |
 
 #### Nested Submenus
 
@@ -195,6 +197,7 @@ Another Item
 #### Examples
 
 **CPU Monitor**:
+
 ```
 🖥️ 23.5% | color=green
 ---
@@ -206,6 +209,7 @@ Refresh | refresh=true
 ```
 
 **Weather**:
+
 ```
 ☀️ 24°C
 ---
@@ -227,10 +231,13 @@ For more complex data, use JSON:
   "text": "85%",
   "color": "green",
   "menu": [
-    {"text": "Battery: 85%"},
-    {"text": "Time remaining: 3:45"},
-    {"separator": true},
-    {"text": "Power Settings", "href": "x-apple.systempreferences:com.apple.preference.battery"}
+    { "text": "Battery: 85%" },
+    { "text": "Time remaining: 3:45" },
+    { "separator": true },
+    {
+      "text": "Power Settings",
+      "href": "x-apple.systempreferences:com.apple.preference.battery"
+    }
   ]
 }
 ```
@@ -239,22 +246,23 @@ For more complex data, use JSON:
 
 ```json
 {
-  "icon": "string",           // Emoji or icon character
-  "text": "string",           // Main display text
-  "color": "string",          // Text color
-  "font": "string",           // Font name
-  "size": "number",           // Font size
-  "tooltip": "string",        // Tooltip text
-  "menu": [                   // Dropdown menu items
+  "icon": "string", // Emoji or icon character
+  "text": "string", // Main display text
+  "color": "string", // Text color
+  "font": "string", // Font name
+  "size": "number", // Font size
+  "tooltip": "string", // Tooltip text
+  "menu": [
+    // Dropdown menu items
     {
-      "text": "string",       // Menu item text
-      "color": "string",      // Item color
-      "href": "string",       // URL to open
-      "bash": "string",       // Command to run
-      "terminal": "boolean",  // Run in terminal
-      "refresh": "boolean",   // Refresh after click
+      "text": "string", // Menu item text
+      "color": "string", // Item color
+      "href": "string", // URL to open
+      "bash": "string", // Command to run
+      "terminal": "boolean", // Run in terminal
+      "refresh": "boolean", // Refresh after click
       "separator": "boolean", // Is separator line
-      "submenu": []           // Nested submenu
+      "submenu": [] // Nested submenu
     }
   ]
 }
@@ -290,6 +298,7 @@ echo "Refresh | refresh=true"
 ```
 
 **Tips**:
+
 - Use `#!/bin/bash` shebang
 - Handle errors with `|| echo "fallback"`
 - Use `2>/dev/null` to suppress error output
@@ -339,6 +348,7 @@ else:
 ```
 
 **Tips**:
+
 - Use `#!/usr/bin/env python3` for portability
 - Handle exceptions to avoid plugin failures
 - Use environment variables for configuration
@@ -354,52 +364,55 @@ Great for async operations and web APIs.
  * github-stars.1h.js - GitHub Stars Counter
  */
 
-const https = require('https');
+const https = require("https");
 
-const REPO = process.env.CROSSBAR_GITHUB_REPO || 'verseles/crossbar';
+const REPO = process.env.CROSSBAR_GITHUB_REPO || "verseles/crossbar";
 
 function fetchStars() {
-    return new Promise((resolve, reject) => {
-        const options = {
-            hostname: 'api.github.com',
-            path: `/repos/${REPO}`,
-            headers: { 'User-Agent': 'Crossbar-Plugin' }
-        };
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: "api.github.com",
+      path: `/repos/${REPO}`,
+      headers: { "User-Agent": "Crossbar-Plugin" },
+    };
 
-        https.get(options, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    const json = JSON.parse(data);
-                    resolve(json.stargazers_count);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        }).on('error', reject);
-    });
+    https
+      .get(options, (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            const json = JSON.parse(data);
+            resolve(json.stargazers_count);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      })
+      .on("error", reject);
+  });
 }
 
 (async () => {
-    try {
-        const stars = await fetchStars();
-        console.log(`⭐ ${stars}`);
-        console.log('---');
-        console.log(`Repository: ${REPO}`);
-        console.log(`Stars: ${stars}`);
-        console.log('---');
-        console.log(`Open Repo | href=https://github.com/${REPO}`);
-        console.log('Refresh | refresh=true');
-    } catch (error) {
-        console.log('⭐ Error | color=red');
-        console.log('---');
-        console.log(`Error: ${error.message}`);
-    }
+  try {
+    const stars = await fetchStars();
+    console.log(`⭐ ${stars}`);
+    console.log("---");
+    console.log(`Repository: ${REPO}`);
+    console.log(`Stars: ${stars}`);
+    console.log("---");
+    console.log(`Open Repo | href=https://github.com/${REPO}`);
+    console.log("Refresh | refresh=true");
+  } catch (error) {
+    console.log("⭐ Error | color=red");
+    console.log("---");
+    console.log(`Error: ${error.message}`);
+  }
 })();
 ```
 
 **Tips**:
+
 - Use `#!/usr/bin/env node` shebang
 - Use async/await for cleaner async code
 - Wrap in IIFE for top-level await
@@ -434,6 +447,7 @@ void main() async {
 ```
 
 **Tips**:
+
 - Use `#!/usr/bin/env dart` for script mode
 - Import only `dart:io` and `dart:convert` for zero dependencies
 - Take advantage of type safety
@@ -471,6 +485,7 @@ func main() {
 **Important**: Include `// +build ignore` at the top to prevent Go from trying to build it as a package.
 
 **Tips**:
+
 - Use `// +build ignore` directive
 - Crossbar runs plugins with `go run`
 - Keep imports minimal for fast compilation
@@ -504,6 +519,7 @@ fn main() {
 **Note**: Rust plugins are compiled on first run. Crossbar handles compilation automatically.
 
 **Tips**:
+
 - Avoid external crates for faster compilation
 - Use standard library when possible
 - Compiled binary is cached for subsequent runs
@@ -566,17 +582,17 @@ plugin.10s.py.config.json
 
 ### Field Types
 
-| Type | Description | Options |
-|------|-------------|---------|
-| `text` | Text input | - |
-| `password` | Masked text input | - |
-| `number` | Numeric input | `min`, `max`, `step` |
-| `checkbox` | Boolean toggle | - |
-| `dropdown` | Select from options | `options` |
-| `slider` | Range slider | `min`, `max`, `step` |
-| `color` | Color picker | - |
-| `file` | File path selector | - |
-| `textarea` | Multi-line text | - |
+| Type       | Description         | Options              |
+| ---------- | ------------------- | -------------------- |
+| `text`     | Text input          | -                    |
+| `password` | Masked text input   | -                    |
+| `number`   | Numeric input       | `min`, `max`, `step` |
+| `checkbox` | Boolean toggle      | -                    |
+| `dropdown` | Select from options | `options`            |
+| `slider`   | Range slider        | `min`, `max`, `step` |
+| `color`    | Color picker        | -                    |
+| `file`     | File path selector  | -                    |
+| `textarea` | Multi-line text     | -                    |
 
 See [Configuration Schema](config-schema.md) for complete documentation.
 
@@ -588,14 +604,14 @@ Crossbar injects several environment variables when running plugins:
 
 ### Standard Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `CROSSBAR_VERSION` | Crossbar version | `1.0.0` |
-| `CROSSBAR_OS` | Operating system | `linux`, `macos`, `windows` |
-| `CROSSBAR_PLUGIN_ID` | Plugin identifier | `cpu.10s.sh` |
-| `CROSSBAR_PLUGIN_PATH` | Full plugin path | `/home/user/.crossbar/plugins/cpu.10s.sh` |
-| `CROSSBAR_PLUGINS_DIR` | Plugins directory | `/home/user/.crossbar/plugins` |
-| `CROSSBAR_CONFIG_DIR` | Config directory | `/home/user/.crossbar` |
+| Variable               | Description       | Example                                   |
+| ---------------------- | ----------------- | ----------------------------------------- |
+| `CROSSBAR_VERSION`     | Crossbar version  | `1.0.0`                                   |
+| `CROSSBAR_OS`          | Operating system  | `linux`, `macos`, `windows`               |
+| `CROSSBAR_PLUGIN_ID`   | Plugin identifier | `cpu.10s.sh`                              |
+| `CROSSBAR_PLUGIN_PATH` | Full plugin path  | `/home/user/.crossbar/plugins/cpu.10s.sh` |
+| `CROSSBAR_PLUGINS_DIR` | Plugins directory | `/home/user/.crossbar/plugins`            |
+| `CROSSBAR_CONFIG_DIR`  | Config directory  | `/home/user/.crossbar`                    |
 
 ### User-Defined Variables
 
@@ -603,19 +619,19 @@ Settings from configuration files are injected as environment variables:
 
 ```json
 {
-  "settings": [
-    {"key": "CITY", "type": "text", "default": "London"}
-  ]
+  "settings": [{ "key": "CITY", "type": "text", "default": "London" }]
 }
 ```
 
 In your plugin:
+
 ```bash
 #!/bin/bash
 echo "Weather in $CITY"
 ```
 
 Or in Python:
+
 ```python
 import os
 city = os.environ.get('CITY', 'London')
@@ -795,6 +811,7 @@ debug("Starting plugin...")
 ### Viewing Logs
 
 Crossbar logs are available at:
+
 - Linux: `~/.crossbar/logs/crossbar.log`
 - macOS: `~/Library/Logs/Crossbar/crossbar.log`
 - Windows: `%APPDATA%\Crossbar\logs\crossbar.log`
@@ -807,8 +824,8 @@ Crossbar logs are available at:
 
 ```
 my-crossbar-plugin/
-├── plugin.30s.py           # Main plugin file
-├── plugin.30s.py.config.json  # Configuration schema
+├── plugin.30s.py           # Main plugin.10s.py.schema.json
+├── plugin.30s.py.schema.json  # Configuration schema
 ├── README.md               # Documentation
 ├── LICENSE                 # License file
 └── screenshots/            # Screenshots (optional)
@@ -817,7 +834,7 @@ my-crossbar-plugin/
 
 ### README Template
 
-```markdown
+````markdown
 # My Crossbar Plugin
 
 Description of what your plugin does.
@@ -827,15 +844,16 @@ Description of what your plugin does.
 ```bash
 crossbar install https://github.com/username/my-crossbar-plugin
 ```
+````
 
 ## Configuration
 
 After installation, configure in Crossbar settings:
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| API_KEY | Your API key | - |
-| CITY | City name | London |
+| Setting | Description  | Default |
+| ------- | ------------ | ------- |
+| API_KEY | Your API key | -       |
+| CITY    | City name    | London  |
 
 ## Screenshots
 
@@ -844,7 +862,8 @@ After installation, configure in Crossbar settings:
 ## License
 
 MIT License
-```
+
+````
 
 ### Installation via CLI
 
@@ -852,9 +871,10 @@ Users can install your plugin with:
 
 ```bash
 crossbar install https://github.com/username/my-crossbar-plugin
-```
+````
 
 This will:
+
 1. Clone the repository
 2. Detect the plugin language
 3. Move files to the plugins directory
@@ -868,34 +888,35 @@ This will:
 
 Crossbar comes with 24 example plugins:
 
-| Plugin | Language | Interval | Description |
-|--------|----------|----------|-------------|
-| `time.1s.py` | Python | 1s | Current time |
-| `cpu.10s.sh` | Bash | 10s | CPU usage |
-| `memory.10s.sh` | Bash | 10s | Memory usage |
-| `battery.30s.sh` | Bash | 30s | Battery status |
-| `network.30s.sh` | Bash | 30s | Network status |
-| `disk.5m.sh` | Bash | 5m | Disk usage |
-| `uptime.1m.sh` | Bash | 1m | System uptime |
-| `weather.30m.py` | Python | 30m | Weather info |
-| `bitcoin.5m.py` | Python | 5m | Bitcoin price |
-| `github-notifications.5m.py` | Python | 5m | GitHub notifications |
-| `process-monitor.10s.py` | Python | 10s | Process stats |
-| `countdown.1s.py` | Python | 1s | Countdown timer |
-| `quotes.1h.py` | Python | 1h | Random quotes |
-| `todo.1m.py` | Python | 1m | Todo list |
-| `emoji-clock.1m.js` | Node.js | 1m | Emoji clock |
-| `world-clock.1m.js` | Node.js | 1m | World clocks |
-| `ip-info.1h.js` | Node.js | 1h | IP information |
-| `npm-downloads.1h.js` | Node.js | 1h | NPM downloads |
-| `pomodoro.1s.js` | Node.js | 1s | Pomodoro timer |
-| `git-status.30s.dart` | Dart | 30s | Git repository status |
-| `system-info.1m.dart` | Dart | 1m | System information |
-| `docker-status.1m.sh` | Bash | 1m | Docker containers |
-| `spotify.5s.sh` | Bash | 5s | Spotify now playing |
-| `ssh-connections.30s.sh` | Bash | 30s | SSH connections |
+| Plugin                       | Language | Interval | Description           |
+| ---------------------------- | -------- | -------- | --------------------- |
+| `time.1s.py`                 | Python   | 1s       | Current time          |
+| `cpu.10s.sh`                 | Bash     | 10s      | CPU usage             |
+| `memory.10s.sh`              | Bash     | 10s      | Memory usage          |
+| `battery.30s.sh`             | Bash     | 30s      | Battery status        |
+| `network.30s.sh`             | Bash     | 30s      | Network status        |
+| `disk.5m.sh`                 | Bash     | 5m       | Disk usage            |
+| `uptime.1m.sh`               | Bash     | 1m       | System uptime         |
+| `weather.30m.py`             | Python   | 30m      | Weather info          |
+| `bitcoin.5m.py`              | Python   | 5m       | Bitcoin price         |
+| `github-notifications.5m.py` | Python   | 5m       | GitHub notifications  |
+| `process-monitor.10s.py`     | Python   | 10s      | Process stats         |
+| `countdown.1s.py`            | Python   | 1s       | Countdown timer       |
+| `quotes.1h.py`               | Python   | 1h       | Random quotes         |
+| `todo.1m.py`                 | Python   | 1m       | Todo list             |
+| `emoji-clock.1m.js`          | Node.js  | 1m       | Emoji clock           |
+| `world-clock.1m.js`          | Node.js  | 1m       | World clocks          |
+| `ip-info.1h.js`              | Node.js  | 1h       | IP information        |
+| `npm-downloads.1h.js`        | Node.js  | 1h       | NPM downloads         |
+| `pomodoro.1s.js`             | Node.js  | 1s       | Pomodoro timer        |
+| `git-status.30s.dart`        | Dart     | 30s      | Git repository status |
+| `system-info.1m.dart`        | Dart     | 1m       | System information    |
+| `docker-status.1m.sh`        | Bash     | 1m       | Docker containers     |
+| `spotify.5s.sh`              | Bash     | 5s       | Spotify now playing   |
+| `ssh-connections.30s.sh`     | Bash     | 30s      | SSH connections       |
 
 Plus 8 Go and Rust examples:
+
 - `clock.5s.go`, `cpu.10s.go`, `battery.30s.go`, `site-check.1m.go`
 - `clock.5s.rs`, `cpu.10s.rs`, `battery.30s.rs`, `site-check.1m.rs`
 

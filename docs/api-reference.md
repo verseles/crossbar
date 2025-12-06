@@ -32,12 +32,12 @@ Complete documentation for all Crossbar CLI commands.
 
 These options can be added to most commands:
 
-| Option | Description |
-|--------|-------------|
-| `--json` | Output in JSON format |
-| `--xml` | Output in XML format |
-| `--version`, `-v` | Show version |
-| `--help`, `-h` | Show help |
+| Option            | Description           |
+| ----------------- | --------------------- |
+| `--json`          | Output in JSON format |
+| `--xml`           | Output in XML format  |
+| `--version`, `-v` | Show version          |
+| `--help`, `-h`    | Show help             |
 
 ### Without Arguments
 
@@ -330,6 +330,7 @@ crossbar --media-prev
 Seek forward or backward.
 
 **Arguments**:
+
 - `offset` - Time offset (e.g., `+30s`, `-10s`, `+1m`)
 
 ```bash
@@ -396,6 +397,7 @@ crossbar --audio-volume --json
 Set volume level (0-100).
 
 **Arguments**:
+
 - `level` - Volume level from 0 to 100
 
 ```bash
@@ -462,6 +464,7 @@ crossbar --audio-output --list --json
 Set audio output device.
 
 **Arguments**:
+
 - `device` - Device ID (from `--audio-output --list`)
 
 ```bash
@@ -496,6 +499,7 @@ crossbar --screen-brightness --json
 Set screen brightness (0-100).
 
 **Arguments**:
+
 - `level` - Brightness level from 0 to 100
 
 ```bash
@@ -512,9 +516,11 @@ crossbar --screen-brightness-set 70
 Take a screenshot.
 
 **Arguments**:
+
 - `path` - Optional output path (default: auto-generated in Pictures)
 
 **Options**:
+
 - `--clipboard` - Copy to clipboard instead of file
 
 ```bash
@@ -550,6 +556,7 @@ crossbar --wallpaper-get
 Set desktop wallpaper.
 
 **Arguments**:
+
 - `path` - Path to image file
 
 ```bash
@@ -631,6 +638,7 @@ crossbar --dnd-status --json
 Set Do Not Disturb status.
 
 **Arguments**:
+
 - `on` - Enable DND
 - `off` - Disable DND
 
@@ -795,6 +803,7 @@ crossbar --net-ssid
 Ping a host and get latency.
 
 **Arguments**:
+
 - `host` - Hostname or IP address to ping
 
 ```bash
@@ -840,9 +849,11 @@ crossbar --wifi-off
 Make HTTP request.
 
 **Arguments**:
+
 - `url` - URL to request
 
 **Options**:
+
 - `--method <METHOD>` - HTTP method (GET, POST, PUT, DELETE). Default: GET
 - `--headers <JSON>` - JSON object of headers
 - `--body <DATA>` - Request body
@@ -899,6 +910,7 @@ crossbar --temp
 Get environment variable(s).
 
 **Arguments**:
+
 - `name` - Optional variable name (all if omitted)
 
 ```bash
@@ -949,6 +961,7 @@ crossbar --timezone
 Check if file or directory exists.
 
 **Arguments**:
+
 - `path` - Path to check
 
 ```bash
@@ -971,6 +984,7 @@ crossbar --file-exists /etc/passwd --json
 Read file contents.
 
 **Arguments**:
+
 - `path` - Path to file
 
 ```bash
@@ -987,6 +1001,7 @@ crossbar --file-read /etc/hostname
 Get file size.
 
 **Arguments**:
+
 - `path` - Path to file
 
 ```bash
@@ -1006,6 +1021,7 @@ crossbar --file-size /etc/passwd --json
 List directory contents.
 
 **Arguments**:
+
 - `path` - Directory path (default: current directory)
 
 ```bash
@@ -1031,6 +1047,7 @@ crossbar --dir-list /home --json
 Execute shell command.
 
 **Arguments**:
+
 - `command` - Command to execute
 
 ```bash
@@ -1052,6 +1069,7 @@ crossbar --exec "echo Hello World"
 Get current time.
 
 **Options**:
+
 - `--fmt <12h|24h>` - Time format (default: 24h)
 
 ```bash
@@ -1071,6 +1089,7 @@ crossbar --time --fmt 12h
 Get current date.
 
 **Options**:
+
 - `--fmt <iso|us|eu|unix>` - Date format (default: iso)
 
 ```bash
@@ -1116,6 +1135,7 @@ crossbar --calendar
 Start countdown timer.
 
 **Arguments**:
+
 - `seconds` - Number of seconds
 
 ```bash
@@ -1150,6 +1170,7 @@ crossbar --clipboard
 Set clipboard content.
 
 **Arguments**:
+
 - `text` - Text to copy
 
 ```bash
@@ -1168,9 +1189,11 @@ crossbar --clipboard-set "Hello World"
 Hash text with specified algorithm.
 
 **Arguments**:
+
 - `text` - Text to hash
 
 **Options**:
+
 - `--algo <algorithm>` - Hash algorithm (default: sha256)
   - Supported: `md5`, `sha1`, `sha256`, `sha384`, `sha512`
 
@@ -1207,6 +1230,7 @@ crossbar --uuid
 Generate random number.
 
 **Arguments**:
+
 - `min` - Minimum value (default: 0)
 - `max` - Maximum value (default: 100)
 
@@ -1230,6 +1254,7 @@ crossbar --random 100 999
 Encode text to base64.
 
 **Arguments**:
+
 - `text` - Text to encode
 
 ```bash
@@ -1246,6 +1271,7 @@ crossbar --base64-encode "Hello World"
 Decode base64 text.
 
 **Arguments**:
+
 - `text` - Base64 text to decode
 
 ```bash
@@ -1264,6 +1290,7 @@ crossbar --base64-decode "SGVsbG8gV29ybGQ="
 Create a new plugin from template.
 
 **Options**:
+
 - `--lang <language>` - Plugin language (required)
   - Supported: `bash`, `python`, `node`, `dart`, `go`, `rust`
 - `--type <type>` - Plugin type (default: custom)
@@ -1275,7 +1302,7 @@ Create a new plugin from template.
 crossbar init --lang python --type monitor --name cpu-monitor
 # Output:
 # Plugin created: ~/.config/crossbar/plugins/python/cpu-monitor.10s.py
-# Config file: ~/.config/crossbar/plugins/python/cpu-monitor.10s.py.config.json
+# Config file: ~/.config/crossbar/plugins/python/cpu-monitor.10s.py.schema.json
 #
 # Next steps:
 #   1. Edit the plugin file to add your logic
@@ -1307,6 +1334,7 @@ crossbar init --lang go --type api --name weather
 Install plugin from GitHub repository.
 
 **Arguments**:
+
 - `url` - GitHub repository URL
 
 ```bash
@@ -1317,6 +1345,7 @@ crossbar install https://github.com/user/my-crossbar-plugin
 ```
 
 **Requirements**:
+
 - `git` must be installed
 - Repository must contain valid plugin files
 
@@ -1331,10 +1360,12 @@ crossbar install https://github.com/user/my-crossbar-plugin
 Send desktop notification.
 
 **Arguments**:
+
 - `title` - Notification title
 - `message` - Notification message
 
 **Options**:
+
 - `--icon <icon>` - Icon path or name
 - `--priority <level>` - Priority: `low`, `normal`, `critical`
 
@@ -1358,6 +1389,7 @@ crossbar --notify "Update" "New version available" --icon software-update
 Open URL in default browser.
 
 **Arguments**:
+
 - `url` - URL to open
 
 ```bash
@@ -1374,6 +1406,7 @@ crossbar --open-url https://github.com
 Open file with default application.
 
 **Arguments**:
+
 - `path` - File path
 
 ```bash
@@ -1390,6 +1423,7 @@ crossbar --open-file ~/Documents/report.pdf
 Launch application by name.
 
 **Arguments**:
+
 - `name` - Application name
 
 ```bash
@@ -1419,62 +1453,63 @@ crossbar --process-count
 
 ## Platform Compatibility
 
-| Command | Linux | macOS | Windows |
-|---------|:-----:|:-----:|:-------:|
-| **System Info** |
-| `--cpu` | ✅ | ✅ | ✅ |
-| `--memory` | ✅ | ✅ | ✅ |
-| `--battery` | ✅ | ✅ | ✅ |
-| `--uptime` | ✅ | ✅ | ✅ |
-| `--disk` | ✅ | ✅ | ✅ |
-| `--os` | ✅ | ✅ | ✅ |
-| `--hostname` | ✅ | ✅ | ✅ |
-| `--username` | ✅ | ✅ | ✅ |
-| `--kernel` | ✅ | ✅ | ✅ |
-| `--arch` | ✅ | ✅ | ✅ |
-| `--screen-size` | ✅ (X11) | ✅ | ✅ |
-| `--volume` | ✅ (PA) | ✅ | ⚠️ |
-| `--brightness` | ✅ | ✅ | ❌ |
-| **Media Controls** |
-| `--media-*` | ✅ (MPRIS) | ✅ | ✅ |
-| **Audio Controls** |
-| `--audio-*` | ✅ (PA) | ✅ | ✅ |
-| **Screen Controls** |
-| `--screen-brightness` | ✅ | ✅ | ⚠️ |
-| `--screenshot` | ✅ | ✅ | ✅ |
-| `--wallpaper-*` | ✅ | ✅ | ✅ |
-| **Power** |
-| `--power-*` | ✅ | ✅ | ✅ |
-| **DND** |
-| `--dnd-*` | ✅ (GNOME) | ✅ | ⚠️ |
-| **Bluetooth** |
-| `--bluetooth-*` | ✅ | ✅ | ✅ |
-| **VPN** |
-| `--vpn-status` | ✅ | ✅ | ✅ |
-| **Network** |
-| `--net-*` | ✅ | ✅ | ✅ |
-| `--wifi-*` | ✅ | ✅ | ✅ |
-| `--web` | ✅ | ✅ | ✅ |
-| **Environment** |
-| All | ✅ | ✅ | ✅ |
-| **Files** |
-| All | ✅ | ✅ | ✅ |
-| **Date/Time** |
-| All | ✅ | ✅ | ✅ |
-| **Clipboard** |
-| `--clipboard` | ✅ (xclip) | ✅ | ✅ |
-| `--clipboard-set` | ✅ (xclip) | ✅ | ✅ |
-| **Utilities** |
-| All | ✅ | ✅ | ✅ |
-| **Plugin Mgmt** |
-| `init` | ✅ | ✅ | ✅ |
-| `install` | ✅ | ✅ | ✅ |
-| **System Actions** |
-| `--notify` | ✅ | ✅ | ✅ |
-| `--open-*` | ✅ | ✅ | ✅ |
-| `--process-count` | ✅ | ✅ | ✅ |
+| Command               |   Linux    | macOS | Windows |
+| --------------------- | :--------: | :---: | :-----: |
+| **System Info**       |
+| `--cpu`               |     ✅     |  ✅   |   ✅    |
+| `--memory`            |     ✅     |  ✅   |   ✅    |
+| `--battery`           |     ✅     |  ✅   |   ✅    |
+| `--uptime`            |     ✅     |  ✅   |   ✅    |
+| `--disk`              |     ✅     |  ✅   |   ✅    |
+| `--os`                |     ✅     |  ✅   |   ✅    |
+| `--hostname`          |     ✅     |  ✅   |   ✅    |
+| `--username`          |     ✅     |  ✅   |   ✅    |
+| `--kernel`            |     ✅     |  ✅   |   ✅    |
+| `--arch`              |     ✅     |  ✅   |   ✅    |
+| `--screen-size`       |  ✅ (X11)  |  ✅   |   ✅    |
+| `--volume`            |  ✅ (PA)   |  ✅   |   ⚠️    |
+| `--brightness`        |     ✅     |  ✅   |   ❌    |
+| **Media Controls**    |
+| `--media-*`           | ✅ (MPRIS) |  ✅   |   ✅    |
+| **Audio Controls**    |
+| `--audio-*`           |  ✅ (PA)   |  ✅   |   ✅    |
+| **Screen Controls**   |
+| `--screen-brightness` |     ✅     |  ✅   |   ⚠️    |
+| `--screenshot`        |     ✅     |  ✅   |   ✅    |
+| `--wallpaper-*`       |     ✅     |  ✅   |   ✅    |
+| **Power**             |
+| `--power-*`           |     ✅     |  ✅   |   ✅    |
+| **DND**               |
+| `--dnd-*`             | ✅ (GNOME) |  ✅   |   ⚠️    |
+| **Bluetooth**         |
+| `--bluetooth-*`       |     ✅     |  ✅   |   ✅    |
+| **VPN**               |
+| `--vpn-status`        |     ✅     |  ✅   |   ✅    |
+| **Network**           |
+| `--net-*`             |     ✅     |  ✅   |   ✅    |
+| `--wifi-*`            |     ✅     |  ✅   |   ✅    |
+| `--web`               |     ✅     |  ✅   |   ✅    |
+| **Environment**       |
+| All                   |     ✅     |  ✅   |   ✅    |
+| **Files**             |
+| All                   |     ✅     |  ✅   |   ✅    |
+| **Date/Time**         |
+| All                   |     ✅     |  ✅   |   ✅    |
+| **Clipboard**         |
+| `--clipboard`         | ✅ (xclip) |  ✅   |   ✅    |
+| `--clipboard-set`     | ✅ (xclip) |  ✅   |   ✅    |
+| **Utilities**         |
+| All                   |     ✅     |  ✅   |   ✅    |
+| **Plugin Mgmt**       |
+| `init`                |     ✅     |  ✅   |   ✅    |
+| `install`             |     ✅     |  ✅   |   ✅    |
+| **System Actions**    |
+| `--notify`            |     ✅     |  ✅   |   ✅    |
+| `--open-*`            |     ✅     |  ✅   |   ✅    |
+| `--process-count`     |     ✅     |  ✅   |   ✅    |
 
 **Legend**:
+
 - ✅ Full support
 - ⚠️ Partial support / may require additional setup
 - ❌ Not supported
@@ -1487,10 +1522,10 @@ crossbar --process-count
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Error (invalid arguments, command failed, etc.) |
+| Code | Meaning                                         |
+| ---- | ----------------------------------------------- |
+| 0    | Success                                         |
+| 1    | Error (invalid arguments, command failed, etc.) |
 
 ---
 
@@ -1549,6 +1584,7 @@ crossbar install https://github.com/example/crossbar-weather-plugin
 **Total Commands**: ~75 commands across 17 categories
 
 **See Also**:
+
 - [Plugin Development Guide](plugin-development.md)
 - [Configuration Schema](config-schema.md)
 - [README](../README.md)

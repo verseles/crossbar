@@ -262,7 +262,7 @@ crossbar --base64-decode "dGV4dA=="
 Plugins can declare their configuration needs:
 
 ```json
-// ~/.crossbar/plugins/weather.30m.py.config.json
+// ~/.crossbar/plugins/weather.30m.py.schema.json
 {
   "name": "Weather Plugin",
   "description": "Shows current weather",
@@ -303,7 +303,7 @@ CROSSBAR_DARK_MODE=true        # System theme
 CROSSBAR_VERSION=1.0.0         # Crossbar version
 CROSSBAR_PLUGIN_ID=cpu.10s.sh  # Plugin filename
 
-# User configs (from .config.json)
+# User configs (from .schema.json)
 WEATHER_API_KEY=abc123         # Passwords from Keychain
 WEATHER_LOCATION=São Paulo
 WEATHER_UNITS=metric

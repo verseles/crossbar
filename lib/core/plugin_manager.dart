@@ -139,8 +139,8 @@ class PluginManager {
     }
 
     // Load config schema if exists
-    // Config file naming: <pluginName>.config.json
-    // e.g., weather.10m.py -> weather.10m.py.config.json
+    // Config file naming: <pluginName>.schema.json
+    // e.g., weather.10m.py -> weather.10m.py.schema.json
     final config = await _loadPluginConfig(file.path);
 
     return Plugin(
@@ -153,12 +153,12 @@ class PluginManager {
     );
   }
 
-  /// Loads plugin configuration schema from a .config.json file.
+  /// Loads plugin configuration schema from a .schema.json file.
   ///
-  /// Looks for a file named `<pluginPath>.config.json`.
+  /// Looks for a file named `<pluginPath>.schema.json`.
   /// Returns null if no config file exists.
   Future<PluginConfig?> _loadPluginConfig(String pluginPath) async {
-    final configPath = '$pluginPath.config.json';
+    final configPath = '$pluginPath.schema.json';
     final configFile = File(configPath);
 
     if (!await configFile.exists()) {

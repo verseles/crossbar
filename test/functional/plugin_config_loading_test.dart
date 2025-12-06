@@ -38,14 +38,14 @@ void main() {
       expect(plugins.first.hasConfig, isFalse);
     });
 
-    test('loads config from .config.json file', () async {
+    test('loads config from .schema.json file', () async {
       // Create a plugin with config
       final pluginFile = File('${tempDir.path}/configurable.10s.sh');
       await pluginFile.writeAsString('#!/bin/bash\necho "With Config"');
       await Process.run('chmod', ['+x', pluginFile.path]);
 
       // Create config file
-      final configFile = File('${tempDir.path}/configurable.10s.sh.config.json');
+      final configFile = File('${tempDir.path}/configurable.10s.sh.schema.json');
       await configFile.writeAsString(jsonEncode({
         'name': 'Configurable Plugin',
         'description': 'A plugin with configuration',
@@ -94,7 +94,7 @@ void main() {
       await Process.run('chmod', ['+x', pluginFile.path]);
 
       // Create invalid config file
-      final configFile = File('${tempDir.path}/broken.10s.sh.config.json');
+      final configFile = File('${tempDir.path}/broken.10s.sh.schema.json');
       await configFile.writeAsString('not valid json {');
 
       // Set custom directory and discover
@@ -113,7 +113,7 @@ void main() {
       await pluginFile1.writeAsString('#!/bin/bash\necho "Optional"');
       await Process.run('chmod', ['+x', pluginFile1.path]);
 
-      final configFile1 = File('${tempDir.path}/optional.10s.sh.config.json');
+      final configFile1 = File('${tempDir.path}/optional.10s.sh.schema.json');
       await configFile1.writeAsString(jsonEncode({
         'name': 'Optional',
         'description': 'Optional config',
@@ -129,7 +129,7 @@ void main() {
       await pluginFile2.writeAsString('#!/bin/bash\necho "Required"');
       await Process.run('chmod', ['+x', pluginFile2.path]);
 
-      final configFile2 = File('${tempDir.path}/required.10s.sh.config.json');
+      final configFile2 = File('${tempDir.path}/required.10s.sh.schema.json');
       await configFile2.writeAsString(jsonEncode({
         'name': 'Required',
         'description': 'Required config',
@@ -145,7 +145,7 @@ void main() {
       await pluginFile3.writeAsString('#!/bin/bash\necho "Empty"');
       await Process.run('chmod', ['+x', pluginFile3.path]);
 
-      final configFile3 = File('${tempDir.path}/empty.10s.sh.config.json');
+      final configFile3 = File('${tempDir.path}/empty.10s.sh.schema.json');
       await configFile3.writeAsString(jsonEncode({
         'name': 'Empty',
         'description': 'No settings',

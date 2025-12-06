@@ -21,6 +21,7 @@ Complete documentation for plugin configuration field types and the grid layout 
 Crossbar plugins can declare their configuration in a JSON file. When present, Crossbar automatically generates a settings GUI for users to configure the plugin.
 
 **Benefits**:
+
 - No UI code required in plugins
 - Consistent user experience across plugins
 - Automatic validation and type checking
@@ -32,7 +33,7 @@ Configuration files are placed alongside the plugin file:
 
 ```
 plugin.10s.py
-plugin.10s.py.config.json
+plugin.10s.py.schema.json
 ```
 
 ---
@@ -66,29 +67,29 @@ plugin.10s.py.config.json
 
 ### Root Properties
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `name` | string | Yes | Plugin display name |
-| `version` | string | No | Plugin version (semver) |
-| `description` | string | No | Plugin description |
-| `author` | string | No | Author name or email |
-| `icon` | string | No | Plugin icon (emoji or icon name) |
-| `config_required` | string | No | `"required"` or `"optional"` |
-| `settings` | array | Yes | Array of setting definitions |
+| Property          | Type   | Required | Description                      |
+| ----------------- | ------ | -------- | -------------------------------- |
+| `name`            | string | Yes      | Plugin display name              |
+| `version`         | string | No       | Plugin version (semver)          |
+| `description`     | string | No       | Plugin description               |
+| `author`          | string | No       | Author name or email             |
+| `icon`            | string | No       | Plugin icon (emoji or icon name) |
+| `config_required` | string | No       | `"required"` or `"optional"`     |
+| `settings`        | array  | Yes      | Array of setting definitions     |
 
 ### Setting Properties
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `key` | string | Yes | Environment variable name |
-| `label` | string | Yes | Display label |
-| `type` | string | Yes | Field type (see below) |
-| `default` | any | No | Default value |
-| `required` | boolean | No | Whether the field is required |
-| `placeholder` | string | No | Placeholder text for inputs |
-| `help` | string | No | Help text shown below field |
-| `width` | integer | No | Grid width (1-100) |
-| `options` | object | No | Type-specific options |
+| Property      | Type    | Required | Description                   |
+| ------------- | ------- | -------- | ----------------------------- |
+| `key`         | string  | Yes      | Environment variable name     |
+| `label`       | string  | Yes      | Display label                 |
+| `type`        | string  | Yes      | Field type (see below)        |
+| `default`     | any     | No       | Default value                 |
+| `required`    | boolean | No       | Whether the field is required |
+| `placeholder` | string  | No       | Placeholder text for inputs   |
+| `help`        | string  | No       | Help text shown below field   |
+| `width`       | integer | No       | Grid width (1-100)            |
+| `options`     | object  | No       | Type-specific options         |
 
 ---
 
@@ -216,9 +217,9 @@ Dropdown selection from predefined options.
   "default": "celsius",
   "options": {
     "choices": [
-      {"value": "celsius", "label": "Celsius (°C)"},
-      {"value": "fahrenheit", "label": "Fahrenheit (°F)"},
-      {"value": "kelvin", "label": "Kelvin (K)"}
+      { "value": "celsius", "label": "Celsius (°C)" },
+      { "value": "fahrenheit", "label": "Fahrenheit (°F)" },
+      { "value": "kelvin", "label": "Kelvin (K)" }
     ]
   }
 }
@@ -230,6 +231,7 @@ Dropdown selection from predefined options.
 | `choices` | array | Array of `{value, label}` objects |
 
 **Simple format** (value equals label):
+
 ```json
 {
   "key": "COLOR",
@@ -254,9 +256,9 @@ Radio button group.
   "default": "system",
   "options": {
     "choices": [
-      {"value": "light", "label": "Light"},
-      {"value": "dark", "label": "Dark"},
-      {"value": "system", "label": "System Default"}
+      { "value": "light", "label": "Light" },
+      { "value": "dark", "label": "Dark" },
+      { "value": "system", "label": "System Default" }
     ]
   }
 }
@@ -306,10 +308,10 @@ Select multiple options.
   "label": "Services to Monitor",
   "options": {
     "choices": [
-      {"value": "nginx", "label": "Nginx"},
-      {"value": "postgresql", "label": "PostgreSQL"},
-      {"value": "redis", "label": "Redis"},
-      {"value": "docker", "label": "Docker"}
+      { "value": "nginx", "label": "Nginx" },
+      { "value": "postgresql", "label": "PostgreSQL" },
+      { "value": "redis", "label": "Redis" },
+      { "value": "docker", "label": "Docker" }
     ]
   }
 }
@@ -478,7 +480,7 @@ Dual-handle range selector.
     "step": 10,
     "unit": "$"
   },
-  "default": {"min": 100, "max": 500}
+  "default": { "min": 100, "max": 500 }
 }
 ```
 
@@ -573,7 +575,7 @@ Time range selector.
   "key": "ACTIVE_HOURS",
   "type": "timerange",
   "label": "Active Hours",
-  "default": {"start": "09:00", "end": "17:00"}
+  "default": { "start": "09:00", "end": "17:00" }
 }
 ```
 
@@ -678,8 +680,8 @@ Group related fields together.
     "collapsed": false
   },
   "settings": [
-    {"key": "USERNAME", "type": "text", "label": "Username"},
-    {"key": "PASSWORD", "type": "password", "label": "Password"}
+    { "key": "USERNAME", "type": "text", "label": "Username" },
+    { "key": "PASSWORD", "type": "password", "label": "Password" }
   ]
 }
 ```
@@ -763,6 +765,7 @@ Crossbar uses a 1-100 grid system for field layout, where the width represents t
 ### Why 1-100?
 
 More intuitive than traditional 12-column grids:
+
 - `width: 50` = 50% of the row (half width)
 - `width: 33` = 33% of the row (one third)
 - `width: 75` = 75% of the row (three quarters)
@@ -776,35 +779,37 @@ More intuitive than traditional 12-column grids:
 ### Examples
 
 **Two equal columns**:
+
 ```json
 [
-  {"key": "FIRST_NAME", "type": "text", "width": 50},
-  {"key": "LAST_NAME", "type": "text", "width": 50}
+  { "key": "FIRST_NAME", "type": "text", "width": 50 },
+  { "key": "LAST_NAME", "type": "text", "width": 50 }
 ]
 ```
 
 **Three columns**:
+
 ```json
 [
-  {"key": "CITY", "type": "text", "width": 33},
-  {"key": "STATE", "type": "text", "width": 33},
-  {"key": "ZIP", "type": "text", "width": 34}
+  { "key": "CITY", "type": "text", "width": 33 },
+  { "key": "STATE", "type": "text", "width": 33 },
+  { "key": "ZIP", "type": "text", "width": 34 }
 ]
 ```
 
 **Mixed widths**:
+
 ```json
 [
-  {"key": "EMAIL", "type": "email", "width": 70},
-  {"key": "AGE", "type": "number", "width": 30}
+  { "key": "EMAIL", "type": "email", "width": 70 },
+  { "key": "AGE", "type": "number", "width": 30 }
 ]
 ```
 
 **Full width (default)**:
+
 ```json
-[
-  {"key": "DESCRIPTION", "type": "textarea"}
-]
+[{ "key": "DESCRIPTION", "type": "textarea" }]
 ```
 
 ### Complex Layout
@@ -812,18 +817,19 @@ More intuitive than traditional 12-column grids:
 ```json
 {
   "settings": [
-    {"key": "NAME", "type": "text", "width": 100, "label": "Full Name"},
-    {"key": "EMAIL", "type": "email", "width": 60, "label": "Email"},
-    {"key": "PHONE", "type": "phone", "width": 40, "label": "Phone"},
-    {"key": "ADDRESS", "type": "text", "width": 100, "label": "Address"},
-    {"key": "CITY", "type": "text", "width": 40, "label": "City"},
-    {"key": "STATE", "type": "select", "width": 30, "label": "State"},
-    {"key": "ZIP", "type": "text", "width": 30, "label": "ZIP Code"}
+    { "key": "NAME", "type": "text", "width": 100, "label": "Full Name" },
+    { "key": "EMAIL", "type": "email", "width": 60, "label": "Email" },
+    { "key": "PHONE", "type": "phone", "width": 40, "label": "Phone" },
+    { "key": "ADDRESS", "type": "text", "width": 100, "label": "Address" },
+    { "key": "CITY", "type": "text", "width": 40, "label": "City" },
+    { "key": "STATE", "type": "select", "width": 30, "label": "State" },
+    { "key": "ZIP", "type": "text", "width": 30, "label": "ZIP Code" }
   ]
 }
 ```
 
 This produces:
+
 ```
 ┌────────────────────────────────────────────┐
 │ Full Name                                  │
@@ -842,14 +848,14 @@ This produces:
 
 ### Built-in Validation
 
-| Rule | Type | Description |
-|------|------|-------------|
-| `required` | boolean | Field must have a value |
-| `minLength` | number | Minimum string length |
-| `maxLength` | number | Maximum string length |
-| `min` | number | Minimum numeric value |
-| `max` | number | Maximum numeric value |
-| `pattern` | string | Regex pattern |
+| Rule        | Type    | Description             |
+| ----------- | ------- | ----------------------- |
+| `required`  | boolean | Field must have a value |
+| `minLength` | number  | Minimum string length   |
+| `maxLength` | number  | Maximum string length   |
+| `min`       | number  | Minimum numeric value   |
+| `max`       | number  | Maximum numeric value   |
+| `pattern`   | string  | Regex pattern           |
 
 ### Custom Validation
 
@@ -902,8 +908,8 @@ This produces:
       "width": 30,
       "options": {
         "choices": [
-          {"value": "metric", "label": "Celsius"},
-          {"value": "imperial", "label": "Fahrenheit"}
+          { "value": "metric", "label": "Celsius" },
+          { "value": "imperial", "label": "Fahrenheit" }
         ]
       }
     },
@@ -990,7 +996,7 @@ This produces:
     {
       "type": "group",
       "label": "Notifications",
-      "options": {"collapsible": true, "collapsed": true},
+      "options": { "collapsible": true, "collapsed": true },
       "settings": [
         {
           "key": "NOTIFY_ENABLED",
@@ -1051,10 +1057,10 @@ This produces:
       "default": ["issue", "pr", "release"],
       "options": {
         "choices": [
-          {"value": "issue", "label": "Issues"},
-          {"value": "pr", "label": "Pull Requests"},
-          {"value": "release", "label": "Releases"},
-          {"value": "discussion", "label": "Discussions"}
+          { "value": "issue", "label": "Issues" },
+          { "value": "pr", "label": "Pull Requests" },
+          { "value": "release", "label": "Releases" },
+          { "value": "discussion", "label": "Discussions" }
         ]
       }
     }
