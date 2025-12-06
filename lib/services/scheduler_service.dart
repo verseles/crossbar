@@ -45,7 +45,17 @@ class SchedulerService {
 
     _running = true;
 
+    // Initialize services for mobile platforms
+    await _widgetService.init();
+    await _notificationService.init();
+
     await _pluginManager.discoverPlugins();
+
+    // Show persistent notification on Android
+    final enabledCount = _pluginManager.plugins.where((p) => p.enabled).length;
+    await _notificationService.showPersistentNotification(
+      enabledPlugins: enabledCount,
+    );
 
     for (final plugin in _pluginManager.plugins) {
       if (plugin.enabled) {
@@ -54,13 +64,16 @@ class SchedulerService {
     }
   }
 
-  void stop() {
+  Future<void> stop() async {
     _running = false;
 
     for (final timer in _timers.values) {
       timer.cancel();
     }
     _timers.clear();
+    
+    // Hide persistent notification
+    await _notificationService.hidePersistentNotification();
   }
 
   void _schedulePlugin(Plugin plugin) {
@@ -93,7 +106,15 @@ class SchedulerService {
     // Update widget
     await _widgetService.updateWidget(plugin.id, output);
 
-    // Handle notifications
+    // Update persistent notification with latest time
+    final now = DateTime.now();
+    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    await _notificationService.updatePersistentNotification(
+      enabledPlugins: _pluginManager.plugins.where((p) => p.enabled).length,
+      lastUpdate: timeStr,
+    );
+
+    // Handle error notifications
     if (output.hasError) {
       await _notificationService.showErrorNotification(
         pluginId: plugin.id,

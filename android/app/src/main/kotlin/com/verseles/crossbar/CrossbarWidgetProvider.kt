@@ -210,12 +210,13 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
     }
 
     private fun setNoDataState(views: RemoteViews, layoutId: Int) {
-        views.setTextViewText(R.id.widget_icon, "📊")
-        views.setTextViewText(R.id.widget_value, "--")
+        views.setTextViewText(R.id.widget_icon, "⚙️")
+        views.setTextViewText(R.id.widget_value, "Open app")
         
         if (layoutId == R.layout.crossbar_widget_medium) {
             views.setTextViewText(R.id.widget_title, "Crossbar")
-            views.setViewVisibility(R.id.widget_subtitle, View.GONE)
+            views.setTextViewText(R.id.widget_subtitle, "Tap to start")
+            views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
         }
     }
 
