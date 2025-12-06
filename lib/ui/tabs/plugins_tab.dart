@@ -4,6 +4,7 @@ import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
 import '../../services/plugin_config_service.dart';
+import '../../services/tray_service.dart';
 import '../dialogs/plugin_config_dialog.dart';
 
 class PluginsTab extends StatefulWidget {
@@ -129,7 +130,12 @@ class _PluginsTabState extends State<PluginsTab> {
       );
       
       // Reload plugin to apply changes immediately
-      await _pluginManager.runPlugin(plugin.id);
+      final output = await _pluginManager.runPlugin(plugin.id);
+      
+      // Update tray icon if output is available
+      if (output != null) {
+        TrayService().updatePluginOutput(plugin.id, output);
+      }
       
       if (mounted) {
         setState(() {}); // Refresh UI
