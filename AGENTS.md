@@ -250,6 +250,7 @@ pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/rel
 
 **SEMPRE**:
 
+- Teste a compilação do código antes de commitar.
 - Commite código funcional incrementalmente.
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.

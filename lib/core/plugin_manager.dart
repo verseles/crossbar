@@ -10,7 +10,7 @@ import 'paths/platform_paths.dart'
 import '../models/plugin.dart';
 import '../models/plugin_config.dart';
 import '../models/plugin_output.dart';
-import '../services/plugin_config_service.dart';
+import '../services/config_service.dart';
 import 'script_runner.dart';
 
 class PluginManager {
