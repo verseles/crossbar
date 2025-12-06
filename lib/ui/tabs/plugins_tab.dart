@@ -127,6 +127,20 @@ class _PluginsTabState extends State<PluginsTab> {
         newValues,
         schema: plugin.config,
       );
+      
+      // Reload plugin to apply changes immediately
+      await _pluginManager.runPlugin(plugin.id);
+      
+      if (mounted) {
+        setState(() {}); // Refresh UI
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Configuration saved and plugin reloaded'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
