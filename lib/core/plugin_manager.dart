@@ -21,9 +21,8 @@ class PluginManager {
   static final PluginManager _instance = PluginManager._internal();
 
   final List<Plugin> _plugins = [];
-  late final ScriptRunner _scriptRunner = ScriptRunner(
-    configService: PluginConfigService(),
-  );
+  final ScriptRunner _scriptRunner = const ScriptRunner();
+  final PluginConfigService _configService = PluginConfigService();
   static const int maxConcurrent = 10;
 
   static const List<String> supportedLanguages = [
@@ -251,7 +250,19 @@ class PluginManager {
 
   Future<PluginOutput?> _runPlugin(Plugin plugin) async {
     try {
-      final output = await _scriptRunner.run(plugin);
+      // Load config values if plugin has config
+      Map<String, String> configEnv = {};
+      if (plugin.config != null) {
+        configEnv = await _configService.getAsEnvironmentVariables(
+          plugin.id,
+          schema: plugin.config,
+        );
+      }
+
+      final output = await _scriptRunner.run(
+        plugin,
+        additionalEnv: configEnv,
+      );
 
       final index = _plugins.indexWhere((p) => p.id == plugin.id);
       if (index >= 0) {

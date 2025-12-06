@@ -1,7 +1,7 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão.
+> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo, chame adequadamente a tool play_notification para notificar o usuário.
 
 ---
 
@@ -255,6 +255,7 @@ pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/rel
 - Aprenda com implementações existentes.
 - Pare após 3 tentativas falhas e reavalie.
 - Atualize o roadmap conforme avança.
+- Sempre que concluir tudo, chame adequadamente a tool play_notification para notificar o usuário.
 
 ---
 

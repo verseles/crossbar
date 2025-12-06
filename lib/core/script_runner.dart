@@ -4,7 +4,6 @@ import 'dart:io';
 
 import '../models/plugin.dart';
 import '../models/plugin_output.dart';
-import '../services/plugin_config_service.dart';
 import 'output_parser.dart';
 
 abstract class IProcessRunner {
@@ -93,16 +92,20 @@ class ScriptRunner {
 
   const ScriptRunner({
     this.processRunner = const SystemProcessRunner(),
-    this.configService,
   });
   final IProcessRunner processRunner;
-  final PluginConfigService? configService;
   static const Duration defaultTimeout = Duration(seconds: 30);
   static const String crossbarVersion = '1.0.0';
 
-  Future<PluginOutput> run(Plugin plugin) async {
+  /// Runs a plugin script.
+  ///
+  /// [additionalEnv] allows injecting extra environment variables (e.g., config values).
+  Future<PluginOutput> run(
+    Plugin plugin, {
+    Map<String, String> additionalEnv = const {},
+  }) async {
     try {
-      final environment = await _buildEnvironment(plugin);
+      final environment = _buildEnvironment(plugin, additionalEnv);
 
       // Get the appropriate executable and arguments for this interpreter
       final (executable, arguments) = _getExecutableAndArgs(plugin);
@@ -152,24 +155,16 @@ class ScriptRunner {
     }
   }
 
-  Future<Map<String, String>> _buildEnvironment(Plugin plugin) async {
-    final baseEnv = {
+  Map<String, String> _buildEnvironment(
+    Plugin plugin,
+    Map<String, String> additionalEnv,
+  ) {
+    return {
       ...Platform.environment,
       'CROSSBAR_OS': Platform.operatingSystem,
       'CROSSBAR_VERSION': crossbarVersion,
       'CROSSBAR_PLUGIN_ID': plugin.id,
+      ...additionalEnv,
     };
-
-    // Inject plugin configuration values as environment variables
-    if (configService != null && plugin.config != null) {
-      final configEnv = await configService!.getAsEnvironmentVariables(
-        plugin.id,
-        schema: plugin.config,
-      );
-      baseEnv.addAll(configEnv);
-    }
-
-    return baseEnv;
   }
 }
-
