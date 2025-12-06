@@ -32,10 +32,9 @@ class SettingsService extends ChangeNotifier {
   static const bool _defaultStartWithSystem = false;
   static const bool _defaultShowInTray = true;
   static const String _defaultLanguage = 'system';
-  // NOTE: system_tray package does NOT support multiple tray instances.
+  // NOTE: tray_manager uses a single global tray instance.
   // Using 'unified' mode ensures a single tray icon with submenus for plugins.
-  // 'separate' mode would attempt to create multiple SystemTray instances,
-  // which causes a crash on Linux and undefined behavior on other platforms.
+  // Other modes (separate, smartCollapse) are reserved for future multi-tray implementations.
   static const TrayDisplayMode _defaultTrayDisplayMode = TrayDisplayMode.unified;
   static const int _defaultTrayClusterThreshold = 3;
 

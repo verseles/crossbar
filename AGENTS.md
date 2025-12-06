@@ -12,7 +12,7 @@
 - **Leitura Inicial**: Sempre leia `original_plan.md` e `MASTER_PLAN.md` no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test --coverage`), verificar coverage mínimo de 43% e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
-- **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push.
+- **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
 - **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act`.
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
