@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'settings_service.dart';
+
 class WindowService with WindowListener {
   factory WindowService() => _instance;
 
@@ -10,7 +12,6 @@ class WindowService with WindowListener {
   static final WindowService _instance = WindowService._internal();
 
   bool _isInitialized = false;
-  final bool _minimizeToTray = true;
 
   bool get isInitialized => _isInitialized;
 
@@ -72,7 +73,7 @@ class WindowService with WindowListener {
 
   @override
   void onWindowClose() async {
-    if (_minimizeToTray) {
+    if (SettingsService().showInTray) {
       await hide();
     } else {
       await quit();
