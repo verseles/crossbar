@@ -97,6 +97,19 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               const SizedBox(height: 16),
               _buildSection(
+                title: 'System Tray',
+                icon: Icons.apps,
+                children: [
+                  ListTile(
+                    title: const Text('Display Mode'),
+                    subtitle: Text(_getTrayModeLabel(settings.trayDisplayMode)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showTrayModeDialog(settings),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSection(
                 title: l10n.pluginsTab,
                 icon: Icons.extension,
                 children: [
@@ -242,6 +255,131 @@ class _SettingsTabState extends State<SettingsTab> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getTrayModeLabel(TrayDisplayMode mode) {
+    switch (mode) {
+      case TrayDisplayMode.unified:
+        return 'Unified (single icon with menu)';
+      case TrayDisplayMode.separate:
+        return 'Separate (one icon per plugin)';
+      case TrayDisplayMode.smartCollapse:
+        return 'Smart Collapse';
+      case TrayDisplayMode.smartOverflow:
+        return 'Smart Overflow';
+    }
+  }
+
+  void _showTrayModeDialog(SettingsService settings) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tray Display Mode'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Unified - Available
+            RadioListTile<TrayDisplayMode>(
+              title: const Text('Unified'),
+              subtitle: const Text('Single tray icon with menu for all plugins'),
+              value: TrayDisplayMode.unified,
+              groupValue: settings.trayDisplayMode,
+              onChanged: (value) {
+                settings.trayDisplayMode = value!;
+                Navigator.pop(context);
+              },
+            ),
+            // Separate - Coming Soon (Linux only in future)
+            RadioListTile<TrayDisplayMode>(
+              title: Row(
+                children: [
+                  const Text('Separate'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Coming Soon',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: const Text('One tray icon per plugin (Linux only)'),
+              value: TrayDisplayMode.separate,
+              groupValue: settings.trayDisplayMode,
+              onChanged: null, // Disabled
+            ),
+            // Smart Collapse - Coming Soon
+            RadioListTile<TrayDisplayMode>(
+              title: Row(
+                children: [
+                  const Text('Smart Collapse'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Coming Soon',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: const Text('Auto-collapse when too many plugins'),
+              value: TrayDisplayMode.smartCollapse,
+              groupValue: settings.trayDisplayMode,
+              onChanged: null, // Disabled
+            ),
+            // Smart Overflow - Coming Soon
+            RadioListTile<TrayDisplayMode>(
+              title: Row(
+                children: [
+                  const Text('Smart Overflow'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Coming Soon',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: const Text('Show first N icons, rest in overflow menu'),
+              value: TrayDisplayMode.smartOverflow,
+              groupValue: settings.trayDisplayMode,
+              onChanged: null, // Disabled
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
         ],
       ),
