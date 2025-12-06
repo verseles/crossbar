@@ -1,9 +1,9 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo, chame adequadamente a tool play_notification para notificar o usuário.
+> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou, chame adequadamente a tool play_notification para notificar o usuário.
 
----
+## recis
 
 Plano granndioso e teorico:
 @./original_plan.md
@@ -101,6 +101,14 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 - Exemplo: Um plugin python chama `subprocess.run(['crossbar', '--cpu'])`.
 - Comandos disponíveis: `docs/api-reference.md`.
+
+### Gestão de Configuração (ADR)
+
+> **Decisão Crítica (v1.1)**: Separação estrita entre definição e dados.
+
+- **Schema (`.schema.json`)**: Define os campos/UI. Reside junto ao plugin (ex: `plugins/cpu.py.schema.json`). Deve ser versionado.
+- **Values (`.json`)**: Valores preenchidos pelo usuário. Reside em `~/.crossbar/configs/`. JAMAIS salve dados na pasta de plugins.
+- **Secrets**: Campos `type: password` são salvos no SecureStorage (Keyring/Keychain), nunca em texto plano.
 
 ---
 
@@ -206,7 +214,7 @@ pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/rel
 #### Princípios de Arquitetura
 
 - **Composição sobre herança** - Use injeção de dependência.
-- **Interfaces sobre singletons** - Habilite testes e flexibilidade.
+- **Interfaces sobre singletons** - Use mocks para testes. Core Services (Tray, Config) usam Singleton Pattern por necessidade de estado global.
 - **Explícito sobre implícito** - Fluxo de dados e dependências claros.
 - **Test-driven quando possível** - Nunca desabilite testes, conserte-os.
 
