@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:crossbar/models/plugin_output.dart';
 import 'package:crossbar/services/widget_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -143,6 +145,74 @@ void main() {
 
       expect(builder.value, equals(''));
     });
+
+    test('fromPluginOutput handles null color', () {
+      const output = PluginOutput(
+        pluginId: 'no-color',
+        text: 'Test',
+        icon: '📊',
+        hasError: false,
+        menu: [],
+      );
+
+      final builder = WidgetDataBuilder.fromPluginOutput(output);
+
+      expect(builder.color, isNull);
+    });
+
+    test('fromPluginOutput handles special characters in pluginId', () {
+      const output = PluginOutput(
+        pluginId: 'cpu.10s.sh',
+        text: '45%',
+        icon: '⚡',
+        hasError: false,
+        menu: [],
+      );
+
+      final builder = WidgetDataBuilder.fromPluginOutput(output);
+
+      expect(builder.pluginId, equals('cpu.10s.sh'));
+      expect(builder.deepLink, equals('crossbar://plugin/cpu.10s.sh'));
+    });
+
+    test('toJson is JSON serializable', () {
+      const builder = WidgetDataBuilder(
+        pluginId: 'test',
+        icon: '🚀',
+        title: 'Test Plugin',
+        value: '100%',
+        color: 'FF0000',
+      );
+
+      final json = builder.toJson();
+      final encoded = jsonEncode(json);
+      final decoded = jsonDecode(encoded) as Map<String, dynamic>;
+
+      expect(decoded['pluginId'], equals('test'));
+      expect(decoded['icon'], equals('🚀'));
+      expect(decoded['title'], equals('Test Plugin'));
+      expect(decoded['value'], equals('100%'));
+      expect(decoded['color'], equals('FF0000'));
+    });
+
+    test('handles unicode characters in all fields', () {
+      const builder = WidgetDataBuilder(
+        pluginId: '天气插件',
+        icon: '🌈',
+        title: 'Погода',
+        subtitle: '現在の天気',
+        value: '25°C 晴れ',
+        deepLink: 'crossbar://plugin/天气',
+      );
+
+      final json = builder.toJson();
+
+      expect(json['pluginId'], equals('天气插件'));
+      expect(json['icon'], equals('🌈'));
+      expect(json['title'], equals('Погода'));
+      expect(json['subtitle'], equals('現在の天気'));
+      expect(json['value'], equals('25°C 晴れ'));
+    });
   });
 
   group('WidgetService - Constants', () {
@@ -158,4 +228,76 @@ void main() {
       expect(WidgetService.androidWidgetName, equals('CrossbarWidgetProvider'));
     });
   });
+
+  group('WidgetService - Singleton', () {
+    test('returns same instance', () {
+      final instance1 = WidgetService();
+      final instance2 = WidgetService();
+
+      expect(identical(instance1, instance2), isTrue);
+    });
+
+    test('factory constructor returns singleton', () {
+      final service = WidgetService();
+      expect(service, isNotNull);
+      expect(service, isA<WidgetService>());
+    });
+  });
+
+  group('WidgetDataBuilder - Edge Cases', () {
+    test('handles very long text values', () {
+      final longText = 'A' * 1000;
+      final builder = WidgetDataBuilder(
+        pluginId: 'long-text',
+        value: longText,
+      );
+
+      expect(builder.value, equals(longText));
+      expect(builder.value!.length, equals(1000));
+    });
+
+    test('handles empty pluginId', () {
+      const builder = WidgetDataBuilder(pluginId: '');
+      expect(builder.pluginId, equals(''));
+    });
+
+    test('handles whitespace in fields', () {
+      const builder = WidgetDataBuilder(
+        pluginId: '  spaced  ',
+        title: '  Title  ',
+        value: '  Value  ',
+      );
+
+      expect(builder.pluginId, equals('  spaced  '));
+      expect(builder.title, equals('  Title  '));
+      expect(builder.value, equals('  Value  '));
+    });
+
+    test('handles newlines in text', () {
+      const builder = WidgetDataBuilder(
+        pluginId: 'multiline',
+        value: 'Line1\nLine2\nLine3',
+      );
+
+      expect(builder.value, contains('\n'));
+    });
+
+    test('fromPluginOutput handles error state', () {
+      const output = PluginOutput(
+        pluginId: 'error-plugin',
+        text: 'Error occurred',
+        icon: '❌',
+        hasError: true,
+        errorMessage: 'Something went wrong',
+        menu: [],
+      );
+
+      final builder = WidgetDataBuilder.fromPluginOutput(output);
+
+      expect(builder.pluginId, equals('error-plugin'));
+      expect(builder.value, equals('Error occurred'));
+      expect(builder.icon, equals('❌'));
+    });
+  });
 }
+

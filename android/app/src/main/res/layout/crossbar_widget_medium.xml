@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Medium Widget Layout (2x1): Icon + Title + Value + Action area -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <!-- Icon/Emoji on the left -->
+    <TextView
+        android:id="@+id/widget_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📊"
+        android:textSize="28sp"
+        android:gravity="center"
+        android:layout_marginEnd="12dp" />
+
+    <!-- Text content in the middle (takes remaining space) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Plugin Title -->
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Plugin"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Main Value -->
+        <TextView
+            android:id="@+id/widget_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Subtitle/Description (optional) -->
+        <TextView
+            android:id="@+id/widget_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="10sp"
+            android:textColor="@android:color/darker_gray"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Refresh action button on the right -->
+    <ImageView
+        android:id="@+id/widget_refresh"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_popup_sync"
+        android:contentDescription="Refresh"
+        android:layout_marginStart="8dp" />
+
+</LinearLayout>

@@ -235,6 +235,12 @@ jobs:
             echo "Warning: ANDROID_KEYSTORE_BASE64 secret not found. Skipping signing configuration."
           fi
 
+      - name: Clean stale pub-cache packages
+        run: |
+          # Remove stale workmanager package that causes compatibility issues with Flutter 3.38
+          rm -rf ~/.pub-cache/hosted/pub.dev/workmanager-* || true
+          flutter pub get
+
       - name: Build APK
         run: flutter build apk --release
 

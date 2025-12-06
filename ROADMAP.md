@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.1.0 (Configuration Engine Done)
-**Próximo Ciclo:** v1.2.0 (Mobile Mastery)
+**Status Atual:** v1.2.0-dev (Mobile Widgets - Android ✅, iOS 🚧)
+**Próximo Ciclo:** v1.3.0 (Advanced Desktop UI)
 
 ---
 
@@ -68,32 +68,38 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 **Objetivo:** Transformar o Crossbar em um cidadão de primeira classe no Android e iOS, usando o package `home_widget` corretamente.
 
-### Fase 1: Android Native (XML & Receiver)
+### Fase 1: Android Native (XML & Receiver) ✅
 
-- [ ] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
-  - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
-  - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
-  - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
-- [ ] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
-  - [ ] Implementar lógica de atualização via `RemoteViews`.
-  - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
-- [ ] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
+- [x] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
+  - [x] `crossbar_widget_small.xml` (1x1: Ícone + Texto curto).
+  - [x] `crossbar_widget_medium.xml` (2x1: Ícone + Texto + 1 Ação).
+  - [x] `crossbar_widget_large.xml` (Lista/Grid para menu items).
+- [x] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
+  - [x] Implementar lógica de atualização via `RemoteViews`.
+  - [x] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
+- [x] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
+- [x] **Recursos:** Criar arquivos de suporte:
+  - [x] `crossbar_widget_info.xml` (configuração do widget).
+  - [x] `widget_background.xml` e `widget_background_dark.xml` (drawables).
+  - [x] `strings.xml` (labels e descrições).
 
-### Fase 2: iOS Native (WidgetKit)
+### Fase 2: iOS Native (WidgetKit) 🚧
 
-- [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS.
+- [x] **SwiftUI View:** Implementar `CrossbarWidget.swift` (placeholder ready).
+  - [x] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
+  - [x] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
+- [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS (requer macOS).
 - [ ] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
-- [ ] **SwiftUI View:** Implementar `CrossbarWidget.swift`.
-  - [ ] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
-  - [ ] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
+- [x] **Documentação:** Criar guia de setup `docs/ios-widget-setup.md`.
 
-### Fase 3: Widget Service Logic
+### Fase 3: Widget Service Logic ✅
 
-- [ ] **Serialização:** Em `lib/services/widget_service.dart`:
-  - [ ] Implementar `updateWidget(pluginId, output)`.
-  - [ ] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
-  - [ ] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
-- [ ] **Background Sync:** Garantir que o `SchedulerService` chame `updateWidget` mesmo quando o app está em background (Android Headless Task).
+- [x] **Serialização:** Em `lib/services/widget_service.dart`:
+  - [x] Implementar `updateWidget(pluginId, output)`.
+  - [x] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
+  - [x] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
+- [x] **SchedulerService Integration:** Chamar `updateWidget` após cada execução de plugin.
+- [ ] **Background Sync:** Implementar Android Headless Task para updates em background (enhancement futuro).
 
 ---
 
