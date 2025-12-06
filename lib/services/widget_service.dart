@@ -2,9 +2,51 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
+import 'package:workmanager/workmanager.dart';
 
 import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    // Re-initialize necessary components for background execution
+    // Note: We cannot use the Singleton instance state here as it is a new isolate
+
+    // We create a temporary PluginManager
+    final pluginManager = PluginManager();
+    // In background, we might not have all context, but we try to run plugins
+    await pluginManager.discoverPlugins();
+
+    final outputs = await pluginManager.runAllEnabled();
+
+    final List<String> pluginIds = [];
+
+    for (final output in outputs) {
+      pluginIds.add(output.pluginId);
+      final widgetData = WidgetDataBuilder.fromPluginOutput(output).toJson();
+      await HomeWidget.saveWidgetData<String>(
+        'plugin_${output.pluginId}',
+        jsonEncode(widgetData),
+      );
+    }
+
+    await HomeWidget.saveWidgetData<String>(
+      'plugin_ids',
+      jsonEncode(pluginIds),
+    );
+
+    // Update all widget providers
+    for (final name in WidgetService.androidWidgetNames) {
+      await HomeWidget.updateWidget(
+        name: name,
+        androidName: name,
+      );
+    }
+
+    return Future.value(true);
+  });
+}
 
 class WidgetService {
 
@@ -15,6 +57,14 @@ class WidgetService {
 
   static const String appGroupId = 'group.crossbar.widgets';
   static const String iOSWidgetName = 'CrossbarWidget';
+
+  static const List<String> androidWidgetNames = [
+    'CrossbarWidgetProvider',
+    'CrossbarWidgetSmallProvider',
+    'CrossbarWidgetLargeProvider'
+  ];
+
+  // For backward compatibility or direct access
   static const String androidWidgetName = 'CrossbarWidgetProvider';
 
   final PluginManager _pluginManager = PluginManager();
@@ -30,6 +80,19 @@ class WidgetService {
 
     // Register callback for when widget is clicked
     HomeWidget.widgetClicked.listen(_handleWidgetClick);
+
+    if (Platform.isAndroid) {
+       await Workmanager().initialize(callbackDispatcher);
+       // Register periodic task (every 15 min)
+       await Workmanager().registerPeriodicTask(
+         "crossbar_widget_update_task",
+         "crossbar_widget_update_task",
+         frequency: const Duration(minutes: 15),
+         constraints: Constraints(
+           networkType: NetworkType.connected,
+         ),
+       );
+    }
 
     _initialized = true;
   }
@@ -50,9 +113,10 @@ class WidgetService {
     _widgetData[pluginId] = output;
 
     // Store data for the widget
+    final widgetData = WidgetDataBuilder.fromPluginOutput(output).toJson();
     await HomeWidget.saveWidgetData<String>(
       'plugin_$pluginId',
-      jsonEncode(output.toJson()),
+      jsonEncode(widgetData),
     );
 
     // Store list of all plugin IDs
@@ -63,10 +127,12 @@ class WidgetService {
 
     // Update the widget
     if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
+      for (final name in androidWidgetNames) {
+        await HomeWidget.updateWidget(
+          name: name,
+          androidName: name,
+        );
+      }
     } else if (Platform.isIOS) {
       await HomeWidget.updateWidget(
         name: iOSWidgetName,
@@ -100,10 +166,12 @@ class WidgetService {
     );
 
     if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
+      for (final name in androidWidgetNames) {
+        await HomeWidget.updateWidget(
+          name: name,
+          androidName: name,
+        );
+      }
     } else if (Platform.isIOS) {
       await HomeWidget.updateWidget(
         name: iOSWidgetName,

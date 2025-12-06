@@ -38,6 +38,7 @@ dependencies:
 
   # Mobile Specifics
   home_widget: ^0.8.1
+  workmanager: ^0.5.2
   flutter_local_notifications: ^19.5.0
   clipboard: ^2.0.2
 

@@ -10,6 +10,7 @@ import 'services/logger_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
 import 'services/tray_service.dart';
+import 'services/widget_service.dart';
 import 'services/window_service.dart';
 import 'ui/main_window.dart';
 
@@ -97,6 +98,17 @@ void main(List<String> args) async {
         logger.info('Tray service initialized');
       } catch (e, stack) {
         logger.error('Failed to initialize tray service', e, stack);
+      }
+    });
+
+    // Initialize widget service (Mobile background tasks)
+    final widgetService = WidgetService();
+    Future.delayed(Duration.zero, () async {
+      try {
+        await widgetService.init();
+        logger.info('Widget service initialized');
+      } catch (e, stack) {
+        logger.error('Failed to initialize widget service', e, stack);
       }
     });
 

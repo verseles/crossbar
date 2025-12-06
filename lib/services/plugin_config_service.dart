@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as path;
 
+import '../core/paths/platform_paths.dart'
+    if (dart.library.ui) '../core/paths/platform_paths_flutter.dart';
 import '../models/plugin_config.dart';
 import 'logger_service.dart';
 
@@ -39,8 +41,13 @@ class PluginConfigService extends ChangeNotifier {
 
   /// Gets the configs directory path.
   /// Desktop: `~/.crossbar/configs/`
+  /// Mobile: `AppDocsDir/configs/`
   Future<String> get configsDirectory async {
     if (_configsDirectory != null) return _configsDirectory!;
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      return getMobileConfigsDirectory();
+    }
 
     final homeDir = Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
