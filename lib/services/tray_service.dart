@@ -136,6 +136,8 @@ class TrayService with TrayListener {
   }
 
   void _updateTooltip() {
+    // setToolTip is not supported on Linux by tray_manager
+    if (Platform.isLinux) return;
     if (_pluginOutputs.isEmpty) return;
 
     final tooltipParts = <String>[];
