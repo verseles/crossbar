@@ -1,0 +1,24 @@
+{
+  "name": "Weather Widget",
+  "description": "Shows current weather for your location",
+  "icon": "🌤️",
+  "config_required": "first_run",
+  "settings": [
+    {
+      "key": "WEATHER_API_KEY",
+      "label": "OpenWeather API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your API key",
+      "help": "Get a free key at openweathermap.org/appid"
+    },
+    {
+      "key": "WEATHER_CITY",
+      "label": "City",
+      "type": "text",
+      "default": "London",
+      "required": true,
+      "placeholder": "City name"
+    }
+  ]
+}
