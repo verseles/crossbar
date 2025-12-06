@@ -7,6 +7,7 @@ Configure via Crossbar settings or environment variables:
 """
 import json
 import urllib.request
+import urllib.parse
 import os
 
 # Configuration from Crossbar settings (injected as env vars)
@@ -15,7 +16,8 @@ UNITS = os.environ.get('CROSSBAR_PLUGIN_UNITS', 'celsius')
 
 def get_weather():
     try:
-        url = f"https://wttr.in/{CITY}?format=j1"
+        encoded_city = urllib.parse.quote(CITY)
+        url = f"https://wttr.in/{encoded_city}?format=j1"
         with urllib.request.urlopen(url, timeout=5) as response:
             data = json.loads(response.read().decode())
             current = data['current_condition'][0]
