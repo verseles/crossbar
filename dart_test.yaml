@@ -1,0 +1,13 @@
+# Configuration for dart test runner
+# See: https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+
+tags:
+  hardware:
+    # Tests that interact with real hardware (audio, screen, wifi, bluetooth)
+    # These tests modify system state and may cause glitches when run locally.
+    # 
+    # To skip hardware tests locally:
+    #   flutter test --exclude-tags=hardware
+    #
+    # CI runs all tests, but hardware commands may fail gracefully
+    # since containers don't have real hardware.

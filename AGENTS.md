@@ -114,6 +114,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 2.  **Dependências Linux**: Requer `libayatana-appindicator3-dev` e `libsecret-1-dev`.
 3.  **Caminhos em Mobile**: Nunca use paths absolutos (`/home/user`) em Android/iOS. Use `path_provider`.
 4.  **CLI vs GUI**: Não importe `dart:ui` ou widgets Flutter dentro de `lib/cli/`. Isso quebra o binário CLI puro.
+5.  **Testes de Hardware**: Testes em `cli_handler_hardware_test.dart` alteram volume, brilho, wifi e bluetooth. Use `--exclude-tags=hardware` localmente para evitar glitches.
 
 ### Validação Local CI (act)
 
@@ -145,6 +146,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 | Ação                    | Comando                                                                   |
 | ----------------------- | ------------------------------------------------------------------------- |
 | Rodar Testes            | `flutter test --coverage`                                                 |
+| Testes (sem hardware)   | `flutter test --exclude-tags=hardware` (evita glitches locais)            |
 | Verificar Coverage      | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info)     |
 | Build Release (Linux)   | `make linux`                                                              |
 | Analisar Código         | `flutter analyze --no-fatal-infos`                                        |
