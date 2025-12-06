@@ -6,6 +6,7 @@ import '../../models/plugin.dart';
 import '../../services/plugin_config_service.dart';
 import '../../services/tray_service.dart';
 import '../dialogs/plugin_config_dialog.dart';
+import '../dialogs/sample_plugins_dialog.dart';
 
 class PluginsTab extends StatefulWidget {
   const PluginsTab({super.key});
@@ -188,49 +189,160 @@ class _PluginsTabState extends State<PluginsTab> {
 
   void _showAddPluginDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.addPlugin),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('To add a plugin:'),
-            const SizedBox(height: 16),
-            const Text('1. Create a script in one of these languages:'),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _LanguageChip(label: l10n.bash, extension: '.sh'),
-                _LanguageChip(label: l10n.python, extension: '.py'),
-                _LanguageChip(label: l10n.node, extension: '.js'),
-                _LanguageChip(label: l10n.dart, extension: '.dart'),
-                _LanguageChip(label: l10n.go, extension: '.go'),
-                _LanguageChip(label: l10n.rust, extension: '.rs'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('2. Name it with refresh interval:'),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Sample Plugins option (primary)
+              Card(
+                color: theme.colorScheme.primaryContainer,
+                child: InkWell(
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final installed = await SamplePluginsDialog.show(context);
+                    if (installed != null && installed.isNotEmpty && mounted) {
+                      await _refreshPlugins();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${installed.length} plugin(s) installed successfully!',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.extension,
+                            color: theme.colorScheme.onPrimary,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Sample Plugins',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Choose from 20+ ready-to-use plugins',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer
+                                      .withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: const Text(
-                'cpu.10s.sh  # runs every 10 seconds\n'
-                'weather.5m.py  # runs every 5 minutes\n'
-                'backup.1h.sh  # runs every hour',
-                style: TextStyle(fontFamily: 'monospace'),
+              
+              const SizedBox(height: 16),
+              
+              Row(
+                children: [
+                  Expanded(child: Divider(color: theme.colorScheme.outline)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'OR',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: theme.colorScheme.outline)),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text('3. Place it in ~/.crossbar/plugins/<language>/'),
-          ],
+              
+              const SizedBox(height: 16),
+              
+              // Manual creation instructions
+              Text(
+                'Create your own plugin:',
+                style: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: 12),
+              
+              Text(
+                '1. Create a script in one of these languages:',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _LanguageChip(label: l10n.bash, extension: '.sh'),
+                  _LanguageChip(label: l10n.python, extension: '.py'),
+                  _LanguageChip(label: l10n.node, extension: '.js'),
+                  _LanguageChip(label: l10n.dart, extension: '.dart'),
+                  _LanguageChip(label: l10n.go, extension: '.go'),
+                  _LanguageChip(label: l10n.rust, extension: '.rs'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              Text(
+                '2. Name it with refresh interval:',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'cpu.10s.sh  # runs every 10 seconds\n'
+                  'weather.5m.py  # runs every 5 minutes\n'
+                  'backup.1h.sh  # runs every hour',
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              Text(
+                '3. Place it in ~/.crossbar/plugins/',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(

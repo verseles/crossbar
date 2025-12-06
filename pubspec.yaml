@@ -66,6 +66,7 @@ flutter:
   generate: true
   assets:
     - assets/icons/
+    - plugins/
 
 flutter_launcher_icons:
   android: true
