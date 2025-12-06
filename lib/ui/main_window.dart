@@ -129,10 +129,10 @@ class _MainScreenState extends State<MainScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.view_carousel,
-                    size: 32,
-                    color: Theme.of(context).colorScheme.primary,
+                  Image.asset(
+                    'assets/icons/icon.png',
+                    width: 32,
+                    height: 32,
                   ),
                   const SizedBox(height: 4),
                   Text(
