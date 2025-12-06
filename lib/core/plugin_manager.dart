@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -7,7 +8,9 @@ import 'paths/platform_paths.dart'
     if (dart.library.ui) 'paths/platform_paths_flutter.dart';
 
 import '../models/plugin.dart';
+import '../models/plugin_config.dart';
 import '../models/plugin_output.dart';
+import '../services/plugin_config_service.dart';
 import 'script_runner.dart';
 
 class PluginManager {
@@ -18,7 +21,9 @@ class PluginManager {
   static final PluginManager _instance = PluginManager._internal();
 
   final List<Plugin> _plugins = [];
-  final ScriptRunner _scriptRunner = const ScriptRunner();
+  late final ScriptRunner _scriptRunner = ScriptRunner(
+    configService: PluginConfigService(),
+  );
   static const int maxConcurrent = 10;
 
   static const List<String> supportedLanguages = [
@@ -134,13 +139,43 @@ class PluginManager {
       }
     }
 
+    // Load config schema if exists
+    // Config file naming: <pluginName>.config.json
+    // e.g., weather.10m.py -> weather.10m.py.config.json
+    final config = await _loadPluginConfig(file.path);
+
     return Plugin(
       id: fileName,
       path: file.path,
       interpreter: interpreter,
       refreshInterval: refreshInterval,
       enabled: isEnabled,
+      config: config,
     );
+  }
+
+  /// Loads plugin configuration schema from a .config.json file.
+  ///
+  /// Looks for a file named `<pluginPath>.config.json`.
+  /// Returns null if no config file exists.
+  Future<PluginConfig?> _loadPluginConfig(String pluginPath) async {
+    final configPath = '$pluginPath.config.json';
+    final configFile = File(configPath);
+
+    if (!await configFile.exists()) {
+      return null;
+    }
+
+    try {
+      final content = await configFile.readAsString();
+      final json = jsonDecode(content) as Map<String, dynamic>;
+      return PluginConfig.fromJson(json);
+    } catch (e) {
+      // Log error but don't fail plugin loading
+      // ignore: avoid_print
+      print('Error loading config for $pluginPath: $e');
+      return null;
+    }
   }
 
   String? _detectInterpreter(File file) {

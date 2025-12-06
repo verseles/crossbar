@@ -1,3 +1,5 @@
+import 'plugin_config.dart';
+
 class Plugin {
 
   const Plugin({
@@ -8,6 +10,7 @@ class Plugin {
     this.enabled = true,
     this.lastRun,
     this.lastError,
+    this.config,
   });
 
   factory Plugin.mock({
@@ -15,12 +18,14 @@ class Plugin {
     String path = '/path/to/mock.10s.sh',
     String interpreter = 'bash',
     Duration refreshInterval = const Duration(seconds: 10),
+    PluginConfig? config,
   }) {
     return Plugin(
       id: id,
       path: path,
       interpreter: interpreter,
       refreshInterval: refreshInterval,
+      config: config,
     );
   }
 
@@ -36,6 +41,9 @@ class Plugin {
           ? DateTime.parse(json['lastRun'] as String)
           : null,
       lastError: json['lastError'] as String?,
+      config: json['config'] != null
+          ? PluginConfig.fromJson(json['config'] as Map<String, dynamic>)
+          : null,
     );
   }
   final String id;
@@ -45,6 +53,13 @@ class Plugin {
   final bool enabled;
   final DateTime? lastRun;
   final String? lastError;
+  final PluginConfig? config;
+
+  /// Returns true if the plugin has a configuration schema defined.
+  bool get hasConfig => config != null && config!.settings.isNotEmpty;
+
+  /// Returns true if the plugin requires configuration before running.
+  bool get requiresConfig => config?.configRequired == 'required';
 
   Map<String, dynamic> toJson() {
     return {
@@ -55,6 +70,7 @@ class Plugin {
       'enabled': enabled,
       'lastRun': lastRun?.toIso8601String(),
       'lastError': lastError,
+      if (config != null) 'config': config!.toJson(),
     };
   }
 
@@ -66,6 +82,7 @@ class Plugin {
     bool? enabled,
     DateTime? lastRun,
     String? lastError,
+    PluginConfig? config,
   }) {
     return Plugin(
       id: id ?? this.id,
@@ -75,6 +92,7 @@ class Plugin {
       enabled: enabled ?? this.enabled,
       lastRun: lastRun ?? this.lastRun,
       lastError: lastError ?? this.lastError,
+      config: config ?? this.config,
     );
   }
 
@@ -91,11 +109,12 @@ class Plugin {
         other.path == path &&
         other.interpreter == interpreter &&
         other.refreshInterval == refreshInterval &&
-        other.enabled == enabled;
+        other.enabled == enabled &&
+        other.config == config;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, path, interpreter, refreshInterval, enabled);
+    return Object.hash(id, path, interpreter, refreshInterval, enabled, config);
   }
 }

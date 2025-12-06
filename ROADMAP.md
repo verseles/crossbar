@@ -12,12 +12,14 @@ Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a 
 Antes de avançar, reconhecemos o que existe e o que falta para atingir a promessa do "Write Once, Run Everywhere".
 
 ### ✅ O que está Sólido
+
 - **Core Architecture:** `PluginManager` e `ScriptRunner` funcionam bem.
 - **CLI Foundation:** Estrutura de comandos e parser de argumentos robustos.
 - **UI Desktop:** Janela principal e abas implementadas.
 - **Tray Básico:** Ícone único e menu funcionam via `tray_manager`.
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
+
 - **Configuração:** UI existe, mas não salva dados nem injeta no plugin.
 - **Mobile Widgets:** `WidgetService` existe mas não comunica com layouts nativos (XML/SwiftUI).
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
@@ -29,29 +31,32 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 **Objetivo:** Permitir que plugins declarem configurações (JSON), o usuário preencha (UI), e o sistema injete (ENV vars) com segurança.
 
-### Fase 1: Persistência e Segurança
-- [ ] **Criar Service:** `lib/services/plugin_config_service.dart`.
-    - [ ] Implementar `loadValues(pluginId)` lendo de `~/.crossbar/configs/`.
-    - [ ] Implementar `saveValues(pluginId, map)` escrevendo JSON.
-    - [ ] Integrar `flutter_secure_storage` para detectar chaves definidas como `type: password` no schema e salvar separadamente.
-- [ ] **Vincular Plugin:** Em `lib/core/plugin_manager.dart`:
-    - [ ] No método `_createPluginFromFile`, verificar existência de `[plugin].config.json`.
-    - [ ] Parsear JSON para `PluginConfig` object.
-    - [ ] Adicionar campo `PluginConfig? config` ao model `Plugin`.
-- [ ] **Teste Unitário:** `test/unit/services/plugin_config_service_test.dart` cobrindo criptografia e I/O.
+### Fase 1: Persistência e Segurança ✅
 
-### Fase 2: Injeção de Variáveis
-- [ ] **Update Runner:** Em `lib/core/script_runner.dart`:
-    - [ ] Injetar `PluginConfigService` no construtor.
-    - [ ] No método `run`, chamar `loadValues`.
-    - [ ] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
+- [x] **Criar Service:** `lib/services/plugin_config_service.dart`.
+  - [x] Implementar `loadValues(pluginId)` lendo de `~/.crossbar/configs/`.
+  - [x] Implementar `saveValues(pluginId, map)` escrevendo JSON.
+  - [x] Integrar `flutter_secure_storage` para detectar chaves definidas como `type: password` no schema e salvar separadamente.
+- [x] **Vincular Plugin:** Em `lib/core/plugin_manager.dart`:
+  - [x] No método `_createPluginFromFile`, verificar existência de `[plugin].config.json`.
+  - [x] Parsear JSON para `PluginConfig` object.
+  - [x] Adicionar campo `PluginConfig? config` ao model `Plugin`.
+- [x] **Teste Unitário:** `test/unit/services/plugin_config_service_test.dart` cobrindo criptografia e I/O.
+
+### Fase 2: Injeção de Variáveis ✅
+
+- [x] **Update Runner:** Em `lib/core/script_runner.dart`:
+  - [x] Injetar `PluginConfigService` no construtor.
+  - [x] No método `run`, chamar `loadValues` via `_buildEnvironment`.
+  - [x] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
 - [ ] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
 
-### Fase 3: Conexão UI
-- [ ] **Plugins Tab:** Em `lib/ui/tabs/plugins_tab.dart`:
-    - [ ] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
-    - [ ] Carregar valores atuais antes de abrir o dialog.
-    - [ ] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
+### Fase 3: Conexão UI ✅
+
+- [x] **Plugins Tab:** Em `lib/ui/tabs/plugins_tab.dart`:
+  - [x] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
+  - [x] Carregar valores atuais antes de abrir o dialog.
+  - [x] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
 
 ---
 
@@ -60,27 +65,30 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 **Objetivo:** Transformar o Crossbar em um cidadão de primeira classe no Android e iOS, usando o package `home_widget` corretamente.
 
 ### Fase 1: Android Native (XML & Receiver)
+
 - [ ] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
-    - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
-    - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
-    - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
+  - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
+  - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
+  - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
 - [ ] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
-    - [ ] Implementar lógica de atualização via `RemoteViews`.
-    - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
+  - [ ] Implementar lógica de atualização via `RemoteViews`.
+  - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
 - [ ] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
 
 ### Fase 2: iOS Native (WidgetKit)
+
 - [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS.
 - [ ] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
 - [ ] **SwiftUI View:** Implementar `CrossbarWidget.swift`.
-    - [ ] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
-    - [ ] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
+  - [ ] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
+  - [ ] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
 
 ### Fase 3: Widget Service Logic
+
 - [ ] **Serialização:** Em `lib/services/widget_service.dart`:
-    - [ ] Implementar `updateWidget(pluginId, output)`.
-    - [ ] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
-    - [ ] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
+  - [ ] Implementar `updateWidget(pluginId, output)`.
+  - [ ] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
+  - [ ] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
 - [ ] **Background Sync:** Garantir que o `SchedulerService` chame `updateWidget` mesmo quando o app está em background (Android Headless Task).
 
 ---
@@ -90,23 +98,26 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 **Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
 
 ### Fase 1: Global Hotkey
+
 - [ ] **Dependência:** Adicionar `hotkey_manager` ao `pubspec.yaml`.
 - [ ] **Implementação:** Em `lib/services/window_service.dart`:
-    - [ ] Registrar `Ctrl+Alt+C` (ou `Cmd+Alt+C` no macOS).
-    - [ ] Handler deve fazer toggle de `show()` / `hide()`.
+  - [ ] Registrar `Ctrl+Alt+C` (ou `Cmd+Alt+C` no macOS).
+  - [ ] Handler deve fazer toggle de `show()` / `hide()`.
 - [ ] **Settings:** Adicionar opção na aba Settings para customizar/desativar o atalho.
 
 ### Fase 2: Tray Overflow Logic
+
 - [ ] **Lógica:** Em `lib/services/tray_service.dart`:
-    - [ ] Implementar lógica para `TrayDisplayMode.smartOverflow`.
-    - [ ] Se `plugins.length > threshold`, renderizar apenas 1 ícone genérico na tray.
-    - [ ] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
+  - [ ] Implementar lógica para `TrayDisplayMode.smartOverflow`.
+  - [ ] Se `plugins.length > threshold`, renderizar apenas 1 ícone genérico na tray.
+  - [ ] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
 - [ ] **Menu Builder:** Refatorar a construção do menu para suportar aninhamento dinâmico (Plugin A -> [Output, Actions]).
 
 ### Fase 3: Window State Persistence
+
 - [ ] **Persistência:** Em `lib/services/window_service.dart`:
-    - [ ] Salvar `Rect` (posição e tamanho) no `shared_preferences` ao fechar/ocultar.
-    - [ ] Restaurar `Rect` ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
+  - [ ] Salvar `Rect` (posição e tamanho) no `shared_preferences` ao fechar/ocultar.
+  - [ ] Restaurar `Rect` ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
 
 ---
 
@@ -115,26 +126,28 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 **Objetivo:** Preencher as lacunas nos comandos CLI e tornar o Marketplace funcional.
 
 ### Fase 1: CLI Gaps
+
 - [ ] **Geolocation:** Implementar `lib/cli/commands/location_command.dart`.
-    - [ ] Usar `geolocator` (se permissão concedida) ou API IP-based (ipapi.co) como fallback.
-    - [ ] Implementar geocoding reverso (lat/long -> Cidade).
+  - [ ] Usar `geolocator` (se permissão concedida) ou API IP-based (ipapi.co) como fallback.
+  - [ ] Implementar geocoding reverso (lat/long -> Cidade).
 - [ ] **QR Code:** Implementar `lib/cli/commands/utility_commands.dart` (subcomando `qr`).
-    - [ ] Gerar QR code em ASCII para terminal.
-    - [ ] Gerar PNG base64 se flag `--image` for passada.
+  - [ ] Gerar QR code em ASCII para terminal.
+  - [ ] Gerar PNG base64 se flag `--image` for passada.
 - [ ] **Screenshot:** Finalizar implementação multiplataforma em `lib/core/api/utils_api.dart`.
-    - [ ] Linux: `gnome-screenshot` ou `scrot` ou `import` (ImageMagick).
-    - [ ] Windows: PowerShell snippet para captura.
-    - [ ] macOS: `screencapture`.
+  - [ ] Linux: `gnome-screenshot` ou `scrot` ou `import` (ImageMagick).
+  - [ ] Windows: PowerShell snippet para captura.
+  - [ ] macOS: `screencapture`.
 
 ### Fase 2: Marketplace Engine
+
 - [ ] **GitHub API:** Em `lib/services/marketplace_service.dart`:
-    - [ ] Implementar busca real usando `api.github.com/search/code?q=crossbar+extension:sh`.
-    - [ ] Implementar cache de resultados para evitar rate limiting.
+  - [ ] Implementar busca real usando `api.github.com/search/code?q=crossbar+extension:sh`.
+  - [ ] Implementar cache de resultados para evitar rate limiting.
 - [ ] **Instalação:** Melhorar `InstallCommand`:
-    - [ ] Clonar repositório temporariamente.
-    - [ ] Validar integridade do arquivo.
-    - [ ] Copiar para `~/.crossbar/plugins`.
-    - [ ] Executar `chmod +x` automaticamente.
+  - [ ] Clonar repositório temporariamente.
+  - [ ] Validar integridade do arquivo.
+  - [ ] Copiar para `~/.crossbar/plugins`.
+  - [ ] Executar `chmod +x` automaticamente.
 
 ---
 

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
+import '../../services/plugin_config_service.dart';
+import '../dialogs/plugin_config_dialog.dart';
 
 class PluginsTab extends StatefulWidget {
   const PluginsTab({super.key});
@@ -13,6 +15,7 @@ class PluginsTab extends StatefulWidget {
 
 class _PluginsTabState extends State<PluginsTab> {
   final PluginManager _pluginManager = PluginManager();
+  final PluginConfigService _configService = PluginConfigService();
   bool _isLoading = true;
 
   @override
@@ -87,12 +90,44 @@ class _PluginsTabState extends State<PluginsTab> {
               await _refreshPlugins();
             }
           },
+          onConfigure: plugin.hasConfig
+              ? () => _showConfigDialog(context, plugin)
+              : null,
           onTap: () {
             _showPluginDetails(context, plugin);
           },
         );
       },
     );
+  }
+
+  Future<void> _showConfigDialog(BuildContext context, Plugin plugin) async {
+    if (plugin.config == null) return;
+
+    // Load current values
+    final currentValues = await _configService.loadValues(
+      plugin.id,
+      schema: plugin.config,
+    );
+
+    if (!mounted) return;
+
+    // Show config dialog
+    final newValues = await PluginConfigDialog.show(
+      context: context,
+      plugin: plugin,
+      config: plugin.config!,
+      initialValues: currentValues,
+    );
+
+    // Save if user confirmed
+    if (newValues != null) {
+      await _configService.saveValues(
+        plugin.id,
+        newValues,
+        schema: plugin.config,
+      );
+    }
   }
 
   Widget _buildEmptyState() {
@@ -291,10 +326,12 @@ class _PluginCard extends StatelessWidget {
     required this.plugin,
     required this.onToggle,
     required this.onTap,
+    this.onConfigure,
   });
   final Plugin plugin;
   final VoidCallback onToggle;
   final VoidCallback onTap;
+  final VoidCallback? onConfigure;
 
   @override
   Widget build(BuildContext context) {
@@ -310,9 +347,20 @@ class _PluginCard extends StatelessWidget {
         subtitle: Text(
           '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
         ),
-        trailing: Switch(
-          value: plugin.enabled,
-          onChanged: (_) => onToggle(),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (onConfigure != null)
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: onConfigure,
+                tooltip: 'Configure',
+              ),
+            Switch(
+              value: plugin.enabled,
+              onChanged: (_) => onToggle(),
+            ),
+          ],
         ),
         onTap: onTap,
       ),
