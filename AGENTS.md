@@ -3,8 +3,6 @@
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
 > Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou, chame adequadamente a tool play_notification para notificar o usuário.
 
-## recis
-
 Plano granndioso e teorico:
 @./original_plan.md
 Plano de execucao baseado em original_plan.md, pode estar defasado:
@@ -72,7 +70,10 @@ crossbar/
 │   │   ├── ipc_server.dart     # REST API (localhost:48291)
 │   │   ├── tray_service.dart   # Gerenciamento de ícones de bandeja
 │   │   ├── scheduler_service.dart # Timers para refresh de plugins
-│   │   └── notification_service.dart # Notificações push
+│   │   ├── notification_service.dart # Notificações push
+│   │   ├── plugin_config_service.dart # Gestão de config e secrets
+│   │   ├── marketplace_service.dart # Instalação de plugins
+│   │   └── widget_service.dart    # Mobile Home Widgets
 │   └── ui/                     # Widgets Flutter (Material 3)
 ├── plugins/                    # Exemplos de plugins (Go, Rust, Py, JS, Sh, Dart)
 ├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
