@@ -1,3 +1,6 @@
+@Tags(['hardware'])
+library;
+
 import 'dart:io';
 
 import 'package:crossbar/core/api/utils_api.dart';
