@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.0.0 (MVP lançado)
-**Próximo Ciclo:** v1.1.0 (Configuration Engine)
+**Status Atual:** v1.1.0 (Configuration Engine Done)
+**Próximo Ciclo:** v1.2.0 (Mobile Mastery)
 
 ---
 
@@ -49,7 +49,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] Injetar `PluginConfigService` no construtor.
   - [x] No método `run`, chamar `loadValues` via `_buildEnvironment`.
   - [x] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
-- [ ] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
+  - [x] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
 
 ### Fase 3: Conexão UI ✅
 
@@ -57,6 +57,10 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
   - [x] Carregar valores atuais antes de abrir o dialog.
   - [x] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
+
+### Fase 4: Refinamentos e Limpeza ✅
+
+- [x] **Consistência de Arquivos:** Renomear arquivos de definição de configuração de `.config.json` para `.schema.json` para evitar confusão com arquivos de valores salvos.
 
 ---
 

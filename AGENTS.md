@@ -1,7 +1,7 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou, chame adequadamente a tool play_notification para notificar o usuário.
+> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
 
 Plano granndioso e teorico:
 @./original_plan.md
@@ -142,18 +142,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 ## 7. Status do Roadmap
 
-- **Fase Atual**: Manutenção v1.0.1
-- **Features Completas**:
-  - [x] Core Plugin System (6 linguagens)
-  - [x] CLI Avançada (Mídia, Sistema, Rede, Utils)
-  - [x] GUI Desktop + Tray
-  - [x] Mobile Widgets + Notifications
-  - [x] IPC Server (HTTP)
-  - [x] CI/CD Multi-plataforma
-- **Pendente**:
-  - [ ] Atalho global (Ctrl+Alt+C)
-  - [ ] Marketplace real (Backend integration)
-  - [ ] Sandboxing de plugins
+@./ROADMAP.md
 
 ---
 
@@ -177,6 +166,7 @@ Para testar novas funcionalidades na GUI:
 1. **Sempre mate a instância antes de testar**:
    ```bash
    pkill -9 -f crossbar-gui
+   pkill -9 -f crossbar
    ```
 2. **Depois rebuild e abra novamente**:
    ```bash
@@ -187,7 +177,7 @@ Para testar novas funcionalidades na GUI:
 Ou use o comando combinado:
 
 ```bash
-pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/release/bundle/crossbar gui
+pkill -9 -f crossbar-gui; pkill -9 -f crossbar; flutter build linux --release && ./build/linux/x64/release/bundle/crossbar gui
 ```
 
 ---
@@ -264,8 +254,8 @@ pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/rel
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.
 - Pare após 3 tentativas falhas e reavalie.
-- Atualize o roadmap conforme avança.
-- Sempre que concluir tudo, chame adequadamente a tool play_notification para notificar o usuário.
+- Atualize o ROADMAP.md conforme avança.
+- Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
 
 ---
 
