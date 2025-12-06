@@ -38,25 +38,31 @@ print(json.dumps({
 
 ### 🎯 Revolutionary Advantages Over BitBar/Argos
 
-| Feature | BitBar/Argos | Crossbar |
-|---------|--------------|----------|
-| Platforms | macOS/Linux only | Linux + Windows + macOS + Android + iOS |
-| Output Formats | Text only | Text + JSON + Structured Data |
-| UI Targets | Menu bar only | Tray + Notifications + Widgets + Menu bar |
-| CLI API | None (scripts call system commands) | 47 unified commands (`crossbar --cpu`) |
-| Configuration | Manual scripting | Declarative JSON with auto-generated UI |
-| Mobile Support | ❌ None | ✅ Widgets + Persistent Notifications |
-| Controls | Read-only | Bidirectional (volume, media, system) |
-| Hot Reload | Manual refresh | Automatic file watching |
+| Feature        | BitBar/Argos                        | Crossbar                                  |
+| -------------- | ----------------------------------- | ----------------------------------------- |
+| Platforms      | macOS/Linux only                    | Linux + Windows + macOS + Android + iOS   |
+| Output Formats | Text only                           | Text + JSON + Structured Data             |
+| UI Targets     | Menu bar only                       | Tray + Notifications + Widgets + Menu bar |
+| CLI API        | None (scripts call system commands) | 47 unified commands (`crossbar --cpu`)    |
+| Configuration  | Manual scripting                    | Declarative JSON with auto-generated UI   |
+| Mobile Support | ❌ None                             | ✅ Widgets + Persistent Notifications     |
+| Controls       | Read-only                           | Bidirectional (volume, media, system)     |
+| Hot Reload     | Manual refresh                      | Automatic file watching                   |
 
 ### 📱 Platform-Specific Features
 
 #### Desktop (Linux/macOS/Windows)
+
 - System tray integration with custom icons
 - Menu bar dropdown with unlimited items
 - Window management and theming
+- **Tray Display Mode** (Settings → System Tray):
+  - _Unified_: Single tray icon with menu for all plugins (default)
+  - _Separate_: One tray icon per plugin (Linux only, coming soon)
+  - _Smart Collapse/Overflow_: Automatic modes (coming soon)
 
 #### Mobile (Android/iOS)
+
 - Home screen widgets (1x1, 2x2, 4x4 layouts)
 - Persistent notifications (Android foreground service)
 - Lock screen widgets (iOS)
@@ -66,6 +72,7 @@ print(json.dumps({
 ### Installation
 
 #### Prerequisites
+
 - Flutter 3.35.0+ ([Install Flutter](https://docs.flutter.dev/get-started/install))
 - Dart 3.10.0+ (comes with Flutter)
 
@@ -93,6 +100,7 @@ flutter build apk --release  # Android
 Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases).
 
 **Linux**: Extract `crossbar-linux.zip` and run:
+
 ```bash
 ./crossbar          # Launch (Start in Tray)
 ./crossbar gui      # Launch GUI (Open Window)
@@ -138,6 +146,7 @@ echo "Details | bash='crossbar --battery --json'"
 ```
 
 **Attributes**:
+
 - `color=red|blue|#FF0000` - Text color
 - `bash='command'` - Execute on click
 - `refresh=true` - Refresh all plugins on click
@@ -168,6 +177,7 @@ print(json.dumps({
 Crossbar provides 47 unified commands accessible via `crossbar --<command>`:
 
 #### System Information
+
 ```bash
 crossbar --cpu              # CPU usage percentage
 crossbar --memory           # Memory usage (e.g., "8.2/16 GB")
@@ -181,6 +191,7 @@ crossbar --arch             # Architecture (x64, arm64)
 ```
 
 #### Network
+
 ```bash
 crossbar --net-status       # "online" | "offline" | "wifi"
 crossbar --net-ip           # Local IP address
@@ -191,6 +202,7 @@ crossbar --bluetooth-status # "on" | "off"
 ```
 
 #### Device
+
 ```bash
 crossbar --device-model     # Device model name
 crossbar --screen-size      # Screen resolution
@@ -199,6 +211,7 @@ crossbar --timezone         # Timezone
 ```
 
 #### Audio & Media
+
 ```bash
 crossbar --audio-volume           # Current volume (0-100)
 crossbar --audio-volume-set 50    # Set volume
@@ -212,6 +225,7 @@ crossbar --screen-brightness-set 75
 ```
 
 #### Clipboard
+
 ```bash
 crossbar --clipboard              # Get clipboard text
 crossbar --clipboard-set "text"   # Copy to clipboard
@@ -219,6 +233,7 @@ crossbar --clipboard-clear
 ```
 
 #### File Operations
+
 ```bash
 crossbar --file-exists /path/file
 crossbar --file-read /path/file
@@ -227,6 +242,7 @@ crossbar --dir-list /path/dir
 ```
 
 #### Time & Utilities
+
 ```bash
 crossbar --time [12h|24h]
 crossbar --date
@@ -307,6 +323,7 @@ For comprehensive documentation, see:
 Crossbar includes **24 example plugins** in 6 languages:
 
 ### Bash (8 plugins)
+
 - `cpu.10s.sh` - CPU usage with color coding
 - `memory.10s.sh` - RAM usage visualization
 - `battery.30s.sh` - Battery status with icon
@@ -317,6 +334,7 @@ Crossbar includes **24 example plugins** in 6 languages:
 - `spotify.5s.sh` - Now playing on Spotify
 
 ### Python (8 plugins)
+
 - `weather.30m.py` - Weather from OpenWeatherMap API
 - `time.1s.py` - Live clock
 - `countdown.1s.py` - Event countdown timer
@@ -327,6 +345,7 @@ Crossbar includes **24 example plugins** in 6 languages:
 - `quotes.1h.py` - Random inspirational quotes
 
 ### Node.js (6 plugins)
+
 - `npm-downloads.1h.js` - NPM package stats
 - `ip-info.1h.js` - Geolocation info
 - `world-clock.1m.js` - Multi-timezone clocks
@@ -334,6 +353,7 @@ Crossbar includes **24 example plugins** in 6 languages:
 - `emoji-clock.1m.js` - Time as emojis
 
 ### Dart (2 plugins)
+
 - `system-info.1m.dart` - Comprehensive system info
 - `git-status.30s.dart` - Current repo status
 
@@ -383,8 +403,9 @@ flutter analyze
 ```
 
 **Current stats**:
+
 - 116 tests (114 passing, 2 skipped)
-- >90% code coverage
+- > 90% code coverage
 - 0 analysis errors
 
 ## 🔧 Development
@@ -448,13 +469,13 @@ Locale is auto-detected from system settings.
 
 ## 📊 Performance
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Boot Time (desktop) | <2s | ✅ ~1.5s |
-| Memory (idle, 3 plugins) | <150MB | ✅ ~120MB |
-| Plugin Execution Overhead | <50ms | ✅ ~30ms |
-| Hot Reload | <1s | ✅ ~500ms |
-| Binary Size (Linux) | <50MB | ✅ 41MB |
+| Metric                    | Target | Actual    |
+| ------------------------- | ------ | --------- |
+| Boot Time (desktop)       | <2s    | ✅ ~1.5s  |
+| Memory (idle, 3 plugins)  | <150MB | ✅ ~120MB |
+| Plugin Execution Overhead | <50ms  | ✅ ~30ms  |
+| Hot Reload                | <1s    | ✅ ~500ms |
+| Binary Size (Linux)       | <50MB  | ✅ 41MB   |
 
 ## 🤝 Contributing
 
@@ -474,6 +495,7 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
 
 This ensures that:
+
 - ✅ You can use, modify, and distribute the software
 - ✅ All derivatives must remain open source
 - ✅ SaaS deployments must share source code (network copyleft)
@@ -484,10 +506,12 @@ See [LICENSE](LICENSE) for full terms.
 ## 🙏 Acknowledgments
 
 Inspired by:
+
 - [BitBar](https://github.com/matryer/xbar) by Mat Ryer
 - [Argos](https://github.com/p-e-w/argos) by Philipp Emanuel Weidmann
 
 Built with:
+
 - [Flutter](https://flutter.dev) - Google's UI toolkit
 - [Dart](https://dart.dev) - Client-optimized language
 
@@ -505,6 +529,7 @@ Built with:
 ### ✅ v1.0.0 (Current - December 2025)
 
 **Completed**: All 7 phases from MASTER_PLAN.md
+
 - ✅ Core plugin system (6 languages)
 - ✅ 47 CLI commands
 - ✅ 5 platform support (structure ready)
@@ -514,6 +539,7 @@ Built with:
 - ✅ Comprehensive documentation
 
 **Limitations**:
+
 - macOS/iOS builds require macOS with Xcode
 - Android APK requires SDK setup
 - No plugin sandboxing or signing
@@ -523,6 +549,7 @@ Built with:
 **Focus**: Platform builds & marketplace enhancements
 
 **High Priority**:
+
 - 🏗️ Complete macOS/Windows/Android/iOS builds
 - ⭐ Plugin ratings and reviews in marketplace
 - 📊 Plugin performance metrics dashboard
@@ -530,6 +557,7 @@ Built with:
 - 📦 Package managers (Homebrew, Snap, winget, AUR)
 
 **Also Planned**:
+
 - Plugin templates/wizard
 - Output history in UI
 - Auto-updater
@@ -538,6 +566,7 @@ Built with:
 ### 🚀 v1.2.0 - v1.5.0 (2026)
 
 **Mid-term Goals**:
+
 - 🔄 Config sync via GitHub Gists (v1.2)
 - 🎨 Custom themes & theming system (v1.3)
 - 🔌 Plugin dependencies & inter-plugin communication (v1.4)
@@ -546,6 +575,7 @@ Built with:
 ### 🌟 v2.0.0+ (2027+)
 
 **Long-term Vision**:
+
 - 🌐 Remote plugins (server-side execution)
 - 📊 OpenTelemetry & Grafana integration
 - 🤖 AI-powered plugin suggestions
@@ -555,12 +585,12 @@ Built with:
 
 ### 📈 Success Metrics
 
-| Milestone | Stars | Downloads | Contributors | Plugins |
-|-----------|-------|-----------|--------------|---------|
-| v1.0.0 (Now) | 0 | 0 | 1 | 24 |
-| v1.1.0 (Q1 2026) | 100+ | 500+ | 3+ | 40+ |
-| v1.5.0 (Q4 2026) | 500+ | 2.5k+ | 10+ | 100+ |
-| v2.0.0 (2027) | 1k+ | 10k+ | 20+ | 250+ |
+| Milestone        | Stars | Downloads | Contributors | Plugins |
+| ---------------- | ----- | --------- | ------------ | ------- |
+| v1.0.0 (Now)     | 0     | 0         | 1            | 24      |
+| v1.1.0 (Q1 2026) | 100+  | 500+      | 3+           | 40+     |
+| v1.5.0 (Q4 2026) | 500+  | 2.5k+     | 10+          | 100+    |
+| v2.0.0 (2027)    | 1k+   | 10k+      | 20+          | 250+    |
 
 **Want to influence the roadmap?** Vote on features in [GitHub Issues](https://github.com/verseles/crossbar/issues) or join [Discussions](https://github.com/verseles/crossbar/discussions)!
 
@@ -572,6 +602,7 @@ Built with:
 First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 
 #### ✨ Key Features Highlights:
+
 - **Multi-language plugin support**: Bash, Python, Node.js, Dart, Go, Rust.
 - **BitBar-compatible text format parser** & **JSON output format** for structured data.
 - **Hot reload system** with automatic plugin detection.
@@ -584,18 +615,20 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - **Internationalization**: 10 languages supported.
 
 #### 🏗️ Architecture Overview:
+
 - **Core**: Plugin Manager, Script Runner, Output Parser, CLI API implementations.
 - **Models**: Plugin, PluginOutput, PluginConfig.
 - **Services**: Scheduler, Tray, Hot Reload, Marketplace, Logger, IPC, Notification, Settings, Widget.
 - **UI**: Modern Material Design 3.
 
 #### 📦 By the Numbers (v1.0.0):
+
 - ~6,661 lines of Dart code
 - 39 CLI commands
 - 24 example plugins (in 6 languages)
 - 10 languages (i18n)
 - 4+ platforms supported (Linux, macOS, Windows, Android, iOS - planned)
-- >90% test coverage
+- > 90% test coverage
 - <150MB memory footprint (idle, 3 plugins)
 - <50ms plugin execution overhead
 - 41MB Linux binary size
@@ -607,7 +640,9 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 This roadmap outlines the development for Crossbar, tracking completed work, current limitations, and planned future enhancements.
 
 ### ✅ v1.0.0 (Current - December 2025)
+
 **Completed**: All 7 phases from `MASTER_PLAN.md`.
+
 - Core plugin system (6 languages).
 - 39 CLI commands.
 - 4+ platform support (Linux, macOS, Windows, Android, iOS - planned).
@@ -617,6 +652,7 @@ This roadmap outlines the development for Crossbar, tracking completed work, cur
 - Comprehensive documentation.
 
 **Current Limitations**:
+
 - macOS/iOS builds require macOS with Xcode.
 - Android APK requires SDK setup.
 - No plugin sandboxing or signing.
@@ -626,7 +662,9 @@ This roadmap outlines the development for Crossbar, tracking completed work, cur
 - No plugin output caching.
 
 ### 🎯 v1.1.0 (Q1 2026 - Próxima Prioridade)
+
 **Foco**: Builds de plataforma e melhorias no marketplace.
+
 - 🏗️ Concluir builds para macOS/Windows/Android/iOS.
 - ⭐ Classificações e avaliações de plugins no marketplace.
 - 📊 Painel de métricas de desempenho de plugins.
@@ -636,6 +674,7 @@ This roadmap outlines the development for Crossbar, tracking completed work, cur
 - Comandos CLI adicionais (captura de tela, papel de parede, notificações).
 
 ### 🌟 Visão de Longo Prazo (v2.0.0+)
+
 - 🌐 Plugins remotos (execução server-side).
 - 📊 Integração OpenTelemetry e Grafana.
 - 🤖 Sugestões de plugins com IA.
@@ -644,6 +683,7 @@ This roadmap outlines the development for Crossbar, tracking completed work, cur
 - 🌍 Extensão de navegador e suporte a smartwatch.
 
 **Quer influenciar o roadmap?** Vote em funcionalidades nas [GitHub Issues](https://github.com/verseles/crossbar/issues) ou participe das [Discussions](https://github.com/verseles/crossbar/discussions)!
+
 </details>
 
 <details>
@@ -652,10 +692,12 @@ This roadmap outlines the development for Crossbar, tracking completed work, cur
 Crossbar takes security seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### Supported Versions
+
 - **1.x.x**: Fully supported for security patches.
 - **< 1.0**: Not supported.
 
 ### Reporting a Vulnerability
+
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 Instead, please report security issues by emailing: **security@verseles.com**
 Alternatively, use GitHub's private vulnerability reporting: [Security tab](https://github.com/verseles/crossbar/security).
@@ -663,11 +705,13 @@ Alternatively, use GitHub's private vulnerability reporting: [Security tab](http
 **What to Include**: Description, Impact, Steps to Reproduce, Affected Versions, Possible Fix, Your Contact.
 
 **Response Timeline**:
+
 - **Acknowledgment**: Within 48 hours.
 - **Initial Assessment**: Within 7 days.
 - **Resolution**: Aim for 30 days for critical vulnerabilities.
 
 ### Security Considerations & Known Limitations
+
 - **Plugin Security**: Plugins execute with the same permissions as the running user. **Only run trusted plugins.** Review third-party plugins.
 - **No Plugin Sandboxing**: Plugins run with full user permissions.
 - **Secure Storage**: Sensitive values (type `password`) are stored using platform-specific secure storage (Keychain, Credential Manager, libsecret).
@@ -675,6 +719,7 @@ Alternatively, use GitHub's private vulnerability reporting: [Security tab](http
 - **File Permissions**: Plugin files should have restricted permissions (`chmod 700`).
 
 ### Best Practices for Users
+
 - Keep Crossbar updated.
 - Review plugin source code.
 - Use secure API keys.
@@ -682,6 +727,7 @@ Alternatively, use GitHub's private vulnerability reporting: [Security tab](http
 - Monitor plugin behavior.
 
 ### Best Practices for Plugin Developers
+
 - Validate all inputs.
 - Use HTTPS.
 - Don't hardcode secrets.
@@ -690,6 +736,7 @@ Alternatively, use GitHub's private vulnerability reporting: [Security tab](http
 - Document security requirements.
 
 For security concerns: **security@verseles.com**
+
 </details>
 
 <details>
@@ -700,15 +747,18 @@ Thank you for considering contributing to Crossbar!
 ### How Can I Contribute?
 
 #### Reporting Bugs
+
 - Check existing issues first.
 - Provide a clear description, steps to reproduce, expected behavior, screenshots, and environment details.
 
 #### Suggesting Enhancements
+
 - Use a clear and descriptive title.
 - Provide a detailed description and explain its usefulness.
 - List similar features in other applications.
 
 #### Pull Requests (PRs)
+
 1.  **Before Submitting**: Check existing PRs, create an issue for major changes, follow coding style, write/update tests, update documentation.
 2.  **PR Process**:
     - Fork the repo and create your branch from `main`.
@@ -722,12 +772,14 @@ Thank you for considering contributing to Crossbar!
 ### Development Setup
 
 #### Prerequisites
+
 - Flutter 3.35.0+
 - Dart 3.10.0+
 - Git
 - Your favorite IDE
 
 #### Setup Steps
+
 1.  Clone your fork: `git clone https://github.com/YOUR-USERNAME/crossbar.git`
 2.  Add upstream remote: `git remote add upstream https://github.com/verseles/crossbar.git`
 3.  Install dependencies: `flutter pub get`
@@ -735,6 +787,7 @@ Thank you for considering contributing to Crossbar!
 5.  Run the app: `flutter run -d linux`
 
 ### Coding Standards
+
 - Follow [Effective Dart](https://dart.dev/guides/language/effective-dart).
 - Use `flutter analyze` and `dart format`.
 - **Test Coverage**: Aim for >90% for new code.
@@ -742,6 +795,7 @@ Thank you for considering contributing to Crossbar!
 - **Null Safety**: Use strict null safety.
 
 See `CONTRIBUTING.md` for more details.
+
 </details>
 
 ## ⭐ Star History

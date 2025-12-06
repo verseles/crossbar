@@ -77,17 +77,21 @@ crossbar/
 ## 5. Sistema de Plugins
 
 ### Descoberta
+
 - Local: `~/.crossbar/plugins/` (ou pasta local em dev).
 - Identificação: Extensão (`.py`, `.sh`) ou Shebang.
 - Intervalo: Parseado do nome (ex: `cpu.10s.sh` = 10 segundos).
 
 ### Execução
+
 - **Runner**: `lib/core/script_runner.dart`
 - **Interpreters**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
 - **Output**: Suporta formato texto legado (BitBar) OU JSON estruturado (Crossbar).
 
 ### API de Plugins (CLI)
+
 Plugins usam a própria CLI do Crossbar para obter dados.
+
 - Exemplo: Um plugin python chama `subprocess.run(['crossbar', '--cpu'])`.
 - Comandos disponíveis: `docs/api-reference.md`.
 
@@ -96,20 +100,23 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ## 6. Contexto de Desenvolvimento
 
 ### Build & Run
+
 - **Linux**: `make linux` (Gera bundle com os 3 binários).
 - **Testes**: `flutter test --coverage` (Min 43% coverage, CI falha se menor).
 - **Docker/Podman**:
-    - `make container-shell`: Entra no ambiente dev containerizado.
-    - `make container-build`: Roda build clean.
-    - **Alternativa**: Se `podman` ou `podman-compose` não forem encontrados, tente usar `docker` e `docker-compose` como fallback.
+  - `make container-shell`: Entra no ambiente dev containerizado.
+  - `make container-build`: Roda build clean.
+  - **Alternativa**: Se `podman` ou `podman-compose` não forem encontrados, tente usar `docker` e `docker-compose` como fallback.
 
 ### Armadilhas Comuns
+
 1.  **Versão do Flutter**: O CI exige estritamente `3.38.3`. Versões mais novas/velhas quebram constraints do Dart `^3.10.0`.
 2.  **Dependências Linux**: Requer `libayatana-appindicator3-dev` e `libsecret-1-dev`.
 3.  **Caminhos em Mobile**: Nunca use paths absolutos (`/home/user`) em Android/iOS. Use `path_provider`.
 4.  **CLI vs GUI**: Não importe `dart:ui` ou widgets Flutter dentro de `lib/cli/`. Isso quebra o binário CLI puro.
 
 ### Validação Local CI (act)
+
 - **Ferramenta**: `act`
 - **Função**: Permite executar os workflows do GitHub Actions localmente, utilizando Docker.
 - **Uso**: Simula o ambiente do CI/CD para testar pipelines antes de fazer `push`, prevenindo falhas remotas.
@@ -120,28 +127,50 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 - **Fase Atual**: Manutenção v1.0.1
 - **Features Completas**:
-    - [x] Core Plugin System (6 linguagens)
-    - [x] CLI Avançada (Mídia, Sistema, Rede, Utils)
-    - [x] GUI Desktop + Tray
-    - [x] Mobile Widgets + Notifications
-    - [x] IPC Server (HTTP)
-    - [x] CI/CD Multi-plataforma
+  - [x] Core Plugin System (6 linguagens)
+  - [x] CLI Avançada (Mídia, Sistema, Rede, Utils)
+  - [x] GUI Desktop + Tray
+  - [x] Mobile Widgets + Notifications
+  - [x] IPC Server (HTTP)
+  - [x] CI/CD Multi-plataforma
 - **Pendente**:
-    - [ ] Atalho global (Ctrl+Alt+C)
-    - [ ] Marketplace real (Backend integration)
-    - [ ] Sandboxing de plugins
+  - [ ] Atalho global (Ctrl+Alt+C)
+  - [ ] Marketplace real (Backend integration)
+  - [ ] Sandboxing de plugins
 
 ---
 
 ## 8. Comandos Úteis
 
-| Ação | Comando |
-|------|---------|
-| Rodar Testes | `flutter test --coverage` |
-| Verificar Coverage | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info) |
-| Build Release (Linux) | `make linux` |
-| Analisar Código | `flutter analyze --no-fatal-infos` |
-| Monitorar CI | `gh run watch` |
+| Ação                    | Comando                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Rodar Testes            | `flutter test --coverage`                                                 |
+| Verificar Coverage      | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info)     |
+| Build Release (Linux)   | `make linux`                                                              |
+| Analisar Código         | `flutter analyze --no-fatal-infos`                                        |
+| Monitorar CI            | `gh run watch`                                                            |
+| **Matar GUI + Reabrir** | `pkill -9 -f crossbar-gui; ./build/linux/x64/release/bundle/crossbar gui` |
+
+### ⚠️ Aviso sobre Testes de GUI
+
+**Importante**: Por padrão, fechar a janela da GUI apenas minimiza para a bandeja (tray).
+Para testar novas funcionalidades na GUI:
+
+1. **Sempre mate a instância antes de testar**:
+   ```bash
+   pkill -9 -f crossbar-gui
+   ```
+2. **Depois rebuild e abra novamente**:
+   ```bash
+   flutter build linux --release
+   ./build/linux/x64/release/bundle/crossbar gui
+   ```
+
+Ou use o comando combinado:
+
+```bash
+pkill -9 -f crossbar-gui; flutter build linux --release && ./build/linux/x64/release/bundle/crossbar gui
+```
 
 ---
 
@@ -150,12 +179,14 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Filosofia
 
 #### Crenças Centrais
+
 - **Progresso incremental sobre grandes mudanças** - Pequenas alterações que compilam e passam nos testes.
 - **Aprender com o código existente** - Estude e planeje antes de implementar.
 - **Pragmático sobre dogmático** - Adapte-se à realidade do projeto.
 - **Intenção clara sobre código "esperto"** - Seja chato e óbvio.
 
 #### Simplicidade
+
 - **Responsabilidade única** por função/classe.
 - **Evite abstrações prematuras**.
 - **Sem truques "espertos"** - escolha a solução chata.
@@ -164,12 +195,14 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Padrões Técnicos
 
 #### Princípios de Arquitetura
+
 - **Composição sobre herança** - Use injeção de dependência.
 - **Interfaces sobre singletons** - Habilite testes e flexibilidade.
 - **Explícito sobre implícito** - Fluxo de dados e dependências claros.
 - **Test-driven quando possível** - Nunca desabilite testes, conserte-os.
 
 #### Tratamento de Erros
+
 - **Falhe rápido** com mensagens descritivas.
 - **Inclua contexto** para depuração.
 - **Trate erros** no nível apropriado.
@@ -178,18 +211,21 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Integração com o Projeto
 
 #### Aprenda a Base de Código
+
 - Encontre recursos/componentes similares.
 - Identifique padrões e convenções comuns.
 - Use as mesmas bibliotecas/utilitários quando possível.
 - Siga padrões de teste existentes.
 
 #### Ferramentas
+
 - Use o sistema de build existente do projeto.
 - Use o framework de teste existente do projeto.
 - Use as configurações de formatador/linter do projeto.
 - Não introduza novas ferramentas sem forte justificativa.
 
 #### Estilo de Código
+
 - Siga convenções existentes no projeto.
 - Consulte configurações de linter e .editorconfig, se presentes.
 - Arquivos de texto devem sempre terminar com uma linha vazia.
@@ -197,12 +233,14 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Lembretes Importantes
 
 **NUNCA**:
+
 - Use `--no-verify` para ignorar hooks de commit.
 - Desabilite testes em vez de consertá-los.
 - Commite código que não compila.
 - Faça suposições - verifique com o código existente.
 
 **SEMPRE**:
+
 - Commite código funcional incrementalmente.
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.
@@ -215,6 +253,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 Se a context7 não estiver disponível no sistema, faça o seguinte:
 
 ### Filosofia Central: ZERO SUPOSIÇÕES
+
 - **Verificação Obrigatória**: Você está **PROIBIDO** de escrever código baseado apenas em dados de treinamento internos para bibliotecas externas.
 - **Cobertura Universal**: Antes de planejar ou codificar, você **DEVE** buscar documentação ao vivo para **CADA** biblioteca ou ferramenta envolvida na tarefa.
 - **Maximizar Contexto**: Não otimize para economia de tokens. Otimize para **precisão** e **detalhe**. Sempre solicite contexto profundo e abrangente.
@@ -222,10 +261,12 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 ### Protocolo de Execução
 
 1.  **Identificar e Isolar**:
+
     - Liste todas as bibliotecas necessárias (por exemplo, se a tarefa usa `Actix`, `Serde` e `Tokio`, busque documentação para TODAS as três).
     - Determine a versão exata a partir de `pubspec.yaml`, `Cargo.toml`, `package.json`, etc.
 
 2.  **Construindo a Requisição**:
+
     - **URL Base**: `https://context7.com/api/v1/{owner}/{repo}/{version}`
     - **Tópico**: Use `topic` para focar no detalhe de implementação específico (ex: `topic=advanced+error+handling`).
     - **Tokens**: SEMPRE defina um limite de tokens ALTO (ex: `tokens=25000`) para garantir que a resposta não seja truncada. Precisamos do contexto completo.
@@ -243,9 +284,9 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 
 - **Limites de Taxa (429)**: Respeite o campo `retryAfterSeconds` implicitamente. Aguarde. Não pule.
 - **Fonte da Verdade da Documentação**:
-    - Se encontrar erros inesperados (400 Bad Request, 404 Not Found) ou se o comportamento da API parecer ter mudado, **PARE IMEDIATAMENTE**.
-    - **Buscar o Guia Oficial**: Execute uma requisição para ler a documentação da API para depurar seus parâmetros:
-      ```
-      curl -L "https://context7.com/docs/api-guide"
-      ```
-    - Use o guia recuperado para corrigir o formato da sua requisição à API antes de tentar novamente.
+  - Se encontrar erros inesperados (400 Bad Request, 404 Not Found) ou se o comportamento da API parecer ter mudado, **PARE IMEDIATAMENTE**.
+  - **Buscar o Guia Oficial**: Execute uma requisição para ler a documentação da API para depurar seus parâmetros:
+    ```
+    curl -L "https://context7.com/docs/api-guide"
+    ```
+  - Use o guia recuperado para corrigir o formato da sua requisição à API antes de tentar novamente.
