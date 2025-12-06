@@ -1,4 +1,4 @@
-.PHONY: all linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix \
+.PHONY: all linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
 	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
 
 # Paths
@@ -80,6 +80,24 @@ rebuild: clean linux
 # Mix (update repomix if exists)
 mix:
 	@if [ -f repomix-output.xml ]; then npx repomix; fi
+
+# Generate all icons from source files (requires imagemagick)
+# Source: assets/icons/icon.png (transparent) and icon_opaque.png (with background)
+icons:
+	@echo "Generating tray icons..."
+	@cd assets/icons && \
+	magick icon.png -resize 48x48 -alpha extract mask.png && \
+	magick -size 48x48 xc:white mask.png -alpha off -compose CopyOpacity -composite PNG32:tray_icon_light.png && \
+	magick -size 48x48 xc:black mask.png -alpha off -compose CopyOpacity -composite PNG32:tray_icon_dark.png && \
+	magick -size 44x44 xc:black \( icon.png -resize 44x44 -alpha extract \) -alpha off -compose CopyOpacity -composite PNG32:tray_icon_macos.png && \
+	magick icon.png -resize 48x48 -define icon:auto-resize=48,32,16 tray_icon.ico && \
+	rm -f mask.png
+	@echo "Tray icons generated:"
+	@ls -la assets/icons/tray_icon*
+	@echo ""
+	@echo "Generating launcher icons (Android, Windows, macOS)..."
+	dart run flutter_launcher_icons
+	@echo "Done! All icons generated."
 
 # ===============================
 # Docker/Podman Container Commands

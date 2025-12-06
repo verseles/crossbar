@@ -59,9 +59,31 @@ dev_dependencies:
   coverage: ^1.9.2
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
   generate: true
   assets:
     - assets/icons/
+
+flutter_launcher_icons:
+  android: true
+  ios: false  # Pasta ios não existe no projeto
+  
+  # Para Android - Adaptive Icon (2 camadas)
+  adaptive_icon_foreground: "assets/icons/icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  
+  # Para iOS e outras plataformas
+  image_path: "assets/icons/icon_opaque.png"
+  
+  # Desktop
+  windows:
+    generate: true
+    image_path: "assets/icons/icon.png"
+    icon_size: 256
+    
+  macos:
+    generate: true
+    image_path: "assets/icons/icon_opaque.png"

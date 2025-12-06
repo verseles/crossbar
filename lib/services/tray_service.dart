@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:flutter/scheduler.dart';
 import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
@@ -13,6 +15,7 @@ import 'window_service.dart';
 ///
 /// Uses tray_manager for all desktop platforms (Linux, Windows, macOS).
 /// Shows plugin outputs in a unified menu under a single tray icon.
+/// On Linux, automatically switches between light/dark icons based on system theme.
 class TrayService with TrayListener {
   factory TrayService() => _instance;
 
@@ -25,6 +28,7 @@ class TrayService with TrayListener {
 
   bool _initialized = false;
   String? _iconPath;
+  Brightness? _lastBrightness;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -37,15 +41,54 @@ class TrayService with TrayListener {
     await _resolveAndSetIcon();
     await _updateMenu();
 
+    // Listen for theme changes on Linux
+    if (Platform.isLinux) {
+      _setupThemeListener();
+    }
+
     _initialized = true;
     LoggerService().info('Tray service initialized');
+  }
+
+  void _setupThemeListener() {
+    // Check for theme changes periodically since platformDispatcher
+    // callbacks may not work reliably for tray services
+    final dispatcher = SchedulerBinding.instance.platformDispatcher;
+    dispatcher.onPlatformBrightnessChanged = () {
+      _onThemeChanged();
+    };
+  }
+
+  void _onThemeChanged() {
+    if (!Platform.isLinux) return;
+
+    final currentBrightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+
+    if (_lastBrightness != currentBrightness) {
+      _lastBrightness = currentBrightness;
+      LoggerService().info('Theme changed to: $currentBrightness');
+      _resolveAndSetIcon();
+    }
   }
 
   Future<void> _resolveAndSetIcon() async {
     String candidate;
 
     if (Platform.isLinux) {
-      candidate = 'assets/icons/tray_icon.png';
+      // Detect system theme and use appropriate icon
+      final brightness =
+          SchedulerBinding.instance.platformDispatcher.platformBrightness;
+      _lastBrightness = brightness;
+
+      if (brightness == Brightness.dark) {
+        // Dark theme: use light (white) icon for visibility
+        candidate = 'assets/icons/tray_icon_light.png';
+      } else {
+        // Light theme: use dark (black) icon for visibility
+        candidate = 'assets/icons/tray_icon_dark.png';
+      }
+      LoggerService().info('Linux theme: $brightness, using icon: $candidate');
     } else if (Platform.isMacOS) {
       candidate = 'assets/icons/tray_icon_macos.png';
     } else {
