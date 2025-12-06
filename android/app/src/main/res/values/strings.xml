@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Crossbar</string>
+    <string name="widget_name">Crossbar Plugin</string>
+    <string name="widget_description">Display plugin output on your home screen</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="widget_no_data">No data</string>
+    <string name="widget_tap_to_refresh">Tap to refresh</string>
+    <string name="widget_last_updated">Updated %1$s</string>
+</resources>

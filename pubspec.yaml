@@ -1,7 +1,7 @@
 name: crossbar
 description: Universal Plugin System for Taskbar/Menu Bar - Cross-platform BitBar/Argos alternative
 publish_to: "none"
-version: 1.0.1+2
+version: 1.2.0+3
 
 environment:
   sdk: ^3.10.0
