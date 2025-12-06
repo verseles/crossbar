@@ -2,9 +2,9 @@
 /// CPU Monitor Plugin - Uses Crossbar API for portability
 import 'dart:io';
 
-String? crossbar(String args) {
+String? crossbar(List<String> args) {
   try {
-    final result = Process.runSync('crossbar', args.split(' '));
+    final result = Process.runSync('crossbar', args);
     return result.exitCode == 0 ? (result.stdout as String).trim() : null;
   } catch (_) {
     return null;
@@ -13,7 +13,7 @@ String? crossbar(String args) {
 
 void main() {
   // Get CPU from Crossbar API
-  var cpuStr = crossbar('--cpu') ?? 'N/A';
+  var cpuStr = crossbar(['cpu']) ?? 'N/A';
   
   double cpu = double.tryParse(cpuStr) ?? 0;
   String color;

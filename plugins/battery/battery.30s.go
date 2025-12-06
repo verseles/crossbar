@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func crossbar(args string) string {
-	cmd := exec.Command("crossbar", strings.Split(args, " ")...)
+func crossbar(args ...string) string {
+	cmd := exec.Command("crossbar", args...)
 	out, err := cmd.Output()
 	if err != nil {
 		return ""
@@ -20,13 +20,13 @@ func crossbar(args string) string {
 }
 
 func main() {
-	batteryStr := crossbar("--battery")
+	batteryStr := crossbar("battery")
 	if batteryStr == "" {
 		batteryStr = "N/A"
 	}
 
 	charging := false
-	jsonStr := crossbar("--battery --json")
+	jsonStr := crossbar("battery", "--json")
 	if jsonStr != "" {
 		var data map[string]interface{}
 		if err := json.Unmarshal([]byte(jsonStr), &data); err == nil {

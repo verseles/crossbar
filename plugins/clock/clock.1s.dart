@@ -2,9 +2,9 @@
 /// Clock Plugin - Shows current time using Crossbar API
 import 'dart:io';
 
-String? crossbar(String args) {
+String? crossbar(List<String> args) {
   try {
-    final result = Process.runSync('crossbar', args.split(' '));
+    final result = Process.runSync('crossbar', args);
     return result.exitCode == 0 ? (result.stdout as String).trim() : null;
   } catch (_) {
     return null;
@@ -13,17 +13,15 @@ String? crossbar(String args) {
 
 void main() {
   final now = DateTime.now();
-  final timeStr = crossbar('--time') ?? 
+  final timeStr = crossbar(['time']) ?? 
       '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
-  final dateStr = crossbar('--time --format date') ?? 
+  final dateStr = crossbar(['date']) ?? 
       '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-  final tz = crossbar('--timezone') ?? now.timeZoneName;
 
   print('🕐 $timeStr');
   print('---');
   print('Time: $timeStr');
   print('Date: $dateStr');
-  print('Timezone: $tz');
   print('---');
   print('Refresh | refresh=true');
 }

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func crossbar(args string) string {
-	cmd := exec.Command("crossbar", strings.Split(args, " ")...)
+func crossbar(args ...string) string {
+	cmd := exec.Command("crossbar", args...)
 	out, err := cmd.Output()
 	if err != nil {
 		return ""
@@ -19,7 +19,7 @@ func crossbar(args string) string {
 }
 
 func main() {
-	memoryStr := crossbar("--memory")
+	memoryStr := crossbar("memory")
 	if memoryStr == "" {
 		memoryStr = "N/A"
 	}

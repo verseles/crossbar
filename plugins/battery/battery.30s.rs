@@ -3,9 +3,9 @@
 use std::process::Command;
 use serde_json::Value;
 
-fn crossbar(args: &str) -> Option<String> {
+fn crossbar(args: &[&str]) -> Option<String> {
     let output = Command::new("crossbar")
-        .args(args.split_whitespace())
+        .args(args)
         .output()
         .ok()?;
     
@@ -17,10 +17,10 @@ fn crossbar(args: &str) -> Option<String> {
 }
 
 fn main() {
-    let battery_str = crossbar("--battery").unwrap_or_else(|| "N/A".to_string());
+    let battery_str = crossbar(&["battery"]).unwrap_or_else(|| "N/A".to_string());
     
     let mut charging = false;
-    if let Some(json_str) = crossbar("--battery --json") {
+    if let Some(json_str) = crossbar(&["battery", "--json"]) {
         if let Ok(data) = serde_json::from_str::<Value>(&json_str) {
             charging = data["charging"].as_bool().unwrap_or(false);
         }

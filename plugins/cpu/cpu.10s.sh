@@ -1,7 +1,7 @@
 #!/bin/bash
 # CPU Monitor Plugin - Uses Crossbar API for portability
 
-cpu=$(crossbar --cpu 2>/dev/null)
+cpu=$(crossbar cpu 2>/dev/null)
 
 # Fallback if crossbar not available
 if [ -z "$cpu" ]; then

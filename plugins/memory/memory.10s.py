@@ -2,14 +2,14 @@
 """Memory Monitor Plugin - Uses Crossbar API for portability"""
 import subprocess
 
-def crossbar(cmd):
+def crossbar(*args):
     try:
-        result = subprocess.run(['crossbar'] + cmd.split(), capture_output=True, text=True, timeout=5)
+        result = subprocess.run(['crossbar'] + list(args), capture_output=True, text=True, timeout=5)
         return result.stdout.strip() if result.returncode == 0 else None
     except Exception:
         return None
 
-memory_str = crossbar('--memory')
+memory_str = crossbar('memory')
 
 if not memory_str:
     try:

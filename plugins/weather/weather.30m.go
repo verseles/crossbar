@@ -5,18 +5,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
-	"os/exec"
 )
-
-func crossbar(args ...string) string {
-	cmd := exec.Command("crossbar", args...)
-	out, err := cmd.Output()
-	if err != nil {
-		return ""
-	}
-	return string(out)
-}
 
 func main() {
 	apiKey := os.Getenv("WEATHER_API_KEY")
@@ -28,22 +19,20 @@ func main() {
 	if apiKey == "" {
 		fmt.Println("🌡️ No API Key")
 		fmt.Println("---")
-		fmt.Println("Set WEATHER_API_KEY in configuration")
+		fmt.Println("Set WEATHER_API_KEY")
 		return
 	}
 
 	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", city, apiKey)
-	response := crossbar("--web", url, "--json")
-
-	if response == "" {
+	resp, err := http.Get(url)
+	if err != nil {
 		fmt.Println("🌡️ Error")
-		fmt.Println("---")
-		fmt.Println("Failed to fetch weather data")
 		return
 	}
+	defer resp.Body.Close()
 
 	var data map[string]interface{}
-	if err := json.Unmarshal([]byte(response), &data); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		fmt.Println("🌡️ Parse Error")
 		return
 	}

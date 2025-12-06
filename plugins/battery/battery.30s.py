@@ -3,16 +3,16 @@
 import subprocess
 import json
 
-def crossbar(cmd):
+def crossbar(*args):
     try:
-        result = subprocess.run(['crossbar'] + cmd.split(), capture_output=True, text=True, timeout=5)
+        result = subprocess.run(['crossbar'] + list(args), capture_output=True, text=True, timeout=5)
         return result.stdout.strip() if result.returncode == 0 else None
     except Exception:
         return None
 
 # Get battery from Crossbar API
-battery_str = crossbar('--battery')
-battery_json = crossbar('--battery --json')
+battery_str = crossbar('battery')
+battery_json = crossbar('battery', '--json')
 
 charging = False
 if battery_json:

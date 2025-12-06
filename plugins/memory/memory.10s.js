@@ -5,15 +5,15 @@
 const { execSync } = require('child_process');
 const os = require('os');
 
-function crossbar(cmd) {
+function crossbar(...args) {
     try {
-        return execSync(`crossbar ${cmd}`, { encoding: 'utf8', timeout: 5000 }).trim();
+        return execSync(`crossbar ${args.join(' ')}`, { encoding: 'utf8', timeout: 5000 }).trim();
     } catch {
         return null;
     }
 }
 
-let memoryStr = crossbar('--memory');
+let memoryStr = crossbar('memory');
 
 if (!memoryStr) {
     const total = os.totalmem();

@@ -1,31 +1,18 @@
 #!/usr/bin/env dart
-/// Bitcoin Price Plugin - Uses Crossbar API for HTTP requests
-import 'dart:convert';
+/// Bitcoin Price Plugin - Uses HttpClient
 import 'dart:io';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 
-String? crossbar(List<String> args) {
-  try {
-    final result = Process.runSync('crossbar', args);
-    return result.exitCode == 0 ? (result.stdout as String).trim() : null;
-  } catch (_) {
-    return null;
-  }
-}
-
-void main() {
+void main() async {
   const url = 'https://api.coinbase.com/v2/prices/BTC-USD/spot';
-  final response = crossbar(['--web', url, '--json']);
-
-  if (response == null) {
-    print('₿ Error');
-    print('---');
-    print('Failed to fetch price');
-    return;
-  }
 
   try {
-    final data = jsonDecode(response) as Map<String, dynamic>;
+    final request = await HttpClient().getUrl(Uri.parse(url));
+    final response = await request.close();
+    final body = await response.transform(utf8.decoder).join();
+    
+    final data = jsonDecode(body) as Map<String, dynamic>;
     final price = data['data']?['amount'] ?? '--';
     
     String formatted;
@@ -41,7 +28,9 @@ void main() {
     print('BTC/USD: \$$price');
     print('Source: Coinbase');
   } catch (_) {
-    print('₿ Parse Error');
+    print('₿ Error');
+    print('---');
+    print('Failed to fetch price');
   }
 
   print('---');

@@ -2,9 +2,9 @@
 /// Memory Monitor Plugin - Uses Crossbar API for portability
 import 'dart:io';
 
-String? crossbar(String args) {
+String? crossbar(List<String> args) {
   try {
-    final result = Process.runSync('crossbar', args.split(' '));
+    final result = Process.runSync('crossbar', args);
     return result.exitCode == 0 ? (result.stdout as String).trim() : null;
   } catch (_) {
     return null;
@@ -12,7 +12,7 @@ String? crossbar(String args) {
 }
 
 void main() {
-  var memoryStr = crossbar('--memory') ?? 'N/A';
+  var memoryStr = crossbar(['memory']) ?? 'N/A';
   
   final memory = int.tryParse(memoryStr.replaceAll('%', '')) ?? 0;
   String color;

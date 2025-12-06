@@ -1,8 +1,8 @@
 #!/bin/bash
-# Bitcoin Price Plugin - Uses Crossbar API for HTTP requests
+# Bitcoin Price Plugin - Uses curl for HTTP requests
 
-# Use Crossbar web API - no API key needed for Coinbase
-response=$(crossbar --web "https://api.coinbase.com/v2/prices/BTC-USD/spot" --json 2>/dev/null)
+# Use curl
+response=$(curl -s "https://api.coinbase.com/v2/prices/BTC-USD/spot")
 
 if [ -z "$response" ]; then
     echo "₿ Error"

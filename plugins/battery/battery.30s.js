@@ -4,18 +4,18 @@
  */
 const { execSync } = require('child_process');
 
-function crossbar(cmd) {
+function crossbar(...args) {
     try {
-        return execSync(`crossbar ${cmd}`, { encoding: 'utf8', timeout: 5000 }).trim();
+        return execSync(`crossbar ${args.join(' ')}`, { encoding: 'utf8', timeout: 5000 }).trim();
     } catch {
         return null;
     }
 }
 
-let batteryStr = crossbar('--battery') || 'N/A';
+let batteryStr = crossbar('battery') || 'N/A';
 let charging = false;
 
-const jsonStr = crossbar('--battery --json');
+const jsonStr = crossbar('battery', '--json');
 if (jsonStr) {
     try {
         const data = JSON.parse(jsonStr);

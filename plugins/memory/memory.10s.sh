@@ -1,7 +1,7 @@
 #!/bin/bash
 # Memory Monitor Plugin - Uses Crossbar API for portability
 
-memory=$(crossbar --memory 2>/dev/null)
+memory=$(crossbar memory 2>/dev/null)
 
 # Fallback if crossbar not available
 if [ -z "$memory" ]; then

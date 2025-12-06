@@ -1,20 +1,7 @@
-//! Bitcoin Price Plugin - Uses Crossbar API for HTTP requests
+//! Bitcoin Price Plugin - Uses curl via Command
 
 use std::process::Command;
 use serde_json::Value;
-
-fn crossbar(args: &[&str]) -> Option<String> {
-    let output = Command::new("crossbar")
-        .args(args)
-        .output()
-        .ok()?;
-    
-    if output.status.success() {
-        Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
-    } else {
-        None
-    }
-}
 
 fn format_number(n: f64) -> String {
     let s = format!("{:.0}", n);
@@ -31,32 +18,33 @@ fn format_number(n: f64) -> String {
 
 fn main() {
     let url = "https://api.coinbase.com/v2/prices/BTC-USD/spot";
-    let response = crossbar(&["--web", url, "--json"]);
+    let output = Command::new("curl")
+        .args(&["-s", url])
+        .output();
 
-    if response.is_none() {
+    if let Ok(out) = output {
+        let json_str = String::from_utf8_lossy(&out.stdout);
+        match serde_json::from_str::<Value>(&json_str) {
+            Ok(data) => {
+                let price = data["data"]["amount"]
+                    .as_str()
+                    .unwrap_or("--");
+                
+                let formatted = price.parse::<f64>()
+                    .map(|p| format_number(p))
+                    .unwrap_or_else(|_| price.to_string());
+
+                println!("₿ ${}", formatted);
+                println!("---");
+                println!("BTC/USD: ${}", price);
+                println!("Source: Coinbase");
+            }
+            Err(_) => println!("₿ Parse Error"),
+        }
+    } else {
         println!("₿ Error");
         println!("---");
-        println!("Failed to fetch price");
-        return;
-    }
-
-    let response = response.unwrap();
-    match serde_json::from_str::<Value>(&response) {
-        Ok(data) => {
-            let price = data["data"]["amount"]
-                .as_str()
-                .unwrap_or("--");
-            
-            let formatted = price.parse::<f64>()
-                .map(|p| format_number(p))
-                .unwrap_or_else(|_| price.to_string());
-
-            println!("₿ ${}", formatted);
-            println!("---");
-            println!("BTC/USD: ${}", price);
-            println!("Source: Coinbase");
-        }
-        Err(_) => println!("₿ Parse Error"),
+        println!("Failed to run curl");
     }
 
     println!("---");

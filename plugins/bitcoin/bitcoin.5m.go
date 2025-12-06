@@ -5,19 +5,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os/exec"
+	"net/http"
 	"strconv"
-	"strings"
 )
-
-func crossbar(args ...string) string {
-	cmd := exec.Command("crossbar", args...)
-	out, err := cmd.Output()
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(out))
-}
 
 func formatNumber(n float64) string {
 	str := strconv.FormatFloat(n, 'f', 0, 64)
@@ -33,17 +23,17 @@ func formatNumber(n float64) string {
 
 func main() {
 	url := "https://api.coinbase.com/v2/prices/BTC-USD/spot"
-	response := crossbar("--web", url, "--json")
-
-	if response == "" {
+	resp, err := http.Get(url)
+	if err != nil {
 		fmt.Println("₿ Error")
 		fmt.Println("---")
 		fmt.Println("Failed to fetch price")
 		return
 	}
+	defer resp.Body.Close()
 
 	var data map[string]interface{}
-	if err := json.Unmarshal([]byte(response), &data); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		fmt.Println("₿ Parse Error")
 		return
 	}

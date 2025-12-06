@@ -2,9 +2,9 @@
 
 use std::process::Command;
 
-fn crossbar(args: &str) -> Option<String> {
+fn crossbar(args: &[&str]) -> Option<String> {
     let output = Command::new("crossbar")
-        .args(args.split_whitespace())
+        .args(args)
         .output()
         .ok()?;
     
@@ -16,7 +16,7 @@ fn crossbar(args: &str) -> Option<String> {
 }
 
 fn main() {
-    let cpu_str = crossbar("--cpu").unwrap_or_else(|| "N/A".to_string());
+    let cpu_str = crossbar(&["cpu"]).unwrap_or_else(|| "N/A".to_string());
     
     let color = if let Ok(cpu) = cpu_str.parse::<f64>() {
         if cpu > 80.0 { "red" }

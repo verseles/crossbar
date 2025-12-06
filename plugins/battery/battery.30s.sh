@@ -1,7 +1,7 @@
 #!/bin/bash
 # Battery Monitor Plugin - Uses Crossbar API for portability
 
-battery=$(crossbar --battery 2>/dev/null)
+battery=$(crossbar battery 2>/dev/null)
 
 # Fallback if crossbar not available
 if [ -z "$battery" ]; then
@@ -9,7 +9,7 @@ if [ -z "$battery" ]; then
 fi
 
 # Check charging status
-charging=$(crossbar --battery --json 2>/dev/null | grep -o '"charging":true' || cat /sys/class/power_supply/BAT*/status 2>/dev/null | grep -qi "charging" && echo "true" || echo "false")
+charging=$(crossbar battery --json 2>/dev/null | grep -o '"charging":true' || cat /sys/class/power_supply/BAT*/status 2>/dev/null | grep -qi "charging" && echo "true" || echo "false")
 
 # Icon and color based on level
 if [ "$battery" = "N/A" ]; then

@@ -2,9 +2,9 @@
 
 use std::process::Command;
 
-fn crossbar(args: &str) -> Option<String> {
+fn crossbar(args: &[&str]) -> Option<String> {
     let output = Command::new("crossbar")
-        .args(args.split_whitespace())
+        .args(args)
         .output()
         .ok()?;
     
@@ -16,7 +16,7 @@ fn crossbar(args: &str) -> Option<String> {
 }
 
 fn main() {
-    let memory_str = crossbar("--memory").unwrap_or_else(|| "N/A".to_string());
+    let memory_str = crossbar(&["memory"]).unwrap_or_else(|| "N/A".to_string());
     
     let color = if let Ok(memory) = memory_str.trim_end_matches('%').parse::<i32>() {
         if memory > 80 { "red" }
