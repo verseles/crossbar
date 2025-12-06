@@ -14,7 +14,7 @@
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
-- **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act`.
+- **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act` ou simplesmente execute os comandos necessários diretamente.
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
 
 ---
@@ -22,7 +22,7 @@
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.0.1+2`
+- **Versão Atual**: `1.0.1+2` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
