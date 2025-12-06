@@ -74,46 +74,76 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Mobile Layout (Android/iOS)
+    // Mobile Layout (Android/iOS) - sempre usa bottom navigation
     if (Platform.isAndroid || Platform.isIOS) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.appTitle),
-          centerTitle: true,
-          notificationPredicate: (notification) => notification.depth == 1,
-          scrolledUnderElevation: 4.0,
-          shadowColor: Theme.of(context).shadowColor,
-        ),
-        body: _tabs[_currentIndex],
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.extension_outlined),
-              selectedIcon: const Icon(Icons.extension),
-              label: l10n.pluginsTab,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings),
-              label: l10n.settingsTab,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.store_outlined),
-              selectedIcon: const Icon(Icons.store),
-              label: l10n.marketplaceTab,
-            ),
-          ],
-        ),
-      );
+      return _buildCompactLayout(l10n);
     }
 
-    // Desktop Layout (Linux/Windows/macOS)
+    // Desktop Layout - responsivo baseado na largura
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Usa layout compacto (bottom nav) quando a largura for menor que 600px
+        if (constraints.maxWidth < 600) {
+          return _buildCompactLayout(l10n);
+        }
+        // Layout expandido (side rail) para janelas maiores
+        return _buildExpandedLayout(l10n);
+      },
+    );
+  }
+
+  /// Layout compacto com NavigationBar inferior (mobile e desktop estreito)
+  Widget _buildCompactLayout(AppLocalizations l10n) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/icons/icon.png',
+              width: 24,
+              height: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(l10n.appTitle),
+          ],
+        ),
+        centerTitle: true,
+        notificationPredicate: (notification) => notification.depth == 1,
+        scrolledUnderElevation: 4.0,
+        shadowColor: Theme.of(context).shadowColor,
+      ),
+      body: _tabs[_currentIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.extension_outlined),
+            selectedIcon: const Icon(Icons.extension),
+            label: l10n.pluginsTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.settingsTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.store_outlined),
+            selectedIcon: const Icon(Icons.store),
+            label: l10n.marketplaceTab,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Layout expandido com NavigationRail lateral (desktop largo)
+  Widget _buildExpandedLayout(AppLocalizations l10n) {
     return Scaffold(
       body: Row(
         children: [
