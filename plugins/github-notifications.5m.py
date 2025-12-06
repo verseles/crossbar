@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""GitHub Notifications - Shows unread notification count"""
+"""GitHub Notifications - Shows unread notification count
+
+Configure via Crossbar settings (recommended - stored securely):
+- CROSSBAR_PLUGIN_GITHUB_TOKEN: Personal Access Token with 'notifications' scope
+"""
 import json
 import urllib.request
 import os
 
-# Set your GitHub token in GITHUB_TOKEN env var
-TOKEN = os.environ.get('GITHUB_TOKEN', '')
+# Token from Crossbar secure config, or fallback to env var
+TOKEN = os.environ.get('CROSSBAR_PLUGIN_GITHUB_TOKEN', os.environ.get('GITHUB_TOKEN', ''))
 
 def get_notifications():
     if not TOKEN:

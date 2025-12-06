@@ -1,0 +1,29 @@
+{
+  "name": "Weather",
+  "description": "Shows current weather for your city using wttr.in API",
+  "icon": "🌤️",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "weather_city",
+      "label": "City",
+      "type": "text",
+      "description": "City name for weather data (e.g., 'London', 'New York', 'São Paulo')",
+      "default": "London",
+      "placeholder": "Enter your city name",
+      "required": false
+    },
+    {
+      "key": "units",
+      "label": "Temperature Units",
+      "type": "select",
+      "description": "Choose temperature display units",
+      "default": "celsius",
+      "options": [
+        {"value": "celsius", "label": "Celsius (°C)"},
+        {"value": "fahrenheit", "label": "Fahrenheit (°F)"}
+      ],
+      "required": false
+    }
+  ]
+}

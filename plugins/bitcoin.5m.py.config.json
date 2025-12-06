@@ -1,0 +1,37 @@
+{
+  "name": "Bitcoin Price",
+  "description": "Shows current Bitcoin price with 24h change",
+  "icon": "₿",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "currency",
+      "label": "Display Currency",
+      "type": "select",
+      "description": "Currency to display the price in",
+      "default": "usd",
+      "options": [
+        {"value": "usd", "label": "US Dollar ($)"},
+        {"value": "eur", "label": "Euro (€)"},
+        {"value": "gbp", "label": "British Pound (£)"},
+        {"value": "brl", "label": "Brazilian Real (R$)"},
+        {"value": "jpy", "label": "Japanese Yen (¥)"}
+      ],
+      "required": false
+    },
+    {
+      "key": "crypto",
+      "label": "Cryptocurrency",
+      "type": "select",
+      "description": "Which coin to track",
+      "default": "bitcoin",
+      "options": [
+        {"value": "bitcoin", "label": "Bitcoin (BTC)"},
+        {"value": "ethereum", "label": "Ethereum (ETH)"},
+        {"value": "solana", "label": "Solana (SOL)"},
+        {"value": "cardano", "label": "Cardano (ADA)"}
+      ],
+      "required": false
+    }
+  ]
+}

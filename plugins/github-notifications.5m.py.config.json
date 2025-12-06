@@ -1,0 +1,16 @@
+{
+  "name": "GitHub Notifications",
+  "description": "Shows your unread GitHub notifications count",
+  "icon": "🔔",
+  "config_required": "required",
+  "settings": [
+    {
+      "key": "github_token",
+      "label": "GitHub Token",
+      "type": "password",
+      "description": "Personal Access Token with 'notifications' scope. Create at: https://github.com/settings/tokens",
+      "placeholder": "ghp_xxxxxxxxxxxxxxxxxxxx",
+      "required": true
+    }
+  ]
+}
