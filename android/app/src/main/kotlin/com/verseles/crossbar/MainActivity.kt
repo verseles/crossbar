@@ -1,4 +1,4 @@
-package com.example.crossbar
+package com.verseles.crossbar
 
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity

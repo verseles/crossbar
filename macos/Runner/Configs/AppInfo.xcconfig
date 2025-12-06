@@ -8,7 +8,7 @@
 PRODUCT_NAME = crossbar
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.crossbar
+PRODUCT_BUNDLE_IDENTIFIER = com.verseles.crossbar
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 Verseles. All rights reserved.

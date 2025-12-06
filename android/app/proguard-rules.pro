@@ -10,7 +10,7 @@
 -keep class io.flutter.embedding.**  { *; }
 
 # Keep the main application class
--keep class com.example.crossbar.** { *; }
+-keep class com.verseles.crossbar.** { *; }
 
 # Keep plugin classes
 -keep class * extends io.flutter.plugin.FlutterPlugin { *; }
