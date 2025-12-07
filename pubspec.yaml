@@ -69,6 +69,14 @@ flutter:
   assets:
     - assets/icons/
     - plugins/
+    # Universal plugins (multi-language)
+    - plugins/cpu/
+    - plugins/memory/
+    - plugins/battery/
+    - plugins/clock/
+    - plugins/weather/
+    - plugins/bitcoin/
+    - plugins/yaml/
 
 flutter_launcher_icons:
   android: true

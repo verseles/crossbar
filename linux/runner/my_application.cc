@@ -53,6 +53,27 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "crossbar");
   }
 
+  // Set window icon from Flutter assets
+  // Try multiple paths: relative (dev) and bundle (release)
+  const char* icon_paths[] = {
+    "assets/icons/icon.png",
+    "data/flutter_assets/assets/icons/icon.png",
+    NULL
+  };
+  
+  for (int i = 0; icon_paths[i] != NULL; i++) {
+    GError* error = NULL;
+    GdkPixbuf* icon = gdk_pixbuf_new_from_file(icon_paths[i], &error);
+    if (icon != NULL) {
+      gtk_window_set_icon(window, icon);
+      g_object_unref(icon);
+      break;
+    }
+    if (error != NULL) {
+      g_error_free(error);
+    }
+  }
+
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

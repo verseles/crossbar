@@ -12,9 +12,9 @@ void main() {
       expect(executor.getRunnerType('/path/to/plugin.yaml'), RunnerType.declarative);
     });
 
-    test('detects Dart plugins', () {
-      expect(executor.getRunnerType('clock.1s.dart'), RunnerType.dart);
-      expect(executor.getRunnerType('/path/to/plugin.dart'), RunnerType.dart);
+    test('detects Dart plugins as script (runs via dart run)', () {
+      expect(executor.getRunnerType('clock.1s.dart'), RunnerType.script);
+      expect(executor.getRunnerType('/path/to/plugin.dart'), RunnerType.script);
     });
 
     test('detects compiled Dart as script', () {
@@ -57,8 +57,11 @@ void main() {
       expect(executor.canRunOnPlatform('plugin.yaml'), isTrue);
     });
 
-    test('dart plugins run everywhere', () {
-      expect(executor.canRunOnPlatform('plugin.dart'), isTrue);
+    test('dart plugins run on desktop (via dart run)', () {
+      // Dart scripts run via dart run, so require desktop platform
+      final result = executor.canRunOnPlatform('plugin.dart');
+      // On desktop, expect true
+      expect(result, isTrue);
     });
 
     // Script testing depends on platform

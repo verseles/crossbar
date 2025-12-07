@@ -20,12 +20,12 @@ class SamplePluginsDialog extends StatefulWidget {
 
 class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   final SamplePluginsService _service = SamplePluginsService();
-  final Set<String> _selectedPlugins = {}; // plugin.id
   final Map<String, bool> _installedStatus = {}; // variant.filename -> installed
+  final Map<String, PluginLanguage> _selectedLanguages = {}; // plugin.id -> language
+  final Set<String> _installingPlugins = {}; // plugin.id being installed
+  final List<String> _installedFilenames = []; // track what we installed
   PluginCategory? _selectedCategory;
-  PluginLanguage? _selectedLanguage;
   bool _isLoading = true;
-  bool _isInstalling = false;
 
   @override
   void initState() {
@@ -35,6 +35,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   Future<void> _loadInstalledStatus() async {
     for (final plugin in SamplePluginsService.allPlugins) {
+      // Set default language to bash (or first available)
+      _selectedLanguages[plugin.id] = plugin.hasLanguage(PluginLanguage.bash)
+          ? PluginLanguage.bash
+          : plugin.variants.first.language;
+      
       for (final variant in plugin.variants) {
         _installedStatus[variant.filename] = await _service.isInstalled(variant.filename);
       }
@@ -54,11 +59,6 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       plugins = plugins.where((p) => p.category == _selectedCategory).toList();
     }
     
-    // Filter by language
-    if (_selectedLanguage != null) {
-      plugins = plugins.where((p) => p.hasLanguage(_selectedLanguage!)).toList();
-    }
-    
     return plugins;
   }
 
@@ -67,29 +67,44 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     return plugin.variants.any((v) => _installedStatus[v.filename] ?? false);
   }
 
-  Future<void> _installSelected() async {
-    if (_selectedPlugins.isEmpty) return;
-
+  Future<void> _installPlugin(PluginMetadata plugin) async {
+    final language = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+    final variant = plugin.getVariant(language) ?? plugin.defaultVariant;
+    
     setState(() {
-      _isInstalling = true;
+      _installingPlugins.add(plugin.id);
     });
-
-    final installedFilenames = <String>[];
-
-    for (final pluginId in _selectedPlugins) {
-      final plugin = SamplePluginsService.allPlugins.firstWhere((p) => p.id == pluginId);
-      
-      // Install preferred language variant, or default
-      final variant = _selectedLanguage != null 
-          ? plugin.getVariant(_selectedLanguage!) ?? plugin.defaultVariant
-          : plugin.defaultVariant;
-      
+    
+    try {
       await _service.installVariant(variant);
-      installedFilenames.add(variant.filename);
-    }
-
-    if (mounted) {
-      Navigator.of(context).pop(installedFilenames);
+      _installedStatus[variant.filename] = true;
+      _installedFilenames.add(variant.filename);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Installed ${plugin.name} (${language.displayName})'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to install ${plugin.name}: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _installingPlugins.remove(plugin.id);
+        });
+      }
     }
   }
 
@@ -98,11 +113,42 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
     final isWide = screenSize.width > 600;
+    final isSmallScreen = screenSize.width < 500;
 
+    // Use full screen on small screens (mobile-like)
+    if (isSmallScreen) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Sample Plugins'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
+          ),
+        ),
+        body: Column(
+          children: [
+            // Category filter
+            _buildCategoryFilter(theme),
+            const Divider(height: 1),
+            // Plugin list
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildPluginList(theme),
+            ),
+            const Divider(height: 1),
+            // Footer
+            _buildFooter(theme),
+          ],
+        ),
+      );
+    }
+
+    // Dialog for larger screens
     return Dialog(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isWide ? 750 : screenSize.width * 0.95,
+          maxWidth: isWide ? 800 : screenSize.width * 0.95,
           maxHeight: screenSize.height * 0.85,
         ),
         child: Column(
@@ -111,8 +157,8 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
             // Header
             _buildHeader(theme),
 
-            // Filters
-            _buildFilters(theme),
+            // Category filter only
+            _buildCategoryFilter(theme),
 
             const Divider(height: 1),
 
@@ -125,7 +171,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
             const Divider(height: 1),
 
-            // Footer with actions
+            // Footer
             _buildFooter(theme),
           ],
         ),
@@ -171,7 +217,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ],
@@ -179,78 +225,39 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     );
   }
 
-  Widget _buildFilters(ThemeData theme) {
+  Widget _buildCategoryFilter(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Category filter row
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                FilterChip(
-                  label: const Text('All Categories'),
-                  selected: _selectedCategory == null,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            FilterChip(
+              label: const Text('All'),
+              selected: _selectedCategory == null,
+              onSelected: (_) {
+                setState(() {
+                  _selectedCategory = null;
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+            ..._service.categories.map(
+              (cat) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text('${cat.icon} ${cat.displayName}'),
+                  selected: _selectedCategory == cat,
                   onSelected: (_) {
                     setState(() {
-                      _selectedCategory = null;
+                      _selectedCategory = cat;
                     });
                   },
                 ),
-                const SizedBox(width: 8),
-                ..._service.categories.map(
-                  (cat) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text('${cat.icon} ${cat.displayName}'),
-                      selected: _selectedCategory == cat,
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedCategory = cat;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          // Language filter row
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                FilterChip(
-                  label: const Text('All Languages'),
-                  selected: _selectedLanguage == null,
-                  onSelected: (_) {
-                    setState(() {
-                      _selectedLanguage = null;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                ...PluginLanguage.values.map(
-                  (lang) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text('${lang.icon} ${lang.displayName}'),
-                      selected: _selectedLanguage == lang,
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedLanguage = lang;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -282,105 +289,199 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       itemBuilder: (context, index) {
         final plugin = plugins[index];
         final isInstalled = _isPluginInstalled(plugin);
-        final isSelected = _selectedPlugins.contains(plugin.id);
+        final isInstalling = _installingPlugins.contains(plugin.id);
+        final selectedLang = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
 
         return Card(
           margin: const EdgeInsets.symmetric(
             horizontal: 8,
             vertical: 4,
           ),
-          color: isSelected
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
-              : null,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              child: Text(
-                plugin.categoryIcon,
-                style: const TextStyle(fontSize: 20),
-              ),
-            ),
-            title: Row(
-              children: [
-                Expanded(child: Text(plugin.name)),
-                if (plugin.mobileCompatible)
-                  Tooltip(
-                    message: 'Mobile compatible',
-                    child: Icon(
-                      Icons.smartphone,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                const SizedBox(width: 4),
-                if (isInstalled)
-                  Chip(
-                    label: const Text('Installed'),
-                    labelStyle: TextStyle(
-                      fontSize: 10,
-                      color: theme.colorScheme.onTertiary,
-                    ),
-                    backgroundColor: theme.colorScheme.tertiary,
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-              ],
-            ),
-            subtitle: Column(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(plugin.description),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
+                // Title row
+                Row(
                   children: [
-                    // Show available languages
-                    ...plugin.availableLanguages.map(
-                      (lang) => _InfoChip(
-                        label: lang.icon,
-                        tooltip: lang.displayName,
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      child: Text(
+                        plugin.categoryIcon,
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ),
-                    // Show interval from default variant
-                    _InfoChip(
-                      label: _extractInterval(plugin.defaultVariant.filename),
-                      icon: Icons.timer,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                plugin.name,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              if (plugin.mobileCompatible) ...[
+                                const SizedBox(width: 8),
+                                Tooltip(
+                                  message: 'Mobile compatible',
+                                  child: Icon(
+                                    Icons.smartphone,
+                                    size: 16,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                              if (isInstalled) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.tertiary,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Installed',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: theme.colorScheme.onTertiary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            plugin.description,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (plugin.configRequired)
-                      const _InfoChip(
-                        label: 'Config',
-                        icon: Icons.settings,
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Action row: Language selector + Install button
+                Row(
+                  children: [
+                    // Language dropdown
+                    if (plugin.variants.length > 1) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<PluginLanguage>(
+                            value: selectedLang,
+                            isDense: true,
+                            items: plugin.availableLanguages.map((lang) {
+                              return DropdownMenuItem(
+                                value: lang,
+                                child: Text(
+                                  '${lang.icon} ${lang.displayName}',
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: isInstalled ? null : (lang) {
+                              if (lang != null) {
+                                setState(() {
+                                  _selectedLanguages[plugin.id] = lang;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ] else ...[
+                      // Single language - just show a chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${selectedLang.icon} ${selectedLang.displayName}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    // Interval chip
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.timer, size: 12, color: theme.colorScheme.outline),
+                          const SizedBox(width: 4),
+                          Text(
+                            _extractInterval(plugin.defaultVariant.filename),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (plugin.configRequired) ...[
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.settings, size: 12, color: theme.colorScheme.outline),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Config',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    // Install button
+                    if (isInstalling)
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else if (!isInstalled)
+                      FilledButton.tonal(
+                        onPressed: () => _installPlugin(plugin),
+                        child: const Text('Install'),
                       ),
                   ],
                 ),
               ],
             ),
-            trailing: isInstalled
-                ? null
-                : Checkbox(
-                    value: isSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value ?? false) {
-                          _selectedPlugins.add(plugin.id);
-                        } else {
-                          _selectedPlugins.remove(plugin.id);
-                        }
-                      });
-                    },
-                  ),
-            onTap: isInstalled
-                ? null
-                : () {
-                    setState(() {
-                      if (_selectedPlugins.contains(plugin.id)) {
-                        _selectedPlugins.remove(plugin.id);
-                      } else {
-                        _selectedPlugins.add(plugin.id);
-                      }
-                    });
-                  },
           ),
         );
       },
@@ -388,7 +489,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   }
 
   String _extractInterval(String filename) {
-    final match = RegExp(r'\.(\d+[smh])\.').firstMatch(filename);
+    final match = RegExp(r'\.(\d+[smhd])\.').firstMatch(filename);
     return match?.group(1) ?? '5m';
   }
 
@@ -397,92 +498,21 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          if (_selectedPlugins.isNotEmpty) ...[
+          if (_installedFilenames.isNotEmpty)
             Text(
-              '${_selectedPlugins.length} selected',
+              '${_installedFilenames.length} installed this session',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (_selectedLanguage != null) ...[
-              const SizedBox(width: 8),
-              Text(
-                '(${_selectedLanguage!.displayName})',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-            ],
-          ],
           const Spacer(),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            onPressed: _selectedPlugins.isEmpty || _isInstalling
-                ? null
-                : _installSelected,
-            icon: _isInstalling
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.download),
-            label: Text(_isInstalling
-                ? 'Installing...'
-                : 'Install ${_selectedPlugins.isNotEmpty ? "(${_selectedPlugins.length})" : ""}'),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
+            child: Text(_installedFilenames.isNotEmpty ? 'Done' : 'Close'),
           ),
         ],
       ),
     );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.label,
-    this.icon,
-    this.tooltip,
-  });
-
-  final String label;
-  final IconData? icon;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final child = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 12, color: theme.colorScheme.outline),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
-    );
-    
-    if (tooltip != null) {
-      return Tooltip(message: tooltip!, child: child);
-    }
-    return child;
   }
 }

@@ -177,6 +177,11 @@ class TrayService with TrayListener {
     _updateTooltip();
   }
 
+  /// Public method to refresh the tray menu (e.g., after plugin toggle/delete)
+  Future<void> refreshMenu() async {
+    await _updateMenu();
+  }
+
   void _updateTooltip() {
     // setToolTip is not supported on Linux by tray_manager
     if (Platform.isLinux) return;

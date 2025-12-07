@@ -132,6 +132,9 @@ class ScriptRunner {
   /// Returns (executable, arguments) tuple for the given plugin interpreter
   (String, List<String>) _getExecutableAndArgs(Plugin plugin) {
     switch (plugin.interpreter) {
+      case 'dart':
+        // Dart requires 'dart run file.dart'
+        return ('dart', ['run', plugin.path]);
       case 'go':
         // Go requires 'go run file.go'
         return ('go', ['run', plugin.path]);
@@ -152,12 +155,32 @@ class ScriptRunner {
     }
   }
 
+  /// Returns the directory containing the crossbar executable
+  static String? _getCrossbarBinDir() {
+    // Platform.resolvedExecutable returns the absolute path to the current executable
+    final execPath = Platform.resolvedExecutable;
+    if (execPath.isNotEmpty) {
+      final execDir = File(execPath).parent.path;
+      return execDir;
+    }
+    return null;
+  }
+
   Map<String, String> _buildEnvironment(
     Plugin plugin,
     Map<String, String> additionalEnv,
   ) {
+    final currentPath = Platform.environment['PATH'] ?? '';
+    final crossbarDir = _getCrossbarBinDir();
+    
+    // Add crossbar's directory to PATH so plugins can call 'crossbar' commands
+    final newPath = crossbarDir != null && !currentPath.contains(crossbarDir)
+        ? '$crossbarDir:$currentPath'
+        : currentPath;
+    
     return {
       ...Platform.environment,
+      'PATH': newPath,
       'CROSSBAR_OS': Platform.operatingSystem,
       'CROSSBAR_VERSION': crossbarVersion,
       'CROSSBAR_PLUGIN_ID': plugin.id,

@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
@@ -651,6 +655,14 @@ class _PluginsTabState extends State<PluginsTab> {
                       ),
                     ),
                     const Spacer(),
+                    // Copy button
+                    if (output != null)
+                      IconButton(
+                        onPressed: () => _copyOutput(output),
+                        icon: const Icon(Icons.copy, size: 18),
+                        tooltip: 'Copy output',
+                      ),
+                    const SizedBox(width: 4),
                     // Run button
                     FilledButton.tonalIcon(
                       onPressed: isRunning ? null : () => _runPlugin(plugin),
@@ -707,11 +719,31 @@ class _PluginsTabState extends State<PluginsTab> {
                     _formatDateTime(plugin.lastRun!),
                   ),
                 if (plugin.lastError != null)
-                  _buildDetailRow(
-                    theme,
-                    'Last Error',
-                    plugin.lastError!,
-                    isError: true,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildDetailRow(
+                          theme,
+                          'Last Error',
+                          plugin.lastError!,
+                          isError: true,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await FlutterClipboard.copy(plugin.lastError!);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Error copied to clipboard')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.copy, size: 16),
+                        tooltip: 'Copy error',
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -733,6 +765,8 @@ class _PluginsTabState extends State<PluginsTab> {
                 OutlinedButton.icon(
                   onPressed: () async {
                     await _pluginManager.togglePlugin(plugin.id);
+                    // Update tray after toggle
+                    await TrayService().refreshMenu();
                     setState(() {});
                   },
                   icon: Icon(
@@ -740,6 +774,16 @@ class _PluginsTabState extends State<PluginsTab> {
                     size: 18,
                   ),
                   label: Text(plugin.enabled ? 'Disable' : 'Enable'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => _editPlugin(plugin),
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text('Edit'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => _confirmDeletePlugin(context, plugin),
+                  icon: Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
+                  label: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
               ],
             ),
@@ -1206,5 +1250,138 @@ class _PluginsTabState extends State<PluginsTab> {
     return '${dateTime.hour.toString().padLeft(2, '0')}:'
         '${dateTime.minute.toString().padLeft(2, '0')}:'
         '${dateTime.second.toString().padLeft(2, '0')}';
+  }
+
+  /// Opens the plugin file in the system's default editor
+  Future<void> _editPlugin(Plugin plugin) async {
+    final file = File(plugin.path);
+    if (!await file.exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Plugin file not found')),
+        );
+      }
+      return;
+    }
+
+    // Use xdg-open on Linux, open on macOS, start on Windows
+    final String command;
+    final List<String> args;
+    
+    if (Platform.isLinux) {
+      command = 'xdg-open';
+      args = [plugin.path];
+    } else if (Platform.isMacOS) {
+      command = 'open';
+      args = ['-e', plugin.path]; // -e opens in TextEdit
+    } else if (Platform.isWindows) {
+      command = 'notepad';
+      args = [plugin.path];
+    } else {
+      // Fallback: try to launch as file:// URI
+      final uri = Uri.file(plugin.path);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+      return;
+    }
+
+    try {
+      await Process.run(command, args);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to open editor: $e')),
+        );
+      }
+    }
+  }
+
+  /// Shows confirmation dialog and deletes the plugin
+  Future<void> _confirmDeletePlugin(BuildContext context, Plugin plugin) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Plugin'),
+        content: Text('Are you sure you want to delete "${_formatPluginName(plugin.id)}"?\n\nThis will permanently delete the plugin file.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final file = File(plugin.path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      
+      // Also delete schema file if exists
+      final schemaFile = File('${plugin.path}.schema.json');
+      if (await schemaFile.exists()) {
+        await schemaFile.delete();
+      }
+
+      // Clear plugin output from tray and refresh
+      TrayService().clearPluginOutput(plugin.id);
+      await _refreshPlugins();
+      await TrayService().refreshMenu();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Deleted ${_formatPluginName(plugin.id)}')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete plugin: $e')),
+        );
+      }
+    }
+  }
+
+  /// Copies the plugin output to clipboard
+  Future<void> _copyOutput(PluginOutput output) async {
+    final buffer = StringBuffer();
+    
+    if (output.icon.isNotEmpty) {
+      buffer.write('${output.icon} ');
+    }
+    buffer.writeln(output.text ?? '');
+    
+    if (output.trayTooltip != null) {
+      buffer.writeln(output.trayTooltip!);
+    }
+    
+    for (final item in output.menu) {
+      if (item.text != null) {
+        buffer.writeln('• ${item.text}');
+      }
+    }
+    
+    if (output.errorMessage != null) {
+      buffer.writeln('Error: ${output.errorMessage}');
+    }
+
+    await FlutterClipboard.copy(buffer.toString());
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Output copied to clipboard')),
+      );
+    }
   }
 }

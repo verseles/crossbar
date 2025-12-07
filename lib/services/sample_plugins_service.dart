@@ -38,6 +38,7 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'cpu.10s.dart', assetPath: 'plugins/cpu/cpu.10s.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'cpu.10s.go', assetPath: 'plugins/cpu/cpu.10s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'cpu.10s.rs', assetPath: 'plugins/cpu/cpu.10s.rs'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'cpu.5s.yaml', assetPath: 'plugins/yaml/cpu.5s.yaml'),
       ],
     ),
     PluginMetadata(
@@ -54,6 +55,7 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'memory.10s.dart', assetPath: 'plugins/memory/memory.10s.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'memory.10s.go', assetPath: 'plugins/memory/memory.10s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'memory.10s.rs', assetPath: 'plugins/memory/memory.10s.rs'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'memory.10s.yaml', assetPath: 'plugins/yaml/memory.10s.yaml'),
       ],
     ),
     PluginMetadata(
@@ -70,6 +72,7 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'battery.30s.dart', assetPath: 'plugins/battery/battery.30s.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'battery.30s.go', assetPath: 'plugins/battery/battery.30s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'battery.30s.rs', assetPath: 'plugins/battery/battery.30s.rs'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'battery.1m.yaml', assetPath: 'plugins/yaml/battery.1m.yaml'),
       ],
     ),
 
@@ -90,6 +93,7 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'clock.1s.dart', assetPath: 'plugins/clock/clock.1s.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'clock.1s.go', assetPath: 'plugins/clock/clock.1s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'clock.1s.rs', assetPath: 'plugins/clock/clock.1s.rs'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'clock.1s.yaml', assetPath: 'plugins/yaml/clock.1s.yaml'),
       ],
     ),
 
@@ -161,6 +165,18 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'bitcoin.5m.dart', assetPath: 'plugins/bitcoin/bitcoin.5m.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'bitcoin.5m.go', assetPath: 'plugins/bitcoin/bitcoin.5m.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'bitcoin.5m.rs', assetPath: 'plugins/bitcoin/bitcoin.5m.rs'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'bitcoin.5m.yaml', assetPath: 'plugins/yaml/bitcoin.5m.yaml'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'network-status',
+      name: 'Network Status',
+      description: 'Shows network interface status (YAML no-code)',
+      category: PluginCategory.network,
+      mobileCompatible: true,
+      tags: ['network', 'status', 'ip', 'connection'],
+      variants: [
+        PluginVariant(language: PluginLanguage.yaml, filename: 'network.30s.yaml', assetPath: 'plugins/yaml/network.30s.yaml'),
       ],
     ),
   ];

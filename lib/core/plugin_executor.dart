@@ -61,9 +61,10 @@ class PluginExecutor {
       return RunnerType.declarative;
     }
     
-    // Dart plugins (interpreted)
-    if (ext == 'dart' && !pluginPath.contains('.dart.exe')) {
-      return RunnerType.dart;
+    // Dart plugins - run via 'dart run' like other scripts
+    // Note: dart_eval is too limited (no dart:io support), so we run natively
+    if (ext == 'dart') {
+      return RunnerType.script;
     }
     
     // Script plugins (bash, python, node, go, rust, compiled dart)
@@ -80,12 +81,12 @@ class PluginExecutor {
     
     switch (runnerType) {
       case RunnerType.declarative:
-      case RunnerType.dart:
-        // YAML and interpreted Dart work everywhere
+        // YAML-based declarative plugins work everywhere
         return true;
         
+      case RunnerType.dart:
       case RunnerType.script:
-        // Scripts only work on desktop platforms
+        // Scripts (including Dart via dart run) only work on desktop platforms
         return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
         
       case RunnerType.unknown:

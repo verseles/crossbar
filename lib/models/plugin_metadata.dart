@@ -5,7 +5,8 @@ enum PluginLanguage {
   node('node', '📦', 'Node.js'),
   dart('dart', '🎯', 'Dart'),
   go('go', '🐹', 'Go'),
-  rust('rust', '🦀', 'Rust');
+  rust('rust', '🦀', 'Rust'),
+  yaml('yaml', '📄', 'YAML (No-Code)');
 
   const PluginLanguage(this.id, this.icon, this.displayName);
   
@@ -34,6 +35,9 @@ enum PluginLanguage {
         return go;
       case 'rs':
         return rust;
+      case 'yaml':
+      case 'yml':
+        return yaml;
       default:
         return null;
     }
