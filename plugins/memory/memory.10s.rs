@@ -26,9 +26,9 @@ fn main() {
         "gray"
     };
 
-    println!("🧠 {}% | color={}", memory_str, color);
+    println!("🧠 {} | color={}", memory_str, color);
     println!("---");
-    println!("Memory Usage: {}%", memory_str);
+    println!("Memory Usage: {}", memory_str);
     println!("---");
     println!("Refresh | refresh=true");
 }

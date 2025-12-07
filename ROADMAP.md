@@ -400,6 +400,12 @@ menu:
   - [ ] Salvar `Rect` (posição e tamanho) no `shared_preferences` ao fechar/ocultar.
   - [ ] Restaurar `Rect` ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
 
+### Fase 4: Rich Icons Support
+
+- [ ] **Image Icons:** Suporte para plugins retornarem base64 imagem ou path para imagem no output (`image=...`).
+- [ ] **Emoji Fallback:** Se a imagem falhar ou não for suportada, usar o texto/emoji principal.
+- [ ] **Parser Update:** Detetar parâmetros `image`, `templateImage` (macOS monochrome) no output parser.
+
 ---
 
 ## 🌐 Epic v1.5.0: API & Marketplace Completion

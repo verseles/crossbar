@@ -29,8 +29,8 @@ else
     color="gray"
 fi
 
-echo "🧠 ${memory}% | color=$color"
+echo "🧠 ${memory} | color=$color"
 echo "---"
-echo "Memory Usage: ${memory}%"
+echo "Memory Usage: ${memory}"
 echo "---"
 echo "Refresh | refresh=true"

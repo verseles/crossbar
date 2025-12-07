@@ -27,8 +27,8 @@ let color = 'green';
 if (memory > 80) color = 'red';
 else if (memory > 60) color = 'yellow';
 
-console.log(`🧠 ${memoryStr}% | color=${color}`);
+console.log(`🧠 ${memoryStr} | color=${color}`);
 console.log('---');
-console.log(`Memory Usage: ${memoryStr}%`);
+console.log(`Memory Usage: ${memoryStr}`);
 console.log('---');
 console.log('Refresh | refresh=true');

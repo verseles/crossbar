@@ -3,9 +3,12 @@
 -- Works on ALL platforms (Linux, macOS, Windows, Android, iOS)
 
 -- Note: web() is async and not yet supported in embedded Lua
--- For now, show a placeholder with sync data
+-- For now, show a placeholder 
 
 local time = crossbar.time()
-local uuid = crossbar.uuid()
 
-print("₿ BTC | Updated: " .. time)
+print("₿ BTC")
+print("---")
+print("Price: Loading...")
+print("Updated: " .. time)
+print("Note: Embedded Lua lacks async web access")

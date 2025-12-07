@@ -29,8 +29,8 @@ try:
 except ValueError:
     color = "gray"
 
-print(f"🧠 {memory_str}% | color={color}")
+print(f"🧠 {memory_str} | color={color}")
 print("---")
-print(f"Memory Usage: {memory_str}%")
+print(f"Memory Usage: {memory_str}")
 print("---")
 print("Refresh | refresh=true")

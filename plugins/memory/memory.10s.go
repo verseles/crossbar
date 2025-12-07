@@ -33,9 +33,9 @@ func main() {
 		}
 	}
 
-	fmt.Printf("🧠 %s%% | color=%s\n", memoryStr, color)
+	fmt.Printf("🧠 %s | color=%s\n", memoryStr, color)
 	fmt.Println("---")
-	fmt.Printf("Memory Usage: %s%%\n", memoryStr)
+	fmt.Printf("Memory Usage: %s\n", memoryStr)
 	fmt.Println("---")
 	fmt.Println("Refresh | refresh=true")
 }

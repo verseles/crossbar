@@ -24,9 +24,9 @@ void main() {
     color = 'green';
   }
 
-  print('🧠 $memoryStr% | color=$color');
+  print('🧠 $memoryStr | color=$color');
   print('---');
-  print('Memory Usage: $memoryStr%');
+  print('Memory Usage: $memoryStr');
   print('---');
   print('Refresh | refresh=true');
 }

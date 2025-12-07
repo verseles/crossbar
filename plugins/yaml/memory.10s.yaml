@@ -10,7 +10,7 @@ source:
 
 output:
   icon: "🧠"
-  text: "${response.percent}%"
+  text: "${response.percent}"
   tooltip: "RAM: ${response.used}/${response.total} ${response.unit}"
 
 menu:
