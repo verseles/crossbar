@@ -2,12 +2,19 @@
 # Battery Status
 # Shows battery level and charging state
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    battery=$(pmset -g batt | grep -Eo "\d+%" | head -1 | tr -d '%')
-    charging=$(pmset -g batt | grep -q "AC Power" && echo "true" || echo "false")
+# Use Crossbar CLI API to get battery status
+battery_info=$(crossbar battery) # Example: "87% ⚡" or "50%"
+
+battery_level=$(echo "$battery_info" | grep -oE '[0-9]+' | head -1) # Extract percentage
+battery_status="?"
+battery_icon="" # Unknown icon
+
+if echo "$battery_info" | grep -q "⚡"; then
+    battery_status="charging"
+elif [ "$battery_level" == "100" ]; then
+    battery_status="full"
 else
-    battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1 || echo "N/A")
-    charging=$(cat /sys/class/power_supply/BAT*/status 2>/dev/null | grep -qi "charging" && echo "true" || echo "false")
+    battery_status="discharging"
 fi
 
 if [ "$battery" = "N/A" ]; then

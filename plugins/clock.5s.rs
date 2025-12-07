@@ -1,27 +1,49 @@
-use std::time::SystemTime;
+use std::process::Command;
+use std::str;
+use std::str::FromStr;
 
 fn main() {
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap();
+    // Use Crossbar CLI API to get current time
+    let output_time = Command::new("crossbar")
+        .arg("time")
+        .arg("24h")
+        .output();
 
-    let total_secs = now.as_secs();
-    let hours = ((total_secs % 86400) / 3600) as u32;
-    let minutes = ((total_secs % 3600) / 60) as u32;
-    let seconds = (total_secs % 60) as u32;
-
-    // Determine icon based on hour (local time approximation)
-    let icon = match hours {
-        6..=11 => "\u{1F305}",   // sunrise
-        12..=17 => "\u{2600}\u{FE0F}", // sun
-        18..=20 => "\u{1F307}",  // sunset
-        _ => "\u{1F319}",        // moon
+    let time_str = match output_time {
+        Ok(cmd_output) => str::from_utf8(&cmd_output.stdout).unwrap_or("N/A").trim().to_string(),
+        Err(_) => "N/A".to_string(),
     };
 
-    println!("{} {:02}:{:02}:{:02}", icon, hours, minutes, seconds);
+    // Use Crossbar CLI API to get current date
+    let output_date = Command::new("crossbar")
+        .arg("date")
+        .output();
+
+    let date_str = match output_date {
+        Ok(cmd_output) => str::from_utf8(&cmd_output.stdout).unwrap_or("N/A").trim().to_string(),
+        Err(_) => "N/A".to_string(),
+    };
+
+    // Try to parse hour for icon logic
+    let mut hour: i32 = -1;
+    if let Some(h_str) = time_str.split(':').next() {
+        if let Ok(h) = i32::from_str(h_str) {
+            hour = h;
+        }
+    }
+
+    // Determine icon based on time of day
+    let icon = match hour {
+        6..=11 => "\u{1F305}", // sunrise
+        12..=17 => "\u{2600}\u{FE0F}", // sun
+        18..=20 => "\u{1F307}", // sunset
+        _ => "\u{1F319}", // moon
+    };
+
+    println!("{} {}", icon, time_str);
     println!("---");
-    println!("UTC Time: {:02}:{:02}:{:02}", hours, minutes, seconds);
-    println!("Unix Timestamp: {}", total_secs);
+    println!("Date: {}", date_str);
+    // Removed Week and Day of Year as crossbar CLI doesn't provide these directly in a simple format
     println!("---");
     println!("Refresh | refresh=true");
 }

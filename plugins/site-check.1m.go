@@ -1,102 +1,59 @@
-// +build ignore
-
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
+	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
-// Sites to monitor
-var sites = []string{
-	"https://google.com",
-	"https://github.com",
-	"https://cloudflare.com",
-}
-
-type SiteStatus struct {
-	URL      string
-	Up       bool
-	Latency  time.Duration
-	Status   int
-	Error    string
-}
-
 func main() {
-	results := checkSites()
+	url := "https://www.google.com" // Default site to check
+	statusCode, err := checkSiteCrossbar(url)
 
-	// Count up/down
-	upCount := 0
-	for _, r := range results {
-		if r.Up {
-			upCount++
-		}
-	}
-
-	// Header
+	var icon string
 	var color string
-	if upCount == len(results) {
-		color = "green"
-		fmt.Printf("\u2705 %d/%d Up | color=%s\n", upCount, len(results), color)
-	} else if upCount == 0 {
+	var statusText string
+
+	if err != nil {
+		icon = "\U0000274C" // Red X
 		color = "red"
-		fmt.Printf("\u274C %d/%d Up | color=%s\n", upCount, len(results), color)
+		statusText = fmt.Sprintf("Error: %v", err)
+	} else if statusCode >= 200 && statusCode < 300 {
+		icon = "\U00002705" // Green check
+		color = "green"
+		statusText = fmt.Sprintf("Up (HTTP %d)", statusCode) // crossbar web doesn't give duration directly
 	} else {
-		color = "yellow"
-		fmt.Printf("\u26A0\uFE0F %d/%d Up | color=%s\n", upCount, len(results), color)
+		icon = "\U000026A0\U0000FE0F" // Warning triangle
+		color = "orange"
+		statusText = fmt.Sprintf("Down (HTTP %d)", statusCode)
 	}
 
+	fmt.Printf("%s %s | color=%s\n", icon, statusText, color)
 	fmt.Println("---")
-
-	// Individual site status
-	for _, r := range results {
-		if r.Up {
-			fmt.Printf("\u2705 %s - %dms (HTTP %d)\n", r.URL, r.Latency.Milliseconds(), r.Status)
-		} else {
-			fmt.Printf("\u274C %s - %s | color=red\n", r.URL, r.Error)
-		}
-	}
-
-	fmt.Println("---")
-	fmt.Printf("Last checked: %s\n", time.Now().Format("15:04:05"))
+	fmt.Printf("Site: %s\n", url)
 	fmt.Println("Refresh | refresh=true")
 }
 
-func checkSites() []SiteStatus {
-	results := make([]SiteStatus, len(sites))
-
-	for i, url := range sites {
-		results[i] = checkSite(url)
-	}
-
-	return results
-}
-
-func checkSite(url string) SiteStatus {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	start := time.Now()
-	resp, err := client.Get(url)
-	latency := time.Since(start)
-
+func checkSiteCrossbar(url string) (int, error) {
+	cmd := exec.Command("crossbar", "web", url, "--json")
+	output, err := cmd.Output()
 	if err != nil {
-		return SiteStatus{
-			URL:   url,
-			Up:    false,
-			Error: "Connection failed",
-		}
+		return 0, fmt.Errorf("crossbar web command failed: %v", err)
 	}
-	defer resp.Body.Close()
 
-	up := resp.StatusCode >= 200 && resp.StatusCode < 400
-
-	return SiteStatus{
-		URL:     url,
-		Up:      up,
-		Latency: latency,
-		Status:  resp.StatusCode,
+	var result map[string]interface{}
+	err = json.Unmarshal(output, &result)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse JSON response: %v", err)
 	}
+
+	statusCode, ok := result["status"].(float64) // JSON numbers are often float64 in Go
+	if !ok {
+		return 0, fmt.Errorf("status code not found or not a number in JSON response")
+	}
+
+	return int(statusCode), nil
 }

@@ -6,8 +6,8 @@ Configure via Crossbar settings or environment variables:
 - CROSSBAR_PLUGIN_CRYPTO: Coin to track (bitcoin, ethereum, solana, cardano)
 """
 import json
-import urllib.request
 import os
+import subprocess # Add subprocess for calling crossbar CLI
 
 # Configuration from Crossbar settings
 CURRENCY = os.environ.get('CROSSBAR_PLUGIN_CURRENCY', 'usd')
@@ -20,11 +20,20 @@ CRYPTO_NAMES = {'bitcoin': 'BTC', 'ethereum': 'ETH', 'solana': 'SOL', 'cardano':
 def get_crypto_price():
     try:
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={CRYPTO}&vs_currencies={CURRENCY}&include_24hr_change=true"
-        with urllib.request.urlopen(url, timeout=5) as response:
-            data = json.loads(response.read().decode())
-            price = data[CRYPTO][CURRENCY]
-            change = data[CRYPTO].get(f'{CURRENCY}_24h_change', 0)
-            return price, change
+        result = subprocess.run(
+            ['crossbar', 'web', url, '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        data = json.loads(result.stdout)
+        price = data[CRYPTO][CURRENCY]
+        change = data[CRYPTO].get(f'{CURRENCY}_24h_change', 0)
+        return price, change
+    except subprocess.CalledProcessError as e:
+        return None, f"Crossbar web command failed: {e.stderr.strip()}"
+    except json.JSONDecodeError as e:
+        return None, f"Failed to parse JSON response: {e}"
     except Exception as e:
         return None, str(e)
 

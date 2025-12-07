@@ -4,35 +4,52 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	now := time.Now()
-	hour := now.Hour()
-
-	// Determine icon based on time of day
-	var icon string
-	switch {
-	case hour >= 6 && hour < 12:
-		icon = "\U0001F305" // sunrise
-	case hour >= 12 && hour < 18:
-		icon = "\u2600\uFE0F" // sun
-	case hour >= 18 && hour < 21:
-		icon = "\U0001F307" // sunset
-	default:
-		icon = "\U0001F319" // moon
+	// Use Crossbar CLI API to get current time
+	cmd := exec.Command("crossbar", "time", "24h") // Request 24-hour format
+	output, err := cmd.Output()
+	timeStr := "N/A"
+	if err == nil {
+		timeStr = strings.TrimSpace(string(output)) // Example: "14:30:05"
 	}
 
-	// Format time
-	timeStr := now.Format("15:04:05")
+	// Parse time string to get hour for color logic
+	hour := -1
+	if parts := strings.Split(timeStr, ":"); len(parts) >= 1 {
+		if h, err := strconv.Atoi(parts[0]); err == nil {
+			hour = h
+		}
+	}
 
-	fmt.Printf("%s %s\n", icon, timeStr)
+	// Determine icon
+	icon := "⏰"
+
+	// Determine color based on time of day (example logic)
+	var color string
+	if hour >= 6 && hour < 12 {
+		color = "blue" // Morning
+	} else if hour >= 12 && hour < 18 {
+		color = "green" // Afternoon
+	} else {
+		color = "gray" // Evening/Night
+	}
+
+	// Print output
+	fmt.Printf("%s %s | color=%s\n", icon, timeStr, color)
 	fmt.Println("---")
-	fmt.Printf("Date: %s\n", now.Format("Monday, January 2, 2006"))
-	_, week := now.ISOWeek()
-	fmt.Printf("Week: %d\n", week)
-	fmt.Printf("Day of Year: %d\n", now.YearDay())
-	fmt.Println("---")
+	fmt.Printf("Current Time: %s\n", timeStr)
+	// Optionally get date using crossbar date
+	cmdDate := exec.Command("crossbar", "date")
+	outputDate, errDate := cmdDate.Output()
+	dateStr := "N/A"
+	if errDate == nil {
+		dateStr = strings.TrimSpace(string(outputDate))
+	}
+	fmt.Printf("Current Date: %s\n", dateStr)
 	fmt.Println("Refresh | refresh=true")
 }

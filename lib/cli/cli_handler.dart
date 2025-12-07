@@ -108,10 +108,7 @@ Future<int> handleCliCommand(List<String> args) async {
     return 0;
   }
 
-  // Handle double-dash prefix removal (allow both crossbar cpu and crossbar --cpu)
-  final cleanName = commandName.startsWith('--') ? commandName.substring(2) : commandName;
-
-  final command = _commands[cleanName];
+  final command = _commands[commandName];
   if (command != null) {
     try {
       return await command.execute(args.sublist(1));

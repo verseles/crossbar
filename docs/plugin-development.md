@@ -280,12 +280,12 @@ Simple and fast for system commands.
 #!/bin/bash
 # cpu.10s.sh - CPU Monitor
 
-cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 2>/dev/null || echo "0")
+cpu=$(crossbar cpu) # Use the Crossbar CLI API to get CPU usage
 
 # Color based on load
-if (( $(echo "$cpu > 80" | bc -l) )); then
+if (( $(echo "$cpu > 80" | bc -l 2>/dev/null || echo 0) )); then
     color="red"
-elif (( $(echo "$cpu > 50" | bc -l) )); then
+elif (( $(echo "$cpu > 50" | bc -l 2>/dev/null || echo 0) )); then
     color="yellow"
 else
     color="green"
@@ -312,36 +312,77 @@ Best for API calls and complex logic.
 """weather.30m.py - Weather Plugin"""
 
 import json
-import urllib.request
+import subprocess # Import subprocess for calling crossbar CLI
+import urllib.parse
 import os
 
 CITY = os.environ.get('CROSSBAR_WEATHER_CITY', 'London')
+UNITS = os.environ.get('CROSSBAR_PLUGIN_UNITS', 'celsius') # Use CROSSBAR_PLUGIN_UNITS
 
 def get_weather():
     try:
-        url = f"https://wttr.in/{CITY}?format=j1"
-        with urllib.request.urlopen(url, timeout=5) as response:
-            data = json.loads(response.read().decode())
-            current = data['current_condition'][0]
-            return {
-                'temp': current['temp_C'],
-                'desc': current['weatherDesc'][0]['value'],
-                'humidity': current['humidity']
-            }
+        encoded_city = urllib.parse.quote(CITY)
+        url = f"https://wttr.in/{encoded_city}?format=j1"
+        # Use crossbar web command for HTTP request
+        result = subprocess.run(
+            ['crossbar', 'web', url, '--json'],
+            capture_output=True,
+            text=True,
+            check=True # Raise an exception for non-zero exit codes
+        )
+        data = json.loads(result.stdout)
+        current = data['current_condition'][0]
+            
+        # Get temp based on units preference
+        if UNITS == 'fahrenheit':
+            temp = current['temp_F']
+            unit = 'F'
+        else:
+            temp = current['temp_C']
+            unit = 'C'
+        
+        desc = current['weatherDesc'][0]['value']
+        humidity = current['humidity']
+        
+        # Weather icons based on condition
+        if 'sun' in desc.lower() or 'clear' in desc.lower():
+            icon = '☀️'
+        elif 'cloud' in desc.lower():
+            icon = '☁️'
+        elif 'rain' in desc.lower():
+            icon = '🌧️'
+        elif 'snow' in desc.lower():
+            icon = '🌨️'
+        else:
+            icon = '🌈'
+
+        return {
+            'icon': icon,
+            'temp': temp,
+            'unit': unit,
+            'desc': desc,
+            'humidity': humidity,
+            'city': CITY
+        }
+    except subprocess.CalledProcessError as e:
+        return {'error': f"Crossbar web command failed: {e.stderr.strip()}"}
+    except json.JSONDecodeError as e:
+        return {'error': f"Failed to parse JSON response: {e}"}
     except Exception as e:
         return {'error': str(e)}
 
 weather = get_weather()
 
 if 'error' in weather:
-    print(f"⛅ N/A | color=gray")
+    print(f" N/A | color=gray")
     print("---")
     print(f"Error: {weather['error']}")
 else:
-    print(f"☀️ {weather['temp']}°C")
+    print(f"{weather['icon']} {weather['temp']}°{weather['unit']}")
     print("---")
-    print(f"Location: {CITY}")
+    print(f"Location: {weather['city']}")
     print(f"Condition: {weather['desc']}")
+    print(f"Temperature: {weather['temp']}°{weather['unit']}")
     print(f"Humidity: {weather['humidity']}%")
     print("---")
     print("Refresh | refresh=true")
@@ -426,23 +467,66 @@ Ideal for complex plugins that benefit from type safety.
 // system-info.1m.dart - System Information
 
 import 'dart:io';
+import 'dart:convert'; // For JSON parsing
 
 void main() async {
-  final os = Platform.operatingSystem;
-  final version = Platform.operatingSystemVersion;
-  final hostname = Platform.localHostname;
-  final locale = Platform.localeName;
+  final List<String> output = [];
 
-  print('💻 $os');
-  print('---');
-  print('Hostname: $hostname');
-  print('OS: $os');
-  print('Version: $version');
-  print('Locale: $locale');
-  print('---');
-  print('Dart ${Platform.version.split(' ').first}');
-  print('---');
-  print('Refresh | refresh=true');
+  output.add('System Information');
+  output.add('---');
+
+  // OS Info
+  final osResult = await Process.run('crossbar', ['os', '--json']);
+  if (osResult.exitCode == 0) {
+    try {
+      final osInfo = jsonDecode(osResult.stdout.toString());
+      output.add('OS: ${osInfo['name']} (${osInfo['short']})');
+      output.add('Version: ${osInfo['version']}');
+      output.add('Kernel: ${osInfo['kernel']}');
+      output.add('Architecture: ${osInfo['arch']}');
+    } catch (e) {
+      output.add('OS: Error parsing crossbar os --json');
+    }
+  } else {
+    output.add('OS: Error getting info from crossbar os');
+  }
+
+  // CPU Cores (derived from cpu --json)
+  final cpuResult = await Process.run('crossbar', ['cpu', '--json']);
+  if (cpuResult.exitCode == 0) {
+    try {
+      final cpuInfo = jsonDecode(cpuResult.stdout.toString());
+      output.add('Processors: ${cpuInfo['cores']}');
+    } catch (e) {
+      output.add('Processors: Error parsing crossbar cpu --json');
+    }
+  } else {
+    output.add('Processors: Error getting info from crossbar cpu');
+  }
+
+  // Locale
+  final localeResult = await Process.run('crossbar', ['locale']);
+  if (localeResult.exitCode == 0) {
+    output.add('Locale: ${localeResult.stdout.toString().trim()}');
+  } else {
+    output.add('Locale: Error getting info from crossbar locale');
+  }
+
+  // Environment variables (keep as is, as crossbar env is meant for plugin's perspective)
+  output.add('---');
+  output.add('Environment:');
+  Platform.environment.forEach((key, value) {
+    if (key.startsWith('CROSSBAR_')) {
+      output.add('  $key: $value');
+    }
+  });
+
+  output.add('---');
+  output.add('Refresh | refresh=true');
+
+  for (final line in output) {
+    print(line);
+  }
 }
 ```
 
@@ -457,27 +541,57 @@ void main() async {
 Excellent performance for computationally intensive plugins.
 
 ```go
-// +build ignore
-
 package main
 
 import (
 	"fmt"
-	"runtime"
-	"time"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	now := time.Now()
+	// Use Crossbar CLI API to get current time
+	cmd := exec.Command("crossbar", "time", "24h") // Request 24-hour format
+	output, err := cmd.Output()
+	timeStr := "N/A"
+	if err == nil {
+		timeStr = strings.TrimSpace(string(output)) // Example: "14:30:05"
+	}
 
-	fmt.Printf("🕐 %s\n", now.Format("15:04:05"))
+	// Parse time string to get hour for color logic
+	hour := -1
+	if parts := strings.Split(timeStr, ":"); len(parts) >= 1 {
+		if h, err := strconv.Atoi(parts[0]); err == nil {
+			hour = h
+		}
+	}
+
+	// Determine icon
+	icon := "⏰"
+
+	// Determine color based on time of day (example logic)
+	var color string
+	if hour >= 6 && hour < 12 {
+		color = "blue" // Morning
+	} else if hour >= 12 && hour < 18 {
+		color = "green" // Afternoon
+	} else {
+		color = "gray" // Evening/Night
+	}
+
+	// Print output
+	fmt.Printf("%s %s | color=%s\n", icon, timeStr, color)
 	fmt.Println("---")
-	fmt.Printf("Time: %s\n", now.Format("15:04:05"))
-	fmt.Printf("Date: %s\n", now.Format("2006-01-02"))
-	fmt.Printf("Day: %s\n", now.Weekday())
-	fmt.Println("---")
-	fmt.Printf("Go %s on %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
-	fmt.Println("---")
+	fmt.Printf("Current Time: %s\n", timeStr)
+	// Optionally get date using crossbar date
+	cmdDate := exec.Command("crossbar", "date")
+	outputDate, errDate := cmdDate.Output()
+	dateStr := "N/A"
+	if errDate == nil {
+		dateStr = strings.TrimSpace(string(outputDate))
+	}
+	fmt.Printf("Current Date: %s\n", dateStr)
 	fmt.Println("Refresh | refresh=true")
 }
 ```
@@ -495,26 +609,55 @@ func main() {
 Maximum performance with memory safety.
 
 ```rust
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
+use std::process::Command;
+use std::str;
+use std::str::FromStr;
 
 fn main() {
-    let now = SystemTime::now();
-    let duration = now.duration_since(UNIX_EPOCH).unwrap();
-    let secs = duration.as_secs();
+    // Use Crossbar CLI API to get current time
+    let output_time = Command::new("crossbar")
+        .arg("time")
+        .arg("24h")
+        .output();
 
-    // Format time (simplified)
-    let hours = (secs % 86400) / 3600;
-    let minutes = (secs % 3600) / 60;
-    let seconds = secs % 60;
+    let time_str = match output_time {
+        Ok(cmd_output) => str::from_utf8(&cmd_output.stdout).unwrap_or("N/A").trim().to_string(),
+        Err(_) => "N/A".to_string(),
+    };
 
-    println!("🕐 {:02}:{:02}:{:02}", hours, minutes, seconds);
+    // Use Crossbar CLI API to get current date
+    let output_date = Command::new("crossbar")
+        .arg("date")
+        .output();
+
+    let date_str = match output_date {
+        Ok(cmd_output) => str::from_utf8(&cmd_output.stdout).unwrap_or("N/A").trim().to_string(),
+        Err(_) => "N/A".to_string(),
+    };
+
+    // Try to parse hour for icon logic
+    let mut hour: i32 = -1;
+    if let Some(h_str) = time_str.split(':').next() {
+        if let Ok(h) = i32::from_str(h_str) {
+            hour = h;
+        }
+    }
+
+    // Determine icon based on time of day
+    let icon = match hour {
+        6..=11 => "\u{1F305}", // sunrise
+        12..=17 => "\u{2600}\u{FE0F}", // sun
+        18..=20 => "\u{1F307}", // sunset
+        _ => "\u{1F319}", // moon
+    };
+
+    println!("{} {}", icon, time_str);
     println!("---");
-    println!("Unix Timestamp: {}", secs);
+    println!("Date: {}", date_str);
+    // Removed Week and Day of Year as crossbar CLI doesn't provide these directly in a simple format
     println!("---");
     println!("Refresh | refresh=true");
-}
-```
+}```
 
 **Note**: Rust plugins are compiled on first run. Crossbar handles compilation automatically.
 
@@ -771,7 +914,7 @@ rustc ./my-plugin.1h.rs -o /tmp/plugin && /tmp/plugin
 
 ```bash
 # Test via crossbar
-crossbar --exec "python3 ~/.crossbar/plugins/python/my-plugin.10s.py"
+crossbar exec "python3 ~/.crossbar/plugins/python/my-plugin.10s.py"
 ```
 
 ### Common Issues
@@ -884,43 +1027,22 @@ This will:
 
 ## Examples
 
-### 24 Bundled Plugins
+Crossbar comes with a rich set of **35+ example plugins** demonstrating various functionalities and languages.
 
-Crossbar comes with 24 example plugins:
+Browse the `plugins/` directory for source code and ideas:
 
-| Plugin                       | Language | Interval | Description           |
-| ---------------------------- | -------- | -------- | --------------------- |
-| `time.1s.py`                 | Python   | 1s       | Current time          |
-| `cpu.10s.sh`                 | Bash     | 10s      | CPU usage             |
-| `memory.10s.sh`              | Bash     | 10s      | Memory usage          |
-| `battery.30s.sh`             | Bash     | 30s      | Battery status        |
-| `network.30s.sh`             | Bash     | 30s      | Network status        |
-| `disk.5m.sh`                 | Bash     | 5m       | Disk usage            |
-| `uptime.1m.sh`               | Bash     | 1m       | System uptime         |
-| `weather.30m.py`             | Python   | 30m      | Weather info          |
-| `bitcoin.5m.py`              | Python   | 5m       | Bitcoin price         |
-| `github-notifications.5m.py` | Python   | 5m       | GitHub notifications  |
-| `process-monitor.10s.py`     | Python   | 10s      | Process stats         |
-| `countdown.1s.py`            | Python   | 1s       | Countdown timer       |
-| `quotes.1h.py`               | Python   | 1h       | Random quotes         |
-| `todo.1m.py`                 | Python   | 1m       | Todo list             |
-| `emoji-clock.1m.js`          | Node.js  | 1m       | Emoji clock           |
-| `world-clock.1m.js`          | Node.js  | 1m       | World clocks          |
-| `ip-info.1h.js`              | Node.js  | 1h       | IP information        |
-| `npm-downloads.1h.js`        | Node.js  | 1h       | NPM downloads         |
-| `pomodoro.1s.js`             | Node.js  | 1s       | Pomodoro timer        |
-| `git-status.30s.dart`        | Dart     | 30s      | Git repository status |
-| `system-info.1m.dart`        | Dart     | 1m       | System information    |
-| `docker-status.1m.sh`        | Bash     | 1m       | Docker containers     |
-| `spotify.5s.sh`              | Bash     | 5s       | Spotify now playing   |
-| `ssh-connections.30s.sh`     | Bash     | 30s      | SSH connections       |
+-   **Bash**, **Python**, **Node.js**, **Dart**, **Go**, **Rust**, **YAML**
 
-Plus 8 Go and Rust examples:
+These examples cover:
+-   System monitoring (CPU, Memory, Battery, Disk, Uptime)
+-   Network checks (Site-check, IP info)
+-   Time and date displays
+-   Media controls (Spotify)
+-   Specific service integrations (Docker)
+-   External API calls (Bitcoin, Weather, GitHub)
 
-- `clock.5s.go`, `cpu.10s.go`, `battery.30s.go`, `site-check.1m.go`
-- `clock.5s.rs`, `cpu.10s.rs`, `battery.30s.rs`, `site-check.1m.rs`
+The `plugins/` directory is organized by language or type, making it easy to find examples relevant to your needs.
 
-Browse the `plugins/` directory for source code.
 
 ---
 

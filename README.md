@@ -218,7 +218,7 @@ print(json.dumps({
 
 ### CLI API Reference
 
-Crossbar provides 47+ unified commands accessible via `crossbar [command]`. Legacy `--command` flags are also supported.
+Crossbar provides 47+ unified commands accessible via `crossbar [command]`.
 
 #### System Information
 

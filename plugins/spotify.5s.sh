@@ -2,41 +2,28 @@
 # Spotify Now Playing (macOS only)
 # Shows current track
 
-if [[ "$OSTYPE" != "darwin"* ]]; then
-    echo " N/A"
-    echo "---"
-    echo "macOS only"
-    exit 0
-fi
+media_info=$(crossbar media playing --json)
 
-state=$(osascript -e 'tell application "Spotify" to player state as string' 2>/dev/null)
-
-if [ "$state" = "playing" ]; then
-    track=$(osascript -e 'tell application "Spotify" to name of current track as string' 2>/dev/null)
-    artist=$(osascript -e 'tell application "Spotify" to artist of current track as string' 2>/dev/null)
-
-    # Truncate if too long
-    if [ ${#track} -gt 30 ]; then
-        track="${track:0:27}..."
+if [ "$?" -eq 0 ] && [ "$media_info" != "null" ]; then
+    status=$(echo "$media_info" | jq -r '.status')
+    if [ "$status" == "playing" ]; then
+        artist=$(echo "$media_info" | jq -r '.artist')
+        track=$(echo "$media_info" | jq -r '.title')
+        
+        echo " $(echo "$track - $artist" | cut -c1-30)..."
+        echo "---"
+        echo "Artist: $artist"
+        echo "Track: $track"
+        echo "Next | bash='crossbar media next' terminal=false"
+        echo "Prev | bash='crossbar media prev' terminal=false"
+        echo "Play/Pause | bash='crossbar media toggle' terminal=false"
+    else
+        echo "Not Playing"
     fi
-
-    echo " $track"
-    echo "---"
-    echo "Track: $track"
-    echo "Artist: $artist"
-    echo "---"
-    echo "Pause | bash='osascript -e \"tell application \\\"Spotify\\\" to pause\"' terminal=false"
-    echo "Next | bash='osascript -e \"tell application \\\"Spotify\\\" to next track\"' terminal=false refresh=true"
-    echo "Previous | bash='osascript -e \"tell application \\\"Spotify\\\" to previous track\"' terminal=false refresh=true"
-elif [ "$state" = "paused" ]; then
-    echo " Paused"
-    echo "---"
-    echo "Play | bash='osascript -e \"tell application \\\"Spotify\\\" to play\"' terminal=false refresh=true"
 else
-    echo ""
+    echo "Spotify 🎵"
     echo "---"
-    echo "Open Spotify | bash='open -a Spotify' terminal=false"
+    echo "No media info available or Spotify not playing."
 fi
-
 echo "---"
 echo "Refresh | refresh=true"

@@ -1,21 +1,22 @@
-use std::fs;
-use std::path::Path;
+use std::process::Command;
+use std::str;
+use std::str::FromStr;
 
 fn main() {
-    let (level, charging) = get_battery_status();
+    let (level, charging) = get_battery_status_crossbar();
 
     if level < 0 {
         println!("\u{1F50C} N/A");
         return;
     }
 
-    // Determine icon and color
+    // Determine icon and color based on level and charging state
     let (icon, color) = if charging {
-        ("\u{26A1}", "blue")
+        ("\u{26A1}", "blue") // lightning bolt
     } else {
         match level {
-            0..=10 => ("\u{1FAAB}", "red"),
-            11..=25 => ("\u{1F50B}", "orange"),
+            0..=10 => ("\u{1FAAB}", "red"), // empty battery
+            11..=25 => ("\u{1F50B}", "orange"), // battery
             26..=50 => ("\u{1F50B}", "yellow"),
             _ => ("\u{1F50B}", "green"),
         }
@@ -33,43 +34,30 @@ fn main() {
     println!("Refresh | refresh=true");
 }
 
-fn get_battery_status() -> (i32, bool) {
-    // Find battery in /sys/class/power_supply/
-    let power_supply = Path::new("/sys/class/power_supply");
+fn get_battery_status_crossbar() -> (i32, bool) {
+    let output = Command::new("crossbar")
+        .arg("battery")
+        .output();
 
-    if !power_supply.exists() {
-        return (-1, false);
-    }
+    match output {
+        Ok(cmd_output) => {
+            let battery_info = str::from_utf8(&cmd_output.stdout).unwrap_or("").trim();
+            // Example: "87% ⚡" or "50%"
 
-    if let Ok(entries) = fs::read_dir(power_supply) {
-        for entry in entries.filter_map(|e| e.ok()) {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy();
-
-            if name_str.starts_with("BAT") {
-                let bat_path = entry.path();
-
-                // Read capacity
-                let capacity_path = bat_path.join("capacity");
-                let level = if let Ok(content) = fs::read_to_string(&capacity_path) {
-                    content.trim().parse().unwrap_or(-1)
-                } else {
-                    -1
-                };
-
-                // Read status
-                let status_path = bat_path.join("status");
-                let charging = if let Ok(content) = fs::read_to_string(&status_path) {
-                    let status = content.trim();
-                    status == "Charging" || status == "Full"
-                } else {
-                    false
-                };
-
-                return (level, charging);
+            let mut level_str = String::new();
+            for c in battery_info.chars() {
+                if c.is_ascii_digit() {
+                    level_str.push(c);
+                } else if !level_str.is_empty() {
+                    break;
+                }
             }
-        }
-    }
 
-    (-1, false)
+            let level = i32::from_str(&level_str).unwrap_or(-1);
+            let charging = battery_info.contains("⚡");
+
+            (level, charging)
+        }
+        Err(_) => (-1, false),
+    }
 }

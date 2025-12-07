@@ -45,25 +45,25 @@ Running `crossbar` without arguments launches the GUI application.
 
 ```bash
 crossbar           # Launch GUI
-crossbar --cpu     # CLI mode
+crossbar cpu     # CLI mode
 ```
 
 ---
 
 ## System Information
 
-### `--cpu`
+### `cpu`
 
 Get CPU usage percentage.
 
 ```bash
-crossbar --cpu
+crossbar cpu
 # Output: 23.5%
 
-crossbar --cpu --json
+crossbar cpu --json
 # Output: {"cpu":23.5}
 
-crossbar --cpu --xml
+crossbar cpu --xml
 # Output:
 # <?xml version="1.0" encoding="UTF-8"?>
 # <crossbar>
@@ -75,15 +75,15 @@ crossbar --cpu --xml
 
 ---
 
-### `--memory`
+### `memory`
 
 Get RAM usage (used/total).
 
 ```bash
-crossbar --memory
+crossbar memory
 # Output: 8.2 GB / 16.0 GB
 
-crossbar --memory --json
+crossbar memory --json
 # Output: {"used":8.2,"total":16.0,"unit":"GB"}
 ```
 
@@ -91,15 +91,15 @@ crossbar --memory --json
 
 ---
 
-### `--battery`
+### `battery`
 
 Get battery level and charging status.
 
 ```bash
-crossbar --battery
+crossbar battery
 # Output: 85% ⚡
 
-crossbar --battery --json
+crossbar battery --json
 # Output: {"level":85,"charging":true}
 ```
 
@@ -107,12 +107,12 @@ crossbar --battery --json
 
 ---
 
-### `--uptime`
+### `uptime`
 
 Get system uptime.
 
 ```bash
-crossbar --uptime
+crossbar uptime
 # Output: 3 days, 4:23:15
 ```
 
@@ -120,15 +120,15 @@ crossbar --uptime
 
 ---
 
-### `--disk [path]`
+### `disk [path]`
 
 Get disk usage for a path (default: root).
 
 ```bash
-crossbar --disk
+crossbar disk
 # Output: 120 GB / 500 GB (24%)
 
-crossbar --disk /home
+crossbar disk /home
 # Output: 80 GB / 500 GB (16%)
 ```
 
@@ -136,15 +136,15 @@ crossbar --disk /home
 
 ---
 
-### `--os`
+### `os`
 
 Get operating system information.
 
 ```bash
-crossbar --os
+crossbar os
 # Output: Linux 6.17.9-zen1-1-zen
 
-crossbar --os --json
+crossbar os --json
 # Output: {"name":"Linux","version":"6.17.9-zen1-1-zen","platform":"linux"}
 ```
 
@@ -152,12 +152,12 @@ crossbar --os --json
 
 ---
 
-### `--hostname`
+### `hostname`
 
 Get system hostname.
 
 ```bash
-crossbar --hostname
+crossbar hostname
 # Output: my-computer
 ```
 
@@ -165,12 +165,12 @@ crossbar --hostname
 
 ---
 
-### `--username`
+### `username`
 
 Get current username.
 
 ```bash
-crossbar --username
+crossbar username
 # Output: helio
 ```
 
@@ -178,12 +178,12 @@ crossbar --username
 
 ---
 
-### `--kernel`
+### `kernel`
 
 Get kernel version.
 
 ```bash
-crossbar --kernel
+crossbar kernel
 # Output: 6.17.9-zen1-1-zen
 ```
 
@@ -191,12 +191,12 @@ crossbar --kernel
 
 ---
 
-### `--arch`
+### `arch`
 
 Get system architecture.
 
 ```bash
-crossbar --arch
+crossbar arch
 # Output: x86_64
 ```
 
@@ -204,12 +204,12 @@ crossbar --arch
 
 ---
 
-### `--screen-size`
+### `screen-size`
 
 Get screen resolution.
 
 ```bash
-crossbar --screen-size
+crossbar screen-size
 # Output: 1920x1080
 ```
 
@@ -217,12 +217,12 @@ crossbar --screen-size
 
 ---
 
-### `--volume`
+### `volume`
 
-Get audio volume (legacy command, prefer `--audio-volume`).
+Get audio volume (legacy command, prefer `audio volume`).
 
 ```bash
-crossbar --volume
+crossbar volume
 # Output: 75
 ```
 
@@ -230,12 +230,12 @@ crossbar --volume
 
 ---
 
-### `--brightness`
+### `brightness`
 
-Get screen brightness (legacy command, prefer `--screen-brightness`).
+Get screen brightness (legacy command, prefer `screen brightness`).
 
 ```bash
-crossbar --brightness
+crossbar brightness
 # Output: 80%
 ```
 
@@ -247,12 +247,12 @@ crossbar --brightness
 
 Control media playback on the system.
 
-### `--media-play`
+### `media play`
 
 Resume media playback.
 
 ```bash
-crossbar --media-play
+crossbar media play
 # Output: Playing
 ```
 
@@ -260,12 +260,12 @@ crossbar --media-play
 
 ---
 
-### `--media-pause`
+### `media pause`
 
 Pause media playback.
 
 ```bash
-crossbar --media-pause
+crossbar media pause
 # Output: Paused
 ```
 
@@ -273,12 +273,12 @@ crossbar --media-pause
 
 ---
 
-### `--media-play-pause`
+### `media toggle`
 
 Toggle between play and pause.
 
 ```bash
-crossbar --media-play-pause
+crossbar media toggle
 # Output: Toggled
 ```
 
@@ -286,12 +286,12 @@ crossbar --media-play-pause
 
 ---
 
-### `--media-stop`
+### `media stop`
 
 Stop media playback.
 
 ```bash
-crossbar --media-stop
+crossbar media stop
 # Output: Stopped
 ```
 
@@ -299,12 +299,12 @@ crossbar --media-stop
 
 ---
 
-### `--media-next`
+### `media next`
 
 Skip to next track.
 
 ```bash
-crossbar --media-next
+crossbar media next
 # Output: Next track
 ```
 
@@ -312,12 +312,12 @@ crossbar --media-next
 
 ---
 
-### `--media-prev`
+### `media prev`
 
 Go to previous track.
 
 ```bash
-crossbar --media-prev
+crossbar media prev
 # Output: Previous track
 ```
 
@@ -325,7 +325,7 @@ crossbar --media-prev
 
 ---
 
-### `--media-seek <offset>`
+### `media seek <offset>`
 
 Seek forward or backward.
 
@@ -334,10 +334,10 @@ Seek forward or backward.
 - `offset` - Time offset (e.g., `+30s`, `-10s`, `+1m`)
 
 ```bash
-crossbar --media-seek +30s
+crossbar media seek +30s
 # Output: Seeked +30s
 
-crossbar --media-seek -15s
+crossbar media seek -15s
 # Output: Seeked -15s
 ```
 
@@ -345,18 +345,18 @@ crossbar --media-seek -15s
 
 ---
 
-### `--media-playing`
+### `media playing`
 
 Get current track information.
 
 ```bash
-crossbar --media-playing
+crossbar media playing
 # Output:
 # Song Title - Artist Name
 # Album: Album Name
 # 1:23 / 3:45
 
-crossbar --media-playing --json
+crossbar media playing --json
 # Output: {
 #   "playing": true,
 #   "title": "Song Title",
@@ -366,7 +366,7 @@ crossbar --media-playing --json
 #   "duration": "3:45"
 # }
 
-crossbar --media-playing --xml
+crossbar media playing --xml
 # Output: XML format with media root element
 ```
 
@@ -376,15 +376,15 @@ crossbar --media-playing --xml
 
 ## Audio Controls
 
-### `--audio-volume`
+### `audio volume`
 
 Get current volume (0-100).
 
 ```bash
-crossbar --audio-volume
+crossbar audio volume
 # Output: 75%
 
-crossbar --audio-volume --json
+crossbar audio volume --json
 # Output: {"volume":75}
 ```
 
@@ -392,7 +392,7 @@ crossbar --audio-volume --json
 
 ---
 
-### `--audio-volume-set <level>`
+### `audio volume-set <level>`
 
 Set volume level (0-100).
 
@@ -401,10 +401,10 @@ Set volume level (0-100).
 - `level` - Volume level from 0 to 100
 
 ```bash
-crossbar --audio-volume-set 50
+crossbar audio volume-set 50
 # Output: Volume set to 50%
 
-crossbar --audio-volume-set 0
+crossbar audio volume-set 0
 # Output: Volume set to 0%
 ```
 
@@ -412,15 +412,15 @@ crossbar --audio-volume-set 0
 
 ---
 
-### `--audio-mute`
+### `audio mute`
 
 Toggle mute state.
 
 ```bash
-crossbar --audio-mute
+crossbar audio mute
 # Output: Muted
 
-crossbar --audio-mute  # Run again
+crossbar audio mute  # Run again
 # Output: Unmuted
 ```
 
@@ -428,12 +428,12 @@ crossbar --audio-mute  # Run again
 
 ---
 
-### `--audio-output`
+### `audio output`
 
 Get current audio output device.
 
 ```bash
-crossbar --audio-output
+crossbar audio output
 # Output: Built-in Speakers
 ```
 
@@ -441,17 +441,17 @@ crossbar --audio-output
 
 ---
 
-### `--audio-output --list`
+### `audio output --list`
 
 List all audio output devices.
 
 ```bash
-crossbar --audio-output --list
+crossbar audio output --list
 # Output:
 # alsa_output.pci-0000_00_1f.3.analog-stereo: Built-in Audio
 # bluez_sink.AA_BB_CC_DD_EE_FF: Bluetooth Headphones
 
-crossbar --audio-output --list --json
+crossbar audio output --list --json
 # Output: [{"id":"alsa_output...","name":"Built-in Audio"},...]
 ```
 
@@ -459,16 +459,16 @@ crossbar --audio-output --list --json
 
 ---
 
-### `--audio-output-set <device>`
+### `audio output-set <device>`
 
 Set audio output device.
 
 **Arguments**:
 
-- `device` - Device ID (from `--audio-output --list`)
+- `device` - Device ID (from `audio output --list`)
 
 ```bash
-crossbar --audio-output-set alsa_output.pci-0000_00_1f.3.analog-stereo
+crossbar audio output-set alsa_output.pci-0000_00_1f.3.analog-stereo
 # Output: Output set to alsa_output.pci-0000_00_1f.3.analog-stereo
 ```
 
@@ -478,15 +478,15 @@ crossbar --audio-output-set alsa_output.pci-0000_00_1f.3.analog-stereo
 
 ## Screen Controls
 
-### `--screen-brightness`
+### `screen brightness`
 
 Get screen brightness (0-100).
 
 ```bash
-crossbar --screen-brightness
+crossbar screen brightness
 # Output: 80%
 
-crossbar --screen-brightness --json
+crossbar screen brightness --json
 # Output: {"brightness":80}
 ```
 
@@ -494,7 +494,7 @@ crossbar --screen-brightness --json
 
 ---
 
-### `--screen-brightness-set <level>`
+### `screen brightness-set <level>`
 
 Set screen brightness (0-100).
 
@@ -503,7 +503,7 @@ Set screen brightness (0-100).
 - `level` - Brightness level from 0 to 100
 
 ```bash
-crossbar --screen-brightness-set 70
+crossbar screen brightness-set 70
 # Output: Brightness set to 70%
 ```
 
@@ -511,7 +511,7 @@ crossbar --screen-brightness-set 70
 
 ---
 
-### `--screenshot [path]`
+### `screenshot [path]`
 
 Take a screenshot.
 
@@ -524,13 +524,13 @@ Take a screenshot.
 - `--clipboard` - Copy to clipboard instead of file
 
 ```bash
-crossbar --screenshot
+crossbar screenshot
 # Output: Screenshot saved to: /home/user/Pictures/screenshot-2025-12-01.png
 
-crossbar --screenshot ~/Desktop/shot.png
+crossbar screenshot ~/Desktop/shot.png
 # Output: Screenshot saved to: /home/user/Desktop/shot.png
 
-crossbar --screenshot --clipboard
+crossbar screenshot --clipboard
 # Output: Screenshot copied to clipboard
 ```
 
@@ -538,12 +538,12 @@ crossbar --screenshot --clipboard
 
 ---
 
-### `--wallpaper-get`
+### `wallpaper get`
 
 Get current wallpaper path.
 
 ```bash
-crossbar --wallpaper-get
+crossbar wallpaper get
 # Output: /home/user/Pictures/wallpaper.jpg
 ```
 
@@ -551,7 +551,7 @@ crossbar --wallpaper-get
 
 ---
 
-### `--wallpaper-set <path>`
+### `wallpaper set <path>`
 
 Set desktop wallpaper.
 
@@ -560,7 +560,7 @@ Set desktop wallpaper.
 - `path` - Path to image file
 
 ```bash
-crossbar --wallpaper-set ~/Pictures/new-wallpaper.jpg
+crossbar wallpaper set ~/Pictures/new-wallpaper.jpg
 # Output: Wallpaper set to /home/user/Pictures/new-wallpaper.jpg
 ```
 
@@ -570,12 +570,12 @@ crossbar --wallpaper-set ~/Pictures/new-wallpaper.jpg
 
 ## Power Management
 
-### `--power-sleep`
+### `power sleep`
 
 Suspend the system.
 
 ```bash
-crossbar --power-sleep
+crossbar power sleep
 # Output: System going to sleep...
 ```
 
@@ -583,15 +583,15 @@ crossbar --power-sleep
 
 ---
 
-### `--power-restart --confirm`
+### `power restart --confirm`
 
 Restart the system. Requires `--confirm` flag for safety.
 
 ```bash
-crossbar --power-restart --confirm
+crossbar power restart --confirm
 # Output: System restarting...
 
-crossbar --power-restart  # Without --confirm
+crossbar power restart  # Without --confirm
 # Error: --power-restart requires --confirm flag for safety
 ```
 
@@ -599,15 +599,15 @@ crossbar --power-restart  # Without --confirm
 
 ---
 
-### `--power-shutdown --confirm`
+### `power shutdown --confirm`
 
 Shutdown the system. Requires `--confirm` flag for safety.
 
 ```bash
-crossbar --power-shutdown --confirm
+crossbar power shutdown --confirm
 # Output: System shutting down...
 
-crossbar --power-shutdown  # Without --confirm
+crossbar power shutdown  # Without --confirm
 # Error: --power-shutdown requires --confirm flag for safety
 ```
 
@@ -617,15 +617,15 @@ crossbar --power-shutdown  # Without --confirm
 
 ## Do Not Disturb
 
-### `--dnd-status`
+### `dnd status`
 
 Get Do Not Disturb status.
 
 ```bash
-crossbar --dnd-status
+crossbar dnd status
 # Output: Do Not Disturb: OFF
 
-crossbar --dnd-status --json
+crossbar dnd status --json
 # Output: {"dnd":false}
 ```
 
@@ -633,7 +633,7 @@ crossbar --dnd-status --json
 
 ---
 
-### `--dnd-set <on|off>`
+### `dnd set <on|off>`
 
 Set Do Not Disturb status.
 
@@ -643,10 +643,10 @@ Set Do Not Disturb status.
 - `off` - Disable DND
 
 ```bash
-crossbar --dnd-set on
+crossbar dnd set on
 # Output: DND set to on
 
-crossbar --dnd-set off
+crossbar dnd set off
 # Output: DND set to off
 ```
 
@@ -656,15 +656,15 @@ crossbar --dnd-set off
 
 ## Bluetooth
 
-### `--bluetooth-status`
+### `bluetooth status`
 
 Get Bluetooth status.
 
 ```bash
-crossbar --bluetooth-status
+crossbar bluetooth status
 # Output: Bluetooth: on
 
-crossbar --bluetooth-status --json
+crossbar bluetooth status --json
 # Output: {"bluetooth":"on"}
 ```
 
@@ -674,12 +674,12 @@ Returns: `on`, `off`, or `unavailable`
 
 ---
 
-### `--bluetooth-on`
+### `bluetooth on`
 
 Enable Bluetooth.
 
 ```bash
-crossbar --bluetooth-on
+crossbar bluetooth on
 # Output: Bluetooth enabled
 ```
 
@@ -687,12 +687,12 @@ crossbar --bluetooth-on
 
 ---
 
-### `--bluetooth-off`
+### `bluetooth off`
 
 Disable Bluetooth.
 
 ```bash
-crossbar --bluetooth-off
+crossbar bluetooth off
 # Output: Bluetooth disabled
 ```
 
@@ -700,17 +700,17 @@ crossbar --bluetooth-off
 
 ---
 
-### `--bluetooth-devices`
+### `bluetooth devices`
 
 List paired Bluetooth devices.
 
 ```bash
-crossbar --bluetooth-devices
+crossbar bluetooth devices
 # Output:
 # AA:BB:CC:DD:EE:FF: Bluetooth Headphones
 # 11:22:33:44:55:66: Wireless Mouse
 
-crossbar --bluetooth-devices --json
+crossbar bluetooth devices --json
 # Output: [
 #   {"mac":"AA:BB:CC:DD:EE:FF","name":"Bluetooth Headphones"},
 #   {"mac":"11:22:33:44:55:66","name":"Wireless Mouse"}
@@ -723,18 +723,18 @@ crossbar --bluetooth-devices --json
 
 ## VPN
 
-### `--vpn-status`
+### `vpn status`
 
 Get VPN connection status.
 
 ```bash
-crossbar --vpn-status
+crossbar vpn status
 # Output: VPN: Connected (WireGuard)
 
-crossbar --vpn-status --json
+crossbar vpn status --json
 # Output: {"connected":true,"name":"WireGuard","type":"wireguard"}
 
-crossbar --vpn-status --xml
+crossbar vpn status --xml
 # Output: XML format with vpn root element
 ```
 
@@ -744,12 +744,12 @@ crossbar --vpn-status --xml
 
 ## Network
 
-### `--net-status`
+### `net status`
 
 Get network connection status.
 
 ```bash
-crossbar --net-status
+crossbar net status
 # Output: online
 ```
 
@@ -759,12 +759,12 @@ Returns: `online` or `offline`
 
 ---
 
-### `--net-ip`
+### `net ip`
 
 Get local IP address.
 
 ```bash
-crossbar --net-ip
+crossbar net ip
 # Output: 192.168.1.100
 ```
 
@@ -772,12 +772,12 @@ crossbar --net-ip
 
 ---
 
-### `--net-ip --public`
+### `net ip --public`
 
 Get public IP address (requires internet).
 
 ```bash
-crossbar --net-ip --public
+crossbar net ip --public
 # Output: 203.0.113.42
 ```
 
@@ -785,12 +785,12 @@ crossbar --net-ip --public
 
 ---
 
-### `--net-ssid`
+### `net ssid`
 
 Get connected WiFi SSID.
 
 ```bash
-crossbar --net-ssid
+crossbar net ssid
 # Output: MyWiFiNetwork
 ```
 
@@ -798,7 +798,7 @@ crossbar --net-ssid
 
 ---
 
-### `--net-ping <host>`
+### `net ping <host>`
 
 Ping a host and get latency.
 
@@ -807,10 +807,10 @@ Ping a host and get latency.
 - `host` - Hostname or IP address to ping
 
 ```bash
-crossbar --net-ping google.com
+crossbar net ping google.com
 # Output: 15.2 ms
 
-crossbar --net-ping 8.8.8.8
+crossbar net ping 8.8.8.8
 # Output: 12.8 ms
 ```
 
@@ -818,12 +818,12 @@ crossbar --net-ping 8.8.8.8
 
 ---
 
-### `--wifi-on`
+### `wifi on`
 
 Enable WiFi.
 
 ```bash
-crossbar --wifi-on
+crossbar wifi on
 # Output: WiFi enabled
 ```
 
@@ -831,12 +831,12 @@ crossbar --wifi-on
 
 ---
 
-### `--wifi-off`
+### `wifi off`
 
 Disable WiFi.
 
 ```bash
-crossbar --wifi-off
+crossbar wifi off
 # Output: WiFi disabled
 ```
 
@@ -844,7 +844,7 @@ crossbar --wifi-off
 
 ---
 
-### `--web <url>`
+### `web <url>`
 
 Make HTTP request.
 
@@ -861,16 +861,16 @@ Make HTTP request.
 
 ```bash
 # Simple GET
-crossbar --web https://api.github.com/users/octocat
+crossbar web https://api.github.com/users/octocat
 
 # POST with body
-crossbar --web https://api.example.com/data --method POST --body '{"key":"value"}'
+crossbar web https://api.example.com/data --method POST --body '{"key":"value"}'
 
 # With headers
-crossbar --web https://api.example.com --headers '{"Authorization":"Bearer token"}'
+crossbar web https://api.example.com --headers '{"Authorization":"Bearer token"}'
 
 # With timeout
-crossbar --web https://slow-api.com --timeout 2m
+crossbar web https://slow-api.com --timeout 2m
 ```
 
 **Platforms**: Linux, macOS, Windows
@@ -879,12 +879,12 @@ crossbar --web https://slow-api.com --timeout 2m
 
 ## Environment
 
-### `--home`
+### `home`
 
 Get home directory.
 
 ```bash
-crossbar --home
+crossbar home
 # Output: /home/helio
 ```
 
@@ -892,12 +892,12 @@ crossbar --home
 
 ---
 
-### `--temp`
+### `temp`
 
 Get temp directory.
 
 ```bash
-crossbar --temp
+crossbar temp
 # Output: /tmp
 ```
 
@@ -905,7 +905,7 @@ crossbar --temp
 
 ---
 
-### `--env [name]`
+### `env [name]`
 
 Get environment variable(s).
 
@@ -914,13 +914,13 @@ Get environment variable(s).
 - `name` - Optional variable name (all if omitted)
 
 ```bash
-crossbar --env PATH
+crossbar env PATH
 # Output: /usr/bin:/bin:/usr/local/bin
 
-crossbar --env
+crossbar env
 # Output: (all environment variables)
 
-crossbar --env --json
+crossbar env --json
 # Output: {"PATH":"/usr/bin:...", "HOME":"/home/user", ...}
 ```
 
@@ -928,12 +928,12 @@ crossbar --env --json
 
 ---
 
-### `--locale`
+### `locale`
 
 Get system locale.
 
 ```bash
-crossbar --locale
+crossbar locale
 # Output: en_US.UTF-8
 ```
 
@@ -941,12 +941,12 @@ crossbar --locale
 
 ---
 
-### `--timezone`
+### `timezone`
 
 Get timezone.
 
 ```bash
-crossbar --timezone
+crossbar timezone
 # Output: BRT
 ```
 
@@ -956,7 +956,7 @@ crossbar --timezone
 
 ## Files & Directories
 
-### `--file-exists <path>`
+### `file exists <path>`
 
 Check if file or directory exists.
 
@@ -965,13 +965,13 @@ Check if file or directory exists.
 - `path` - Path to check
 
 ```bash
-crossbar --file-exists /etc/passwd
+crossbar file exists /etc/passwd
 # Output: true
 
-crossbar --file-exists /nonexistent
+crossbar file exists /nonexistent
 # Output: false
 
-crossbar --file-exists /etc/passwd --json
+crossbar file exists /etc/passwd --json
 # Output: {"exists":true,"path":"/etc/passwd"}
 ```
 
@@ -979,7 +979,7 @@ crossbar --file-exists /etc/passwd --json
 
 ---
 
-### `--file-read <path>`
+### `file read <path>`
 
 Read file contents.
 
@@ -988,7 +988,7 @@ Read file contents.
 - `path` - Path to file
 
 ```bash
-crossbar --file-read /etc/hostname
+crossbar file read /etc/hostname
 # Output: my-computer
 ```
 
@@ -996,7 +996,7 @@ crossbar --file-read /etc/hostname
 
 ---
 
-### `--file-size <path>`
+### `file size <path>`
 
 Get file size.
 
@@ -1005,10 +1005,10 @@ Get file size.
 - `path` - Path to file
 
 ```bash
-crossbar --file-size /etc/passwd
+crossbar file size /etc/passwd
 # Output: 2.34 KB
 
-crossbar --file-size /etc/passwd --json
+crossbar file size /etc/passwd --json
 # Output: {"size":2396,"path":"/etc/passwd"}
 ```
 
@@ -1016,7 +1016,7 @@ crossbar --file-size /etc/passwd --json
 
 ---
 
-### `--dir-list [path]`
+### `dir list [path]`
 
 List directory contents.
 
@@ -1025,13 +1025,13 @@ List directory contents.
 - `path` - Directory path (default: current directory)
 
 ```bash
-crossbar --dir-list
+crossbar dir list
 # Output:
 # d Documents
 # d Downloads
 # - file.txt
 
-crossbar --dir-list /home --json
+crossbar dir list /home --json
 # Output: [
 #   {"name":"user","path":"/home/user","type":"directory","size":4096,...},
 #   ...
@@ -1042,7 +1042,7 @@ crossbar --dir-list /home --json
 
 ---
 
-### `--exec <command>`
+### `exec <command>`
 
 Execute shell command.
 
@@ -1051,10 +1051,10 @@ Execute shell command.
 - `command` - Command to execute
 
 ```bash
-crossbar --exec "ls -la"
+crossbar exec "ls -la"
 # Output: (directory listing)
 
-crossbar --exec "echo Hello World"
+crossbar exec "echo Hello World"
 # Output: Hello World
 ```
 
@@ -1064,7 +1064,7 @@ crossbar --exec "echo Hello World"
 
 ## Date & Time
 
-### `--time`
+### `time`
 
 Get current time.
 
@@ -1073,10 +1073,10 @@ Get current time.
 - `--fmt <12h|24h>` - Time format (default: 24h)
 
 ```bash
-crossbar --time
+crossbar time
 # Output: 14:30
 
-crossbar --time --fmt 12h
+crossbar time --fmt 12h
 # Output: 02:30 PM
 ```
 
@@ -1084,7 +1084,7 @@ crossbar --time --fmt 12h
 
 ---
 
-### `--date`
+### `date`
 
 Get current date.
 
@@ -1093,16 +1093,16 @@ Get current date.
 - `--fmt <iso|us|eu|unix>` - Date format (default: iso)
 
 ```bash
-crossbar --date
+crossbar date
 # Output: 2025-12-01
 
-crossbar --date --fmt us
+crossbar date --fmt us
 # Output: 12/1/2025
 
-crossbar --date --fmt eu
+crossbar date --fmt eu
 # Output: 1/12/2025
 
-crossbar --date --fmt unix
+crossbar date --fmt unix
 # Output: 1733011200
 ```
 
@@ -1110,12 +1110,12 @@ crossbar --date --fmt unix
 
 ---
 
-### `--calendar`
+### `calendar`
 
 Display current month calendar.
 
 ```bash
-crossbar --calendar
+crossbar calendar
 # Output:
 #    December 2025
 # Su Mo Tu We Th Fr Sa
@@ -1130,7 +1130,7 @@ crossbar --calendar
 
 ---
 
-### `--countdown <seconds>`
+### `countdown <seconds>`
 
 Start countdown timer.
 
@@ -1139,10 +1139,10 @@ Start countdown timer.
 - `seconds` - Number of seconds
 
 ```bash
-crossbar --countdown 60
+crossbar countdown 60
 # Output: 1:00
 
-crossbar --countdown 300 --json
+crossbar countdown 300 --json
 # Output: {"remaining":300,"target":"2025-12-01T14:35:00.000"}
 ```
 
@@ -1152,12 +1152,12 @@ crossbar --countdown 300 --json
 
 ## Clipboard
 
-### `--clipboard`
+### `clipboard`
 
 Get clipboard content.
 
 ```bash
-crossbar --clipboard
+crossbar clipboard
 # Output: (clipboard contents)
 ```
 
@@ -1165,7 +1165,7 @@ crossbar --clipboard
 
 ---
 
-### `--clipboard-set <text>`
+### `clipboard set <text>`
 
 Set clipboard content.
 
@@ -1174,7 +1174,7 @@ Set clipboard content.
 - `text` - Text to copy
 
 ```bash
-crossbar --clipboard-set "Hello World"
+crossbar clipboard set "Hello World"
 # Output: Copied to clipboard
 ```
 
@@ -1184,7 +1184,7 @@ crossbar --clipboard-set "Hello World"
 
 ## Utilities
 
-### `--hash <text>`
+### `hash <text>`
 
 Hash text with specified algorithm.
 
@@ -1198,13 +1198,13 @@ Hash text with specified algorithm.
   - Supported: `md5`, `sha1`, `sha256`, `sha384`, `sha512`
 
 ```bash
-crossbar --hash "Hello World"
+crossbar hash "Hello World"
 # Output: a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e
 
-crossbar --hash "Hello World" --algo md5
+crossbar hash "Hello World" --algo md5
 # Output: b10a8db164e0754105b7a99be72e3fe5
 
-crossbar --hash "Hello World" --algo sha1
+crossbar hash "Hello World" --algo sha1
 # Output: 0a4d55a8d778e5022fab701977c5d840bbc486d0
 ```
 
@@ -1212,12 +1212,12 @@ crossbar --hash "Hello World" --algo sha1
 
 ---
 
-### `--uuid`
+### `uuid`
 
 Generate UUID v4.
 
 ```bash
-crossbar --uuid
+crossbar uuid
 # Output: 550e8400-e29b-41d4-a716-446655440000
 ```
 
@@ -1225,7 +1225,7 @@ crossbar --uuid
 
 ---
 
-### `--random [min] [max]`
+### `random [min] [max]`
 
 Generate random number.
 
@@ -1235,13 +1235,13 @@ Generate random number.
 - `max` - Maximum value (default: 100)
 
 ```bash
-crossbar --random
+crossbar random
 # Output: 42
 
-crossbar --random 1 10
+crossbar random 1 10
 # Output: 7
 
-crossbar --random 100 999
+crossbar random 100 999
 # Output: 547
 ```
 
@@ -1249,7 +1249,7 @@ crossbar --random 100 999
 
 ---
 
-### `--base64-encode <text>`
+### `base64 encode <text>`
 
 Encode text to base64.
 
@@ -1258,7 +1258,7 @@ Encode text to base64.
 - `text` - Text to encode
 
 ```bash
-crossbar --base64-encode "Hello World"
+crossbar base64 encode "Hello World"
 # Output: SGVsbG8gV29ybGQ=
 ```
 
@@ -1266,7 +1266,7 @@ crossbar --base64-encode "Hello World"
 
 ---
 
-### `--base64-decode <text>`
+### `base64 decode <text>`
 
 Decode base64 text.
 
@@ -1275,7 +1275,7 @@ Decode base64 text.
 - `text` - Base64 text to decode
 
 ```bash
-crossbar --base64-decode "SGVsbG8gV29ybGQ="
+crossbar base64 decode "SGVsbG8gV29ybGQ="
 # Output: Hello World
 ```
 
@@ -1307,7 +1307,7 @@ crossbar init --lang python --type monitor --name cpu-monitor
 # Next steps:
 #   1. Edit the plugin file to add your logic
 #   2. Customize the config file for settings
-#   3. Test with: crossbar --exec "python3 ~/.config/crossbar/plugins/python/cpu-monitor.10s.py"
+#   3. Test with: crossbar exec "python3 ~/.config/crossbar/plugins/python/cpu-monitor.10s.py"
 
 crossbar init --lang bash --type clock
 # Output: Plugin created with 1s interval
@@ -1355,7 +1355,7 @@ crossbar install https://github.com/user/my-crossbar-plugin
 
 ## System Actions
 
-### `--notify`
+### `notify`
 
 Send desktop notification.
 
@@ -1370,13 +1370,13 @@ Send desktop notification.
 - `--priority <level>` - Priority: `low`, `normal`, `critical`
 
 ```bash
-crossbar --notify "Build Complete" "All tests passed!"
+crossbar notify "Build Complete" "All tests passed!"
 # Output: Notification sent
 
-crossbar --notify "Warning" "Disk space low" --priority critical
+crossbar notify "Warning" "Disk space low" --priority critical
 # Output: Notification sent
 
-crossbar --notify "Update" "New version available" --icon software-update
+crossbar notify "Update" "New version available" --icon software-update
 # Output: Notification sent
 ```
 
@@ -1384,7 +1384,7 @@ crossbar --notify "Update" "New version available" --icon software-update
 
 ---
 
-### `--open-url <url>`
+### `open url <url>`
 
 Open URL in default browser.
 
@@ -1393,7 +1393,7 @@ Open URL in default browser.
 - `url` - URL to open
 
 ```bash
-crossbar --open-url https://github.com
+crossbar open url https://github.com
 # Output: Opened: https://github.com
 ```
 
@@ -1401,7 +1401,7 @@ crossbar --open-url https://github.com
 
 ---
 
-### `--open-file <path>`
+### `open file <path>`
 
 Open file with default application.
 
@@ -1410,7 +1410,7 @@ Open file with default application.
 - `path` - File path
 
 ```bash
-crossbar --open-file ~/Documents/report.pdf
+crossbar open file ~/Documents/report.pdf
 # Output: Opened: /home/user/Documents/report.pdf
 ```
 
@@ -1418,7 +1418,7 @@ crossbar --open-file ~/Documents/report.pdf
 
 ---
 
-### `--open-app <name>`
+### `open app <name>`
 
 Launch application by name.
 
@@ -1427,10 +1427,10 @@ Launch application by name.
 - `name` - Application name
 
 ```bash
-crossbar --open-app firefox
+crossbar open app firefox
 # Output: Launched: firefox
 
-crossbar --open-app "Visual Studio Code"
+crossbar open app "Visual Studio Code"
 # Output: Launched: Visual Studio Code
 ```
 
@@ -1438,12 +1438,12 @@ crossbar --open-app "Visual Studio Code"
 
 ---
 
-### `--process-count`
+### `process count`
 
 Get number of running processes.
 
 ```bash
-crossbar --process-count
+crossbar process count
 # Output: 247
 ```
 
@@ -1456,39 +1456,39 @@ crossbar --process-count
 | Command               |   Linux    | macOS | Windows |
 | --------------------- | :--------: | :---: | :-----: |
 | **System Info**       |
-| `--cpu`               |     ✅     |  ✅   |   ✅    |
-| `--memory`            |     ✅     |  ✅   |   ✅    |
-| `--battery`           |     ✅     |  ✅   |   ✅    |
-| `--uptime`            |     ✅     |  ✅   |   ✅    |
-| `--disk`              |     ✅     |  ✅   |   ✅    |
-| `--os`                |     ✅     |  ✅   |   ✅    |
-| `--hostname`          |     ✅     |  ✅   |   ✅    |
-| `--username`          |     ✅     |  ✅   |   ✅    |
-| `--kernel`            |     ✅     |  ✅   |   ✅    |
-| `--arch`              |     ✅     |  ✅   |   ✅    |
-| `--screen-size`       |  ✅ (X11)  |  ✅   |   ✅    |
-| `--volume`            |  ✅ (PA)   |  ✅   |   ⚠️    |
-| `--brightness`        |     ✅     |  ✅   |   ❌    |
+| cpu                 |     ✅     |  ✅   |   ✅    |
+| memory                |     ✅     |  ✅   |   ✅    |
+| battery               |     ✅     |  ✅   |   ✅    |
+| uptime                |     ✅     |  ✅   |   ✅    |
+| disk                  |     ✅     |  ✅   |   ✅    |
+| os                    |     ✅     |  ✅   |   ✅    |
+| hostname              |     ✅     |  ✅   |   ✅    |
+| username              |     ✅     |  ✅   |   ✅    |
+| kernel                |     ✅     |  ✅   |   ✅    |
+| arch                  |     ✅     |  ✅   |   ✅    |
+| screen-size           |  ✅ (X11)  |  ✅   |   ✅    |
+| volume                |  ✅ (PA)   |  ✅   |   ⚠️    |
+| brightness            |     ✅     |  ✅   |   ❌    |
 | **Media Controls**    |
-| `--media-*`           | ✅ (MPRIS) |  ✅   |   ✅    |
+| media-*               | ✅ (MPRIS) |  ✅   |   ✅    |
 | **Audio Controls**    |
-| `--audio-*`           |  ✅ (PA)   |  ✅   |   ✅    |
+| audio-*               |  ✅ (PA)   |  ✅   |   ✅    |
 | **Screen Controls**   |
-| `--screen-brightness` |     ✅     |  ✅   |   ⚠️    |
-| `--screenshot`        |     ✅     |  ✅   |   ✅    |
-| `--wallpaper-*`       |     ✅     |  ✅   |   ✅    |
+| screen-brightness     |     ✅     |  ✅   |   ⚠️    |
+| screenshot            |     ✅     |  ✅   |   ✅    |
+| wallpaper-*           |     ✅     |  ✅   |   ✅    |
 | **Power**             |
-| `--power-*`           |     ✅     |  ✅   |   ✅    |
+| power-*               |     ✅     |  ✅   |   ✅    |
 | **DND**               |
-| `--dnd-*`             | ✅ (GNOME) |  ✅   |   ⚠️    |
+| dnd-*                 | ✅ (GNOME) |  ✅   |   ⚠️    |
 | **Bluetooth**         |
-| `--bluetooth-*`       |     ✅     |  ✅   |   ✅    |
+| bluetooth-*           |     ✅     |  ✅   |   ✅    |
 | **VPN**               |
-| `--vpn-status`        |     ✅     |  ✅   |   ✅    |
+| vpn-status            |     ✅     |  ✅   |   ✅    |
 | **Network**           |
-| `--net-*`             |     ✅     |  ✅   |   ✅    |
-| `--wifi-*`            |     ✅     |  ✅   |   ✅    |
-| `--web`               |     ✅     |  ✅   |   ✅    |
+| net-*                 |     ✅     |  ✅   |   ✅    |
+| wifi-*                |     ✅     |  ✅   |   ✅    |
+| web                   |     ✅     |  ✅   |   ✅    |
 | **Environment**       |
 | All                   |     ✅     |  ✅   |   ✅    |
 | **Files**             |
@@ -1496,17 +1496,17 @@ crossbar --process-count
 | **Date/Time**         |
 | All                   |     ✅     |  ✅   |   ✅    |
 | **Clipboard**         |
-| `--clipboard`         | ✅ (xclip) |  ✅   |   ✅    |
-| `--clipboard-set`     | ✅ (xclip) |  ✅   |   ✅    |
+| clipboard             | ✅ (xclip) |  ✅   |   ✅    |
+| clipboard-set         | ✅ (xclip) |  ✅   |   ✅    |
 | **Utilities**         |
 | All                   |     ✅     |  ✅   |   ✅    |
 | **Plugin Mgmt**       |
 | `init`                |     ✅     |  ✅   |   ✅    |
 | `install`             |     ✅     |  ✅   |   ✅    |
 | **System Actions**    |
-| `--notify`            |     ✅     |  ✅   |   ✅    |
-| `--open-*`            |     ✅     |  ✅   |   ✅    |
-| `--process-count`     |     ✅     |  ✅   |   ✅    |
+| notify                |     ✅     |  ✅   |   ✅    |
+| open-*                |     ✅     |  ✅   |   ✅    |
+| process-count         |     ✅     |  ✅   |   ✅    |
 
 **Legend**:
 
@@ -1535,22 +1535,22 @@ crossbar --process-count
 
 ```bash
 # Morning check
-crossbar --battery
-crossbar --net-status
-crossbar --dnd-set off
+crossbar battery
+crossbar net status
+crossbar dnd set off
 
 # Development
-crossbar --notify "Build Started" "Running tests..."
-crossbar --exec "npm test"
-crossbar --notify "Build Complete" "All tests passed!"
+crossbar notify "Build Started" "Running tests..."
+crossbar exec "npm test"
+crossbar notify "Build Complete" "All tests passed!"
 
 # Media control
-crossbar --media-play-pause
-crossbar --audio-volume-set 30
+crossbar media play-pause
+crossbar audio volume-set 30
 
 # End of day
-crossbar --dnd-set on
-crossbar --power-sleep
+crossbar dnd set on
+crossbar power sleep
 ```
 
 ### Scripting
@@ -1559,10 +1559,10 @@ crossbar --power-sleep
 #!/bin/bash
 # Battery warning script
 
-LEVEL=$(crossbar --battery --json | jq '.level')
+LEVEL=$(crossbar battery --json | jq '.level')
 
 if [ "$LEVEL" -lt 20 ]; then
-    crossbar --notify "Low Battery" "Battery at $LEVEL%" --priority critical
+    crossbar notify "Low Battery" "Battery at $LEVEL%" --priority critical
 fi
 ```
 
@@ -1573,7 +1573,7 @@ fi
 crossbar init --lang python --type monitor --name disk-usage
 
 # Test it
-crossbar --exec "python3 ~/.config/crossbar/plugins/python/disk-usage.10s.py"
+crossbar exec "python3 ~/.config/crossbar/plugins/python/disk-usage.10s.py"
 
 # Install community plugin
 crossbar install https://github.com/example/crossbar-weather-plugin

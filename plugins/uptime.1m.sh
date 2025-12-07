@@ -2,10 +2,7 @@
 # System Uptime
 # Shows how long the system has been running
 
-uptime_str=$(uptime | awk -F'up ' '{print $2}' | awk -F',' '{print $1}')
+uptime_output=$(crossbar uptime) # Example: "3d 12h 45m"
 
-echo " $uptime_str"
-echo "---"
-echo "Uptime: $uptime_str"
-echo "---"
-echo "Refresh | refresh=true"
+icon="⬆️"
+color="green"

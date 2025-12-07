@@ -1,98 +1,77 @@
-// +build ignore
-
 package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
+	"os/exec"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	level, charging := getBatteryStatus()
+	// Default values
+	batteryLevel := "N/A"
+	batteryStatus := "?"
+	batteryIcon := "\U0001F50B" // Battery icon
 
-	if level < 0 {
-		fmt.Println("\U0001F50C N/A")
-		return
-	}
+	// Use Crossbar CLI API to get battery status
+	cmd := exec.Command("crossbar", "battery")
+	out, err := cmd.Output()
+	if err == nil {
+		batteryInfo := strings.TrimSpace(string(out)) // Example: "87% ⚡" or "50%"
 
-	// Determine icon and color based on level and charging state
-	var icon, color string
-	if charging {
-		icon = "\u26A1" // lightning bolt
-		color = "blue"
-	} else {
-		switch {
-		case level <= 10:
-			icon = "\U0001FAAB" // empty battery
-			color = "red"
-		case level <= 25:
-			icon = "\U0001F50B" // battery
-			color = "orange"
-		case level <= 50:
-			icon = "\U0001F50B"
-			color = "yellow"
-		default:
-			icon = "\U0001F50B"
-			color = "green"
+		// Extract percentage
+		levelStr := ""
+		for _, r := range batteryInfo {
+			if r >= '0' && r <= '9' {
+				levelStr += string(r)
+			} else if levelStr != "" {
+				break
+			}
+		}
+		if levelStr != "" {
+			batteryLevel = levelStr
+		}
+
+		// Determine status
+		if strings.Contains(batteryInfo, "⚡") {
+			batteryStatus = "Charging"
+		} else if strings.Contains(batteryInfo, "Full") || (levelStr == "100" && !strings.Contains(batteryInfo, "Discharging")) {
+			batteryStatus = "Full"
+		} else {
+			batteryStatus = "Discharging"
 		}
 	}
 
-	fmt.Printf("%s %d%% | color=%s\n", icon, level, color)
-	fmt.Println("---")
-	fmt.Printf("Battery Level: %d%%\n", level)
-	if charging {
-		fmt.Println("Status: Charging")
-	} else {
-		fmt.Println("Status: Discharging")
+	// Determine icon and color
+	var color string
+	switch batteryStatus {
+	case "Charging":
+		batteryIcon = "\U000026A1" // Lightning bolt
+		color = "green"
+	case "Full":
+		batteryIcon = "\U0001F50B" // Full battery icon
+		color = "green"
+	case "Discharging":
+		level, _ := strconv.Atoi(batteryLevel)
+		switch {
+		case level <= 20:
+			batteryIcon = "\U0001F50C" // Low battery icon
+			color = "red"
+		case level <= 50:
+			batteryIcon = "\U0001F50D" // Half battery icon
+			color = "yellow"
+		default:
+			batteryIcon = "\U0001F50B" // Full battery icon
+			color = "green"
+		}
+	default: // Unknown
+		batteryIcon = "\U0001F50B"
+		color = "gray"
 	}
+
+	// Print output
+	fmt.Printf("%s %s%% | color=%s\n", batteryIcon, batteryLevel, color)
 	fmt.Println("---")
+	fmt.Printf("Status: %s\n", batteryStatus)
 	fmt.Println("Refresh | refresh=true")
-}
-
-func getBatteryStatus() (int, bool) {
-	switch runtime.GOOS {
-	case "linux":
-		return getLinuxBattery()
-	case "darwin":
-		return getMacOSBattery()
-	default:
-		return -1, false
-	}
-}
-
-func getLinuxBattery() (int, bool) {
-	// Find battery in /sys/class/power_supply/
-	matches, _ := filepath.Glob("/sys/class/power_supply/BAT*")
-	if len(matches) == 0 {
-		return -1, false
-	}
-
-	batPath := matches[0]
-
-	// Read capacity
-	capacityData, err := os.ReadFile(filepath.Join(batPath, "capacity"))
-	if err != nil {
-		return -1, false
-	}
-	level, _ := strconv.Atoi(strings.TrimSpace(string(capacityData)))
-
-	// Read status
-	statusData, err := os.ReadFile(filepath.Join(batPath, "status"))
-	charging := false
-	if err == nil {
-		status := strings.TrimSpace(string(statusData))
-		charging = status == "Charging" || status == "Full"
-	}
-
-	return level, charging
-}
-
-func getMacOSBattery() (int, bool) {
-	// On macOS, we would use pmset or IOKit
-	// For simplicity, return -1 (not available)
-	return -1, false
 }
