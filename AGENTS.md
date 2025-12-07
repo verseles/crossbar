@@ -1,7 +1,7 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
+> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification para notificar o usuário.
 
 Atenção: Este projeto ainda não foi lançado, não se preocupe com breking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
@@ -41,7 +41,8 @@ Quando terminar uma tarefa OU o usuário desenvolvedor disser simplesmente "ship
 10. Criar uma nova tag v patch incremental (dispara pipeline de release)
 11. Push para o github
 12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
-13. Notificar o usuário com a tool play_notification (se disponível) para notificar o usuário
+13. Notificar o usuário com a tool play_notification para notificar o usuário
+14. Apresentar resumo das alterações
 
 Caso alguma dessas etapas falhe, corrija e repita.
 Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
@@ -273,13 +274,14 @@ pkill -9 -f crossbar-gui; pkill -9 -f crossbar; flutter build linux --release &&
 
 **SEMPRE**:
 
+- Busque na web por documentação ou questões similares. Use com frequência. Antes de iniciar uma tarefa ou ao encontrar erros.
 - Teste a compilação do código antes de commitar.
 - Commite código funcional incrementalmente.
 - Atualize a documentação do plano conforme avança.
 - Aprenda com implementações existentes.
 - Pare após 3 tentativas falhas e reavalie.
 - Atualize o ROADMAP.md conforme avança.
-- Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
+- Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification para notificar o usuário.
 
 ---
 

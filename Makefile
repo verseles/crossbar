@@ -10,19 +10,25 @@ WINDOWS_BUNDLE = build/windows/x64/runner/Release
 # Default target
 all: linux
 
-# Linux build with launcher architecture
+# Linux build with unified CLI entry point
+# Architecture: crossbar (CLI + launcher) + crossbar-gui (Flutter)
 linux:
 	@echo "Building Flutter GUI..."
 	flutter build linux --release
-	@echo "Setting up launcher architecture..."
+	@echo "Setting up unified architecture..."
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
-	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar-cli
-	dart compile exe bin/launcher.dart -o $(LINUX_BUNDLE)/crossbar
+	@echo "Compiling unified CLI..."
+	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar
 	@echo "Copying desktop integration files..."
 	cp linux/crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
+	@echo ""
+	@echo "  crossbar     - CLI + launcher (runs GUI if no args)"
+	@echo "  crossbar-gui - Flutter GUI application"
+	@echo ""
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
+
 
 # Install Crossbar on Linux (after build)
 # Installs to ~/.local/ for user-level installation
@@ -37,9 +43,8 @@ install:
 	@mkdir -p $(HOME)/.crossbar/plugins
 	@# Copy entire bundle
 	@cp -r $(LINUX_BUNDLE)/* $(INSTALL_DIR)/share/crossbar/
-	@# Create symlinks in bin
+	@# Create symlink in bin
 	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar $(INSTALL_DIR)/bin/crossbar
-	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar-cli $(INSTALL_DIR)/bin/crossbar-cli
 	@# Install desktop file with correct paths
 	@sed 's|Icon=crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/bin/crossbar|' \
 		linux/crossbar.desktop > $(INSTALL_DIR)/share/applications/crossbar.desktop
@@ -61,7 +66,6 @@ install:
 uninstall:
 	@echo "Uninstalling Crossbar..."
 	@rm -f $(INSTALL_DIR)/bin/crossbar
-	@rm -f $(INSTALL_DIR)/bin/crossbar-cli
 	@rm -rf $(INSTALL_DIR)/share/crossbar
 	@rm -f $(INSTALL_DIR)/share/applications/crossbar.desktop
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png
@@ -69,24 +73,22 @@ uninstall:
 	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
 
-# macOS build with launcher architecture
+# macOS build with unified CLI entry point
 macos:
 	@echo "Building Flutter GUI..."
 	flutter build macos --release
-	@echo "Setting up launcher architecture..."
+	@echo "Setting up unified architecture..."
 	mv $(MACOS_BUNDLE)/crossbar $(MACOS_BUNDLE)/crossbar-gui
-	dart compile exe bin/crossbar.dart -o $(MACOS_BUNDLE)/crossbar-cli
-	dart compile exe bin/launcher.dart -o $(MACOS_BUNDLE)/crossbar
+	dart compile exe bin/crossbar.dart -o $(MACOS_BUNDLE)/crossbar
 	@echo "Done! Binaries at $(MACOS_BUNDLE)/"
 
-# Windows build with launcher architecture
+# Windows build with unified CLI entry point
 windows:
 	@echo "Building Flutter GUI..."
 	flutter build windows --release
-	@echo "Setting up launcher architecture..."
+	@echo "Setting up unified architecture..."
 	mv $(WINDOWS_BUNDLE)/crossbar.exe $(WINDOWS_BUNDLE)/crossbar-gui.exe
-	dart compile exe bin/crossbar.dart -o $(WINDOWS_BUNDLE)/crossbar-cli.exe
-	dart compile exe bin/launcher.dart -o $(WINDOWS_BUNDLE)/crossbar.exe
+	dart compile exe bin/crossbar.dart -o $(WINDOWS_BUNDLE)/crossbar.exe
 	@echo "Done! Binaries at $(WINDOWS_BUNDLE)/"
 
 # Android build
