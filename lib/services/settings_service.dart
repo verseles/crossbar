@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:crossbar/services/logger_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,9 +71,65 @@ class SettingsService extends ChangeNotifier {
     if (_startWithSystem != value) {
       _startWithSystem = value;
       _saveBool(_keyStartWithSystem, value);
+      _updateAutostart(value);
       notifyListeners();
     }
   }
+
+  /// Creates or removes the autostart entry for Linux/freedesktop systems.
+  /// The autostart file is placed in ~/.config/autostart/crossbar.desktop
+  Future<void> _updateAutostart(bool enable) async {
+    // Only applicable on Linux
+    if (!Platform.isLinux) return;
+
+    try {
+      final homeDir = Platform.environment['HOME'];
+      if (homeDir == null) {
+        LoggerService().warning('HOME environment variable not set, cannot manage autostart');
+        return;
+      }
+
+      final autostartDir = Directory('$homeDir/.config/autostart');
+      final autostartFile = File('${autostartDir.path}/crossbar.desktop');
+
+      if (enable) {
+        // Create autostart directory if it doesn't exist
+        if (!await autostartDir.exists()) {
+          await autostartDir.create(recursive: true);
+        }
+
+        // Create the desktop entry content
+        // Try to find the installed executable path
+        final localBin = '$homeDir/.local/bin/crossbar';
+        final execPath = await File(localBin).exists() 
+            ? localBin 
+            : 'crossbar'; // Fallback to PATH lookup
+
+        final desktopEntry = '''[Desktop Entry]
+Type=Application
+Name=Crossbar
+Comment=Universal Plugin System for Taskbar/Menu Bar
+Exec=$execPath
+Icon=crossbar
+Terminal=false
+StartupWMClass=crossbar
+X-GNOME-Autostart-enabled=true
+''';
+
+        await autostartFile.writeAsString(desktopEntry);
+        LoggerService().info('Autostart entry created at ${autostartFile.path}');
+      } else {
+        // Remove autostart file if it exists
+        if (await autostartFile.exists()) {
+          await autostartFile.delete();
+          LoggerService().info('Autostart entry removed: ${autostartFile.path}');
+        }
+      }
+    } catch (e, stackTrace) {
+      LoggerService().error('Failed to update autostart entry', e, stackTrace);
+    }
+  }
+
 
   set showInTray(bool value) {
     if (_showInTray != value) {

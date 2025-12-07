@@ -359,11 +359,11 @@ menu:
 - [x] **Traduzir:** Atualizar os 12 arquivos de idiomas (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, zh)
 - [x] **Substituir:** Trocar strings por `l10n.keyName` em todo o código
 
-### Fase 2: Linux Desktop Integration
+### Fase 2: Linux Desktop Integration ✅
 
-- [ ] **Testar install:** Verificar se `make install` funciona corretamente
-- [ ] **Ícone taskbar:** Confirmar que WM_CLASS funciona com diferentes DEs (GNOME, KDE, etc.)
-- [ ] **Auto-start:** Adicionar opção de criar autostart entry
+- [x] **Testar install:** Verificar se `make install` funciona corretamente
+- [x] **Ícone taskbar:** Confirmar que WM_CLASS funciona com diferentes DEs (GNOME, KDE, etc.)
+- [x] **Auto-start:** Adicionar opção de criar autostart entry (~/.config/autostart/crossbar.desktop)
 
 ### Fase 3: Android Polish
 
