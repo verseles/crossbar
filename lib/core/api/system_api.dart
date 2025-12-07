@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
+import 'package:battery_plus/battery_plus.dart';
+
 class SystemApi {
   SystemApi();
 
@@ -21,16 +23,20 @@ class SystemApi {
         return _getWindowsCpuUsage();
       }
 
+      if (Platform.isAndroid) {
+        return _getAndroidCpuUsage();
+      }
+
       return '0.0';
     } catch (e) {
       return '0.0';
     }
   }
 
-  /// Synchronous CPU usage (Stateful for Linux)
+  /// Synchronous CPU usage (Stateful for Linux/Android)
   String getCpuUsageSync() {
     try {
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxCpuUsageSync();
       }
       return '0.0';
@@ -145,11 +151,44 @@ class SystemApi {
     return '0.0';
   }
 
+  /// Android CPU usage via /proc/stat
+  /// Note: This might not work on Android 8+ due to security restrictions
+  Future<String> _getAndroidCpuUsage() async {
+    try {
+      // Android also uses /proc/stat like Linux
+      // But it may be blocked on Android 8+ (Oreo)
+      final stat1 = await File('/proc/stat').readAsString();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final stat2 = await File('/proc/stat').readAsString();
+
+      final values1 = _parseProcStat(stat1);
+      final values2 = _parseProcStat(stat2);
+
+      if (values1 == null || values2 == null) return '0.0';
+
+      final idle1 = values1[3];
+      final idle2 = values2[3];
+      final total1 = values1.reduce((a, b) => a + b);
+      final total2 = values2.reduce((a, b) => a + b);
+
+      final idleDelta = idle2 - idle1;
+      final totalDelta = total2 - total1;
+
+      if (totalDelta == 0) return '0.0';
+
+      final usage = (totalDelta - idleDelta) / totalDelta * 100;
+      return usage.toStringAsFixed(1);
+    } catch (e) {
+      // /proc/stat might be blocked on newer Android versions
+      return '0.0';
+    }
+  }
+
   // MEMORY
 
   Future<String> getMemoryUsage() async {
     try {
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxMemoryUsage();
       }
       if (Platform.isMacOS) {
@@ -166,7 +205,7 @@ class SystemApi {
 
   String getMemoryUsageSync() {
     try {
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxMemoryUsageSync();
       }
       // TODO: Implement sync for macOS/Windows if needed
@@ -252,6 +291,8 @@ class SystemApi {
 
   // BATTERY
 
+  final Battery _battery = Battery();
+
   Future<String> getBatteryStatus() async {
     try {
       if (Platform.isLinux) {
@@ -263,7 +304,24 @@ class SystemApi {
       if (Platform.isWindows) {
         return _getWindowsBatteryStatus();
       }
+      if (Platform.isAndroid || Platform.isIOS) {
+        return _getMobileBatteryStatus();
+      }
       return 'N/A';
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
+  /// Mobile battery status using battery_plus
+  Future<String> _getMobileBatteryStatus() async {
+    try {
+      final level = await _battery.batteryLevel;
+      final state = await _battery.batteryState;
+
+      final isCharging =
+          state == BatteryState.charging || state == BatteryState.full;
+      return '$level%${isCharging ? " ⚡" : ""}';
     } catch (e) {
       return 'N/A';
     }
