@@ -8,7 +8,24 @@ MACOS_BUNDLE = build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
 WINDOWS_BUNDLE = build/windows/x64/runner/Release
 
 # Default target
-all: linux
+# Detect OS and set default target
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+    DEFAULT_TARGET = macos
+else ifneq (,$(findstring MINGW,$(UNAME_S)))
+    DEFAULT_TARGET = windows
+else ifneq (,$(findstring CYGWIN,$(UNAME_S)))
+    DEFAULT_TARGET = windows
+else ifeq ($(OS),Windows_NT)
+    DEFAULT_TARGET = windows
+else
+    DEFAULT_TARGET = linux
+endif
+
+# Default target
+all: $(DEFAULT_TARGET)
+	@echo "Building for detected OS: $(DEFAULT_TARGET)"
 
 # Linux build with unified CLI entry point
 # Architecture: crossbar (CLI + launcher) + crossbar-gui (Flutter)
