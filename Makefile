@@ -46,7 +46,8 @@ install:
 	@# Create symlink in bin
 	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar $(INSTALL_DIR)/bin/crossbar
 	@# Install desktop file with correct paths
-	@sed 's|Icon=crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/bin/crossbar|' \
+	@# Note: Exec points to crossbar-gui directly so GNOME can match WM_CLASS with process
+	@sed 's|Icon=crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/share/crossbar/crossbar-gui|' \
 		linux/crossbar.desktop > $(INSTALL_DIR)/share/applications/crossbar.desktop
 	@# Install icons
 	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png

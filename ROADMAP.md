@@ -23,7 +23,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **Configuração:** UI existe, mas não salva dados nem injeta no plugin.
 - **Mobile Widgets:** `WidgetService` existe mas não comunica com layouts nativos (XML/SwiftUI).
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
-- **API Gaps:** Comandos como `--location` (geocoding) e `--qr` não têm lógica implementada.
+- **API Gaps:** Comandos como `location` (geocoding) e `qr` não têm lógica implementada.
 
 ---
 
@@ -112,7 +112,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 ### Fase 1: Reescrever Plugins Exemplo (API-First) ✅
 
 > **Problema:** Plugins atuais usam `curl`, `top`, `/proc` diretamente, quebrando portabilidade.
-> **Solução:** Reescrever para usar `crossbar --cpu`, `crossbar --web`, etc.
+> **Solução:** Reescrever para usar `crossbar cpu`, `crossbar web`, etc.
 
 - [x] **Definir Catálogo:** 6 plugins × 6 linguagens = 36 arquivos
   - [x] clock (tempo) - 6 linguagens
@@ -121,12 +121,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] memory (sistema) - 6 linguagens
   - [x] weather (API + config) - 6 linguagens + schema
   - [x] bitcoin (API) - 6 linguagens
-- [x] **Reescrever Bash:** Usar `$(crossbar --cpu)` em vez de `top | grep`
-- [x] **Reescrever Python:** Usar `subprocess.run(['crossbar', '--cpu'])`
-- [x] **Reescrever Node:** Usar `execSync('crossbar --cpu')`
-- [x] **Reescrever Dart:** Usar `Process.runSync('crossbar', ['--cpu'])`
-- [x] **Reescrever Go:** Usar `exec.Command("crossbar", "--cpu")`
-- [x] **Reescrever Rust:** Usar `Command::new("crossbar").arg("--cpu")`
+- [x] **Reescrever Bash:** Usar `$(crossbar cpu)` em vez de `top | grep`
+- [x] **Reescrever Python:** Usar `subprocess.run(['crossbar', 'cpu'])`
+- [x] **Reescrever Node:** Usar `execSync('crossbar cpu')`
+- [x] **Reescrever Dart:** Usar `Process.runSync('crossbar', ['cpu'])`
+- [x] **Reescrever Go:** Usar `exec.Command("crossbar", "cpu")`
+- [x] **Reescrever Rust:** Usar `Command::new("crossbar").arg("cpu")`
 - [x] **Estrutura de Pastas:** Reorganizar `plugins/` por funcionalidade
 
 ### Fase 2: Sistema de Tags/Categorias Unificado ✅
