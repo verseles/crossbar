@@ -1,0 +1,9 @@
+name: cpu_monitor_example
+description: Example plugin using crossbar_api
+
+environment:
+  sdk: ^3.4.0
+
+dependencies:
+  crossbar_api:
+    path: ../
