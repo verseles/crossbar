@@ -1,0 +1,21 @@
+# CPU Monitor - Declarative YAML
+# Shows CPU usage percentage
+
+name: CPU Monitor
+interval: 5s
+
+source:
+  type: system
+  command: cpu
+
+output:
+  icon: "💻"
+  text: "${response.percent}%"
+  tooltip: "CPU Usage"
+
+menu:
+  - title: "Open System Monitor"
+    action: exec:gnome-system-monitor
+  - separator
+  - title: "Refresh"
+    action: refresh

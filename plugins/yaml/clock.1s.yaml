@@ -1,0 +1,20 @@
+# Clock Plugin - Declarative YAML
+# Shows current time, updates every second
+
+name: Clock
+interval: 1s
+
+source:
+  type: system
+  command: time
+
+output:
+  icon: "⏰"
+  text: "${response.value}"
+  tooltip: "Current local time"
+
+menu:
+  - title: "Date: Will be added"
+  - separator
+  - title: "Refresh"
+    action: refresh

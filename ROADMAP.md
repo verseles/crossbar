@@ -231,7 +231,7 @@ void main() async {
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Fase 6: DeclarativeRunner (Plugins YAML)
+### Fase 6: DeclarativeRunner (Plugins YAML) ✅
 
 > **Objetivo:** Plugins sem código, apenas configuração. Ultra-portátil.
 
@@ -259,14 +259,19 @@ menu:
     action: refresh
 ```
 
-- [ ] **Criar:** `lib/core/runners/declarative_runner.dart`
-- [ ] **Providers:**
-  - [ ] `http` - Fetch de APIs (via CrossbarBridge.web)
-  - [ ] `system` - cpu, memory, battery (via CrossbarBridge)
-  - [ ] `exec` - Executar comandos (desktop only)
-- [ ] **Template Engine:** Interpolação `${response.path.to.value}`
-- [ ] **Conditions:** Cores/ícones condicionais
-- [ ] **Criar:** Versões YAML dos 6 plugins universais
+- [x] **Criar:** `lib/core/runners/declarative_runner.dart`
+- [x] **Providers:**
+  - [x] `http` - Fetch de APIs (via CrossbarBridge.web)
+  - [x] `system` - cpu, memory, battery, time, date, uptime, network
+  - [x] `exec` - Executar comandos shell
+  - [x] `static` - Dados estáticos no próprio YAML
+- [x] **Template Engine:** Interpolação `${response.path.to.value}`
+- [x] **Menu Support:** Items com título, action, separadores
+- [x] **Environment Variables:** Interpolação `${VAR_NAME}` no URL/templates
+- [x] **Plugins Exemplo:** 6 plugins YAML em `plugins/yaml/`
+  - clock.1s.yaml, cpu.5s.yaml, memory.10s.yaml
+  - battery.1m.yaml, bitcoin.5m.yaml, network.30s.yaml
+- [x] **Testes:** 14 testes passando
 
 ### Fase 7: Plugin Executor Unificado
 
