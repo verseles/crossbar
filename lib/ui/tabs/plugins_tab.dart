@@ -1055,11 +1055,12 @@ class _PluginsTabState extends State<PluginsTab> {
                   onTap: () async {
                     Navigator.pop(context);
                     final installed = await SamplePluginsDialog.show(context);
+                    // Always refresh to pick up any installed plugins
+                    if (!context.mounted) return;
+                    await _refreshPlugins();
+                    await TrayService().refreshMenu();
+                    if (!context.mounted) return;
                     if (installed != null && installed.isNotEmpty) {
-                      if (!context.mounted) return;
-                      await _refreshPlugins();
-                      await TrayService().refreshMenu();
-                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

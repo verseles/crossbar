@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Crossbar
+Comment=Universal Plugin System for Taskbar/Menu Bar
+Icon=crossbar
+Exec=crossbar
+Categories=Utility;System;
+Terminal=false
+StartupWMClass=crossbar
+Keywords=plugins;tray;menubar;bitbar;argos;

@@ -32,8 +32,8 @@ let color = 'green';
 if (cpu > 80) color = 'red';
 else if (cpu > 50) color = 'yellow';
 
-console.log(`⚡ ${cpuStr} | color=${color}`);
+console.log(`⚡ ${cpuStr}% | color=${color}`);
 console.log('---');
-console.log(`CPU Usage: ${cpuStr}`);
+console.log(`CPU Usage: ${cpuStr}%`);
 console.log('---');
 console.log('Refresh | refresh=true');

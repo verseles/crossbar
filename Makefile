@@ -17,6 +17,9 @@ linux:
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
 	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar-cli
 	dart compile exe bin/launcher.dart -o $(LINUX_BUNDLE)/crossbar
+	@echo "Copying desktop integration files..."
+	cp linux/crossbar.desktop $(LINUX_BUNDLE)/
+	cp assets/icons/icon.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
 

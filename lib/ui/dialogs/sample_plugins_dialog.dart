@@ -301,7 +301,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
           crossAxisCount: screenWidth > 1000 ? 3 : 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.6,
+          childAspectRatio: 2.4,
         ),
         itemCount: plugins.length,
         itemBuilder: (context, index) => _buildPluginCard(theme, plugins[index]),

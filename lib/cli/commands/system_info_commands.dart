@@ -38,7 +38,7 @@ class CpuCommand extends CliCommand {
       {'cpu': val},
       json: args.contains('--json'),
       xml: args.contains('--xml'),
-      plain: (_) => '$result%',
+      plain: (_) => result,
     );
     return 0;
   }

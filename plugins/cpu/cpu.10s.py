@@ -32,8 +32,8 @@ except ValueError:
     cpu = 0
     color = "gray"
 
-print(f"⚡ {cpu_str} | color={color}")
+print(f"⚡ {cpu_str}% | color={color}")
 print("---")
-print(f"CPU Usage: {cpu_str}")
+print(f"CPU Usage: {cpu_str}%")
 print("---")
 print("Refresh | refresh=true")

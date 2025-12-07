@@ -90,6 +90,9 @@ static void my_application_activate(GApplication* application) {
   g_free(exe_dir);
   g_free(exe_path);
 
+  // Set WM_CLASS for proper desktop integration (taskbar icon, .desktop file matching)
+  gtk_window_set_wmclass(window, "crossbar", "Crossbar");
+
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

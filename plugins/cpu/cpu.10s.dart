@@ -25,9 +25,9 @@ void main() {
     color = 'green';
   }
 
-  print('⚡ $cpuStr | color=$color');
+  print('⚡ $cpuStr% | color=$color');
   print('---');
-  print('CPU Usage: $cpuStr');
+  print('CPU Usage: $cpuStr%');
   print('---');
   print('Refresh | refresh=true');
 }

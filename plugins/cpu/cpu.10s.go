@@ -33,9 +33,9 @@ func main() {
 		}
 	}
 
-	fmt.Printf("⚡ %s | color=%s\n", cpuStr, color)
+	fmt.Printf("⚡ %s%% | color=%s\n", cpuStr, color)
 	fmt.Println("---")
-	fmt.Printf("CPU Usage: %s\n", cpuStr)
+	fmt.Printf("CPU Usage: %s%%\n", cpuStr)
 	fmt.Println("---")
 	fmt.Println("Refresh | refresh=true")
 }
