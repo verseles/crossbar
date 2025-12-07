@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.3.0-dev (Universal Plugins 🚧)
-**Próximo Ciclo:** v1.4.0 (Advanced Desktop UI)
+**Status Atual:** v1.3.1 (UX Fixes & Plugin Management ✅)
+**Próximo Ciclo:** v1.3.2 (Internationalization & Polish)
 
 ---
 
@@ -311,30 +311,64 @@ menu:
 
 ### Fase 1: Bug Fixes ✅
 
-- [x] **Double %% em CPU plugins:** Corrigido - plugins agora usam saída do `crossbar cpu` diretamente sem adicionar % extra
-- [x] **Ícone da janela Linux:** Melhorado carregamento do ícone via paths relativos ao executável
+- [x] **CPU output unificado:** `crossbar cpu` retorna apenas número (ex: "15.3"), plugins adicionam %
+- [x] **Ícone da janela Linux:** Carregamento via paths relativos ao executável
 - [x] **Tray tooltip:** Adicionado tooltip e title "Crossbar" inicial
+- [x] **Test fix:** Atualizado regex do teste de CPU para aceitar número sem %
 
 ### Fase 2: Plugin Management UX ✅
 
-- [x] **Double-click to delete:** Removido dialog de confirmação, agora requer dois cliques em 3s
+- [x] **Double-click to delete:** Removido dialog de confirmação, requer dois cliques em 3s
 - [x] **Edit button:** Abre o plugin no editor padrão do sistema
 - [x] **Copy Live Output:** Botão para copiar saída do plugin
 - [x] **Copy Last Error:** Botão para copiar mensagem de erro
-- [x] **Refresh automático:** Tray menu atualiza após toggling/deleting plugins
+- [x] **Refresh automático:** Lista e tray atualizam após fechar Sample Plugins dialog
 
 ### Fase 3: Sample Plugins Dialog ✅
 
 - [x] **Grid layout:** Telas > 700px usam grid (2 colunas), > 1000px (3 colunas)
+- [x] **Height reduzida:** Aumentado childAspectRatio para cards mais compactos
 - [x] **Multiple variants:** Permite instalar mesmo plugin em múltiplas linguagens
 - [x] **Language indicator:** Dropdown mostra checkmark em linguagens já instaladas
-- [x] **Responsive design:** Fullscreen em mobile, dialog em desktop
 
-### Fase 4: Pendências (v1.3.2)
+### Fase 4: Android & Linux ✅
 
-- [ ] **i18n:** Identificar e traduzir strings hardcoded
-- [ ] **Android persistent notification:** Verificar porque não aparece (código existe, pode ser permissão)
-- [ ] **Taskbar icon:** Verificar WM_CLASS e mapeamento de .desktop file
+- [x] **Android notifications:** Adicionado request de permissão para Android 13+
+- [x] **Foreground service:** Adicionadas permissões no AndroidManifest
+- [x] **Linux .desktop:** Criado arquivo crossbar.desktop com StartupWMClass
+- [x] **WM_CLASS:** Adicionado gtk_window_set_wmclass() no código GTK
+- [x] **make install:** Comando para instalar no ~/.local/ com ícones e .desktop
+
+---
+
+## 🌍 Epic v1.3.2: Internationalization & Polish
+
+**Status: 🚧 PENDENTE**
+
+**Objetivo:** Internacionalizar a aplicação e finalizar integração desktop.
+
+### Fase 1: i18n Strings
+
+- [ ] **Identificar:** Mapear todas as strings hardcoded em lib/ui/
+  - [ ] `plugins_tab.dart` - "Sample Plugins", "plugin(s) installed", etc.
+  - [ ] `sample_plugins_dialog.dart` - títulos e labels
+  - [ ] `settings_tab.dart` - labels de configuração
+  - [ ] `plugin_config_dialog.dart` - campos e botões
+  - [ ] `plugin_card.dart` - status e ações
+- [ ] **Adicionar ao arb:** Criar ~30-50 novas chaves em `app_en.arb`
+- [ ] **Traduzir:** Atualizar os 12 arquivos de idiomas (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, zh)
+- [ ] **Substituir:** Trocar strings por `l10n.keyName` em todo o código
+
+### Fase 2: Linux Desktop Integration
+
+- [ ] **Testar install:** Verificar se `make install` funciona corretamente
+- [ ] **Ícone taskbar:** Confirmar que WM_CLASS funciona com diferentes DEs (GNOME, KDE, etc.)
+- [ ] **Auto-start:** Adicionar opção de criar autostart entry
+
+### Fase 3: Android Polish
+
+- [ ] **Testar notification:** Verificar que persistent notification aparece após build
+- [ ] **Widget styling:** Melhorar visual dos widgets Android
 
 ---
 
