@@ -99,7 +99,7 @@ void main() {
       expect(called, true);
       expect(scheduler.isRunning, true);
 
-      scheduler.stop();
+      await scheduler.stop();
       expect(scheduler.isRunning, false);
     });
   });
