@@ -113,7 +113,7 @@ Future<int> handleCliCommand(List<String> args) async {
     try {
       return await command.execute(args.sublist(1));
     } catch (e) {
-      stderr.writeln('Error executing $cleanName: $e');
+      stderr.writeln('Error executing $commandName: $e');
       return 1;
     }
   } else {

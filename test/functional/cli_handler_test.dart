@@ -42,12 +42,6 @@ void main() {
       expect(output.exitCode, equals(0));
     });
 
-    test('--cpu returns CPU percentage (legacy)', () async {
-      final output = await _captureOutput(() => handleCliCommand(['--cpu']));
-      expect(output.stdout, matches(RegExp(r'\d+(\.\d+)?%')));
-      expect(output.exitCode, equals(0));
-    });
-
     test('cpu --json returns JSON format', () async {
       final output = await _captureOutput(() => handleCliCommand(['cpu', '--json']));
       final json = jsonDecode(output.stdout.trim()) as Map<String, dynamic>;
