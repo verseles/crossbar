@@ -303,7 +303,42 @@ menu:
 
 ---
 
-## �🖥️ Epic v1.4.0: Advanced Desktop UI
+## 🔧 Epic v1.3.1: UX Fixes & Plugin Management
+
+**Status: ✅ CONCLUÍDO**
+
+**Objetivo:** Corrigir bugs, melhorar UX de gerenciamento de plugins e polir a experiência do usuário.
+
+### Fase 1: Bug Fixes ✅
+
+- [x] **Double %% em CPU plugins:** Corrigido - plugins agora usam saída do `crossbar cpu` diretamente sem adicionar % extra
+- [x] **Ícone da janela Linux:** Melhorado carregamento do ícone via paths relativos ao executável
+- [x] **Tray tooltip:** Adicionado tooltip e title "Crossbar" inicial
+
+### Fase 2: Plugin Management UX ✅
+
+- [x] **Double-click to delete:** Removido dialog de confirmação, agora requer dois cliques em 3s
+- [x] **Edit button:** Abre o plugin no editor padrão do sistema
+- [x] **Copy Live Output:** Botão para copiar saída do plugin
+- [x] **Copy Last Error:** Botão para copiar mensagem de erro
+- [x] **Refresh automático:** Tray menu atualiza após toggling/deleting plugins
+
+### Fase 3: Sample Plugins Dialog ✅
+
+- [x] **Grid layout:** Telas > 700px usam grid (2 colunas), > 1000px (3 colunas)
+- [x] **Multiple variants:** Permite instalar mesmo plugin em múltiplas linguagens
+- [x] **Language indicator:** Dropdown mostra checkmark em linguagens já instaladas
+- [x] **Responsive design:** Fullscreen em mobile, dialog em desktop
+
+### Fase 4: Pendências (v1.3.2)
+
+- [ ] **i18n:** Identificar e traduzir strings hardcoded
+- [ ] **Android persistent notification:** Verificar porque não aparece (código existe, pode ser permissão)
+- [ ] **Taskbar icon:** Verificar WM_CLASS e mapeamento de .desktop file
+
+---
+
+## 🖥️ Epic v1.4.0: Advanced Desktop UI
 
 **Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
 
