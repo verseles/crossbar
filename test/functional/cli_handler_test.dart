@@ -38,7 +38,8 @@ void main() {
   group('CLI Handler - System Info', () {
     test('cpu returns CPU percentage', () async {
       final output = await _captureOutput(() => handleCliCommand(['cpu']));
-      expect(output.stdout, matches(RegExp(r'\d+(\.\d+)?%')));
+      // CPU command returns raw number without % (e.g., "15.3")
+      expect(output.stdout, matches(RegExp(r'^\d+(\.\d+)?\s*$')));
       expect(output.exitCode, equals(0));
     });
 
