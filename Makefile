@@ -1,4 +1,5 @@
 .PHONY: all linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
+	install uninstall \
 	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
 
 # Paths
@@ -22,6 +23,51 @@ linux:
 	cp assets/icons/icon.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
+
+# Install Crossbar on Linux (after build)
+# Installs to ~/.local/ for user-level installation
+INSTALL_DIR = $(HOME)/.local
+install:
+	@echo "Installing Crossbar to $(INSTALL_DIR)..."
+	@mkdir -p $(INSTALL_DIR)/bin
+	@mkdir -p $(INSTALL_DIR)/share/crossbar
+	@mkdir -p $(INSTALL_DIR)/share/applications
+	@mkdir -p $(INSTALL_DIR)/share/icons/hicolor/128x128/apps
+	@mkdir -p $(INSTALL_DIR)/share/icons/hicolor/256x256/apps
+	@mkdir -p $(HOME)/.crossbar/plugins
+	@# Copy entire bundle
+	@cp -r $(LINUX_BUNDLE)/* $(INSTALL_DIR)/share/crossbar/
+	@# Create symlinks in bin
+	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar $(INSTALL_DIR)/bin/crossbar
+	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar-cli $(INSTALL_DIR)/bin/crossbar-cli
+	@# Install desktop file with correct paths
+	@sed 's|Icon=crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/bin/crossbar|' \
+		linux/crossbar.desktop > $(INSTALL_DIR)/share/applications/crossbar.desktop
+	@# Install icons
+	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png
+	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/crossbar.png
+	@# Update icon cache
+	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
+	@echo ""
+	@echo "✅ Crossbar installed successfully!"
+	@echo ""
+	@echo "Make sure $(INSTALL_DIR)/bin is in your PATH:"
+	@echo "  export PATH=\"\$$HOME/.local/bin:\$$PATH\""
+	@echo ""
+	@echo "You can now run 'crossbar' from anywhere."
+	@echo "A desktop entry has been created - search for 'Crossbar' in your app menu."
+
+# Uninstall Crossbar
+uninstall:
+	@echo "Uninstalling Crossbar..."
+	@rm -f $(INSTALL_DIR)/bin/crossbar
+	@rm -f $(INSTALL_DIR)/bin/crossbar-cli
+	@rm -rf $(INSTALL_DIR)/share/crossbar
+	@rm -f $(INSTALL_DIR)/share/applications/crossbar.desktop
+	@rm -f $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png
+	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/crossbar.png
+	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
+
 
 # macOS build with launcher architecture
 macos:
