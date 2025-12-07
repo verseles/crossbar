@@ -60,6 +60,9 @@ class NotificationService {
             .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin>();
                 
+        // Request notification permission for Android 13+ (API 33+)
+        await androidPlugin?.requestNotificationsPermission();
+                
         // Regular notification channel
         const channel = AndroidNotificationChannel(
           channelId,
