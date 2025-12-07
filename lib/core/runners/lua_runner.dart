@@ -117,6 +117,10 @@ class LuaRunner {
     _registerSyncNoArgBool(lua, 'isMobile', () => _bridge.isMobile);
     _registerSyncNoArgBool(lua, 'isDesktop', () => _bridge.isDesktop);
 
+    // System info (sync)
+    _registerSyncMapFunc(lua, 'memory', () => _bridge.memorySync());
+    _registerSyncMapFunc(lua, 'battery', () => _bridge.batterySync());
+
     lua.setGlobal('crossbar');
   }
 
@@ -182,6 +186,38 @@ class LuaRunner {
         return 1;
       } catch (e) {
         ls.pushInteger(0);
+        return 1;
+      }
+    });
+    lua.setField(-2, name);
+  }
+
+  /// Register a sync function that returns a Map<String, dynamic> converted to Lua Table
+  void _registerSyncMapFunc(LuaState lua, String name, Map<String, dynamic> Function() fn) {
+    lua.pushDartFunction((LuaState ls) {
+      try {
+        final result = fn();
+        ls.newTable();
+        result.forEach((key, value) {
+          ls.pushString(key);
+          if (value is String) {
+            ls.pushString(value);
+          } else if (value is int) {
+            ls.pushInteger(value);
+          } else if (value is double) {
+            ls.pushNumber(value);
+          } else if (value is bool) {
+            ls.pushBoolean(value);
+          } else if (value == null) {
+            ls.pushNil();
+          } else {
+            ls.pushString(value.toString());
+          }
+          ls.setTable(-3);
+        });
+        return 1;
+      } catch (e) {
+        ls.pushNil();
         return 1;
       }
     });

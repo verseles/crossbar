@@ -93,20 +93,31 @@ class SystemApi {
     return '0.0';
   }
 
+  // MEMORY
+
   Future<String> getMemoryUsage() async {
     try {
       if (Platform.isLinux) {
         return _getLinuxMemoryUsage();
       }
-
       if (Platform.isMacOS) {
         return _getMacOsMemoryUsage();
       }
-
       if (Platform.isWindows) {
         return _getWindowsMemoryUsage();
       }
+      return 'Unknown';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
 
+  String getMemoryUsageSync() {
+    try {
+      if (Platform.isLinux) {
+        return _getLinuxMemoryUsageSync();
+      }
+      // TODO: Implement sync for macOS/Windows if needed
       return 'Unknown';
     } catch (e) {
       return 'Unknown';
@@ -115,6 +126,15 @@ class SystemApi {
 
   Future<String> _getLinuxMemoryUsage() async {
     final memInfo = await File('/proc/meminfo').readAsString();
+    return _parseLinuxMemory(memInfo);
+  }
+
+  String _getLinuxMemoryUsageSync() {
+    final memInfo = File('/proc/meminfo').readAsStringSync();
+    return _parseLinuxMemory(memInfo);
+  }
+
+  String _parseLinuxMemory(String memInfo) {
     final total = _parseMemValue(memInfo, 'MemTotal:');
     final available = _parseMemValue(memInfo, 'MemAvailable:');
     final used = total - available;
@@ -178,20 +198,30 @@ class SystemApi {
     return 'Unknown';
   }
 
+  // BATTERY
+
   Future<String> getBatteryStatus() async {
     try {
       if (Platform.isLinux) {
         return _getLinuxBatteryStatus();
       }
-
       if (Platform.isMacOS) {
         return _getMacOsBatteryStatus();
       }
-
       if (Platform.isWindows) {
         return _getWindowsBatteryStatus();
       }
+      return 'N/A';
+    } catch (e) {
+      return 'N/A';
+    }
+  }
 
+  String getBatteryStatusSync() {
+    try {
+      if (Platform.isLinux) {
+        return _getLinuxBatteryStatusSync();
+      }
       return 'N/A';
     } catch (e) {
       return 'N/A';
@@ -200,18 +230,18 @@ class SystemApi {
 
   Future<String> _getLinuxBatteryStatus() async {
     const batteryPath = '/sys/class/power_supply/BAT0';
-    final batteryDir = Directory(batteryPath);
-
-    if (!await batteryDir.exists()) {
-      const bat1Path = '/sys/class/power_supply/BAT1';
-      final bat1Dir = Directory(bat1Path);
-      if (!await bat1Dir.exists()) {
-        return 'N/A';
-      }
-      return _readLinuxBattery(bat1Path);
-    }
-
     return _readLinuxBattery(batteryPath);
+  }
+
+  String _getLinuxBatteryStatusSync() {
+    const batteryPath = '/sys/class/power_supply/BAT0';
+    if (Directory(batteryPath).existsSync()) {
+      return _readLinuxBatterySync(batteryPath);
+    }
+    if (Directory('/sys/class/power_supply/BAT1').existsSync()) {
+       return _readLinuxBatterySync('/sys/class/power_supply/BAT1');
+    }
+    return 'N/A';
   }
 
   Future<String> _readLinuxBattery(String batteryPath) async {
@@ -225,6 +255,27 @@ class SystemApi {
 
     if (await statusFile.exists()) {
       final statusValue = (await statusFile.readAsString()).trim().toLowerCase();
+      if (statusValue == 'charging') {
+        status = ' ⚡';
+      } else if (statusValue == 'full') {
+        status = ' ✓';
+      }
+    }
+
+    return '$capacity%$status';
+  }
+
+  String _readLinuxBatterySync(String batteryPath) {
+    final capacityFile = File('$batteryPath/capacity');
+    final statusFile = File('$batteryPath/status');
+
+    if (!capacityFile.existsSync()) return 'N/A';
+
+    final capacity = capacityFile.readAsStringSync().trim();
+    var status = '';
+
+    if (statusFile.existsSync()) {
+      final statusValue = statusFile.readAsStringSync().trim().toLowerCase();
       if (statusValue == 'charging') {
         status = ' ⚡';
       } else if (statusValue == 'full') {
@@ -277,15 +328,12 @@ class SystemApi {
       if (Platform.isLinux) {
         return _getLinuxUptime();
       }
-
       if (Platform.isMacOS) {
         return _getMacOsUptime();
       }
-
       if (Platform.isWindows) {
         return _getWindowsUptime();
       }
-
       return 'Unknown';
     } catch (e) {
       return 'Unknown';

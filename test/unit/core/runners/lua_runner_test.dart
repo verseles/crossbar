@@ -63,6 +63,24 @@ void main() {
         expect(value! >= 0 && value <= 100, true);
       });
 
+      test('can access crossbar.memory() table', () async {
+        final result = await runner.runSource('''
+          local m = crossbar.memory()
+          if m then print(m.raw) else print("nil") end
+        ''');
+        expect(result.success, true);
+        expect(result.output, isNotNull);
+      });
+
+      test('can access crossbar.battery() table', () async {
+        final result = await runner.runSource('''
+          local b = crossbar.battery()
+          if b then print(b.status) else print("nil") end
+        ''');
+        expect(result.success, true);
+        expect(result.output, isNotNull);
+      });
+
       test('can use string concatenation', () async {
         final result = await runner.runSource('print("Hello " .. "World")');
         expect(result.success, true);

@@ -47,7 +47,15 @@ class CrossbarBridge {
   /// Get memory usage as map {used, total, unit, percent}
   Future<Map<String, dynamic>> memory() async {
     final result = await _systemApi.getMemoryUsage();
-    
+    return _parseMemoryResult(result);
+  }
+
+  Map<String, dynamic> memorySync() {
+    final result = _systemApi.getMemoryUsageSync();
+    return _parseMemoryResult(result);
+  }
+
+  Map<String, dynamic> _parseMemoryResult(String result) {
     final parts = result.split('/');
     if (parts.length == 2) {
       final usedStr = parts[0].trim();
@@ -70,14 +78,21 @@ class CrossbarBridge {
         };
       }
     }
-    
     return {'raw': result};
   }
   
   /// Get battery status as map {level, charging, status}
   Future<Map<String, dynamic>> battery() async {
     final result = await _systemApi.getBatteryStatus();
-    
+    return _parseBatteryResult(result);
+  }
+
+  Map<String, dynamic> batterySync() {
+    final result = _systemApi.getBatteryStatusSync();
+    return _parseBatteryResult(result);
+  }
+
+  Map<String, dynamic> _parseBatteryResult(String result) {
     final match = RegExp(r'(\d+)%').firstMatch(result);
     final isCharging = result.contains('⚡') || 
                        result.toLowerCase().contains('charging');
