@@ -181,7 +181,7 @@ void main() {
 - [x] **Zone-based output:** Captura print() statements via Zone
 - [x] **Testes:** 10 testes passando (basic execution + bridge integration)
 
-### Fase 5: crossbar_api Package (Plugins Compilados)
+### Fase 5: crossbar_api Package (Plugins Compilados) ✅
 
 > **Objetivo:** Package Dart para plugins avançados que precisam ser compilados.
 
@@ -193,20 +193,24 @@ import 'package:crossbar_api/crossbar_api.dart';
 import 'package:html/parser.dart'; // Package externo ✅
 
 void main() async {
-  final html = await CrossbarApi.web('https://example.com');
-  final doc = parse(html);
+  final html = await Crossbar.web('https://example.com');
+  final doc = parse(html.text);
   print(doc.querySelector('title')?.text);
 }
 
-// Compilar: dart compile exe plugins/advanced.1s.dart -o plugins/advanced.1s.exe
+// Compilar: dart compile exe plugins/advanced.1s.dart -o plugins/advanced.1s.dart.exe
 ```
 
-- [ ] **Criar:** `packages/crossbar_api/` (package separado)
-  - [ ] `CrossbarApi.cpu()`, `CrossbarApi.memory()`, etc.
-  - [ ] Internamente usa Process.run para chamar CLI ou lógica nativa
-- [ ] **Publicar:** pub.dev (opcional, ou local path dependency)
-- [ ] **Docs:** Como criar plugins avançados
-- [ ] **Template:** `crossbar init --lang dart --advanced`
+- [x] **Criar:** `packages/crossbar_api/` (package separado)
+  - [x] `Crossbar.cpu()`, `memory()`, `battery()`, `uptime()`, `disk()`
+  - [x] `Crossbar.time()`, `date()` com formatação
+  - [x] `Crossbar.web()`, `netStatus()`, `localIp()`, `publicIp()`, `ping()`
+  - [x] `Crossbar.exec()`, `notify()`, `clipboard()`, `openUrl()`
+  - [x] `Crossbar.env()`, `homeDir`, `platform`, `isMobile`, `isDesktop`
+  - [x] `Crossbar.hashMd5()`, `hashSha256()`, `uuid()`, `base64*()`
+- [x] **Models:** `MemoryInfo`, `BatteryInfo`, `WebResponse`
+- [x] **Docs:** README.md com API completa
+- [x] **Example:** `example/cpu_monitor.dart`
 
 ### Arquitetura de Plugins Dart (Resumo)
 
@@ -288,14 +292,14 @@ menu:
 - [x] **Testes:** 13 testes unitários passando
 - [x] **Build:** 337 testes totais passando
 
-### Fase 8: Documentação Completa
+### Fase 8: Documentação Completa ✅
 
-- [ ] **README.md:** Atualizar seção "Plugin Types"
-- [ ] **docs/plugin-types.md:** Comparativo detalhado
-- [ ] **docs/dart-plugins.md:** Como criar plugins Dart (ambos modos)
-- [ ] **docs/yaml-plugins.md:** Como criar plugins declarativos
-- [ ] **docs/writing-portable-plugins.md:** Best practices
-- [ ] **GUI Onboarding:** Wizard ao adicionar primeiro plugin
+- [x] **README.md:** Seção "Plugin Types" com tabela comparativa e links
+- [x] **docs/plugin-types.md:** Comparativo detalhado de todos os tipos
+- [x] **docs/dart-plugins.md:** Guia completo (interpretado + compilado)
+- [x] **docs/yaml-plugins.md:** Guia de plugins declarativos
+- [x] **docs/writing-portable-plugins.md:** Best practices cross-platform
+- [x] **packages/crossbar_api/README.md:** Documentação da API
 
 ---
 

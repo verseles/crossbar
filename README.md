@@ -131,6 +131,47 @@ chmod +x ~/.crossbar/plugins/hello.10s.sh
 
 ## 📖 Documentation
 
+### Plugin Types
+
+Crossbar supports multiple plugin types for different use cases:
+
+| Type                 | Extension           | Platforms | Use Case                            |
+| -------------------- | ------------------- | --------- | ----------------------------------- |
+| **YAML**             | `.yaml`             | All ✅    | Simple data display, no code needed |
+| **Dart Interpreted** | `.dart`             | All ✅    | Logic without external packages     |
+| **Script**           | `.sh`, `.py`, `.js` | Desktop   | Existing scripts, shell commands    |
+| **Dart Compiled**    | `.dart.exe`         | Desktop   | Full Dart with any package          |
+
+**Quick Examples:**
+
+```yaml
+# YAML Plugin - weather.30m.yaml
+name: Weather
+source:
+  type: http
+  url: "https://api.example.com/weather"
+output:
+  text: "🌡️ ${response.temp}°C"
+```
+
+```dart
+// Dart Plugin - clock.1s.dart
+import 'package:crossbar_bridge/crossbar_bridge.dart';
+
+void main() {
+  final crossbar = CrossbarBridge();
+  print('⏰ ${crossbar.time()}');
+}
+```
+
+📖 **Detailed Guides:**
+
+- [Plugin Types Overview](docs/plugin-types.md)
+- [YAML Plugins](docs/yaml-plugins.md)
+- [Dart Plugins](docs/dart-plugins.md)
+- [Writing Portable Plugins](docs/writing-portable-plugins.md)
+- [crossbar_api Package](packages/crossbar_api/README.md)
+
 ### Plugin Format
 
 Crossbar supports **two output formats**:
