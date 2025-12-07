@@ -396,6 +396,17 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - Geração automatizada no build
 - Consistência visual entre sistemas
 
+### ADR-006: Universal Synchronous API for Embedded Scripting (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: O interpretador embarcado `lua_dardo` executa código Lua de forma síncrona/bloqueante na thread do Dart isolate. A arquitetura original do Crossbar (`SystemApi`, `CrossbarBridge`) era puramente assíncrona (`Future`). Isso impedia plugins Lua de acessarem nativamente informações do sistema como CPU, Memória e Bateria sem recorrer a hacks de leitura de arquivo.  
+**Decision**: Implementar variantes síncronas (`Sync`) na `SystemApi` e `CrossbarBridge` para operações essenciais e rápidas (Memory, Battery, Uptime). Registrar estas funções na tabela global `crossbar` do LuaRunner, convertendo `Map` Dart para `Table` Lua.  
+**Consequences**:
+
+- Plugins Lua agora usam a mesma API conceitual (`crossbar.memory()`) em todas as plataformas.
+- Simplifica a escrita de plugins universais.
+- Trade-off: Chamadas bloqueantes no LuaRunner bloqueiam o Isolate Dart.
+
 ### Template para Novas ADRs
 
 ```markdown
