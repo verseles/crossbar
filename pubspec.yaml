@@ -51,6 +51,11 @@ dependencies:
   xdg_status_notifier_item: ^0.0.1
   dart_eval: ^0.8.2
   yaml: ^3.1.3
+
+  # Embedded interpreters (run scripts without external runtime)
+  lua_dardo: ^0.0.5      # Lua 5.3 interpreter in pure Dart
+  flutter_js: ^0.8.0     # QuickJS/JavaScriptCore for embedded JS
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

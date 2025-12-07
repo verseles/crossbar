@@ -52,6 +52,7 @@
   "allCategories": "सभी श्रेणियां",
   "popular": "लोकप्रिय",
   "recent": "हाल का",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

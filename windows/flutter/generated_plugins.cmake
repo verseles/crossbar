@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   battery_plus
   connectivity_plus
+  flutter_js
   flutter_secure_storage_windows
   screen_retriever_windows
   tray_manager

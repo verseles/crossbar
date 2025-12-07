@@ -52,6 +52,7 @@
   "allCategories": "모든 카테고리",
   "popular": "인기",
   "recent": "최근",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

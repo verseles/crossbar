@@ -52,6 +52,7 @@
   "allCategories": "جميع الفئات",
   "popular": "شائع",
   "recent": "حديث",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

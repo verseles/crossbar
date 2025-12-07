@@ -52,6 +52,7 @@
   "allCategories": "সব বিভাগ",
   "popular": "জনপ্রিয়",
   "recent": "সাম্প্রতিক",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

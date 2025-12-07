@@ -33,8 +33,9 @@ void main() {
     });
 
     test('detects Node.js plugins', () {
-      expect(executor.getRunnerType('bitcoin.5m.js'), RunnerType.script);
-      expect(executor.getRunnerType('plugin.node'), RunnerType.script);
+      // .js files return script if Node is available, javascript otherwise
+      final result = executor.getRunnerType('bitcoin.5m.js');
+      expect(result, anyOf(RunnerType.script, RunnerType.javascript));
     });
 
     test('detects Go plugins', () {
@@ -43,6 +44,11 @@ void main() {
 
     test('detects Rust plugins', () {
       expect(executor.getRunnerType('uptime.1h.rs'), RunnerType.script);
+    });
+
+    test('detects Lua plugins', () {
+      expect(executor.getRunnerType('clock.1s.lua'), RunnerType.lua);
+      expect(executor.getRunnerType('/path/to/plugin.lua'), RunnerType.lua);
     });
 
     test('unknown extensions return unknown', () {
@@ -55,6 +61,14 @@ void main() {
   group('PluginExecutor - Platform Compatibility', () {
     test('declarative plugins run everywhere', () {
       expect(executor.canRunOnPlatform('plugin.yaml'), isTrue);
+    });
+
+    test('lua plugins run everywhere', () {
+      expect(executor.canRunOnPlatform('plugin.lua'), isTrue);
+    });
+
+    test('javascript plugins run everywhere', () {
+      expect(executor.canRunOnPlatform('plugin.js'), isTrue);
     });
 
     test('dart plugins run on desktop (via dart run)', () {
@@ -90,6 +104,9 @@ void main() {
       expect(extensions, contains('js'));
       expect(extensions, contains('go'));
       expect(extensions, contains('rs'));
+      
+      // Embedded (work everywhere)
+      expect(extensions, contains('lua'));
     });
   });
 }

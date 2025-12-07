@@ -52,6 +52,7 @@
   "allCategories": "すべてのカテゴリ",
   "popular": "人気",
   "recent": "最近",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

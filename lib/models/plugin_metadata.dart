@@ -1,5 +1,6 @@
 /// Plugin language enumeration
 enum PluginLanguage {
+  lua('lua', '🌙', 'Lua'),  // Embedded - works everywhere
   bash('bash', '🐚', 'Bash'),
   python('python', '🐍', 'Python'),
   node('node', '📦', 'Node.js'),
@@ -23,6 +24,8 @@ enum PluginLanguage {
   
   static PluginLanguage? fromExtension(String ext) {
     switch (ext) {
+      case 'lua':
+        return lua;
       case 'sh':
         return bash;
       case 'py':
@@ -133,10 +136,10 @@ class PluginMetadata {
     );
   }
 
-  /// Get the default/preferred variant (Bash first for desktop compatibility)
+  /// Get the default/preferred variant (Lua first for universal compatibility)
   PluginVariant get defaultVariant {
-    // Prefer Bash for desktop, Dart for mobile
-    for (final lang in [PluginLanguage.bash, PluginLanguage.python, PluginLanguage.dart]) {
+    // Prefer Lua for universal compatibility, then Bash for desktop
+    for (final lang in [PluginLanguage.lua, PluginLanguage.bash, PluginLanguage.python, PluginLanguage.dart]) {
       final v = getVariant(lang);
       if (v != null) return v;
     }

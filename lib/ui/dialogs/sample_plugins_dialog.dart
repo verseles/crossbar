@@ -36,9 +36,9 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   Future<void> _loadInstalledStatus() async {
     for (final plugin in SamplePluginsService.allPlugins) {
-      // Set default language to bash (or first available)
-      _selectedLanguages[plugin.id] = plugin.hasLanguage(PluginLanguage.bash)
-          ? PluginLanguage.bash
+      // Set default language to Lua (universal, works everywhere) or first available
+      _selectedLanguages[plugin.id] = plugin.hasLanguage(PluginLanguage.lua)
+          ? PluginLanguage.lua
           : plugin.variants.first.language;
       
       for (final variant in plugin.variants) {

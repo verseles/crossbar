@@ -4,12 +4,14 @@ import '../models/plugin.dart';
 import '../models/plugin_output.dart';
 import 'runners/dart_runner.dart';
 import 'runners/declarative_runner.dart';
+import 'runners/lua_runner.dart';
+import 'runners/quickjs_runner.dart';
 import 'script_runner.dart';
 
 /// Unified Plugin Executor - Routes plugin execution to the appropriate runner
 ///
 /// This executor determines the best runner for each plugin based on:
-/// 1. File extension (.dart, .yaml, .sh, .py, etc.)
+/// 1. File extension (.dart, .yaml, .sh, .py, .lua, .js, etc.)
 /// 2. Platform compatibility (mobile vs desktop)
 /// 3. Fallback chain if primary runner fails
 ///
@@ -17,6 +19,8 @@ import 'script_runner.dart';
 /// - ScriptRunner: Bash, Python, Node.js, Go, Rust (desktop only)
 /// - DartRunner: Interpreted Dart plugins (all platforms)
 /// - DeclarativeRunner: YAML-based plugins (all platforms)
+/// - LuaRunner: Lua plugins via lua_dardo (all platforms, embedded)
+/// - QuickJsRunner: JavaScript plugins via QuickJS (all platforms, embedded)
 class PluginExecutor {
   factory PluginExecutor() => instance;
   PluginExecutor._();
@@ -26,6 +30,8 @@ class PluginExecutor {
   final ScriptRunner _scriptRunner = const ScriptRunner();
   final DartRunner _dartRunner = DartRunner();
   final DeclarativeRunner _declarativeRunner = DeclarativeRunner();
+  final LuaRunner _luaRunner = LuaRunner();
+  final QuickJsRunner _quickJsRunner = QuickJsRunner();
   
   /// Run a plugin using the appropriate runner
   Future<PluginOutput> run(
@@ -40,6 +46,12 @@ class PluginExecutor {
         
       case RunnerType.dart:
         return _runDart(plugin);
+        
+      case RunnerType.lua:
+        return _runLua(plugin);
+        
+      case RunnerType.javascript:
+        return _runJavaScript(plugin, additionalEnv);
         
       case RunnerType.script:
         return _runScript(plugin, additionalEnv);
@@ -56,9 +68,28 @@ class PluginExecutor {
   RunnerType getRunnerType(String pluginPath) {
     final ext = _getExtension(pluginPath);
     
-    // YAML plugins
+    // YAML plugins - work everywhere
     if (ext == 'yaml' || ext == 'yml') {
       return RunnerType.declarative;
+    }
+    
+    // Lua plugins - embedded interpreter works everywhere
+    if (ext == 'lua') {
+      return RunnerType.lua;
+    }
+    
+    // JavaScript plugins - use embedded QuickJS on mobile, native Node on desktop
+    if (ext == 'js') {
+      // On mobile, always use embedded QuickJS
+      if (Platform.isAndroid || Platform.isIOS) {
+        return RunnerType.javascript;
+      }
+      // On desktop, check if Node is available - if not, use QuickJS
+      if (!_isNodeAvailable()) {
+        return RunnerType.javascript;
+      }
+      // Node is available on desktop, use script runner
+      return RunnerType.script;
     }
     
     // Dart plugins - run via 'dart run' like other scripts
@@ -67,12 +98,22 @@ class PluginExecutor {
       return RunnerType.script;
     }
     
-    // Script plugins (bash, python, node, go, rust, compiled dart)
+    // Script plugins (bash, python, go, rust, compiled dart)
     if (_isScriptExtension(ext) || pluginPath.endsWith('.dart.exe')) {
       return RunnerType.script;
     }
     
     return RunnerType.unknown;
+  }
+  
+  /// Check if Node.js is available on the system
+  bool _isNodeAvailable() {
+    try {
+      final result = Process.runSync('node', ['--version']);
+      return result.exitCode == 0;
+    } catch (_) {
+      return false;
+    }
   }
   
   /// Check if runner can execute on current platform
@@ -81,7 +122,9 @@ class PluginExecutor {
     
     switch (runnerType) {
       case RunnerType.declarative:
-        // YAML-based declarative plugins work everywhere
+      case RunnerType.lua:
+      case RunnerType.javascript:
+        // These work everywhere (embedded interpreters)
         return true;
         
       case RunnerType.dart:
@@ -98,12 +141,14 @@ class PluginExecutor {
   List<String> get supportedExtensions => [
     // Declarative
     'yaml', 'yml',
+    // Embedded (work everywhere)
+    'lua',
+    'js',
     // Dart
     'dart',
-    // Scripts
+    // Scripts (desktop only)
     'sh', 'bash', 'zsh',
     'py', 'python',
-    'js', 'node',
     'go',
     'rs',
   ];
@@ -137,6 +182,32 @@ class PluginExecutor {
     }
     
     // Parse the output using standard format
+    return _parseOutput(plugin.id, result.output);
+  }
+  
+  /// Run Lua plugin using embedded interpreter
+  Future<PluginOutput> _runLua(Plugin plugin) async {
+    final result = await _luaRunner.run(plugin.path);
+    
+    if (!result.success) {
+      return PluginOutput.error(plugin.id, result.error ?? 'Unknown error');
+    }
+    
+    return _parseOutput(plugin.id, result.output);
+  }
+  
+  /// Run JavaScript plugin using embedded QuickJS or native Node
+  Future<PluginOutput> _runJavaScript(
+    Plugin plugin,
+    Map<String, String> additionalEnv,
+  ) async {
+    // Use embedded QuickJS
+    final result = await _quickJsRunner.run(plugin.path);
+    
+    if (!result.success) {
+      return PluginOutput.error(plugin.id, result.error ?? 'Unknown error');
+    }
+    
     return _parseOutput(plugin.id, result.output);
   }
   
@@ -218,7 +289,6 @@ class PluginExecutor {
     return const [
       'sh', 'bash', 'zsh',
       'py', 'python',
-      'js', 'node',
       'go',
       'rs',
     ].contains(ext);
@@ -232,6 +302,12 @@ enum RunnerType {
   
   /// Interpreted Dart plugins
   dart,
+  
+  /// Lua plugins (embedded lua_dardo)
+  lua,
+  
+  /// JavaScript plugins (embedded QuickJS)
+  javascript,
   
   /// Script plugins (bash, python, node, go, rust)
   script,

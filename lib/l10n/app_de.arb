@@ -52,6 +52,7 @@
   "allCategories": "Alle Kategorien",
   "popular": "Beliebt",
   "recent": "Aktuell",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

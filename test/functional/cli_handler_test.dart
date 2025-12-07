@@ -307,14 +307,14 @@ void main() {
       final json = jsonDecode(output.stdout.trim()) as Map<String, dynamic>;
       expect(json['status'], equals(404));
       expect(output.exitCode, equals(0)); // JSON mode returns 0 even for HTTP errors
-    }, timeout: const Timeout(Duration(seconds: 30)));
+    }, timeout: const Timeout(Duration(seconds: 30)), skip: 'Requires network access');
 
     test('web plain mode returns exit 1 for HTTP errors', () async {
       final output = await _captureOutput(
         () => handleCliCommand(['web', 'httpbin.org/status/500']),
       );
       expect(output.exitCode, equals(1));
-    }, timeout: const Timeout(Duration(seconds: 30)));
+    }, timeout: const Timeout(Duration(seconds: 30)), skip: 'Requires network access');
   });
 }
 

@@ -24,12 +24,12 @@ void main() {
       test('contains all expected languages', () {
         expect(
           PluginManager.supportedLanguages,
-          containsAll(['bash', 'python', 'node', 'dart', 'go', 'rust']),
+          containsAll(['bash', 'python', 'node', 'dart', 'go', 'rust', 'lua']),
         );
       });
 
-      test('has 6 supported languages', () {
-        expect(PluginManager.supportedLanguages.length, 6);
+      test('has 7 supported languages', () {
+        expect(PluginManager.supportedLanguages.length, 7);
       });
     });
 
@@ -57,13 +57,17 @@ void main() {
       test('maps .rs to rust', () {
         expect(PluginManager.extensionToInterpreter['.rs'], 'rust');
       });
+
+      test('maps .lua to lua', () {
+        expect(PluginManager.extensionToInterpreter['.lua'], 'lua');
+      });
     });
 
     group('allowedExtensions', () {
       test('contains all expected extensions', () {
         expect(
           PluginManager.allowedExtensions,
-          containsAll(['.sh', '.py', '.js', '.dart', '.go', '.rs']),
+          containsAll(['.sh', '.py', '.js', '.dart', '.go', '.rs', '.lua']),
         );
       });
     });
@@ -106,7 +110,7 @@ void main() {
       test('parses seconds interval', () {
         // This tests the internal _parseRefreshInterval method indirectly
         // through the plugin discovery process
-        expect(PluginManager.supportedLanguages.length, 6);
+        expect(PluginManager.supportedLanguages.length, 7);
       });
     });
   });

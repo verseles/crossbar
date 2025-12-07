@@ -52,6 +52,7 @@
   "allCategories": "所有分类",
   "popular": "热门",
   "recent": "最近",
+  "lua": "Lua",
   "bash": "Bash",
   "python": "Python",
   "node": "Node.js",

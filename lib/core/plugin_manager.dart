@@ -32,6 +32,7 @@ class PluginManager {
     'dart',
     'go',
     'rust',
+    'lua',  // Embedded - works everywhere
   ];
 
   static const Map<String, String> extensionToInterpreter = {
@@ -41,6 +42,7 @@ class PluginManager {
     '.dart': 'dart',
     '.go': 'go',
     '.rs': 'rust',
+    '.lua': 'lua',  // Embedded lua_dardo interpreter
     '.yaml': 'yaml',
     '.yml': 'yaml',
   };
@@ -52,6 +54,7 @@ class PluginManager {
     '.dart',
     '.go',
     '.rs',
+    '.lua',  // Embedded - works everywhere
     '.yaml',
     '.yml',
   ];
