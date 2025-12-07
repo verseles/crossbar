@@ -91,7 +91,8 @@ static void my_application_activate(GApplication* application) {
   g_free(exe_path);
 
   // Set WM_CLASS for proper desktop integration (taskbar icon, .desktop file matching)
-  gtk_window_set_wmclass(window, "crossbar", "Crossbar");
+  // Must match StartupWMClass in .desktop file and APPLICATION_ID for GNOME dock icon association
+  gtk_window_set_wmclass(window, APPLICATION_ID, "Crossbar");
 
   gtk_window_set_default_size(window, 1280, 720);
 

@@ -20,7 +20,7 @@ linux:
 	@echo "Compiling unified CLI..."
 	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar
 	@echo "Copying desktop integration files..."
-	cp linux/crossbar.desktop $(LINUX_BUNDLE)/
+	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
 	@echo ""
@@ -46,12 +46,12 @@ install:
 	@# Create symlink in bin
 	@ln -sf $(INSTALL_DIR)/share/crossbar/crossbar $(INSTALL_DIR)/bin/crossbar
 	@# Install desktop file with correct paths
-	@# Note: Exec points to crossbar-gui directly so GNOME can match WM_CLASS with process
-	@sed 's|Icon=crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/share/crossbar/crossbar-gui|' \
-		linux/crossbar.desktop > $(INSTALL_DIR)/share/applications/crossbar.desktop
-	@# Install icons
-	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png
-	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/crossbar.png
+	@# Note: Exec points to crossbar-gui directly, file named by APPLICATION_ID for GNOME matching
+	@sed 's|Icon=com.verseles.crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/share/crossbar/crossbar-gui|' \
+		linux/com.verseles.crossbar.desktop > $(INSTALL_DIR)/share/applications/com.verseles.crossbar.desktop
+	@# Install icons with APPLICATION_ID naming for proper GNOME association
+	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
+	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@# Update icon cache
 	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
 	@echo ""
@@ -69,8 +69,11 @@ uninstall:
 	@rm -f $(INSTALL_DIR)/bin/crossbar
 	@rm -rf $(INSTALL_DIR)/share/crossbar
 	@rm -f $(INSTALL_DIR)/share/applications/crossbar.desktop
+	@rm -f $(INSTALL_DIR)/share/applications/com.verseles.crossbar.desktop
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/crossbar.png
+	@rm -f $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/crossbar.png
+	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
 

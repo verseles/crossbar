@@ -2,9 +2,9 @@
 Type=Application
 Name=Crossbar
 Comment=Universal Plugin System for Taskbar/Menu Bar
-Icon=crossbar
+Icon=com.verseles.crossbar
 Exec=crossbar
 Categories=Utility;System;
 Terminal=false
-StartupWMClass=crossbar
+StartupWMClass=com.verseles.crossbar
 Keywords=plugins;tray;menubar;bitbar;argos;
