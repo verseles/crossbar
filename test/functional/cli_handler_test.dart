@@ -11,13 +11,15 @@ void main() {
   group('CLI Handler - Version & Help', () {
     test('--version returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['--version']));
-      expect(output.stdout, contains('Crossbar version'));
+      expect(output.stdout, contains('Crossbar'));
+      expect(output.stdout, matches(RegExp(r'\d+\.\d+\.\d+')));
       expect(output.exitCode, equals(0));
     });
 
     test('-v returns version string', () async {
       final output = await _captureOutput(() => handleCliCommand(['-v']));
-      expect(output.stdout, contains('Crossbar version'));
+      // -v returns just version number (e.g., "1.1.0")
+      expect(output.stdout.trim(), matches(RegExp(r'^\d+\.\d+\.\d+$')));
       expect(output.exitCode, equals(0));
     });
 

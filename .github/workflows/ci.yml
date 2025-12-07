@@ -104,11 +104,8 @@ jobs:
       - name: Rename GUI binary
         run: mv build/linux/x64/release/bundle/crossbar build/linux/x64/release/bundle/crossbar-gui
 
-      - name: Build CLI (pure Dart, no GTK)
-        run: dart compile exe bin/crossbar.dart -o build/linux/x64/release/bundle/crossbar-cli
-
-      - name: Build Launcher
-        run: dart compile exe bin/launcher.dart -o build/linux/x64/release/bundle/crossbar
+      - name: Build unified CLI (includes launcher)
+        run: dart compile exe bin/crossbar.dart -o build/linux/x64/release/bundle/crossbar
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -144,8 +141,7 @@ jobs:
         run: |
           cd build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
           mv crossbar crossbar-gui
-          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar-cli
-          dart compile exe $GITHUB_WORKSPACE/bin/launcher.dart -o crossbar
+          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -180,11 +176,8 @@ jobs:
       - name: Rename GUI binary
         run: Rename-Item -Path "build/windows/x64/runner/Release/crossbar.exe" -NewName "crossbar-gui.exe"
 
-      - name: Build CLI (pure Dart)
-        run: dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar-cli.exe
-
-      - name: Build Launcher
-        run: dart compile exe bin/launcher.dart -o build/windows/x64/runner/Release/crossbar.exe
+      - name: Build unified CLI (includes launcher)
+        run: dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar.exe
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
