@@ -5,7 +5,6 @@ import '../models/plugin_output.dart';
 import 'runners/dart_runner.dart';
 import 'runners/declarative_runner.dart';
 import 'runners/lua_runner.dart';
-import 'runners/quickjs_runner.dart';
 import 'script_runner.dart';
 
 /// Unified Plugin Executor - Routes plugin execution to the appropriate runner
@@ -20,7 +19,6 @@ import 'script_runner.dart';
 /// - DartRunner: Interpreted Dart plugins (all platforms)
 /// - DeclarativeRunner: YAML-based plugins (all platforms)
 /// - LuaRunner: Lua plugins via lua_dardo (all platforms, embedded)
-/// - QuickJsRunner: JavaScript plugins via QuickJS (all platforms, embedded)
 class PluginExecutor {
   factory PluginExecutor() => instance;
   PluginExecutor._();
@@ -31,7 +29,6 @@ class PluginExecutor {
   final DartRunner _dartRunner = DartRunner();
   final DeclarativeRunner _declarativeRunner = DeclarativeRunner();
   final LuaRunner _luaRunner = LuaRunner();
-  final QuickJsRunner _quickJsRunner = QuickJsRunner();
   
   /// Run a plugin using the appropriate runner
   Future<PluginOutput> run(
@@ -49,9 +46,6 @@ class PluginExecutor {
         
       case RunnerType.lua:
         return _runLua(plugin);
-        
-      case RunnerType.javascript:
-        return _runJavaScript(plugin, additionalEnv);
         
       case RunnerType.script:
         return _runScript(plugin, additionalEnv);
@@ -78,17 +72,9 @@ class PluginExecutor {
       return RunnerType.lua;
     }
     
-    // JavaScript plugins - use embedded QuickJS on mobile, native Node on desktop
+    // JavaScript plugins - always use Node on desktop (no embedded JS for now)
+    // Note: flutter_js requires Flutter context, can't use in pure Dart CLI
     if (ext == 'js') {
-      // On mobile, always use embedded QuickJS
-      if (Platform.isAndroid || Platform.isIOS) {
-        return RunnerType.javascript;
-      }
-      // On desktop, check if Node is available - if not, use QuickJS
-      if (!_isNodeAvailable()) {
-        return RunnerType.javascript;
-      }
-      // Node is available on desktop, use script runner
       return RunnerType.script;
     }
     
@@ -106,16 +92,6 @@ class PluginExecutor {
     return RunnerType.unknown;
   }
   
-  /// Check if Node.js is available on the system
-  bool _isNodeAvailable() {
-    try {
-      final result = Process.runSync('node', ['--version']);
-      return result.exitCode == 0;
-    } catch (_) {
-      return false;
-    }
-  }
-  
   /// Check if runner can execute on current platform
   bool canRunOnPlatform(String pluginPath) {
     final runnerType = getRunnerType(pluginPath);
@@ -123,7 +99,6 @@ class PluginExecutor {
     switch (runnerType) {
       case RunnerType.declarative:
       case RunnerType.lua:
-      case RunnerType.javascript:
         // These work everywhere (embedded interpreters)
         return true;
         
@@ -143,6 +118,7 @@ class PluginExecutor {
     'yaml', 'yml',
     // Embedded (work everywhere)
     'lua',
+    // Scripts (desktop only, but .js can use Node)
     'js',
     // Dart
     'dart',
@@ -188,21 +164,6 @@ class PluginExecutor {
   /// Run Lua plugin using embedded interpreter
   Future<PluginOutput> _runLua(Plugin plugin) async {
     final result = await _luaRunner.run(plugin.path);
-    
-    if (!result.success) {
-      return PluginOutput.error(plugin.id, result.error ?? 'Unknown error');
-    }
-    
-    return _parseOutput(plugin.id, result.output);
-  }
-  
-  /// Run JavaScript plugin using embedded QuickJS or native Node
-  Future<PluginOutput> _runJavaScript(
-    Plugin plugin,
-    Map<String, String> additionalEnv,
-  ) async {
-    // Use embedded QuickJS
-    final result = await _quickJsRunner.run(plugin.path);
     
     if (!result.success) {
       return PluginOutput.error(plugin.id, result.error ?? 'Unknown error');
@@ -289,6 +250,7 @@ class PluginExecutor {
     return const [
       'sh', 'bash', 'zsh',
       'py', 'python',
+      'js', 'node',
       'go',
       'rs',
     ].contains(ext);
@@ -305,9 +267,6 @@ enum RunnerType {
   
   /// Lua plugins (embedded lua_dardo)
   lua,
-  
-  /// JavaScript plugins (embedded QuickJS)
-  javascript,
   
   /// Script plugins (bash, python, node, go, rust)
   script,

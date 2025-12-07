@@ -432,6 +432,12 @@ abstract class AppLocalizations {
   /// **'Recent'**
   String get recent;
 
+  /// No description provided for @lua.
+  ///
+  /// In en, this message translates to:
+  /// **'Lua'**
+  String get lua;
+
   /// No description provided for @bash.
   ///
   /// In en, this message translates to:

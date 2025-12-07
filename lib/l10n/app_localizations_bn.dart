@@ -166,6 +166,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get recent => 'সাম্প্রতিক';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override

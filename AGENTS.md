@@ -92,7 +92,6 @@ crossbar/
 │   │   ├── output_parser.dart  # BitBar Text parser & JSON parser
 │   │   └── runners/
 │   │       ├── lua_runner.dart      # Executa .lua via lua_dardo (embarcado)
-│   │       ├── quickjs_runner.dart  # Executa .js via QuickJS (embarcado)
 │   │       ├── dart_runner.dart     # Executa .dart via dart_eval
 │   │       └── declarative_runner.dart # Executa .yaml plugins
 │   ├── services/               # Singleton Services
@@ -116,12 +115,12 @@ crossbar/
 
 - **Executor**: `lib/core/plugin_executor.dart` (roteador de runners)
 - **Runners**:
-  - `LuaRunner`: Plugins `.lua` via lua_dardo (Dart puro, funciona em TODAS as plataformas)
-  - `QuickJsRunner`: Plugins `.js` via flutter_js (mobile ou desktop sem Node)
+  - `LuaRunner`: Plugins `.lua` via lua_dardo (Dart puro, funciona em TODAS as plataformas) ⭐ Recomendado
   - `ScriptRunner`: Plugins bash, python, node, go, rust (desktop only)
   - `DeclarativeRunner`: Plugins `.yaml` (DSL declarativa)
 - **Interpreters Nativos**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
 - **Output**: Suporta formato texto legado (BitBar) OU JSON estruturado (Crossbar).
+- **Nota**: QuickJS foi rejeitado (ADR-003) por depender de `dart:ui`.
 
 ### API de Plugins (CLI)
 
@@ -362,18 +361,15 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 
 ### ADR-003: QuickJS Fallback for JavaScript (2024-12-07)
 
-**Status**: ✅ Accepted  
-**Context**: Plugins `.js` existentes precisam funcionar no mobile, mas Node.js não está disponível.  
-**Decision**: Usar `flutter_js` (QuickJS no Android/desktop, JavaScriptCore no iOS) como fallback.  
-**Behavior**:
+**Status**: ❌ Rejected  
+**Context**: Plugins `.js` precisam funcionar no mobile, mas Node.js não está disponível.  
+**Decision Original**: Usar `flutter_js` (QuickJS no Android/desktop, JavaScriptCore no iOS).  
+**Rejection Reason**: `flutter_js` requer Flutter context (`dart:ui`), impossibilitando uso no binário CLI que é Dart puro. O CLI é compilado com `dart compile exe` e não pode ter dependências de UI.  
+**Workaround Atual**:
 
-- Mobile: Sempre usa QuickJS embarcado
-- Desktop com Node: Usa Node nativo (mais rápido)
-- Desktop sem Node: Usa QuickJS embarcado  
-  **Consequences**:
-- Plugins JS funcionam em todas as plataformas
-- Fallback inteligente mantém performance no desktop
-- Apple permite JavaScript interpretado (App Store friendly)
+- Desktop: Plugins `.js` usam Node nativo
+- Mobile: Plugins `.js` não funcionam - **use `.lua` como alternativa universal**
+- Lua é a linguagem recomendada para plugins cross-platform
 
 ### ADR-004: GNOME Desktop Integration (2024-12-07)
 

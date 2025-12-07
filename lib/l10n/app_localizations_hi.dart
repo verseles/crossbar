@@ -166,6 +166,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get recent => 'हाल का';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override

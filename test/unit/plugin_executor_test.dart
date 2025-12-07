@@ -33,9 +33,8 @@ void main() {
     });
 
     test('detects Node.js plugins', () {
-      // .js files return script if Node is available, javascript otherwise
-      final result = executor.getRunnerType('bitcoin.5m.js');
-      expect(result, anyOf(RunnerType.script, RunnerType.javascript));
+      // .js files always use script runner (Node on desktop)
+      expect(executor.getRunnerType('bitcoin.5m.js'), RunnerType.script);
     });
 
     test('detects Go plugins', () {
@@ -67,7 +66,8 @@ void main() {
       expect(executor.canRunOnPlatform('plugin.lua'), isTrue);
     });
 
-    test('javascript plugins run everywhere', () {
+    test('javascript plugins run on desktop (via Node)', () {
+      // JS now uses Node natively (no embedded QuickJS)
       expect(executor.canRunOnPlatform('plugin.js'), isTrue);
     });
 

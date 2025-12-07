@@ -166,6 +166,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recent => 'Récent';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override

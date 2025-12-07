@@ -166,6 +166,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get recent => 'Недавние';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override

@@ -165,6 +165,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recent => '최근';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override

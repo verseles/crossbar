@@ -166,6 +166,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recent => 'حديث';
 
   @override
+  String get lua => 'Lua';
+
+  @override
   String get bash => 'Bash';
 
   @override
