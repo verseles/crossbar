@@ -118,6 +118,7 @@ class LuaRunner {
     _registerSyncNoArgBool(lua, 'isDesktop', () => _bridge.isDesktop);
 
     // System info (sync)
+    _registerSyncDoubleFunc(lua, 'cpu', () => _bridge.cpuSync());
     _registerSyncMapFunc(lua, 'memory', () => _bridge.memorySync());
     _registerSyncMapFunc(lua, 'battery', () => _bridge.batterySync());
 
@@ -218,6 +219,21 @@ class LuaRunner {
         return 1;
       } catch (e) {
         ls.pushNil();
+        return 1;
+      }
+    });
+    lua.setField(-2, name);
+  }
+
+  /// Register a sync function that returns a double
+  void _registerSyncDoubleFunc(LuaState lua, String name, double Function() fn) {
+    lua.pushDartFunction((LuaState ls) {
+      try {
+        final result = fn();
+        ls.pushNumber(result);
+        return 1;
+      } catch (e) {
+        ls.pushNumber(0.0);
         return 1;
       }
     });

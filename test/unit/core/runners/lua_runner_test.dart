@@ -81,6 +81,13 @@ void main() {
         expect(result.output, isNotNull);
       });
 
+      test('can access crossbar.cpu() number', () async {
+        final result = await runner.runSource('print(crossbar.cpu())');
+        expect(result.success, true);
+        // Should return a number (0.0 or actual usage)
+        expect(double.tryParse(result.output.trim()), isNotNull);
+      });
+
       test('can use string concatenation', () async {
         final result = await runner.runSource('print("Hello " .. "World")');
         expect(result.success, true);

@@ -2,7 +2,10 @@
 import 'dart:io';
 
 class SystemApi {
-  const SystemApi();
+  SystemApi();
+
+  // State for CPU calculation (Linux)
+  List<int>? _lastLinuxCpuValues;
 
   Future<String> getCpuUsage() async {
     try {
@@ -24,7 +27,21 @@ class SystemApi {
     }
   }
 
+  /// Synchronous CPU usage (Stateful for Linux)
+  String getCpuUsageSync() {
+    try {
+      if (Platform.isLinux) {
+        return _getLinuxCpuUsageSync();
+      }
+      return '0.0';
+    } catch (e) {
+      return '0.0';
+    }
+  }
+
   Future<String> _getLinuxCpuUsage() async {
+    // Current Async implementation does sleep 100ms.
+    // We can keep it or switch to stateful too. Keeping it stateless for async is fine for now.
     final stat1 = await File('/proc/stat').readAsString();
     await Future<void>.delayed(const Duration(milliseconds: 100));
     final stat2 = await File('/proc/stat').readAsString();
@@ -46,6 +63,41 @@ class SystemApi {
 
     final usage = (totalDelta - idleDelta) / totalDelta * 100;
     return usage.toStringAsFixed(1);
+  }
+
+  String _getLinuxCpuUsageSync() {
+    try {
+      final content = File('/proc/stat').readAsStringSync();
+      final currentValues = _parseProcStat(content);
+
+      if (currentValues == null) return '0.0';
+
+      if (_lastLinuxCpuValues == null) {
+        _lastLinuxCpuValues = currentValues;
+        return '...'; // Initializing
+      }
+
+      final values1 = _lastLinuxCpuValues!;
+      final values2 = currentValues;
+      
+      // Update state for next call (continuous measurement)
+      _lastLinuxCpuValues = currentValues;
+
+      final idle1 = values1[3];
+      final idle2 = values2[3];
+      final total1 = values1.reduce((a, b) => a + b);
+      final total2 = values2.reduce((a, b) => a + b);
+
+      final idleDelta = idle2 - idle1;
+      final totalDelta = total2 - total1;
+
+      if (totalDelta == 0) return '0.0';
+
+      final usage = (totalDelta - idleDelta) / totalDelta * 100;
+      return usage.toStringAsFixed(1);
+    } catch (e) {
+      return '0.0';
+    }
   }
 
   List<int>? _parseProcStat(String content) {

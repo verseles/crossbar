@@ -25,7 +25,7 @@ class CrossbarBridge {
   
   static final CrossbarBridge instance = CrossbarBridge._();
   
-  final SystemApi _systemApi = const SystemApi();
+  final SystemApi _systemApi = SystemApi();
   final NetworkApi _networkApi = const NetworkApi();
   final UtilsApi _utilsApi = const UtilsApi();
   
@@ -41,6 +41,12 @@ class CrossbarBridge {
   /// Get CPU usage percentage (0-100)
   Future<double> cpu() async {
     final result = await _systemApi.getCpuUsage();
+    return double.tryParse(result.replaceAll('%', '')) ?? 0.0;
+  }
+
+  /// Get CPU usage percentage synchronously (Stateful)
+  double cpuSync() {
+    final result = _systemApi.getCpuUsageSync();
     return double.tryParse(result.replaceAll('%', '')) ?? 0.0;
   }
   
