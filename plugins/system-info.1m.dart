@@ -1,5 +1,5 @@
 #!/usr/bin/env dart
-/// System Info - Comprehensive system information
+// System Info - Comprehensive system information
 import 'dart:io';
 
 void main() async {

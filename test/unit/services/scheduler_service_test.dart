@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 import 'package:crossbar/core/plugin_manager.dart';
 import 'package:crossbar/services/scheduler_service.dart';

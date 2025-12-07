@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import '../../core/api/utils_api.dart';
 import 'base_command.dart';
 

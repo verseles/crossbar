@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
@@ -465,8 +466,8 @@ class SamplePluginsService {
   
   /// @deprecated Use [allPlugins] instead
   @Deprecated('Use allPlugins instead')
-  static List<_LegacySamplePlugin> get samplePlugins {
-    return allPlugins.expand((p) => p.variants.map((v) => _LegacySamplePlugin(
+  static List<LegacySamplePlugin> get samplePlugins {
+    return allPlugins.expand((p) => p.variants.map((v) => LegacySamplePlugin(
       id: v.filename,
       name: '${p.name} (${v.language.displayName})',
       description: p.description,
@@ -480,8 +481,8 @@ class SamplePluginsService {
 
 /// @deprecated Legacy class for backward compatibility
 @Deprecated('Use PluginMetadata instead')
-class _LegacySamplePlugin {
-  const _LegacySamplePlugin({
+class LegacySamplePlugin {
+  const LegacySamplePlugin({
     required this.id,
     required this.name,
     required this.description,

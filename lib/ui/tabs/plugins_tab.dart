@@ -959,7 +959,7 @@ class _PluginsTabState extends State<PluginsTab> {
       schema: plugin.config,
     );
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     final newValues = await PluginConfigDialog.show(
       context: context,
@@ -976,16 +976,16 @@ class _PluginsTabState extends State<PluginsTab> {
       );
 
       // Re-run plugin immediately
-      _runPlugin(plugin);
+      if (!context.mounted) return;
+      await _runPlugin(plugin);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Configuration saved'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Configuration saved'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -1009,18 +1009,18 @@ class _PluginsTabState extends State<PluginsTab> {
                   onTap: () async {
                     Navigator.pop(context);
                     final installed = await SamplePluginsDialog.show(context);
-                    if (installed != null && installed.isNotEmpty && mounted) {
+                    if (installed != null && installed.isNotEmpty) {
+                      if (!context.mounted) return;
                       await _refreshPlugins();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${installed.length} plugin(s) installed successfully!',
-                            ),
-                            duration: const Duration(seconds: 2),
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${installed.length} plugin(s) installed successfully!',
                           ),
-                        );
-                      }
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
                     }
                   },
                   borderRadius: BorderRadius.circular(12),

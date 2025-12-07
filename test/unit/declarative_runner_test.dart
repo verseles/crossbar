@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/core/runners/declarative_runner.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -167,7 +168,7 @@ output:
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
       expect(result.output, matches(RegExp(r'₿ \$\d+')));
-    }, timeout: const Timeout(Duration(seconds: 30)));
+    }, timeout: const Timeout(Duration(seconds: 30)), skip: 'Requires network access');
   });
 
   group('DeclarativeRunner - canRun', () {

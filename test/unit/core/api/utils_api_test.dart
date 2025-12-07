@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 @Tags(['hardware'])
 library;
 

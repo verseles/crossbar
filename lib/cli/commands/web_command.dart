@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:convert';
 import 'dart:io';
 
@@ -33,7 +34,6 @@ class WebCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     // Show help
     if (args.isEmpty || args.contains('--help') || args.contains('-h')) {
-      // ignore: avoid_print
       print('''Usage: crossbar web <url> [options]
 
 Options:

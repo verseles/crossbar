@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/core/bridge/crossbar_bridge.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -72,7 +73,7 @@ void main() {
       final result = await bridge.web('api.coinbase.com/v2/prices/BTC-USD/spot');
       expect(result, isA<Map>());
       expect((result as Map).containsKey('data'), isTrue);
-    }, timeout: const Timeout(Duration(seconds: 30)));
+    }, timeout: const Timeout(Duration(seconds: 30)), skip: 'Requires network access');
 
     test('ping returns latency or timeout', () async {
       final ping = await bridge.ping('127.0.0.1');

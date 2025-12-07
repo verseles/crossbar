@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/services/settings_service.dart';
 import 'package:crossbar/ui/main_window.dart';
 import 'package:flutter/material.dart';

@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
 /// Utility API for system controls: screenshot, wallpaper, power, notifications, DND.

@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -22,15 +23,9 @@ class LoggerService {
 
   String? _logDirectory;
   File? _currentLogFile;
-  LogLevel _minLevel = LogLevel.info;
-  bool _consoleOutput = false;
+  LogLevel minLevel = LogLevel.info;
+  bool consoleOutput = false;
   bool _initialized = false;
-
-  LogLevel get minLevel => _minLevel;
-  set minLevel(LogLevel level) => _minLevel = level;
-
-  bool get consoleOutput => _consoleOutput;
-  set consoleOutput(bool value) => _consoleOutput = value;
 
   Future<void> init({String? logDirectory}) async {
     if (_initialized) return;
@@ -85,7 +80,7 @@ class LoggerService {
     Object? error,
     StackTrace? stackTrace,
   ]) {
-    if (level.index < _minLevel.index) return;
+    if (level.index < minLevel.index) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(7);
@@ -98,7 +93,7 @@ class LoggerService {
       logLine += '\n  StackTrace:\n${_indentStackTrace(stackTrace)}';
     }
 
-    if (_consoleOutput) {
+    if (consoleOutput) {
       _printToConsole(level, logLine);
     }
 

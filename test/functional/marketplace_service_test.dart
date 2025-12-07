@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/services/marketplace_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 

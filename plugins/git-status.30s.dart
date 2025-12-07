@@ -1,5 +1,5 @@
 #!/usr/bin/env dart
-/// Git Status - Shows git repository status
+// Git Status - Shows git repository status
 import 'dart:io';
 
 void main() async {
