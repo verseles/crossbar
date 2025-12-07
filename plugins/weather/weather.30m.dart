@@ -1,7 +1,17 @@
 #!/usr/bin/env dart
-/// Weather Plugin - Uses HttpClient
+/// Weather Plugin - Uses Crossbar web API
 import 'dart:io';
 import 'dart:convert';
+
+String? crossbarWeb(String url) {
+  try {
+    final result = Process.runSync('crossbar', ['web', url]);
+    if (result.exitCode == 0) {
+      return (result.stdout as String).trim();
+    }
+  } catch (_) {}
+  return null;
+}
 
 void main() async {
   final apiKey = Platform.environment['WEATHER_API_KEY'] ?? '';
@@ -14,23 +24,35 @@ void main() async {
     return;
   }
 
-  final url = 'https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric';
+  final url = 'api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric';
 
-  try {
-    final request = await HttpClient().getUrl(Uri.parse(url));
-    finalresponse = await request.close();
-    final body = await finalresponse.transform(utf8.decoder).join();
-    
-    final data = jsonDecode(body) as Map<String, dynamic>;
-    final temp = data['main']?['temp'] ?? '--';
-    final desc = (data['weather'] as List?)?.first?['description'] ?? '';
-    
-    print('🌡️ ${temp}°C');
-    print('---');
-    print('Location: $city');
-    print('Temperature: ${temp}°C');
-    print('Condition: $desc');
-  } catch (_) {
+  // Try Crossbar web first
+  String? response = crossbarWeb(url);
+
+  // Fallback to HttpClient
+  if (response == null || response.isEmpty) {
+    try {
+      final request = await HttpClient().getUrl(Uri.parse('https://$url'));
+      final httpResponse = await request.close();
+      response = await httpResponse.transform(utf8.decoder).join();
+    } catch (_) {}
+  }
+
+  if (response != null && response.isNotEmpty) {
+    try {
+      final data = jsonDecode(response) as Map<String, dynamic>;
+      final temp = data['main']?['temp'] ?? '--';
+      final desc = (data['weather'] as List?)?.first?['description'] ?? '';
+      
+      print('🌡️ ${temp}°C');
+      print('---');
+      print('Location: $city');
+      print('Temperature: ${temp}°C');
+      print('Condition: $desc');
+    } catch (_) {
+      print('🌡️ Parse Error');
+    }
+  } else {
     print('🌡️ Error');
     print('---');
     print('Failed to fetch data');

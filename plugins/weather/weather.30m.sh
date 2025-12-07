@@ -1,5 +1,5 @@
 #!/bin/bash
-# Weather Plugin - Uses curl for HTTP requests
+# Weather Plugin - Uses Crossbar web API
 # Requires: WEATHER_API_KEY and WEATHER_CITY env vars
 
 API_KEY="${WEATHER_API_KEY:-}"
@@ -12,8 +12,15 @@ if [ -z "$API_KEY" ]; then
     exit 0
 fi
 
-# Use curl
-response=$(curl -s "https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric")
+URL="api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric"
+
+# Try Crossbar web first
+response=$(crossbar web "$URL" 2>/dev/null)
+
+# Fallback to curl
+if [ -z "$response" ]; then
+    response=$(curl -s "https://$URL")
+fi
 
 if [ -z "$response" ]; then
     echo "🌡️ Error"
@@ -22,7 +29,6 @@ if [ -z "$response" ]; then
     exit 0
 fi
 
-# Parse JSON (simple grep/perl fallback)
 temp=$(echo "$response" | grep -oP '"temp":\s*\K[0-9.]+' | head -1)
 desc=$(echo "$response" | grep -oP '"description":\s*"\K[^"]+' | head -1)
 

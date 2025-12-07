@@ -1,8 +1,12 @@
 #!/bin/bash
-# Bitcoin Price Plugin - Uses curl for HTTP requests
+# Bitcoin Price Plugin - Uses Crossbar web API
 
-# Use curl
-response=$(curl -s "https://api.coinbase.com/v2/prices/BTC-USD/spot")
+response=$(crossbar web api.coinbase.com/v2/prices/BTC-USD/spot 2>/dev/null)
+
+# Fallback to curl if crossbar fails
+if [ -z "$response" ]; then
+    response=$(curl -s "https://api.coinbase.com/v2/prices/BTC-USD/spot")
+fi
 
 if [ -z "$response" ]; then
     echo "₿ Error"
@@ -14,7 +18,6 @@ fi
 price=$(echo "$response" | grep -oP '"amount":\s*"\K[0-9.]+' | head -1)
 
 if [ -n "$price" ]; then
-    # Format price with comma separator
     formatted=$(printf "%'.0f" "${price%.*}" 2>/dev/null || echo "$price")
     echo "₿ \$${formatted}"
     echo "---"

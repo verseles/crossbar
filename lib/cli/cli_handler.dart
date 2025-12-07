@@ -15,6 +15,7 @@ import 'commands/system_info_commands.dart';
 import 'commands/utility_commands.dart';
 import 'commands/vpn_command.dart';
 import 'commands/wallpaper_command.dart';
+import 'commands/web_command.dart';
 import 'commands/wifi_command.dart';
 
 const String version = '1.1.0';
@@ -36,6 +37,7 @@ void _registerCommands() {
 
   // Network
   _register(NetworkCommand());
+  _register(WebCommand());
   _register(WifiCommand());
   _register(BluetoothCommand());
   _register(VpnCommand());
@@ -184,6 +186,16 @@ Network & Connectivity:
   bluetooth devices         List paired devices
 
   vpn status                VPN connection status
+
+HTTP Client (web):
+  web <url>                 Simple GET request
+  web <url> --json          Output as JSON (with headers)
+  web <url> --method POST   Specify HTTP method
+  web <url> --headers '{}'  Custom headers (JSON)
+  web <url> --body '{}'     Request body
+  web <url> --body-file f   Body from file
+  web <url> --timeout 10    Timeout in seconds
+  web <url> --insecure      Skip SSL verification
 
 Files & Directories:
   file exists <path>        Check if file/dir exists
