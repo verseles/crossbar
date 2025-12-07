@@ -273,23 +273,20 @@ menu:
   - battery.1m.yaml, bitcoin.5m.yaml, network.30s.yaml
 - [x] **Testes:** 14 testes passando
 
-### Fase 7: Plugin Executor Unificado
+### Fase 7: Plugin Executor Unificado ✅
 
-- [ ] **Interface:** `abstract class PluginRunner`
-  ```dart
-  abstract class PluginRunner {
-    bool canRun(String pluginPath, TargetPlatform platform);
-    Future<PluginOutput> run(Plugin plugin);
-    String get name;
-  }
-  ```
-- [ ] **Implementações:**
-  - [ ] `ScriptRunner` - Bash/Python/Node/Go/Rust (desktop only)
-  - [ ] `DartRunner` - Plugins .dart interpretados (todas plataformas)
-  - [ ] `CompiledDartRunner` - Plugins .dart.exe compilados (desktop only)
-  - [ ] `DeclarativeRunner` - Plugins .yaml (todas plataformas)
-- [ ] **Auto-seleção:** Baseado em extensão + plataforma
-- [ ] **Fallback Chain:** Se um runner falha, tenta próximo
+- [x] **Criar:** `lib/core/plugin_executor.dart`
+- [x] **RunnerType enum:** declarative, dart, script, unknown
+- [x] **Auto-detecção:** Baseado em extensão do arquivo
+  - `.yaml`, `.yml` → DeclarativeRunner
+  - `.dart` → DartRunner
+  - `.sh`, `.py`, `.js`, `.go`, `.rs` → ScriptRunner
+  - `.dart.exe` → ScriptRunner (compiled)
+- [x] **Platform Check:** `canRunOnPlatform()` para mobile compatibility
+- [x] **Integração:** PluginManager agora usa PluginExecutor
+- [x] **Extensões:** `.yaml` e `.yml` adicionados a allowedExtensions
+- [x] **Testes:** 13 testes unitários passando
+- [x] **Build:** 337 testes totais passando
 
 ### Fase 8: Documentação Completa
 

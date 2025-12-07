@@ -11,7 +11,7 @@ import '../models/plugin.dart';
 import '../models/plugin_config.dart';
 import '../models/plugin_output.dart';
 import '../services/config_service.dart';
-import 'script_runner.dart';
+import 'plugin_executor.dart';
 
 class PluginManager {
 
@@ -21,7 +21,7 @@ class PluginManager {
   static final PluginManager _instance = PluginManager._internal();
 
   final List<Plugin> _plugins = [];
-  final ScriptRunner _scriptRunner = const ScriptRunner();
+  final PluginExecutor _pluginExecutor = PluginExecutor();
   final PluginConfigService _configService = PluginConfigService();
   static const int maxConcurrent = 10;
 
@@ -41,6 +41,8 @@ class PluginManager {
     '.dart': 'dart',
     '.go': 'go',
     '.rs': 'rust',
+    '.yaml': 'yaml',
+    '.yml': 'yaml',
   };
 
   static const List<String> allowedExtensions = [
@@ -50,6 +52,8 @@ class PluginManager {
     '.dart',
     '.go',
     '.rs',
+    '.yaml',
+    '.yml',
   ];
 
   List<Plugin> get plugins => List.unmodifiable(_plugins);
@@ -259,7 +263,7 @@ class PluginManager {
         );
       }
 
-      final output = await _scriptRunner.run(
+      final output = await _pluginExecutor.run(
         plugin,
         additionalEnv: configEnv,
       );
