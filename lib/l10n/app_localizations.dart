@@ -569,6 +569,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default Refresh Interval'**
   String get defaultRefreshInterval;
+
+  /// No description provided for @searchPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Search plugins...'**
+  String get searchPlugins;
+
+  /// No description provided for @enabledFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled First'**
+  String get enabledFirst;
+
+  /// No description provided for @alphabetical.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get alphabetical;
+
+  /// No description provided for @interval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get interval;
+
+  /// No description provided for @noGrouping.
+  ///
+  /// In en, this message translates to:
+  /// **'No Grouping'**
+  String get noGrouping;
+
+  /// No description provided for @byLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'By Language'**
+  String get byLanguage;
+
+  /// No description provided for @byConfigurable.
+  ///
+  /// In en, this message translates to:
+  /// **'By Configurable'**
+  String get byConfigurable;
+
+  /// No description provided for @noGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No Groups'**
+  String get noGroups;
+
+  /// No description provided for @configurable.
+  ///
+  /// In en, this message translates to:
+  /// **'Configurable'**
+  String get configurable;
+
+  /// No description provided for @standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get standard;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @liveOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Output'**
+  String get liveOutput;
+
+  /// No description provided for @copyOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy output'**
+  String get copyOutput;
+
+  /// No description provided for @running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running...'**
+  String get running;
+
+  /// No description provided for @executingPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Executing plugin...'**
+  String get executingPlugin;
+
+  /// No description provided for @clickRunNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Click \"Run Now\" to see output'**
+  String get clickRunNow;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @path.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get path;
+
+  /// No description provided for @interpreter.
+  ///
+  /// In en, this message translates to:
+  /// **'Interpreter'**
+  String get interpreter;
+
+  /// No description provided for @lastError.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Error'**
+  String get lastError;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @disable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get disable;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @samplePlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Plugins'**
+  String get samplePlugins;
+
+  /// No description provided for @chooseFromPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from 20+ ready-to-use plugins'**
+  String get chooseFromPlugins;
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get or;
+
+  /// No description provided for @createYourOwnPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own plugin:'**
+  String get createYourOwnPlugin;
+
+  /// No description provided for @createScriptStep.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Create a script in one of these languages:'**
+  String get createScriptStep;
+
+  /// No description provided for @nameWithIntervalStep.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Name it with refresh interval:'**
+  String get nameWithIntervalStep;
+
+  /// No description provided for @placeInPluginsStep.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Place it in ~/.crossbar/plugins/'**
+  String get placeInPluginsStep;
+
+  /// No description provided for @pluginsInstalledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plugin(s) installed successfully!'**
+  String pluginsInstalledSuccess(int count);
+
+  /// No description provided for @configurationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration saved'**
+  String get configurationSaved;
+
+  /// No description provided for @noPluginsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugins match \"{query}\"'**
+  String noPluginsMatch(String query);
+
+  /// No description provided for @errorCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Error copied to clipboard'**
+  String get errorCopiedToClipboard;
+
+  /// No description provided for @pluginFileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin file not found'**
+  String get pluginFileNotFound;
+
+  /// No description provided for @failedToOpenEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open editor: {error}'**
+  String failedToOpenEditor(String error);
+
+  /// No description provided for @clickDeleteAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Delete again to remove \"{name}\"'**
+  String clickDeleteAgain(String name);
+
+  /// No description provided for @deletedPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {name}'**
+  String deletedPlugin(String name);
+
+  /// No description provided for @failedToDeletePlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete plugin: {error}'**
+  String failedToDeletePlugin(String error);
+
+  /// No description provided for @outputCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Output copied to clipboard'**
+  String get outputCopiedToClipboard;
+
+  /// No description provided for @andMore.
+  ///
+  /// In en, this message translates to:
+  /// **'... and {count} more'**
+  String andMore(int count);
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String minutesAgo(int count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String hoursAgo(int count);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String daysAgo(int count);
+
+  /// No description provided for @universalAndAdditionalPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'{universal} universal + {additional} additional plugins'**
+  String universalAndAdditionalPlugins(int universal, int additional);
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @noPluginsMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugins match your filters'**
+  String get noPluginsMatchFilters;
+
+  /// No description provided for @mobileCompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile compatible'**
+  String get mobileCompatible;
+
+  /// No description provided for @installedThisSession.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} installed this session'**
+  String installedThisSession(int count);
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @installedLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed {name} ({language})'**
+  String installedLanguage(String name, String language);
+
+  /// No description provided for @failedToInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to install {name}: {error}'**
+  String failedToInstall(String name, String error);
+
+  /// No description provided for @systemTray.
+  ///
+  /// In en, this message translates to:
+  /// **'System Tray'**
+  String get systemTray;
+
+  /// No description provided for @displayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Mode'**
+  String get displayMode;
+
+  /// No description provided for @unified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified'**
+  String get unified;
+
+  /// No description provided for @singleTrayIconWithMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Single tray icon with menu for all plugins'**
+  String get singleTrayIconWithMenu;
+
+  /// No description provided for @separate.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate'**
+  String get separate;
+
+  /// No description provided for @oneTrayIconPerPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'One tray icon per plugin (Linux only)'**
+  String get oneTrayIconPerPlugin;
+
+  /// No description provided for @smartCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Collapse'**
+  String get smartCollapse;
+
+  /// No description provided for @autoCollapseWhenManyPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-collapse when too many plugins'**
+  String get autoCollapseWhenManyPlugins;
+
+  /// No description provided for @smartOverflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Overflow'**
+  String get smartOverflow;
+
+  /// No description provided for @showFirstNIconsRestInOverflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show first N icons, rest in overflow menu'**
+  String get showFirstNIconsRestInOverflow;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get comingSoon;
+
+  /// No description provided for @trayDisplayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Tray Display Mode'**
+  String get trayDisplayMode;
+
+  /// No description provided for @unifiedSingleIconWithMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified (single icon with menu)'**
+  String get unifiedSingleIconWithMenu;
+
+  /// No description provided for @separateOneIconPerPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate (one icon per plugin)'**
+  String get separateOneIconPerPlugin;
+
+  /// No description provided for @noConfigurationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No configuration required'**
+  String get noConfigurationRequired;
+
+  /// No description provided for @fiveMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'5 minutes'**
+  String get fiveMinutes;
+
+  /// No description provided for @licenseText.
+  ///
+  /// In en, this message translates to:
+  /// **'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.'**
+  String get licenseText;
 }
 
 class _AppLocalizationsDelegate

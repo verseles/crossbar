@@ -211,7 +211,7 @@ class _PluginsTabState extends State<PluginsTab> {
                 ? const Center(child: CircularProgressIndicator())
                 : _pluginManager.plugins.isEmpty
                     ? _buildEmptyState(l10n)
-                    : _buildPluginList(theme),
+                    : _buildPluginList(theme, l10n),
           ),
         ],
       ),
@@ -242,7 +242,7 @@ class _PluginsTabState extends State<PluginsTab> {
           TextField(
             onChanged: (value) => setState(() => _searchQuery = value),
             decoration: InputDecoration(
-              hintText: 'Search plugins...',
+              hintText: l10n.searchPlugins,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
@@ -273,24 +273,24 @@ class _PluginsTabState extends State<PluginsTab> {
                   onSelected: (value) => setState(() => _sortOrder = value),
                   child: Chip(
                     avatar: const Icon(Icons.sort, size: 18),
-                    label: Text(_getSortOrderLabel()),
+                    label: Text(_getSortOrderLabel(l10n)),
                   ),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginSortOrder.enabledFirst,
-                      child: Text('Enabled First'),
+                      child: Text(l10n.enabledFirst),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginSortOrder.alphabetical,
-                      child: Text('Alphabetical'),
+                      child: Text(l10n.alphabetical),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginSortOrder.lastRun,
-                      child: Text('Last Run'),
+                      child: Text(l10n.lastRun),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginSortOrder.interval,
-                      child: Text('Interval'),
+                      child: Text(l10n.interval),
                     ),
                   ],
                 ),
@@ -303,20 +303,20 @@ class _PluginsTabState extends State<PluginsTab> {
                   onSelected: (value) => setState(() => _groupBy = value),
                   child: Chip(
                     avatar: const Icon(Icons.folder_outlined, size: 18),
-                    label: Text(_getGroupByLabel()),
+                    label: Text(_getGroupByLabel(l10n)),
                   ),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginGroupBy.none,
-                      child: Text('No Grouping'),
+                      child: Text(l10n.noGrouping),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginGroupBy.language,
-                      child: Text('By Language'),
+                      child: Text(l10n.byLanguage),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: PluginGroupBy.configurable,
-                      child: Text('By Configurable'),
+                      child: Text(l10n.byConfigurable),
                     ),
                   ],
                 ),
@@ -325,7 +325,7 @@ class _PluginsTabState extends State<PluginsTab> {
                 
                 // Quick filters
                 FilterChip(
-                  label: const Text('Enabled'),
+                  label: Text(l10n.enabled),
                   selected: _sortOrder == PluginSortOrder.enabledFirst,
                   onSelected: (_) => setState(() {
                     _sortOrder = PluginSortOrder.enabledFirst;
@@ -337,7 +337,7 @@ class _PluginsTabState extends State<PluginsTab> {
                 // Refresh button
                 ActionChip(
                   avatar: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Refresh'),
+                  label: Text(l10n.refresh),
                   onPressed: _isLoading ? null : _refreshPlugins,
                 ),
               ],
@@ -348,31 +348,31 @@ class _PluginsTabState extends State<PluginsTab> {
     );
   }
 
-  String _getSortOrderLabel() {
+  String _getSortOrderLabel(AppLocalizations l10n) {
     switch (_sortOrder) {
       case PluginSortOrder.enabledFirst:
-        return 'Enabled First';
+        return l10n.enabledFirst;
       case PluginSortOrder.alphabetical:
         return 'A-Z';
       case PluginSortOrder.lastRun:
-        return 'Last Run';
+        return l10n.lastRun;
       case PluginSortOrder.interval:
-        return 'Interval';
+        return l10n.interval;
     }
   }
 
-  String _getGroupByLabel() {
+  String _getGroupByLabel(AppLocalizations l10n) {
     switch (_groupBy) {
       case PluginGroupBy.none:
-        return 'No Groups';
+        return l10n.noGroups;
       case PluginGroupBy.language:
-        return 'By Language';
+        return l10n.byLanguage;
       case PluginGroupBy.configurable:
-        return 'Configurable';
+        return l10n.configurable;
     }
   }
 
-  Widget _buildPluginList(ThemeData theme) {
+  Widget _buildPluginList(ThemeData theme, AppLocalizations l10n) {
     final groups = _groupedPlugins;
     
     if (_filteredAndSortedPlugins.isEmpty) {
@@ -387,7 +387,7 @@ class _PluginsTabState extends State<PluginsTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No plugins match "$_searchQuery"',
+              l10n.noPluginsMatch(_searchQuery),
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -447,6 +447,7 @@ class _PluginsTabState extends State<PluginsTab> {
               context,
               plugin,
               theme,
+              l10n,
             )),
           ],
         );
@@ -458,6 +459,7 @@ class _PluginsTabState extends State<PluginsTab> {
     BuildContext context,
     Plugin plugin,
     ThemeData theme,
+    AppLocalizations l10n,
   ) {
     final isExpanded = _expandedPluginId == plugin.id;
     final output = _pluginOutputs[plugin.id];
@@ -580,7 +582,7 @@ class _PluginsTabState extends State<PluginsTab> {
           
           // Expanded content
           if (isExpanded)
-            _buildExpandedContent(context, plugin, theme, output, isRunning),
+            _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
         ],
       ),
     );
@@ -616,6 +618,7 @@ class _PluginsTabState extends State<PluginsTab> {
     ThemeData theme,
     PluginOutput? output,
     bool isRunning,
+    AppLocalizations l10n,
   ) {
     
     return Container(
@@ -651,7 +654,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Live Output',
+                      l10n.liveOutput,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -662,7 +665,7 @@ class _PluginsTabState extends State<PluginsTab> {
                       IconButton(
                         onPressed: () => _copyOutput(output),
                         icon: const Icon(Icons.copy, size: 18),
-                        tooltip: 'Copy output',
+                        tooltip: l10n.copyOutput,
                       ),
                     const SizedBox(width: 4),
                     // Run button
@@ -675,7 +678,7 @@ class _PluginsTabState extends State<PluginsTab> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.play_arrow, size: 18),
-                      label: Text(isRunning ? 'Running...' : 'Run Now'),
+                      label: Text(isRunning ? l10n.running : l10n.runNow),
                     ),
                   ],
                 ),
@@ -707,17 +710,17 @@ class _PluginsTabState extends State<PluginsTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailRow(theme, 'Path', plugin.path),
+                _buildDetailRow(theme, l10n.path, plugin.path),
                 _buildDetailRow(
                   theme,
-                  'Interval',
+                  l10n.interval,
                   _formatInterval(plugin.refreshInterval),
                 ),
-                _buildDetailRow(theme, 'Interpreter', plugin.interpreter),
+                _buildDetailRow(theme, l10n.interpreter, plugin.interpreter),
                 if (plugin.lastRun != null)
                   _buildDetailRow(
                     theme,
-                    'Last Run',
+                    l10n.lastRun,
                     _formatDateTime(plugin.lastRun!),
                   ),
                 if (plugin.lastError != null)
@@ -727,7 +730,7 @@ class _PluginsTabState extends State<PluginsTab> {
                       Expanded(
                         child: _buildDetailRow(
                           theme,
-                          'Last Error',
+                          l10n.lastError,
                           plugin.lastError!,
                           isError: true,
                         ),
@@ -737,7 +740,7 @@ class _PluginsTabState extends State<PluginsTab> {
                           await FlutterClipboard.copy(plugin.lastError!);
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Error copied to clipboard')),
+                              SnackBar(content: Text(l10n.errorCopiedToClipboard)),
                             );
                           }
                         },
@@ -762,7 +765,7 @@ class _PluginsTabState extends State<PluginsTab> {
                   OutlinedButton.icon(
                     onPressed: () => _showConfigDialog(context, plugin),
                     icon: const Icon(Icons.settings, size: 18),
-                    label: const Text('Configure'),
+                    label: Text(l10n.configure),
                   ),
                 OutlinedButton.icon(
                   onPressed: () async {
@@ -775,17 +778,17 @@ class _PluginsTabState extends State<PluginsTab> {
                     plugin.enabled ? Icons.pause : Icons.play_arrow,
                     size: 18,
                   ),
-                  label: Text(plugin.enabled ? 'Disable' : 'Enable'),
+                  label: Text(plugin.enabled ? l10n.disable : l10n.enable),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _editPlugin(plugin),
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Edit'),
+                    label: Text(l10n.edit),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _handleDeleteClick(context, plugin),
                   icon: Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
-                  label: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    label: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
               ],
             ),
@@ -1026,9 +1029,10 @@ class _PluginsTabState extends State<PluginsTab> {
       await _runPlugin(plugin);
 
       if (!context.mounted) return;
+      final appL10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Configuration saved'),
+        SnackBar(
+          content: Text(appL10n.configurationSaved),
           duration: Duration(seconds: 2),
         ),
       );
@@ -1064,7 +1068,7 @@ class _PluginsTabState extends State<PluginsTab> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${installed.length} plugin(s) installed successfully!',
+                            AppLocalizations.of(context)!.pluginsInstalledSuccess(installed.length),
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -1094,7 +1098,7 @@ class _PluginsTabState extends State<PluginsTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Sample Plugins',
+                                l10n.samplePlugins,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.colorScheme.onPrimaryContainer,
                                   fontWeight: FontWeight.bold,
@@ -1102,7 +1106,7 @@ class _PluginsTabState extends State<PluginsTab> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Choose from 20+ ready-to-use plugins',
+                                l10n.chooseFromPlugins,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onPrimaryContainer
                                       .withValues(alpha: 0.8),
@@ -1129,7 +1133,7 @@ class _PluginsTabState extends State<PluginsTab> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      'OR',
+                      l10n.or,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -1143,13 +1147,13 @@ class _PluginsTabState extends State<PluginsTab> {
 
               // Manual creation instructions
               Text(
-                'Create your own plugin:',
+                l10n.createYourOwnPlugin,
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 12),
 
               Text(
-                '1. Create a script in one of these languages:',
+                l10n.createScriptStep,
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
@@ -1168,7 +1172,7 @@ class _PluginsTabState extends State<PluginsTab> {
               const SizedBox(height: 12),
 
               Text(
-                '2. Name it with refresh interval:',
+                l10n.nameWithIntervalStep,
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
@@ -1188,7 +1192,7 @@ class _PluginsTabState extends State<PluginsTab> {
               const SizedBox(height: 12),
 
               Text(
-                '3. Place it in ~/.crossbar/plugins/',
+                l10n.placeInPluginsStep,
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -1262,7 +1266,7 @@ class _PluginsTabState extends State<PluginsTab> {
     if (!await file.exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Plugin file not found')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.pluginFileNotFound)),
         );
       }
       return;
@@ -1295,7 +1299,7 @@ class _PluginsTabState extends State<PluginsTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to open editor: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToOpenEditor(e.toString()))),
         );
       }
     }
@@ -1320,7 +1324,7 @@ class _PluginsTabState extends State<PluginsTab> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Click Delete again to remove "${_formatPluginName(plugin.id)}"'),
+          content: Text(AppLocalizations.of(context)!.clickDeleteAgain(_formatPluginName(plugin.id))),
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -1350,13 +1354,13 @@ class _PluginsTabState extends State<PluginsTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deleted ${_formatPluginName(plugin.id)}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.deletedPlugin(_formatPluginName(plugin.id)))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete plugin: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.failedToDeletePlugin(e.toString()))),
         );
       }
     }
@@ -1389,7 +1393,7 @@ class _PluginsTabState extends State<PluginsTab> {
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Output copied to clipboard')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.outputCopiedToClipboard)),
       );
     }
   }

@@ -98,14 +98,14 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               const SizedBox(height: 16),
               _buildSection(
-                title: 'System Tray',
+                title: l10n.systemTray,
                 icon: Icons.apps,
                 children: [
                   ListTile(
-                    title: const Text('Display Mode'),
-                    subtitle: Text(_getTrayModeLabel(settings.trayDisplayMode)),
+                    title: Text(l10n.displayMode),
+                    subtitle: Text(_getTrayModeLabel(settings.trayDisplayMode, l10n)),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showTrayModeDialog(settings),
+                    onTap: () => _showTrayModeDialog(settings, l10n),
                   ),
                 ],
               ),
@@ -126,7 +126,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ),
                   ListTile(
                     title: Text(l10n.defaultRefreshInterval),
-                    subtitle: const Text('5 minutes'),
+                    subtitle: Text(l10n.fiveMinutes),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       // TODO: Show interval picker
@@ -232,61 +232,51 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 
   void _showLicenseDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('License'),
-        content: const SingleChildScrollView(
+        title: Text(l10n.license),
+        content: SingleChildScrollView(
           child: Text(
-            'Crossbar - Universal Plugin System\n\n'
-            'Copyright (C) 2025\n\n'
-            'This program is free software: you can redistribute it and/or modify '
-            'it under the terms of the GNU Affero General Public License as published '
-            'by the Free Software Foundation, either version 3 of the License, or '
-            '(at your option) any later version.\n\n'
-            'This program is distributed in the hope that it will be useful, '
-            'but WITHOUT ANY WARRANTY; without even the implied warranty of '
-            'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the '
-            'GNU Affero General Public License for more details.\n\n'
-            'You should have received a copy of the GNU Affero General Public License '
-            'along with this program. If not, see <https://www.gnu.org/licenses/>.',
+            l10n.licenseText,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
     );
   }
 
-  String _getTrayModeLabel(TrayDisplayMode mode) {
+  String _getTrayModeLabel(TrayDisplayMode mode, AppLocalizations l10n) {
     switch (mode) {
       case TrayDisplayMode.unified:
-        return 'Unified (single icon with menu)';
+        return l10n.unifiedSingleIconWithMenu;
       case TrayDisplayMode.separate:
-        return 'Separate (one icon per plugin)';
+        return l10n.separateOneIconPerPlugin;
       case TrayDisplayMode.smartCollapse:
-        return 'Smart Collapse';
+        return l10n.smartCollapse;
       case TrayDisplayMode.smartOverflow:
-        return 'Smart Overflow';
+        return l10n.smartOverflow;
     }
   }
 
-  void _showTrayModeDialog(SettingsService settings) {
+  void _showTrayModeDialog(SettingsService settings, AppLocalizations l10n) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tray Display Mode'),
+        title: Text(l10n.trayDisplayMode),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Unified - Available
             RadioListTile<TrayDisplayMode>(
-              title: const Text('Unified'),
-              subtitle: const Text('Single tray icon with menu for all plugins'),
+              title: Text(l10n.unified),
+              subtitle: Text(l10n.singleTrayIconWithMenu),
               value: TrayDisplayMode.unified,
               groupValue: settings.trayDisplayMode,
               onChanged: (value) {
@@ -298,7 +288,7 @@ class _SettingsTabState extends State<SettingsTab> {
             RadioListTile<TrayDisplayMode>(
               title: Row(
                 children: [
-                  const Text('Separate'),
+                  Text(l10n.separate),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -307,7 +297,7 @@ class _SettingsTabState extends State<SettingsTab> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Coming Soon',
+                      l10n.comingSoon,
                       style: TextStyle(
                         fontSize: 10,
                         color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -316,7 +306,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ),
                 ],
               ),
-              subtitle: const Text('One tray icon per plugin (Linux only)'),
+              subtitle: Text(l10n.oneTrayIconPerPlugin),
               value: TrayDisplayMode.separate,
               groupValue: settings.trayDisplayMode,
               onChanged: null, // Disabled
@@ -325,7 +315,7 @@ class _SettingsTabState extends State<SettingsTab> {
             RadioListTile<TrayDisplayMode>(
               title: Row(
                 children: [
-                  const Text('Smart Collapse'),
+                  Text(l10n.smartCollapse),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -334,7 +324,7 @@ class _SettingsTabState extends State<SettingsTab> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Coming Soon',
+                      l10n.comingSoon,
                       style: TextStyle(
                         fontSize: 10,
                         color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -343,7 +333,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ),
                 ],
               ),
-              subtitle: const Text('Auto-collapse when too many plugins'),
+              subtitle: Text(l10n.autoCollapseWhenManyPlugins),
               value: TrayDisplayMode.smartCollapse,
               groupValue: settings.trayDisplayMode,
               onChanged: null, // Disabled
@@ -352,7 +342,7 @@ class _SettingsTabState extends State<SettingsTab> {
             RadioListTile<TrayDisplayMode>(
               title: Row(
                 children: [
-                  const Text('Smart Overflow'),
+                  Text(l10n.smartOverflow),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -361,7 +351,7 @@ class _SettingsTabState extends State<SettingsTab> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Coming Soon',
+                      l10n.comingSoon,
                       style: TextStyle(
                         fontSize: 10,
                         color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -370,7 +360,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ),
                 ],
               ),
-              subtitle: const Text('Show first N icons, rest in overflow menu'),
+              subtitle: Text(l10n.showFirstNIconsRestInOverflow),
               value: TrayDisplayMode.smartOverflow,
               groupValue: settings.trayDisplayMode,
               onChanged: null, // Disabled
@@ -380,7 +370,7 @@ class _SettingsTabState extends State<SettingsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),

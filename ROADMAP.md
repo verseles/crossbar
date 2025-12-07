@@ -343,21 +343,21 @@ menu:
 
 ## 🌍 Epic v1.3.2: Internationalization & Polish
 
-**Status: 🚧 PENDENTE**
+**Status: 🚧 EM PROGRESSO**
 
 **Objetivo:** Internacionalizar a aplicação e finalizar integração desktop.
 
-### Fase 1: i18n Strings
+### Fase 1: i18n Strings ✅
 
-- [ ] **Identificar:** Mapear todas as strings hardcoded em lib/ui/
-  - [ ] `plugins_tab.dart` - "Sample Plugins", "plugin(s) installed", etc.
-  - [ ] `sample_plugins_dialog.dart` - títulos e labels
-  - [ ] `settings_tab.dart` - labels de configuração
-  - [ ] `plugin_config_dialog.dart` - campos e botões
-  - [ ] `plugin_card.dart` - status e ações
-- [ ] **Adicionar ao arb:** Criar ~30-50 novas chaves em `app_en.arb`
-- [ ] **Traduzir:** Atualizar os 12 arquivos de idiomas (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, zh)
-- [ ] **Substituir:** Trocar strings por `l10n.keyName` em todo o código
+- [x] **Identificar:** Mapear todas as strings hardcoded em lib/ui/
+  - [x] `plugins_tab.dart` - "Sample Plugins", "plugin(s) installed", etc.
+  - [x] `sample_plugins_dialog.dart` - títulos e labels
+  - [x] `settings_tab.dart` - labels de configuração
+  - [x] `plugin_config_dialog.dart` - campos e botões
+  - [x] `plugin_card.dart` - status e ações
+- [x] **Adicionar ao arb:** Criar ~73 novas chaves em `app_en.arb`
+- [x] **Traduzir:** Atualizar os 12 arquivos de idiomas (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, zh)
+- [x] **Substituir:** Trocar strings por `l10n.keyName` em todo o código
 
 ### Fase 2: Linux Desktop Integration
 

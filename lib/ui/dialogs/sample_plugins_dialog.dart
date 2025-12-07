@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/sample_plugins_service.dart';
 
 /// Dialog to browse and install sample/example plugins.
@@ -127,7 +128,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     if (isSmallScreen) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Sample Plugins'),
+          title: Text(AppLocalizations.of(context)!.samplePlugins),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
@@ -207,19 +208,21 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Sample Plugins',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
+                  Text(
+                    AppLocalizations.of(context)!.samplePlugins,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
                   ),
-                ),
-                Text(
-                  '${SamplePluginsService.universalPlugins.length} universal + '
-                  '${SamplePluginsService.legacyPlugins.length} additional plugins',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                  Text(
+                    AppLocalizations.of(context)!.universalAndAdditionalPlugins(
+                      SamplePluginsService.universalPlugins.length,
+                      SamplePluginsService.legacyPlugins.length,
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -241,7 +244,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
         child: Row(
           children: [
             FilterChip(
-              label: const Text('All'),
+              label: Text(AppLocalizations.of(context)!.all),
               selected: _selectedCategory == null,
               onSelected: (_) {
                 setState(() {
@@ -283,7 +286,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
             Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
-              'No plugins match your filters',
+              AppLocalizations.of(context)!.noPluginsMatchFilters,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -360,7 +363,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                           if (plugin.mobileCompatible) ...[
                             const SizedBox(width: 4),
                             Tooltip(
-                              message: 'Mobile compatible',
+                              message: AppLocalizations.of(context)!.mobileCompatible,
                               child: Icon(
                                 Icons.smartphone,
                                 size: 14,
@@ -477,7 +480,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                 else if (!isVariantInstalled)
                   FilledButton.tonal(
                     onPressed: () => _installPlugin(plugin),
-                    child: const Text('Install'),
+                    child: Text(AppLocalizations.of(context)!.install),
                   )
                 else
                   Container(
@@ -492,7 +495,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                         Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
                         const SizedBox(width: 4),
                         Text(
-                          'Installed',
+                          AppLocalizations.of(context)!.installed,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.primary,
@@ -516,7 +519,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
         children: [
           if (_installedFilenames.isNotEmpty)
             Text(
-              '${_installedFilenames.length} installed this session',
+              AppLocalizations.of(context)!.installedThisSession(_installedFilenames.length),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -525,7 +528,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
           const Spacer(),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
-            child: Text(_installedFilenames.isNotEmpty ? 'Done' : 'Close'),
+            child: Text(_installedFilenames.isNotEmpty ? AppLocalizations.of(context)!.done : AppLocalizations.of(context)!.close),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
 import '../../models/plugin_config.dart';
 import '../widgets/config_fields/config_field.dart';
@@ -144,7 +145,7 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No configuration required',
+              AppLocalizations.of(context)!.noConfigurationRequired,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -173,12 +174,12 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
         children: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           const SizedBox(width: 8),
           FilledButton(
             onPressed: _isValid ? () => Navigator.of(context).pop(_values) : null,
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -317,7 +318,7 @@ class PluginInfoDialog extends StatelessWidget {
               onRun!();
             },
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Run Now'),
+            label: Text(AppLocalizations.of(context)!.runNow),
           ),
         if (onConfigure != null)
           OutlinedButton.icon(
@@ -326,7 +327,7 @@ class PluginInfoDialog extends StatelessWidget {
               onConfigure!();
             },
             icon: const Icon(Icons.settings),
-            label: const Text('Configure'),
+            label: Text(AppLocalizations.of(context)!.configure),
           ),
         if (onDelete != null)
           TextButton.icon(
@@ -336,7 +337,7 @@ class PluginInfoDialog extends StatelessWidget {
             },
             icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
             label: Text(
-              'Remove',
+              AppLocalizations.of(context)!.remove,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
