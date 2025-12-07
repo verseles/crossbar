@@ -49,6 +49,7 @@ dependencies:
   uuid: ^3.0.7
   tray_manager: ^0.5.2
   xdg_status_notifier_item: ^0.0.1
+  dart_eval: ^0.8.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

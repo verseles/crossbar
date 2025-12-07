@@ -157,25 +157,29 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] Encoding: `hash()`, `uuid()`, `base64Encode()`, `base64Decode()`, `random()`
 - [x] **Testes:** 20 testes passando para todas as APIs
 
-### Fase 4: DartRunner (Plugins Interpretados)
+### Fase 4: DartRunner (Plugins Interpretados) ✅
 
 > **Objetivo:** Executar plugins `.dart` simples via `dart_eval` em runtime.
 
 **Quando usar:** Plugins simples que usam apenas a API do Crossbar.
 
 ```dart
-// plugins/cpu.1s.dart (SEM imports externos)
-void main() async {
-  final cpu = await crossbar.cpu();
-  print('💻 $cpu%');
+// plugins/clock.1s.dart
+import 'package:crossbar_bridge/crossbar_bridge.dart';
+
+void main() {
+  final crossbar = CrossbarBridge();
+  final time = crossbar.time();
+  print('⏰ $time');
 }
 ```
 
-- [ ] **Dependência:** Adicionar `dart_eval` ao pubspec.yaml
-- [ ] **Criar:** `lib/core/runners/dart_runner.dart`
-- [ ] **Bridge Injection:** Injetar objeto `crossbar` com acesso à CrossbarBridge
-- [ ] **Sandbox:** Limitar acesso a filesystem/network (apenas via bridge)
-- [ ] **Testes:** Validar execução em Android/iOS
+- [x] **Dependência:** dart_eval ^0.8.2 adicionado ao pubspec.yaml
+- [x] **Criar:** `lib/core/runners/dart_runner.dart`
+- [x] **CrossbarPlugin:** Registra CrossbarBridge como binding para dart_eval
+- [x] **Sandbox:** Plugins só acessam APIs via CrossbarBridge
+- [x] **Zone-based output:** Captura print() statements via Zone
+- [x] **Testes:** 10 testes passando (basic execution + bridge integration)
 
 ### Fase 5: crossbar_api Package (Plugins Compilados)
 
