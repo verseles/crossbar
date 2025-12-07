@@ -21,7 +21,7 @@ linux:
 	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar
 	@echo "Copying desktop integration files..."
 	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
-	cp assets/icons/icon.png $(LINUX_BUNDLE)/crossbar.png
+	cp assets/icons/icon_opaque.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
 	@echo ""
 	@echo "  crossbar     - CLI + launcher (runs GUI if no args)"
@@ -50,8 +50,8 @@ install:
 	@sed 's|Icon=com.verseles.crossbar|Icon=$(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png|; s|Exec=.*|Exec=$(INSTALL_DIR)/share/crossbar/crossbar-gui|' \
 		linux/com.verseles.crossbar.desktop > $(INSTALL_DIR)/share/applications/com.verseles.crossbar.desktop
 	@# Install icons with APPLICATION_ID naming for proper GNOME association
-	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
-	@cp assets/icons/icon.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
+	@cp assets/icons/icon_opaque.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
+	@cp assets/icons/icon_opaque.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@# Update icon cache
 	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
 	@echo ""
