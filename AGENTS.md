@@ -7,8 +7,7 @@ Atenção: Este projeto ainda não foi lançado, não se preocupe com breking ch
 
 Plano granndioso e teorico mas ainda a fonte de verdade:
 @./original_plan.md
-Plano de execucao baseado em original_plan.md, pode estar defasado:
-@./MASTER_PLAN.md
+
 Roadmap de implementacao, atualizado regularmente:
 @./ROADMAP.md
 
@@ -16,7 +15,7 @@ Roadmap de implementacao, atualizado regularmente:
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
-- **Leitura Inicial**: Sempre leia @./original_plan.md, @./MASTER_PLAN.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
+- **Leitura Inicial**: Sempre leia @./original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes (`flutter test --coverage`), verificar coverage mínimo de 43%. Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.

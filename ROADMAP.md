@@ -446,3 +446,39 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 2.  **Testes Unitários:** Classes de lógica (Services, ViewModels) com >90% coverage.
 3.  **Testes de Integração:** Pelo menos 1 teste end-to-end para o fluxo crítico (ex: Salvar config -> Executar Plugin -> Verificar Output).
 4.  **Multi-plataforma:** Verificar se a implementação não quebra o build em Linux/Android (CI matrix).
+
+---
+
+## 14. PERFORMANCE TARGETS
+
+| Métrica                            | Target                              |
+| ---------------------------------- | ----------------------------------- |
+| Boot Time (desktop)                | < 2s                                |
+| Boot Time (Android cold start)     | < 3s                                |
+| Memory Footprint (idle, 3 plugins) | < 150MB (desktop), < 100MB (mobile) |
+| Plugin Execution Overhead          | < 50ms                              |
+| Hot Reload                         | < 1s                                |
+| CI/CD Total (5 plataformas)        | < 15 minutos                        |
+
+---
+
+## 15. ROADMAP FUTURO (Pós-V1)
+
+### V2.0 (6-12 meses após lançamento)
+
+- Telemetria opt-in: OpenTelemetry + Grafana
+- Package managers: Homebrew, Snap, Flatpak, winget, AUR
+- Plugin sandboxing (opcional): Permissões granulares
+- Sync de configs: Backup automático via GitHub Gists
+- Theme customization: Além de dark/light, temas custom
+- Voice commands: Integração com assistentes
+- Widgets maiores: 4x4, full-screen widgets
+- Remote plugins: Plugins rodando em servidores
+
+### Métricas de Sucesso (6 meses pós-lançamento)
+
+- 1.000+ stars no GitHub
+- 50+ plugins comunitários
+- 10.000+ downloads
+- 5+ contribuidores ativos
+- 0 issues críticas abertas por >48h
