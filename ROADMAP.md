@@ -139,85 +139,150 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - [x] **Multi-linguagem:** Cada plugin pode ter múltiplas variantes de linguagem
 - [x] **WebCommand:** Implementar `crossbar web` para HTTP requests (Dio-powered)
 
-### Fase 3: EmbeddedApi (API Dart Nativa)
+### Fase 3: CrossbarBridge (APIs Unificadas)
 
-> **Objetivo:** Implementar comandos da CLI diretamente em Dart para mobile.
+> **Objetivo:** Criar uma ponte que expõe as APIs existentes para plugins Dart.
 
-- [ ] **Criar:** `lib/core/api/embedded_api.dart`
-  - [ ] `EmbeddedApi.cpu()` - Uso de CPU
-  - [ ] `EmbeddedApi.memory()` - RAM livre/total
-  - [ ] `EmbeddedApi.battery()` - Nível e status
-  - [ ] `EmbeddedApi.web(url, headers)` - HTTP requests via Dio
-  - [ ] `EmbeddedApi.time(format)` - Hora atual
-  - [ ] `EmbeddedApi.uptime()` - Tempo desde boot
-  - [ ] `EmbeddedApi.os()` - Info do sistema
-- [ ] **Platform Channels:** Implementar para Android (Kotlin) e iOS (Swift) quando necessário
-- [ ] **Fallback:** Desktop usa Process.run como backup
+- [ ] **Criar:** `lib/core/bridge/crossbar_bridge.dart`
+  - [ ] Wrapper unificado sobre `SystemApi`, `UtilsApi`, etc.
+  - [ ] Expõe métodos: `cpu()`, `memory()`, `battery()`, `web()`, `time()`, etc.
+  - [ ] Funciona em TODAS as plataformas (desktop + mobile)
+- [ ] **Platform Detection:**
+  - [ ] Desktop: usa Process.run (como CLI)
+  - [ ] Mobile: usa platform_device_info, battery_plus, etc.
+- [ ] **Testes:** Validar em Linux, Android
 
-### Fase 4: DartRunner
+### Fase 4: DartRunner (Plugins Interpretados)
 
-> **Objetivo:** Executar plugins `.dart` via Isolate com acesso à EmbeddedApi.
+> **Objetivo:** Executar plugins `.dart` simples via `dart_eval` em runtime.
 
+**Quando usar:** Plugins simples que usam apenas a API do Crossbar.
+
+```dart
+// plugins/cpu.1s.dart (SEM imports externos)
+void main() async {
+  final cpu = await crossbar.cpu();
+  print('💻 $cpu%');
+}
+```
+
+- [ ] **Dependência:** Adicionar `dart_eval` ao pubspec.yaml
 - [ ] **Criar:** `lib/core/runners/dart_runner.dart`
-- [ ] **Isolate:** Executar código Dart em isolate separado
-- [ ] **API Access:** Expor `EmbeddedApi` para plugins
-- [ ] **Sandbox:** Limitar acesso a filesystem/network
+- [ ] **Bridge Injection:** Injetar objeto `crossbar` com acesso à CrossbarBridge
+- [ ] **Sandbox:** Limitar acesso a filesystem/network (apenas via bridge)
 - [ ] **Testes:** Validar execução em Android/iOS
 
-### Fase 5: DeclarativeRunner (Plugins YAML)
+### Fase 5: crossbar_api Package (Plugins Compilados)
 
-> **Objetivo:** Plugins sem código, apenas configuração.
+> **Objetivo:** Package Dart para plugins avançados que precisam ser compilados.
 
-- [ ] **Formato YAML:** Definir schema
-  ```yaml
-  name: Weather
-  interval: 30m
-  source:
-    type: http # ou "system"
-    url: "https://api..."
-  output:
-    icon: "🌡️"
-    text: "${response.main.temp}°C"
-  ```
+**Quando usar:** Plugins que precisam de packages externos, FFI, ou performance máxima.
+
+```dart
+// plugins/advanced.1s.dart
+import 'package:crossbar_api/crossbar_api.dart';
+import 'package:html/parser.dart'; // Package externo ✅
+
+void main() async {
+  final html = await CrossbarApi.web('https://example.com');
+  final doc = parse(html);
+  print(doc.querySelector('title')?.text);
+}
+
+// Compilar: dart compile exe plugins/advanced.1s.dart -o plugins/advanced.1s.exe
+```
+
+- [ ] **Criar:** `packages/crossbar_api/` (package separado)
+  - [ ] `CrossbarApi.cpu()`, `CrossbarApi.memory()`, etc.
+  - [ ] Internamente usa Process.run para chamar CLI ou lógica nativa
+- [ ] **Publicar:** pub.dev (opcional, ou local path dependency)
+- [ ] **Docs:** Como criar plugins avançados
+- [ ] **Template:** `crossbar init --lang dart --advanced`
+
+### Arquitetura de Plugins Dart (Resumo)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        PLUGINS DART                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌──────────────────────────┐    ┌──────────────────────────────────┐  │
+│  │   Modo Interpretado      │    │      Modo Compilado              │  │
+│  │   (DartRunner)           │    │      (crossbar_api)              │  │
+│  ├──────────────────────────┤    ├──────────────────────────────────┤  │
+│  │ • Sem imports externos   │    │ • Pode usar qualquer package     │  │
+│  │ • Usa objeto `crossbar`  │    │ • import 'package:crossbar_api/' │  │
+│  │ • Executa em runtime     │    │ • Compilado para binário         │  │
+│  │ • Mobile-friendly ✅     │    │ • Desktop only                   │  │
+│  │ • Sandboxed              │    │ • Performance máxima             │  │
+│  │                          │    │ • IntelliSense/Autocomplete ✅   │  │
+│  │ Extensão: .dart          │    │ Extensão: .dart.exe / .dart.bin  │  │
+│  └──────────────────────────┘    └──────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Fase 6: DeclarativeRunner (Plugins YAML)
+
+> **Objetivo:** Plugins sem código, apenas configuração. Ultra-portátil.
+
+```yaml
+# plugins/weather.30m.yaml
+name: Weather
+interval: 30m
+requires:
+  - WEATHER_API_KEY
+
+source:
+  type: http
+  url: "https://api.openweathermap.org/data/2.5/weather?q=London&appid=${WEATHER_API_KEY}"
+
+output:
+  icon: "🌡️"
+  text: "${response.main.temp}°C"
+  tooltip: "${response.weather[0].description}"
+
+menu:
+  - title: "Humidity: ${response.main.humidity}%"
+  - title: "Wind: ${response.wind.speed} m/s"
+  - separator
+  - title: "Refresh"
+    action: refresh
+```
+
 - [ ] **Criar:** `lib/core/runners/declarative_runner.dart`
-- [ ] **Providers System:**
-  - [ ] `http` - Fetch de APIs
-  - [ ] `system` - cpu, memory, battery, etc (via EmbeddedApi)
-- [ ] **JSONPath:** Suporte a extração de dados `${response.data.value}`
-- [ ] **Conditions:** Cores condicionais baseadas em valores
-- [ ] **Versões YAML:** Criar para os 6 plugins exemplo
-
-### Fase 6: TermuxRunner (Android - Opcional)
-
-> **Objetivo:** Para usuários avançados que têm Termux instalado.
-
-- [ ] **Intent:** Usar `com.termux.RUN_COMMAND` para executar scripts
-- [ ] **Permissões:** Documentar setup necessário
-- [ ] **Fallback:** Se Termux não disponível, guiar para DeclarativeRunner
-- [ ] **Detecção:** Auto-detectar se Termux está instalado
+- [ ] **Providers:**
+  - [ ] `http` - Fetch de APIs (via CrossbarBridge.web)
+  - [ ] `system` - cpu, memory, battery (via CrossbarBridge)
+  - [ ] `exec` - Executar comandos (desktop only)
+- [ ] **Template Engine:** Interpolação `${response.path.to.value}`
+- [ ] **Conditions:** Cores/ícones condicionais
+- [ ] **Criar:** Versões YAML dos 6 plugins universais
 
 ### Fase 7: Plugin Executor Unificado
 
-- [ ] **Interface:** `abstract class PluginRunner { canRun(); run(); }`
+- [ ] **Interface:** `abstract class PluginRunner`
+  ```dart
+  abstract class PluginRunner {
+    bool canRun(String pluginPath, TargetPlatform platform);
+    Future<PluginOutput> run(Plugin plugin);
+    String get name;
+  }
+  ```
 - [ ] **Implementações:**
-  - [ ] `ScriptRunner` (desktop only - já existe)
-  - [ ] `DartRunner` (todas plataformas)
-  - [ ] `DeclarativeRunner` (todas plataformas)
-  - [ ] `TermuxRunner` (Android com Termux)
-- [ ] **Auto-seleção:** Escolher runner baseado em extensão + plataforma
-- [ ] **Prioridade:** Declarative > Dart > Script > Termux
+  - [ ] `ScriptRunner` - Bash/Python/Node/Go/Rust (desktop only)
+  - [ ] `DartRunner` - Plugins .dart interpretados (todas plataformas)
+  - [ ] `CompiledDartRunner` - Plugins .dart.exe compilados (desktop only)
+  - [ ] `DeclarativeRunner` - Plugins .yaml (todas plataformas)
+- [ ] **Auto-seleção:** Baseado em extensão + plataforma
+- [ ] **Fallback Chain:** Se um runner falha, tenta próximo
 
-### Fase 8: UI de Samples Melhorada
+### Fase 8: Documentação Completa
 
-- [ ] **Indicadores:** Mostrar quais linguagens estão disponíveis por plugin
-- [ ] **Compatibilidade:** Indicar "✅ Funciona nesta plataforma"
-- [ ] **Agrupamento:** Por funcionalidade (todos os "clock" juntos)
-- [ ] **Seleção de Variante:** Usuário escolhe linguagem preferida
-
-### Fase 9: Documentação
-
-- [ ] **README:** Seção "Plugin Types" explicando runners
-- [ ] **docs/plugin-runners.md:** Guia detalhado
+- [ ] **README.md:** Atualizar seção "Plugin Types"
+- [ ] **docs/plugin-types.md:** Comparativo detalhado
+- [ ] **docs/dart-plugins.md:** Como criar plugins Dart (ambos modos)
+- [ ] **docs/yaml-plugins.md:** Como criar plugins declarativos
 - [ ] **docs/writing-portable-plugins.md:** Best practices
 - [ ] **GUI Onboarding:** Wizard ao adicionar primeiro plugin
 
