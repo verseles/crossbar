@@ -54,15 +54,19 @@ crossbar cpu     # CLI mode
 
 ### `cpu`
 
-Get CPU usage percentage.
+Returns current CPU usage calculation (0-100).
 
 ```bash
 crossbar cpu
-# Output: 23.5%
+# Output: 23.5
+```
 
+```bash
 crossbar cpu --json
 # Output: {"cpu":23.5}
+```
 
+```bash
 crossbar cpu --xml
 # Output:
 # <?xml version="1.0" encoding="UTF-8"?>
@@ -1453,60 +1457,60 @@ crossbar process count
 
 ## Platform Compatibility
 
-| Command               |   Linux    | macOS | Windows |
-| --------------------- | :--------: | :---: | :-----: |
-| **System Info**       |
+| Command             |   Linux    | macOS | Windows |
+| ------------------- | :--------: | :---: | :-----: |
+| **System Info**     |
 | cpu                 |     ✅     |  ✅   |   ✅    |
-| memory                |     ✅     |  ✅   |   ✅    |
-| battery               |     ✅     |  ✅   |   ✅    |
-| uptime                |     ✅     |  ✅   |   ✅    |
-| disk                  |     ✅     |  ✅   |   ✅    |
-| os                    |     ✅     |  ✅   |   ✅    |
-| hostname              |     ✅     |  ✅   |   ✅    |
-| username              |     ✅     |  ✅   |   ✅    |
-| kernel                |     ✅     |  ✅   |   ✅    |
-| arch                  |     ✅     |  ✅   |   ✅    |
-| screen-size           |  ✅ (X11)  |  ✅   |   ✅    |
-| volume                |  ✅ (PA)   |  ✅   |   ⚠️    |
-| brightness            |     ✅     |  ✅   |   ❌    |
-| **Media Controls**    |
-| media-*               | ✅ (MPRIS) |  ✅   |   ✅    |
-| **Audio Controls**    |
-| audio-*               |  ✅ (PA)   |  ✅   |   ✅    |
-| **Screen Controls**   |
-| screen-brightness     |     ✅     |  ✅   |   ⚠️    |
-| screenshot            |     ✅     |  ✅   |   ✅    |
-| wallpaper-*           |     ✅     |  ✅   |   ✅    |
-| **Power**             |
-| power-*               |     ✅     |  ✅   |   ✅    |
-| **DND**               |
-| dnd-*                 | ✅ (GNOME) |  ✅   |   ⚠️    |
-| **Bluetooth**         |
-| bluetooth-*           |     ✅     |  ✅   |   ✅    |
-| **VPN**               |
-| vpn-status            |     ✅     |  ✅   |   ✅    |
-| **Network**           |
-| net-*                 |     ✅     |  ✅   |   ✅    |
-| wifi-*                |     ✅     |  ✅   |   ✅    |
-| web                   |     ✅     |  ✅   |   ✅    |
-| **Environment**       |
-| All                   |     ✅     |  ✅   |   ✅    |
-| **Files**             |
-| All                   |     ✅     |  ✅   |   ✅    |
-| **Date/Time**         |
-| All                   |     ✅     |  ✅   |   ✅    |
-| **Clipboard**         |
-| clipboard             | ✅ (xclip) |  ✅   |   ✅    |
-| clipboard-set         | ✅ (xclip) |  ✅   |   ✅    |
-| **Utilities**         |
-| All                   |     ✅     |  ✅   |   ✅    |
-| **Plugin Mgmt**       |
-| `init`                |     ✅     |  ✅   |   ✅    |
-| `install`             |     ✅     |  ✅   |   ✅    |
-| **System Actions**    |
-| notify                |     ✅     |  ✅   |   ✅    |
-| open-*                |     ✅     |  ✅   |   ✅    |
-| process-count         |     ✅     |  ✅   |   ✅    |
+| memory              |     ✅     |  ✅   |   ✅    |
+| battery             |     ✅     |  ✅   |   ✅    |
+| uptime              |     ✅     |  ✅   |   ✅    |
+| disk                |     ✅     |  ✅   |   ✅    |
+| os                  |     ✅     |  ✅   |   ✅    |
+| hostname            |     ✅     |  ✅   |   ✅    |
+| username            |     ✅     |  ✅   |   ✅    |
+| kernel              |     ✅     |  ✅   |   ✅    |
+| arch                |     ✅     |  ✅   |   ✅    |
+| screen-size         |  ✅ (X11)  |  ✅   |   ✅    |
+| volume              |  ✅ (PA)   |  ✅   |   ⚠️    |
+| brightness          |     ✅     |  ✅   |   ❌    |
+| **Media Controls**  |
+| media-\*            | ✅ (MPRIS) |  ✅   |   ✅    |
+| **Audio Controls**  |
+| audio-\*            |  ✅ (PA)   |  ✅   |   ✅    |
+| **Screen Controls** |
+| screen-brightness   |     ✅     |  ✅   |   ⚠️    |
+| screenshot          |     ✅     |  ✅   |   ✅    |
+| wallpaper-\*        |     ✅     |  ✅   |   ✅    |
+| **Power**           |
+| power-\*            |     ✅     |  ✅   |   ✅    |
+| **DND**             |
+| dnd-\*              | ✅ (GNOME) |  ✅   |   ⚠️    |
+| **Bluetooth**       |
+| bluetooth-\*        |     ✅     |  ✅   |   ✅    |
+| **VPN**             |
+| vpn-status          |     ✅     |  ✅   |   ✅    |
+| **Network**         |
+| net-\*              |     ✅     |  ✅   |   ✅    |
+| wifi-\*             |     ✅     |  ✅   |   ✅    |
+| web                 |     ✅     |  ✅   |   ✅    |
+| **Environment**     |
+| All                 |     ✅     |  ✅   |   ✅    |
+| **Files**           |
+| All                 |     ✅     |  ✅   |   ✅    |
+| **Date/Time**       |
+| All                 |     ✅     |  ✅   |   ✅    |
+| **Clipboard**       |
+| clipboard           | ✅ (xclip) |  ✅   |   ✅    |
+| clipboard-set       | ✅ (xclip) |  ✅   |   ✅    |
+| **Utilities**       |
+| All                 |     ✅     |  ✅   |   ✅    |
+| **Plugin Mgmt**     |
+| `init`              |     ✅     |  ✅   |   ✅    |
+| `install`           |     ✅     |  ✅   |   ✅    |
+| **System Actions**  |
+| notify              |     ✅     |  ✅   |   ✅    |
+| open-\*             |     ✅     |  ✅   |   ✅    |
+| process-count       |     ✅     |  ✅   |   ✅    |
 
 **Legend**:
 

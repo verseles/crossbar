@@ -38,16 +38,16 @@ print(json.dumps({
 
 ### 🎯 Revolutionary Advantages Over BitBar/Argos
 
-| Feature        | BitBar/Argos                        | Crossbar                                  |
-| -------------- | ----------------------------------- | ----------------------------------------- |
-| Platforms      | macOS/Linux only                    | Linux + Windows + macOS + Android + iOS   |
-| Output Formats | Text only                           | Text + JSON + Structured Data             |
-| UI Targets     | Menu bar only                       | Tray + Notifications + Widgets + Menu bar |
-| CLI API        | None (scripts call system commands) | 47 unified commands (`crossbar cpu`)      |
-| Configuration  | Manual scripting                    | Declarative JSON with auto-generated UI   |
+| Feature        | BitBar/Argos                        | Crossbar                                                                         |
+| -------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
+| Platforms      | macOS/Linux only                    | Linux + Windows + macOS + Android + iOS                                          |
+| Output Formats | Text only                           | Text + JSON + Structured Data                                                    |
+| UI Targets     | Menu bar only                       | Tray + Notifications + Widgets + Menu bar                                        |
+| CLI API        | None (scripts call system commands) | 47 unified commands (`crossbar cpu`)                                             |
+| Configuration  | Manual scripting                    | Declarative JSON with auto-generated UI                                          |
 | Mobile Support | ❌ None                             | ✅ Widgets + Persistent Notifications (Android) + Home/Lock Screen Widgets (iOS) |
-| Controls       | Read-only                           | Bidirectional (volume, media, system)     |
-| Hot Reload     | Manual refresh                      | Automatic file watching                   |
+| Controls       | Read-only                           | Bidirectional (volume, media, system)                                            |
+| Hot Reload     | Manual refresh                      | Automatic file watching                                                          |
 
 ### 📱 Platform-Specific Features
 
@@ -76,6 +76,7 @@ print(json.dumps({
 If you plan to develop plugins or contribute to Crossbar core, we recommend setting up the full environment.
 
 **Prerequisites:**
+
 - Flutter 3.35.0+ ([Install Flutter](https://docs.flutter.dev/get-started/install))
 - Dart 3.10.0+ (comes with Flutter)
 - `make` (optional, for easier build commands)
@@ -223,9 +224,9 @@ Crossbar provides 47+ unified commands accessible via `crossbar [command]`.
 #### System Information
 
 ```bash
-crossbar cpu                # CPU usage percentage
+crossbar cpu                # CPU usage (0-100)
 crossbar memory             # Memory usage (e.g., "8.2/16 GB")
-crossbar battery            # Battery percentage
+crossbar battery            # Battery status
 crossbar disk               # Disk usage
 crossbar uptime             # System uptime
 crossbar hostname           # Machine hostname
