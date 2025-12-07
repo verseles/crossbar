@@ -12,23 +12,23 @@ class AppLocalizationsHi extends AppLocalizations {
   String get appTitle => 'Crossbar';
 
   @override
-  String get pluginsTab => 'प्लगइन्स';
+  String get pluginsTab => 'प्लगइन';
 
   @override
   String get settingsTab => 'सेटिंग्स';
 
   @override
-  String get marketplaceTab => 'बाज़ार';
+  String get marketplaceTab => 'स्टोर';
 
   @override
   String get noPluginsFound => 'कोई प्लगइन नहीं मिला';
 
   @override
   String get noPluginsDescription =>
-      '~/.crossbar/plugins निर्देशिका में प्लगइन्स जोड़ें';
+      'अपनी ~/.crossbar/plugins डायरेक्टरी में प्लगइन जोड़ें';
 
   @override
-  String get refreshAll => 'सभी ताज़ा करें';
+  String get refreshAll => 'सभी रिफ्रेश करें';
 
   @override
   String get addPlugin => 'प्लगइन जोड़ें';
@@ -49,10 +49,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get remove => 'हटाएं';
 
   @override
-  String get lastRun => 'पिछला रन';
+  String get lastRun => 'अंतिम रन';
 
   @override
-  String get refreshInterval => 'ताज़ा करने का अंतराल';
+  String get refreshInterval => 'रिफ्रेश इंटरवल';
 
   @override
   String get seconds => 'सेकंड';
@@ -88,10 +88,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get update => 'अपडेट करें';
 
   @override
-  String get installed => 'इंस्टॉल किया गया';
+  String get installed => 'इंस्टॉल्ड';
 
   @override
-  String get notInstalled => 'इंस्टॉल नहीं है';
+  String get notInstalled => 'इंस्टॉल नहीं';
 
   @override
   String get language => 'भाषा';
@@ -109,37 +109,37 @@ class AppLocalizationsHi extends AppLocalizations {
   String get systemTheme => 'सिस्टम';
 
   @override
-  String get notifications => 'सूचनाएं';
+  String get notifications => 'नोटिफ़िकेशन';
 
   @override
-  String get enableNotifications => 'सूचनाएं सक्षम करें';
+  String get enableNotifications => 'नोटिफ़िकेशन सक्षम करें';
 
   @override
   String get startOnBoot => 'बूट पर शुरू करें';
 
   @override
-  String get minimizeToTray => 'ट्रे में छोटा करें';
+  String get minimizeToTray => 'ट्रे में मिनिमाइज़ करें';
 
   @override
-  String get pluginsDirectory => 'प्लगइन्स निर्देशिका';
+  String get pluginsDirectory => 'प्लगइन डायरेक्टरी';
 
   @override
-  String get openPluginsDirectory => 'प्लगइन्स निर्देशिका खोलें';
+  String get openPluginsDirectory => 'प्लगइन डायरेक्टरी खोलें';
 
   @override
   String get about => 'के बारे में';
 
   @override
-  String get version => 'संस्करण';
+  String get version => 'वर्शन';
 
   @override
-  String get checkForUpdates => 'अपडेट के लिए जांचें';
+  String get checkForUpdates => 'अपडेट की जांच करें';
 
   @override
   String get noUpdatesAvailable => 'कोई अपडेट उपलब्ध नहीं';
 
   @override
-  String get updateAvailable => 'अपडेट उपलब्ध है';
+  String get updateAvailable => 'अपडेट उपलब्ध';
 
   @override
   String get errorOccurred => 'एक त्रुटि हुई';
@@ -163,7 +163,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get popular => 'लोकप्रिय';
 
   @override
-  String get recent => 'हाल ही में';
+  String get recent => 'हाल का';
 
   @override
   String get bash => 'Bash';
@@ -208,7 +208,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get social => 'सामाजिक';
 
   @override
-  String get utilities => 'उपयोगिताएं';
+  String get utilities => 'यूटिलिटीज़';
 
   @override
   String get other => 'अन्य';
@@ -229,260 +229,261 @@ class AppLocalizationsHi extends AppLocalizations {
   String get launchOnLogin => 'लॉगिन पर Crossbar लॉन्च करें';
 
   @override
-  String get keepInTray => 'छोटा करने पर आइकन ट्रे में रखें';
+  String get keepInTray => 'मिनिमाइज़ करते समय ट्रे में आइकन रखें';
 
   @override
-  String get defaultRefreshInterval => 'डिफ़ॉल्ट ताज़ा अंतराल';
+  String get defaultRefreshInterval => 'डिफ़ॉल्ट रिफ्रेश इंटरवल';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => 'प्लगइन खोजें...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => 'सक्षम पहले';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'वर्णानुक्रम';
 
   @override
-  String get interval => 'Interval';
+  String get interval => 'इंटरवल';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => 'कोई ग्रुपिंग नहीं';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => 'भाषा के अनुसार';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => 'कॉन्फ़िगर करने योग्य के अनुसार';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => 'कोई ग्रुप नहीं';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => 'कॉन्फ़िगर करने योग्य';
 
   @override
-  String get standard => 'Standard';
+  String get standard => 'मानक';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => 'रिफ्रेश';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => 'लाइव आउटपुट';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => 'आउटपुट कॉपी करें';
 
   @override
-  String get running => 'Running...';
+  String get running => 'चल रहा है...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => 'प्लगइन चल रहा है...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => 'आउटपुट देखने के लिए \"अभी चलाएं\" पर क्लिक करें';
 
   @override
-  String get error => 'Error';
+  String get error => 'त्रुटि';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => 'अज्ञात त्रुटि';
 
   @override
-  String get path => 'Path';
+  String get path => 'पथ';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => 'इंटरप्रेटर';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => 'अंतिम त्रुटि';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'संपादित करें';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'हटाएं';
 
   @override
-  String get disable => 'Disable';
+  String get disable => 'अक्षम करें';
 
   @override
-  String get enable => 'Enable';
+  String get enable => 'सक्षम करें';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => 'नमूना प्लगइन';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => '20+ उपयोग के लिए तैयार प्लगइन में से चुनें';
 
   @override
-  String get or => 'OR';
+  String get or => 'या';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => 'अपना खुद का प्लगइन बनाएं:';
 
   @override
   String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+      '1. इनमें से किसी एक भाषा में स्क्रिप्ट बनाएं:';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep => '2. रिफ्रेश इंटरवल के साथ नाम दें:';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. इसे ~/.crossbar/plugins/ में रखें';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return '$count प्लगइन सफलतापूर्वक इंस्टॉल हुए!';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => 'कॉन्फ़िगरेशन सहेजा गया';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return 'कोई प्लगइन \"$query\" से मेल नहीं खाता';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => 'त्रुटि क्लिपबोर्ड पर कॉपी की गई';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => 'प्लगइन फ़ाइल नहीं मिली';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return 'एडिटर खोलने में विफल: $error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return '\"$name\" हटाने के लिए फिर से हटाएं पर क्लिक करें';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return '$name हटाया गया';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return 'प्लगइन हटाने में विफल: $error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => 'आउटपुट क्लिपबोर्ड पर कॉपी किया गया';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... और $count अधिक';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'अभी';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return '$count मिनट पहले';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return '$count घंटे पहले';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return '$count दिन पहले';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal यूनिवर्सल + $additional अतिरिक्त प्लगइन';
   }
 
   @override
-  String get all => 'All';
+  String get all => 'सभी';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters =>
+      'आपके फ़िल्टर से कोई प्लगइन मेल नहीं खाता';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => 'मोबाइल संगत';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return 'इस सत्र में $count इंस्टॉल हुए';
   }
 
   @override
-  String get done => 'Done';
+  String get done => 'हो गया';
 
   @override
-  String get close => 'Close';
+  String get close => 'बंद करें';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return '$name ($language) इंस्टॉल किया गया';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return '$name इंस्टॉल करने में विफल: $error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => 'सिस्टम ट्रे';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => 'डिस्प्ले मोड';
 
   @override
-  String get unified => 'Unified';
+  String get unified => 'एकीकृत';
 
   @override
   String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+      'सभी प्लगइन के लिए मेन्यू के साथ एक ट्रे आइकन';
 
   @override
-  String get separate => 'Separate';
+  String get separate => 'अलग';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => 'प्रति प्लगइन एक आइकन (केवल लिनक्स)';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => 'स्मार्ट कोलैप्स';
 
   @override
   String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+      'बहुत सारे प्लगइन होने पर ऑटो-कोलैप्स';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => 'स्मार्ट ओवरफ्लो';
 
   @override
   String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+      'पहले N आइकन दिखाएं, बाकी ओवरफ्लो मेन्यू में';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => 'जल्द आ रहा है';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => 'ट्रे डिस्प्ले मोड';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => 'एकीकृत (मेन्यू के साथ एक आइकन)';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => 'अलग (प्रति प्लगइन एक आइकन)';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => 'कोई कॉन्फ़िगरेशन आवश्यक नहीं';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5 मिनट';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - यूनिवर्सल प्लगइन सिस्टम\n\nकॉपीराइट (C) 2025\n\nयह कार्यक्रम मुक्त सॉफ्टवेयर है: आप इसे Free Software Foundation द्वारा प्रकाशित GNU Affero सार्वजनिक लाइसेंस की शर्तों के तहत पुनर्वितरित और/या संशोधित कर सकते हैं, या तो लाइसेंस का संस्करण 3, या (आपकी पसंद के अनुसार) कोई बाद का संस्करण।\n\nयह कार्यक्रम इस उम्मीद में वितरित किया जाता है कि यह उपयोगी होगा, लेकिन किसी भी वारंटी के बिना; यहां तक कि व्यापारिकता या किसी विशेष उद्देश्य के लिए उपयुक्तता की निहित वारंटी के बिना भी। अधिक विवरण के लिए GNU Affero सार्वजनिक लाइसेंस देखें।\n\nआपको इस कार्यक्रम के साथ GNU Affero सार्वजनिक लाइसेंस की एक प्रति प्राप्त होनी चाहिए थी। यदि नहीं, तो <https://www.gnu.org/licenses/> देखें।';
 }

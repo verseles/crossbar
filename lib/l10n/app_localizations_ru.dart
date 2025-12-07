@@ -25,13 +25,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noPluginsDescription =>
-      'Добавьте плагины в директорию ~/.crossbar/plugins';
+      'Добавьте плагины в каталог ~/.crossbar/plugins';
 
   @override
-  String get refreshAll => 'Обновить все';
+  String get refreshAll => 'Обновить Все';
 
   @override
-  String get addPlugin => 'Добавить плагин';
+  String get addPlugin => 'Добавить Плагин';
 
   @override
   String get enabled => 'Включено';
@@ -40,7 +40,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get disabled => 'Отключено';
 
   @override
-  String get runNow => 'Запустить сейчас';
+  String get runNow => 'Запустить Сейчас';
 
   @override
   String get configure => 'Настроить';
@@ -49,22 +49,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get remove => 'Удалить';
 
   @override
-  String get lastRun => 'Последний запуск';
+  String get lastRun => 'Последний Запуск';
 
   @override
-  String get refreshInterval => 'Интервал обновления';
+  String get refreshInterval => 'Интервал Обновления';
 
   @override
-  String get seconds => 'секунд';
+  String get seconds => 'секунды';
 
   @override
-  String get minutes => 'минут';
+  String get minutes => 'минуты';
 
   @override
-  String get hours => 'часов';
+  String get hours => 'часы';
 
   @override
-  String get days => 'дней';
+  String get days => 'дни';
 
   @override
   String get cancel => 'Отмена';
@@ -91,7 +91,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get installed => 'Установлено';
 
   @override
-  String get notInstalled => 'Не установлено';
+  String get notInstalled => 'Не Установлено';
 
   @override
   String get language => 'Язык';
@@ -103,7 +103,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get lightTheme => 'Светлая';
 
   @override
-  String get darkTheme => 'Темная';
+  String get darkTheme => 'Тёмная';
 
   @override
   String get systemTheme => 'Системная';
@@ -112,19 +112,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifications => 'Уведомления';
 
   @override
-  String get enableNotifications => 'Включить уведомления';
+  String get enableNotifications => 'Включить Уведомления';
 
   @override
-  String get startOnBoot => 'Запускать при загрузке';
+  String get startOnBoot => 'Запуск при загрузке';
 
   @override
-  String get minimizeToTray => 'Сворачивать в трей';
+  String get minimizeToTray => 'Свернуть в трей';
 
   @override
-  String get pluginsDirectory => 'Директория плагинов';
+  String get pluginsDirectory => 'Каталог Плагинов';
 
   @override
-  String get openPluginsDirectory => 'Открыть директорию';
+  String get openPluginsDirectory => 'Открыть Каталог Плагинов';
 
   @override
   String get about => 'О программе';
@@ -136,7 +136,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get checkForUpdates => 'Проверить обновления';
 
   @override
-  String get noUpdatesAvailable => 'Нет обновлений';
+  String get noUpdatesAvailable => 'Обновлений нет';
 
   @override
   String get updateAvailable => 'Доступно обновление';
@@ -154,10 +154,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noResults => 'Нет результатов';
 
   @override
-  String get allLanguages => 'Все языки';
+  String get allLanguages => 'Все Языки';
 
   @override
-  String get allCategories => 'Все категории';
+  String get allCategories => 'Все Категории';
 
   @override
   String get popular => 'Популярные';
@@ -223,266 +223,266 @@ class AppLocalizationsRu extends AppLocalizations {
   String get license => 'Лицензия';
 
   @override
-  String get useDarkTheme => 'Использовать темную тему';
+  String get useDarkTheme => 'Использовать тёмную тему';
 
   @override
   String get launchOnLogin => 'Запускать Crossbar при входе';
 
   @override
-  String get keepInTray => 'Держать в трее при сворачивании';
+  String get keepInTray => 'Оставлять иконку в трее при сворачивании';
 
   @override
   String get defaultRefreshInterval => 'Интервал обновления по умолчанию';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => 'Поиск плагинов...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => 'Включённые Сначала';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'По Алфавиту';
 
   @override
-  String get interval => 'Interval';
+  String get interval => 'Интервал';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => 'Без Группировки';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => 'По Языку';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => 'По Настраиваемости';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => 'Без Групп';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => 'Настраиваемый';
 
   @override
-  String get standard => 'Standard';
+  String get standard => 'Стандартный';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => 'Обновить';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => 'Вывод в Реальном Времени';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => 'Копировать вывод';
 
   @override
-  String get running => 'Running...';
+  String get running => 'Выполняется...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => 'Выполнение плагина...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => 'Нажмите \"Запустить Сейчас\" чтобы увидеть вывод';
 
   @override
-  String get error => 'Error';
+  String get error => 'Ошибка';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => 'Неизвестная ошибка';
 
   @override
-  String get path => 'Path';
+  String get path => 'Путь';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => 'Интерпретатор';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => 'Последняя Ошибка';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'Редактировать';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'Удалить';
 
   @override
-  String get disable => 'Disable';
+  String get disable => 'Отключить';
 
   @override
-  String get enable => 'Enable';
+  String get enable => 'Включить';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => 'Примеры Плагинов';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => 'Выберите из 20+ готовых плагинов';
 
   @override
-  String get or => 'OR';
+  String get or => 'ИЛИ';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => 'Создайте свой плагин:';
 
   @override
-  String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+  String get createScriptStep => '1. Создайте скрипт на одном из этих языков:';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep => '2. Назовите его с интервалом обновления:';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. Поместите в ~/.crossbar/plugins/';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return '$count плагин(ов) успешно установлено!';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => 'Конфигурация сохранена';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return 'Нет плагинов соответствующих \"$query\"';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => 'Ошибка скопирована в буфер обмена';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => 'Файл плагина не найден';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return 'Не удалось открыть редактор: $error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return 'Нажмите Удалить ещё раз чтобы удалить \"$name\"';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return '$name удалён';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return 'Не удалось удалить плагин: $error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => 'Вывод скопирован в буфер обмена';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... и ещё $count';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'Только что';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return '$countм назад';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return '$countч назад';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return '$countд назад';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal универсальных + $additional дополнительных плагинов';
   }
 
   @override
-  String get all => 'All';
+  String get all => 'Все';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters =>
+      'Нет плагинов соответствующих вашим фильтрам';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => 'Совместим с мобильными';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return '$count установлено в этой сессии';
   }
 
   @override
-  String get done => 'Done';
+  String get done => 'Готово';
 
   @override
-  String get close => 'Close';
+  String get close => 'Закрыть';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return '$name ($language) установлен';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return 'Не удалось установить $name: $error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => 'Системный Трей';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => 'Режим Отображения';
 
   @override
-  String get unified => 'Unified';
+  String get unified => 'Объединённый';
 
   @override
   String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+      'Одна иконка в трее с меню для всех плагинов';
 
   @override
-  String get separate => 'Separate';
+  String get separate => 'Раздельный';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => 'Одна иконка на плагин (только Linux)';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => 'Умное Сворачивание';
 
   @override
   String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+      'Автосворачивание при множестве плагинов';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => 'Умное Переполнение';
 
   @override
   String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+      'Показать первые N иконок, остальные в меню переполнения';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => 'Скоро';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => 'Режим Отображения Трея';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => 'Объединённый (одна иконка с меню)';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => 'Раздельный (одна иконка на плагин)';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => 'Настройка не требуется';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5 минут';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - Универсальная Система Плагинов\n\nCopyright (C) 2025\n\nЭта программа является свободным программным обеспечением: вы можете распространять её и/или модифицировать в соответствии с условиями GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 Лицензии или (по вашему выбору) любой более поздней версии.\n\nЭта программа распространяется в надежде, что она будет полезной, но БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ; даже без подразумеваемой гарантии ТОВАРНОЙ ПРИГОДНОСТИ или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЁННОЙ ЦЕЛИ. См. GNU Affero General Public License для получения дополнительной информации.\n\nВы должны были получить копию GNU Affero General Public License вместе с этой программой. Если нет, см. <https://www.gnu.org/licenses/>.';
 }

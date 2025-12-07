@@ -18,13 +18,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTab => '设置';
 
   @override
-  String get marketplaceTab => '市场';
+  String get marketplaceTab => '商店';
 
   @override
   String get noPluginsFound => '未找到插件';
 
   @override
-  String get noPluginsDescription => '请将插件添加到 ~/.crossbar/plugins 目录';
+  String get noPluginsDescription => '将插件添加到 ~/.crossbar/plugins 目录';
 
   @override
   String get refreshAll => '全部刷新';
@@ -57,7 +57,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get seconds => '秒';
 
   @override
-  String get minutes => '分';
+  String get minutes => '分钟';
 
   @override
   String get hours => '小时';
@@ -114,7 +114,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enableNotifications => '启用通知';
 
   @override
-  String get startOnBoot => '开机自启';
+  String get startOnBoot => '开机启动';
 
   @override
   String get minimizeToTray => '最小化到托盘';
@@ -135,7 +135,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get checkForUpdates => '检查更新';
 
   @override
-  String get noUpdatesAvailable => '无可用更新';
+  String get noUpdatesAvailable => '没有可用更新';
 
   @override
   String get updateAvailable => '有可用更新';
@@ -234,254 +234,250 @@ class AppLocalizationsZh extends AppLocalizations {
   String get defaultRefreshInterval => '默认刷新间隔';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => '搜索插件...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => '启用的优先';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => '按字母排序';
 
   @override
-  String get interval => 'Interval';
+  String get interval => '间隔';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => '不分组';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => '按语言';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => '按可配置性';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => '无分组';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => '可配置';
 
   @override
-  String get standard => 'Standard';
+  String get standard => '标准';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => '刷新';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => '实时输出';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => '复制输出';
 
   @override
-  String get running => 'Running...';
+  String get running => '运行中...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => '执行插件中...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => '点击【立即运行】查看输出';
 
   @override
-  String get error => 'Error';
+  String get error => '错误';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => '未知错误';
 
   @override
-  String get path => 'Path';
+  String get path => '路径';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => '解释器';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => '上次错误';
 
   @override
-  String get edit => 'Edit';
+  String get edit => '编辑';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '删除';
 
   @override
-  String get disable => 'Disable';
+  String get disable => '禁用';
 
   @override
-  String get enable => 'Enable';
+  String get enable => '启用';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => '示例插件';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => '从20+个即用型插件中选择';
 
   @override
-  String get or => 'OR';
+  String get or => '或';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => '创建您自己的插件：';
 
   @override
-  String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+  String get createScriptStep => '1. 用以下语言之一创建脚本：';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep => '2. 用刷新间隔命名：';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. 放置在 ~/.crossbar/plugins/';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return '$count 个插件安装成功！';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => '配置已保存';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return '没有插件匹配 \"$query\"';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => '错误已复制到剪贴板';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => '插件文件未找到';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return '打开编辑器失败：$error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return '再次点击删除以移除 \"$name\"';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return '$name 已删除';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return '删除插件失败：$error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => '输出已复制到剪贴板';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... 还有 $count 个';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => '刚刚';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return '$count分钟前';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return '$count小时前';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return '$count天前';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal 个通用 + $additional 个附加插件';
   }
 
   @override
-  String get all => 'All';
+  String get all => '全部';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters => '没有插件匹配您的筛选条件';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => '移动端兼容';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return '本次会话已安装 $count 个';
   }
 
   @override
-  String get done => 'Done';
+  String get done => '完成';
 
   @override
-  String get close => 'Close';
+  String get close => '关闭';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return '已安装 $name ($language)';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return '安装 $name 失败：$error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => '系统托盘';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => '显示模式';
 
   @override
-  String get unified => 'Unified';
+  String get unified => '统一';
 
   @override
-  String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+  String get singleTrayIconWithMenu => '单个托盘图标带菜单显示所有插件';
 
   @override
-  String get separate => 'Separate';
+  String get separate => '分离';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => '每个插件一个图标（仅限 Linux）';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => '智能折叠';
 
   @override
-  String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+  String get autoCollapseWhenManyPlugins => '插件过多时自动折叠';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => '智能溢出';
 
   @override
-  String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+  String get showFirstNIconsRestInOverflow => '显示前 N 个图标，其余在溢出菜单';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => '即将推出';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => '托盘显示模式';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => '统一（单图标带菜单）';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => '分离（每插件一图标）';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => '无需配置';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5 分钟';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - 通用插件系统\n\nCopyright (C) 2025\n\n本程序为自由软件：您可以根据自由软件基金会发布的 GNU Affero 通用公共许可证的条款重新分发和/或修改它，可以是许可证的第 3 版，也可以是（由您选择）任何更高版本。\n\n本程序的分发是希望它有用，但没有任何担保；甚至没有适销性或特定用途适用性的暗示担保。有关更多详细信息，请参阅 GNU Affero 通用公共许可证。\n\n您应该已经收到一份 GNU Affero 通用公共许可证的副本以及本程序。如果没有，请参阅 <https://www.gnu.org/licenses/>。';
 }

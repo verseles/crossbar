@@ -24,7 +24,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noPluginsFound => 'لم يتم العثور على إضافات';
 
   @override
-  String get noPluginsDescription => 'أضف إضافات إلى مجلد ~/.crossbar/plugins';
+  String get noPluginsDescription =>
+      'أضف الإضافات إلى مجلد ~/.crossbar/plugins';
 
   @override
   String get refreshAll => 'تحديث الكل';
@@ -33,10 +34,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addPlugin => 'إضافة إضافة';
 
   @override
-  String get enabled => 'ممكن';
+  String get enabled => 'مفعّل';
 
   @override
-  String get disabled => 'معطل';
+  String get disabled => 'معطّل';
 
   @override
   String get runNow => 'تشغيل الآن';
@@ -87,16 +88,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get update => 'تحديث';
 
   @override
-  String get installed => 'مثبت';
+  String get installed => 'مثبّت';
 
   @override
-  String get notInstalled => 'غير مثبت';
+  String get notInstalled => 'غير مثبّت';
 
   @override
   String get language => 'اللغة';
 
   @override
-  String get theme => 'المظهر';
+  String get theme => 'السمة';
 
   @override
   String get lightTheme => 'فاتح';
@@ -111,13 +112,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notifications => 'الإشعارات';
 
   @override
-  String get enableNotifications => 'تمكين الإشعارات';
+  String get enableNotifications => 'تفعيل الإشعارات';
 
   @override
-  String get startOnBoot => 'تشغيل عند البدء';
+  String get startOnBoot => 'البدء عند الإقلاع';
 
   @override
-  String get minimizeToTray => 'تصغير إلى شريط النظام';
+  String get minimizeToTray => 'تصغير إلى شريط المهام';
 
   @override
   String get pluginsDirectory => 'مجلد الإضافات';
@@ -135,7 +136,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkForUpdates => 'التحقق من التحديثات';
 
   @override
-  String get noUpdatesAvailable => 'لا توجد تحديثات';
+  String get noUpdatesAvailable => 'لا توجد تحديثات متاحة';
 
   @override
   String get updateAvailable => 'تحديث متاح';
@@ -147,16 +148,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
-  String get loading => 'جار التحميل...';
+  String get loading => 'جارٍ التحميل...';
 
   @override
   String get noResults => 'لا توجد نتائج';
 
   @override
-  String get allLanguages => 'كل اللغات';
+  String get allLanguages => 'جميع اللغات';
 
   @override
-  String get allCategories => 'كل الفئات';
+  String get allCategories => 'جميع الفئات';
 
   @override
   String get popular => 'شائع';
@@ -183,31 +184,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rust => 'Rust';
 
   @override
-  String get system => 'نظام';
+  String get system => 'النظام';
 
   @override
-  String get network => 'شبكة';
+  String get network => 'الشبكة';
 
   @override
-  String get development => 'تطوير';
+  String get development => 'التطوير';
 
   @override
-  String get productivity => 'إنتاجية';
+  String get productivity => 'الإنتاجية';
 
   @override
-  String get finance => 'مالية';
+  String get finance => 'المالية';
 
   @override
-  String get weather => 'طقس';
+  String get weather => 'الطقس';
 
   @override
-  String get media => 'وسائط';
+  String get media => 'الوسائط';
 
   @override
-  String get social => 'تواصل اجتماعي';
+  String get social => 'اجتماعي';
 
   @override
-  String get utilities => 'أدوات';
+  String get utilities => 'الأدوات';
 
   @override
   String get other => 'أخرى';
@@ -222,266 +223,264 @@ class AppLocalizationsAr extends AppLocalizations {
   String get license => 'الترخيص';
 
   @override
-  String get useDarkTheme => 'استخدام المظهر الداكن';
+  String get useDarkTheme => 'استخدام السمة الداكنة';
 
   @override
   String get launchOnLogin => 'تشغيل Crossbar عند تسجيل الدخول';
 
   @override
-  String get keepInTray => 'إبقاء الأيقونة في الشريط عند التصغير';
+  String get keepInTray => 'الاحتفاظ بالأيقونة في شريط المهام عند التصغير';
 
   @override
   String get defaultRefreshInterval => 'فترة التحديث الافتراضية';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => 'البحث عن إضافات...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => 'المفعّلة أولاً';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'أبجدي';
 
   @override
-  String get interval => 'Interval';
+  String get interval => 'الفترة';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => 'بدون تجميع';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => 'حسب اللغة';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => 'حسب قابلية التكوين';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => 'بدون مجموعات';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => 'قابل للتكوين';
 
   @override
-  String get standard => 'Standard';
+  String get standard => 'قياسي';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => 'تحديث';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => 'الإخراج المباشر';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => 'نسخ الإخراج';
 
   @override
-  String get running => 'Running...';
+  String get running => 'قيد التشغيل...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => 'جارٍ تنفيذ الإضافة...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => 'انقر على \"تشغيل الآن\" لمشاهدة الإخراج';
 
   @override
-  String get error => 'Error';
+  String get error => 'خطأ';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => 'خطأ غير معروف';
 
   @override
-  String get path => 'Path';
+  String get path => 'المسار';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => 'المفسّر';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => 'آخر خطأ';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'تحرير';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'حذف';
 
   @override
-  String get disable => 'Disable';
+  String get disable => 'تعطيل';
 
   @override
-  String get enable => 'Enable';
+  String get enable => 'تفعيل';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => 'إضافات نموذجية';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => 'اختر من أكثر من 20 إضافة جاهزة للاستخدام';
 
   @override
-  String get or => 'OR';
+  String get or => 'أو';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => 'أنشئ إضافتك الخاصة:';
 
   @override
-  String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+  String get createScriptStep => '1. أنشئ نصًا برمجيًا بإحدى هذه اللغات:';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep => '2. سمّه بفترة التحديث:';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. ضعه في ~/.crossbar/plugins/';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return 'تم تثبيت $count إضافة(إضافات) بنجاح!';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => 'تم حفظ التكوين';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return 'لا توجد إضافات تطابق \"$query\"';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => 'تم نسخ الخطأ إلى الحافظة';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => 'ملف الإضافة غير موجود';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return 'فشل فتح المحرر: $error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return 'انقر على حذف مرة أخرى لإزالة \"$name\"';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return 'تم حذف $name';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return 'فشل حذف الإضافة: $error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => 'تم نسخ الإخراج إلى الحافظة';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... و $count أخرى';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'الآن';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return 'منذ $count دقيقة';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return 'منذ $count ساعة';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return 'منذ $count يوم';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal عالمية + $additional إضافات إضافية';
   }
 
   @override
-  String get all => 'All';
+  String get all => 'الكل';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters => 'لا توجد إضافات تطابق عوامل التصفية';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => 'متوافق مع الهاتف';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return 'تم تثبيت $count في هذه الجلسة';
   }
 
   @override
-  String get done => 'Done';
+  String get done => 'تم';
 
   @override
-  String get close => 'Close';
+  String get close => 'إغلاق';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return 'تم تثبيت $name ($language)';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return 'فشل تثبيت $name: $error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => 'شريط النظام';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => 'وضع العرض';
 
   @override
-  String get unified => 'Unified';
+  String get unified => 'موحّد';
 
   @override
   String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+      'أيقونة واحدة في الشريط مع قائمة لجميع الإضافات';
 
   @override
-  String get separate => 'Separate';
+  String get separate => 'منفصل';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => 'أيقونة واحدة لكل إضافة (لينكس فقط)';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => 'طي ذكي';
 
   @override
-  String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+  String get autoCollapseWhenManyPlugins => 'طي تلقائي عند وجود إضافات كثيرة';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => 'تجاوز ذكي';
 
   @override
   String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+      'عرض أول N أيقونة، والباقي في قائمة التجاوز';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => 'قريبًا';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => 'وضع عرض الشريط';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => 'موحّد (أيقونة واحدة مع قائمة)';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => 'منفصل (أيقونة واحدة لكل إضافة)';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => 'لا يلزم تكوين';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5 دقائق';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - نظام إضافات عالمي\n\nحقوق الطبع والنشر (C) 2025\n\nهذا البرنامج هو برنامج حر: يمكنك إعادة توزيعه و/أو تعديله بموجب شروط رخصة GNU Affero العمومية التي نشرتها مؤسسة البرمجيات الحرة، إما الإصدار 3 من الرخصة، أو (حسب اختيارك) أي إصدار لاحق.\n\nيتم توزيع هذا البرنامج على أمل أن يكون مفيدًا، ولكن بدون أي ضمان؛ حتى بدون الضمان الضمني للتسويق أو الملاءمة لغرض معين. راجع رخصة GNU Affero العمومية لمزيد من التفاصيل.\n\nيجب أن تكون قد تلقيت نسخة من رخصة GNU Affero العمومية مع هذا البرنامج. إن لم تفعل، انظر <https://www.gnu.org/licenses/>.';
 }

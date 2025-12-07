@@ -18,7 +18,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsTab => '設定';
 
   @override
-  String get marketplaceTab => 'マーケット';
+  String get marketplaceTab => 'ストア';
 
   @override
   String get noPluginsFound => 'プラグインが見つかりません';
@@ -49,7 +49,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get remove => '削除';
 
   @override
-  String get lastRun => '前回の実行';
+  String get lastRun => '最終実行';
 
   @override
   String get refreshInterval => '更新間隔';
@@ -112,7 +112,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notifications => '通知';
 
   @override
-  String get enableNotifications => '通知を有効化';
+  String get enableNotifications => '通知を有効にする';
 
   @override
   String get startOnBoot => '起動時に開始';
@@ -127,7 +127,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get openPluginsDirectory => 'プラグインディレクトリを開く';
 
   @override
-  String get about => '情報';
+  String get about => 'について';
 
   @override
   String get version => 'バージョン';
@@ -136,10 +136,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get checkForUpdates => '更新を確認';
 
   @override
-  String get noUpdatesAvailable => '更新はありません';
+  String get noUpdatesAvailable => '利用可能な更新はありません';
 
   @override
-  String get updateAvailable => '更新があります';
+  String get updateAvailable => '更新が利用可能です';
 
   @override
   String get errorOccurred => 'エラーが発生しました';
@@ -163,7 +163,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get popular => '人気';
 
   @override
-  String get recent => '最新';
+  String get recent => '最近';
 
   @override
   String get bash => 'Bash';
@@ -229,260 +229,256 @@ class AppLocalizationsJa extends AppLocalizations {
   String get launchOnLogin => 'ログイン時にCrossbarを起動';
 
   @override
-  String get keepInTray => '最小化時にトレイにアイコンを表示';
+  String get keepInTray => '最小化時にトレイアイコンを保持';
 
   @override
   String get defaultRefreshInterval => 'デフォルト更新間隔';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => 'プラグインを検索...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => '有効なものを先に';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'アルファベット順';
 
   @override
-  String get interval => 'Interval';
+  String get interval => '間隔';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => 'グループ化なし';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => '言語別';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => '設定可能別';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => 'グループなし';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => '設定可能';
 
   @override
-  String get standard => 'Standard';
+  String get standard => '標準';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => '更新';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => 'リアルタイム出力';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => '出力をコピー';
 
   @override
-  String get running => 'Running...';
+  String get running => '実行中...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => 'プラグイン実行中...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => '「今すぐ実行」をクリックして出力を確認';
 
   @override
-  String get error => 'Error';
+  String get error => 'エラー';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => '不明なエラー';
 
   @override
-  String get path => 'Path';
+  String get path => 'パス';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => 'インタープリタ';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => '最後のエラー';
 
   @override
-  String get edit => 'Edit';
+  String get edit => '編集';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '削除';
 
   @override
-  String get disable => 'Disable';
+  String get disable => '無効化';
 
   @override
-  String get enable => 'Enable';
+  String get enable => '有効化';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => 'サンプルプラグイン';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => '20以上のすぐ使えるプラグインから選択';
 
   @override
-  String get or => 'OR';
+  String get or => 'または';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => '独自のプラグインを作成：';
 
   @override
-  String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+  String get createScriptStep => '1. これらの言語のいずれかでスクリプトを作成：';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep => '2. 更新間隔で名前を付ける：';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. ~/.crossbar/plugins/ に配置';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return '$count 個のプラグインが正常にインストールされました！';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => '設定が保存されました';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return '\"$query\" に一致するプラグインはありません';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => 'エラーがクリップボードにコピーされました';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => 'プラグインファイルが見つかりません';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return 'エディタを開けませんでした: $error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return 'もう一度削除をクリックして \"$name\" を削除';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return '$name を削除しました';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return 'プラグインの削除に失敗: $error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => '出力がクリップボードにコピーされました';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... 他に $count 件';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'たった今';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return '$count分前';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return '$count時間前';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return '$count日前';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal ユニバーサル + $additional 追加プラグイン';
   }
 
   @override
-  String get all => 'All';
+  String get all => 'すべて';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters => 'フィルターに一致するプラグインはありません';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => 'モバイル対応';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return 'このセッションで $count 件インストール';
   }
 
   @override
-  String get done => 'Done';
+  String get done => '完了';
 
   @override
-  String get close => 'Close';
+  String get close => '閉じる';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return '$name ($language) をインストールしました';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return '$name のインストールに失敗: $error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => 'システムトレイ';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => '表示モード';
 
   @override
-  String get unified => 'Unified';
+  String get unified => '統合';
 
   @override
-  String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+  String get singleTrayIconWithMenu => 'すべてのプラグイン用メニュー付き単一トレイアイコン';
 
   @override
-  String get separate => 'Separate';
+  String get separate => '分離';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => 'プラグインごとに1つのアイコン（Linuxのみ）';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => 'スマート折りたたみ';
 
   @override
-  String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+  String get autoCollapseWhenManyPlugins => 'プラグインが多い時に自動折りたたみ';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => 'スマートオーバーフロー';
 
   @override
-  String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+  String get showFirstNIconsRestInOverflow => '最初のN個のアイコンを表示、残りはオーバーフローメニューへ';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => '近日公開';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => 'トレイ表示モード';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => '統合（メニュー付き単一アイコン）';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => '分離（プラグインごとに1アイコン）';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => '設定は不要です';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5分';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - ユニバーサルプラグインシステム\n\nCopyright (C) 2025\n\n本プログラムはフリーソフトウェアです：Free Software Foundationが発行したGNU Affero一般公衆利用許諾書の条件の下で、ライセンスのバージョン3、または（お選びにより）それ以降のバージョンに従って再配布および/または変更することができます。\n\n本プログラムは有用であることを期待して配布されていますが、商品性や特定目的への適合性の暗黙の保証さえも含め、いかなる保証もありません。詳細についてはGNU Affero一般公衆利用許諾書をご覧ください。\n\n本プログラムと共にGNU Affero一般公衆利用許諾書のコピーを受け取っているはずです。受け取っていない場合は、<https://www.gnu.org/licenses/>をご覧ください。';
 }

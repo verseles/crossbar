@@ -25,7 +25,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get noPluginsDescription =>
-      'Aggiungi plugin nella directory ~/.crossbar/plugins';
+      'Aggiungi plugin alla tua directory ~/.crossbar/plugins';
 
   @override
   String get refreshAll => 'Aggiorna Tutto';
@@ -115,16 +115,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get enableNotifications => 'Abilita Notifiche';
 
   @override
-  String get startOnBoot => 'Avvia all\'Avvio';
+  String get startOnBoot => 'Avvia all\'avvio';
 
   @override
-  String get minimizeToTray => 'Riduci a Icona';
+  String get minimizeToTray => 'Minimizza nella barra';
 
   @override
-  String get pluginsDirectory => 'Directory Plugin';
+  String get pluginsDirectory => 'Directory dei Plugin';
 
   @override
-  String get openPluginsDirectory => 'Apri Directory Plugin';
+  String get openPluginsDirectory => 'Apri Directory dei Plugin';
 
   @override
   String get about => 'Informazioni';
@@ -133,7 +133,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get version => 'Versione';
 
   @override
-  String get checkForUpdates => 'Controlla Aggiornamenti';
+  String get checkForUpdates => 'Cerca aggiornamenti';
 
   @override
   String get noUpdatesAvailable => 'Nessun aggiornamento disponibile';
@@ -154,10 +154,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get noResults => 'Nessun risultato';
 
   @override
-  String get allLanguages => 'Tutte le lingue';
+  String get allLanguages => 'Tutte le Lingue';
 
   @override
-  String get allCategories => 'Tutte le categorie';
+  String get allCategories => 'Tutte le Categorie';
 
   @override
   String get popular => 'Popolare';
@@ -226,263 +226,266 @@ class AppLocalizationsIt extends AppLocalizations {
   String get useDarkTheme => 'Usa tema scuro';
 
   @override
-  String get launchOnLogin => 'Avvia Crossbar al login';
+  String get launchOnLogin => 'Avvia Crossbar all\'accesso';
 
   @override
-  String get keepInTray => 'Mantieni icona nel vassoio';
+  String get keepInTray => 'Mantieni icona nella barra quando minimizzato';
 
   @override
-  String get defaultRefreshInterval => 'Intervallo aggiornamento predefinito';
+  String get defaultRefreshInterval =>
+      'Intervallo di aggiornamento predefinito';
 
   @override
-  String get searchPlugins => 'Search plugins...';
+  String get searchPlugins => 'Cerca plugin...';
 
   @override
-  String get enabledFirst => 'Enabled First';
+  String get enabledFirst => 'Abilitati Prima';
 
   @override
-  String get alphabetical => 'Alphabetical';
+  String get alphabetical => 'Alfabetico';
 
   @override
-  String get interval => 'Interval';
+  String get interval => 'Intervallo';
 
   @override
-  String get noGrouping => 'No Grouping';
+  String get noGrouping => 'Nessun Raggruppamento';
 
   @override
-  String get byLanguage => 'By Language';
+  String get byLanguage => 'Per Lingua';
 
   @override
-  String get byConfigurable => 'By Configurable';
+  String get byConfigurable => 'Per Configurabile';
 
   @override
-  String get noGroups => 'No Groups';
+  String get noGroups => 'Nessun Gruppo';
 
   @override
-  String get configurable => 'Configurable';
+  String get configurable => 'Configurabile';
 
   @override
   String get standard => 'Standard';
 
   @override
-  String get refresh => 'Refresh';
+  String get refresh => 'Aggiorna';
 
   @override
-  String get liveOutput => 'Live Output';
+  String get liveOutput => 'Output in Tempo Reale';
 
   @override
-  String get copyOutput => 'Copy output';
+  String get copyOutput => 'Copia output';
 
   @override
-  String get running => 'Running...';
+  String get running => 'In esecuzione...';
 
   @override
-  String get executingPlugin => 'Executing plugin...';
+  String get executingPlugin => 'Esecuzione plugin...';
 
   @override
-  String get clickRunNow => 'Click \"Run Now\" to see output';
+  String get clickRunNow => 'Clicca \"Esegui Ora\" per vedere l\'output';
 
   @override
-  String get error => 'Error';
+  String get error => 'Errore';
 
   @override
-  String get unknownError => 'Unknown error';
+  String get unknownError => 'Errore sconosciuto';
 
   @override
-  String get path => 'Path';
+  String get path => 'Percorso';
 
   @override
-  String get interpreter => 'Interpreter';
+  String get interpreter => 'Interprete';
 
   @override
-  String get lastError => 'Last Error';
+  String get lastError => 'Ultimo Errore';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'Modifica';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'Elimina';
 
   @override
-  String get disable => 'Disable';
+  String get disable => 'Disabilita';
 
   @override
-  String get enable => 'Enable';
+  String get enable => 'Abilita';
 
   @override
-  String get samplePlugins => 'Sample Plugins';
+  String get samplePlugins => 'Plugin di Esempio';
 
   @override
-  String get chooseFromPlugins => 'Choose from 20+ ready-to-use plugins';
+  String get chooseFromPlugins => 'Scegli tra 20+ plugin pronti all\'uso';
 
   @override
-  String get or => 'OR';
+  String get or => 'OPPURE';
 
   @override
-  String get createYourOwnPlugin => 'Create your own plugin:';
+  String get createYourOwnPlugin => 'Crea il tuo plugin:';
 
   @override
   String get createScriptStep =>
-      '1. Create a script in one of these languages:';
+      '1. Crea uno script in uno di questi linguaggi:';
 
   @override
-  String get nameWithIntervalStep => '2. Name it with refresh interval:';
+  String get nameWithIntervalStep =>
+      '2. Nominalo con l\'intervallo di aggiornamento:';
 
   @override
-  String get placeInPluginsStep => '3. Place it in ~/.crossbar/plugins/';
+  String get placeInPluginsStep => '3. Mettilo in ~/.crossbar/plugins/';
 
   @override
   String pluginsInstalledSuccess(int count) {
-    return '$count plugin(s) installed successfully!';
+    return '$count plugin installato/i con successo!';
   }
 
   @override
-  String get configurationSaved => 'Configuration saved';
+  String get configurationSaved => 'Configurazione salvata';
 
   @override
   String noPluginsMatch(String query) {
-    return 'No plugins match \"$query\"';
+    return 'Nessun plugin corrisponde a \"$query\"';
   }
 
   @override
-  String get errorCopiedToClipboard => 'Error copied to clipboard';
+  String get errorCopiedToClipboard => 'Errore copiato negli appunti';
 
   @override
-  String get pluginFileNotFound => 'Plugin file not found';
+  String get pluginFileNotFound => 'File del plugin non trovato';
 
   @override
   String failedToOpenEditor(String error) {
-    return 'Failed to open editor: $error';
+    return 'Apertura editor fallita: $error';
   }
 
   @override
   String clickDeleteAgain(String name) {
-    return 'Click Delete again to remove \"$name\"';
+    return 'Clicca di nuovo Elimina per rimuovere \"$name\"';
   }
 
   @override
   String deletedPlugin(String name) {
-    return 'Deleted $name';
+    return '$name eliminato';
   }
 
   @override
   String failedToDeletePlugin(String error) {
-    return 'Failed to delete plugin: $error';
+    return 'Eliminazione plugin fallita: $error';
   }
 
   @override
-  String get outputCopiedToClipboard => 'Output copied to clipboard';
+  String get outputCopiedToClipboard => 'Output copiato negli appunti';
 
   @override
   String andMore(int count) {
-    return '... and $count more';
+    return '... e altri $count';
   }
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'Adesso';
 
   @override
   String minutesAgo(int count) {
-    return '${count}m ago';
+    return '${count}m fa';
   }
 
   @override
   String hoursAgo(int count) {
-    return '${count}h ago';
+    return '${count}h fa';
   }
 
   @override
   String daysAgo(int count) {
-    return '${count}d ago';
+    return '${count}g fa';
   }
 
   @override
   String universalAndAdditionalPlugins(int universal, int additional) {
-    return '$universal universal + $additional additional plugins';
+    return '$universal universali + $additional plugin aggiuntivi';
   }
 
   @override
-  String get all => 'All';
+  String get all => 'Tutti';
 
   @override
-  String get noPluginsMatchFilters => 'No plugins match your filters';
+  String get noPluginsMatchFilters =>
+      'Nessun plugin corrisponde ai tuoi filtri';
 
   @override
-  String get mobileCompatible => 'Mobile compatible';
+  String get mobileCompatible => 'Compatibile con mobile';
 
   @override
   String installedThisSession(int count) {
-    return '$count installed this session';
+    return '$count installato/i in questa sessione';
   }
 
   @override
-  String get done => 'Done';
+  String get done => 'Fatto';
 
   @override
-  String get close => 'Close';
+  String get close => 'Chiudi';
 
   @override
   String installedLanguage(String name, String language) {
-    return 'Installed $name ($language)';
+    return '$name ($language) installato';
   }
 
   @override
   String failedToInstall(String name, String error) {
-    return 'Failed to install $name: $error';
+    return 'Installazione di $name fallita: $error';
   }
 
   @override
-  String get systemTray => 'System Tray';
+  String get systemTray => 'Barra di Sistema';
 
   @override
-  String get displayMode => 'Display Mode';
+  String get displayMode => 'Modalità di Visualizzazione';
 
   @override
-  String get unified => 'Unified';
+  String get unified => 'Unificato';
 
   @override
   String get singleTrayIconWithMenu =>
-      'Single tray icon with menu for all plugins';
+      'Icona unica nella barra con menu per tutti i plugin';
 
   @override
-  String get separate => 'Separate';
+  String get separate => 'Separato';
 
   @override
-  String get oneTrayIconPerPlugin => 'One tray icon per plugin (Linux only)';
+  String get oneTrayIconPerPlugin => 'Un\'icona per plugin (solo Linux)';
 
   @override
-  String get smartCollapse => 'Smart Collapse';
+  String get smartCollapse => 'Compressione Intelligente';
 
   @override
   String get autoCollapseWhenManyPlugins =>
-      'Auto-collapse when too many plugins';
+      'Compressione automatica con molti plugin';
 
   @override
-  String get smartOverflow => 'Smart Overflow';
+  String get smartOverflow => 'Overflow Intelligente';
 
   @override
   String get showFirstNIconsRestInOverflow =>
-      'Show first N icons, rest in overflow menu';
+      'Mostra le prime N icone, il resto nel menu overflow';
 
   @override
-  String get comingSoon => 'Coming Soon';
+  String get comingSoon => 'Prossimamente';
 
   @override
-  String get trayDisplayMode => 'Tray Display Mode';
+  String get trayDisplayMode => 'Modalità di Visualizzazione della Barra';
 
   @override
-  String get unifiedSingleIconWithMenu => 'Unified (single icon with menu)';
+  String get unifiedSingleIconWithMenu => 'Unificato (icona singola con menu)';
 
   @override
-  String get separateOneIconPerPlugin => 'Separate (one icon per plugin)';
+  String get separateOneIconPerPlugin => 'Separato (un\'icona per plugin)';
 
   @override
-  String get noConfigurationRequired => 'No configuration required';
+  String get noConfigurationRequired => 'Nessuna configurazione richiesta';
 
   @override
-  String get fiveMinutes => '5 minutes';
+  String get fiveMinutes => '5 minuti';
 
   @override
   String get licenseText =>
-      'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.';
+      'Crossbar - Sistema Universale di Plugin\n\nCopyright (C) 2025\n\nQuesto programma è software libero: puoi ridistribuirlo e/o modificarlo secondo i termini della GNU Affero General Public License come pubblicata dalla Free Software Foundation, sia la versione 3 della Licenza, o (a tua scelta) qualsiasi versione successiva.\n\nQuesto programma è distribuito nella speranza che sia utile, ma SENZA ALCUNA GARANZIA; senza nemmeno la garanzia implicita di COMMERCIABILITÀ o IDONEITÀ PER UNO SCOPO PARTICOLARE. Vedi la GNU Affero General Public License per maggiori dettagli.\n\nDovresti aver ricevuto una copia della GNU Affero General Public License insieme a questo programma. In caso contrario, vedi <https://www.gnu.org/licenses/>.';
 }
