@@ -17,11 +17,11 @@ Crossbar is a revolutionary cross-platform plugin system inspired by [BitBar](ht
 # Linux, Windows, macOS, Android, iOS
 import subprocess, json
 
-cpu = subprocess.run(['crossbar', '--cpu'], capture_output=True, text=True)
+cpu = subprocess.run(['crossbar', 'cpu'], capture_output=True, text=True)
 print(json.dumps({
     "icon": "⚡",
     "text": f"{cpu.stdout.strip()}%",
-    "menu": [{"text": "Details", "bash": "crossbar --process-list"}]
+    "menu": [{"text": "Details", "bash": "crossbar process list"}]
 }))
 ```
 
@@ -29,12 +29,12 @@ print(json.dumps({
 
 ### 🚀 Core Capabilities
 
-- **🌍 True Cross-Platform**: One plugin, five target platforms (Linux, macOS, Windows, Android, **iOS - planned**)
-- **6️⃣ Multi-Language Support**: Write plugins in Bash, Python, Node.js, Dart, Go, or Rust
+- **🌍 True Cross-Platform**: One plugin, five target platforms (Linux, macOS, Windows, Android, iOS)
+- **8️⃣ Multi-Language Support**: Write plugins in Bash, Python, Node.js, Dart (Interpreted & Compiled), Go, Rust, or YAML
 - **⚡ Hot Reload**: Automatic plugin detection and reload (<1s)
 - **🎨 Adaptive Rendering**: Same plugin renders as tray icon, notification, or widget
 - **🔒 Secure Storage**: Passwords stored in system Keychain/KeyStore
-- **🌐 39 CLI Commands**: Unified API for system info, network, media, clipboard, and more
+- **🌐 47+ CLI Commands**: Unified API for system info, network, media, clipboard, and more
 
 ### 🎯 Revolutionary Advantages Over BitBar/Argos
 
@@ -43,9 +43,9 @@ print(json.dumps({
 | Platforms      | macOS/Linux only                    | Linux + Windows + macOS + Android + iOS   |
 | Output Formats | Text only                           | Text + JSON + Structured Data             |
 | UI Targets     | Menu bar only                       | Tray + Notifications + Widgets + Menu bar |
-| CLI API        | None (scripts call system commands) | 47 unified commands (`crossbar --cpu`)    |
+| CLI API        | None (scripts call system commands) | 47 unified commands (`crossbar cpu`)      |
 | Configuration  | Manual scripting                    | Declarative JSON with auto-generated UI   |
-| Mobile Support | ❌ None                             | ✅ Widgets + Persistent Notifications     |
+| Mobile Support | ❌ None                             | ✅ Widgets + Persistent Notifications (Android) + Home/Lock Screen Widgets (iOS) |
 | Controls       | Read-only                           | Bidirectional (volume, media, system)     |
 | Hot Reload     | Manual refresh                      | Automatic file watching                   |
 
@@ -71,31 +71,34 @@ print(json.dumps({
 
 ### Installation
 
-#### Prerequisites
+#### 1. Development Setup (Recommended for Contributors)
 
+If you plan to develop plugins or contribute to Crossbar core, we recommend setting up the full environment.
+
+**Prerequisites:**
 - Flutter 3.35.0+ ([Install Flutter](https://docs.flutter.dev/get-started/install))
 - Dart 3.10.0+ (comes with Flutter)
+- `make` (optional, for easier build commands)
 
-#### Build from Source
+**Setup:**
 
 ```bash
 # Clone the repository
 git clone https://github.com/verseles/crossbar.git
 cd crossbar
 
-# Get dependencies
+# Install dependencies
 flutter pub get
 
-# Run on desktop
-flutter run -d linux   # or macos, windows
-flutter run -d android # for mobile
+# Build and Run (Desktop)
+# Using Makefile (Recommended - builds full architecture)
+make linux   # or make macos, make windows
 
-# Build release
-flutter build linux --release
-flutter build apk --release  # Android
+# Or using Flutter directly (GUI only)
+flutter run -d linux
 ```
 
-#### Download Pre-built Binaries
+#### 2. Download Pre-built Binaries (For Users)
 
 Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases).
 
@@ -105,7 +108,7 @@ Download the latest release from [GitHub Releases](https://github.com/verseles/c
 ./crossbar          # Launch (Start in Tray)
 ./crossbar gui      # Launch GUI (Open Window)
 ./crossbar --help   # Show CLI commands
-./crossbar --cpu    # Example CLI usage
+./crossbar cpu      # Example CLI usage
 ```
 
 ### Your First Plugin
@@ -183,7 +186,7 @@ Crossbar supports **two output formats**:
 echo "🔋 85%"          # Tray text (first line)
 echo "---"             # Separator
 echo "Status | color=green"
-echo "Details | bash='crossbar --battery --json'"
+echo "Details | bash='crossbar battery --json'"
 ```
 
 **Attributes**:
@@ -206,7 +209,7 @@ print(json.dumps({
     "tooltip": "Battery Level",
     "color": "#00FF00",
     "menu": [
-        {"text": "Show Details", "bash": "crossbar --battery --json"},
+        {"text": "Show Details", "bash": "crossbar battery --json"},
         {"text": "---"},  # Separator
         {"text": "Settings", "href": "https://settings"}
     ]
@@ -215,85 +218,88 @@ print(json.dumps({
 
 ### CLI API Reference
 
-Crossbar provides 47 unified commands accessible via `crossbar --<command>`:
+Crossbar provides 47+ unified commands accessible via `crossbar [command]`. Legacy `--command` flags are also supported.
 
 #### System Information
 
 ```bash
-crossbar --cpu              # CPU usage percentage
-crossbar --memory           # Memory usage (e.g., "8.2/16 GB")
-crossbar --battery          # Battery percentage
-crossbar --disk             # Disk usage
-crossbar --uptime           # System uptime
-crossbar --hostname         # Machine hostname
-crossbar --username         # Current user
-crossbar --kernel           # Kernel version
-crossbar --arch             # Architecture (x64, arm64)
+crossbar cpu                # CPU usage percentage
+crossbar memory             # Memory usage (e.g., "8.2/16 GB")
+crossbar battery            # Battery percentage
+crossbar disk               # Disk usage
+crossbar uptime             # System uptime
+crossbar hostname           # Machine hostname
+crossbar username           # Current user
+crossbar kernel             # Kernel version
+crossbar arch               # Architecture (x64, arm64)
+crossbar os                 # Operating system
 ```
 
 #### Network
 
 ```bash
-crossbar --net-status       # "online" | "offline" | "wifi"
-crossbar --net-ip           # Local IP address
-crossbar --net-ip --public  # Public IP (via ipify.org)
-crossbar --net-ssid         # WiFi network name
-crossbar --net-ping google.com  # Ping latency
-crossbar --bluetooth-status # "on" | "off"
+crossbar net status         # "online" | "offline" | "wifi"
+crossbar net ip             # Local IP address
+crossbar net ip --public    # Public IP (via ipify.org)
+crossbar net ping google.com # Ping latency
+crossbar wifi status        # WiFi status
+crossbar wifi ssid          # WiFi network name
+crossbar bluetooth status   # "on" | "off"
+crossbar vpn status         # VPN status
 ```
 
-#### Device
+#### Device & Hardware
 
 ```bash
-crossbar --device-model     # Device model name
-crossbar --screen-size      # Screen resolution
-crossbar --locale           # System locale
-crossbar --timezone         # Timezone
+crossbar screen size        # Screen resolution
+crossbar screen brightness  # Get brightness
+crossbar power sleep        # Suspend system
+crossbar wallpaper          # Get current wallpaper path
 ```
 
 #### Audio & Media
 
 ```bash
-crossbar --audio-volume           # Current volume (0-100)
-crossbar --audio-volume-set 50    # Set volume
-crossbar --audio-mute             # Toggle mute
-crossbar --media-playing --json   # Current media info
-crossbar --media-play             # Resume playback
-crossbar --media-pause
-crossbar --media-next
-crossbar --media-prev
-crossbar --screen-brightness-set 75
+crossbar audio volume             # Current volume (0-100)
+crossbar audio volume 50          # Set volume
+crossbar audio mute               # Toggle mute
+crossbar media playing --json     # Current media info
+crossbar media play               # Resume playback
+crossbar media pause
+crossbar media next
+crossbar media prev
 ```
 
 #### Clipboard
 
 ```bash
-crossbar --clipboard              # Get clipboard text
-crossbar --clipboard-set "text"   # Copy to clipboard
-crossbar --clipboard-clear
+crossbar clipboard                # Get clipboard text
+crossbar clipboard "text"         # Copy to clipboard
 ```
 
 #### File Operations
 
 ```bash
-crossbar --file-exists /path/file
-crossbar --file-read /path/file
-crossbar --file-size /path/file
-crossbar --dir-list /path/dir
+crossbar file exists /path/file
+crossbar file read /path/file
+crossbar file size /path/file
+crossbar dir list /path/dir
 ```
 
 #### Time & Utilities
 
 ```bash
-crossbar --time [12h|24h]
-crossbar --date
-crossbar --calendar
-crossbar --countdown "2025-12-31 23:59:59"
-crossbar --uuid                   # Generate UUID
-crossbar --random [min] [max]
-crossbar --hash "text" --algo sha256
-crossbar --base64-encode "text"
-crossbar --base64-decode "dGV4dA=="
+crossbar time [12h|24h]
+crossbar date
+crossbar uuid                     # Generate UUID
+crossbar random [min] [max]
+crossbar hash "text"
+crossbar base64 encode "text"
+crossbar base64 decode "dGV4dA=="
+crossbar exec "command"           # Execute shell command
+crossbar notify "Title" "Msg"     # Send notification
+crossbar open url "https://..."   # Open URL
+crossbar open file "/path/..."    # Open file
 ```
 
 **See full API**: [MASTER_PLAN.md](MASTER_PLAN.md#5-cli-api-unificada)
@@ -483,7 +489,7 @@ Future<String> getHostname() async {
 2. Add CLI handler in `lib/cli/cli_handler.dart` (in the switch statement):
 
 ```dart
-case '--hostname':
+case 'hostname':
   print(Platform.localHostname);
 ```
 
@@ -567,73 +573,42 @@ Built with:
 
 > **Full roadmap**: See [ROADMAP.md](ROADMAP.md) for detailed timeline, completed features, and technical debt tracking.
 
-### ✅ v1.0.0 (Current - December 2025)
+### ✅ v1.3.0 (Current - 2025)
 
-**Completed**: All 7 phases from MASTER_PLAN.md
+**Universal Plugins (Multi-Runner Architecture)**
 
-- ✅ Core plugin system (6 languages)
-- ✅ 47 CLI commands
-- ✅ 5 platform support (structure ready)
-- ✅ Hot reload & CI/CD
-- ✅ 24 example plugins
-- ✅ i18n (10 languages)
-- ✅ Comprehensive documentation
+- Core plugin system (Declarative YAML, Dart, Script).
+- 47+ CLI commands.
+- 5 platform support (Linux, macOS, Windows, Android, iOS).
+- Hot reload & CI/CD.
+- 24+ example plugins.
+- i18n (10 languages).
+- Comprehensive documentation.
 
-**Limitations**:
+**Current Focus**:
 
-- macOS/iOS builds require macOS with Xcode
-- Android APK requires SDK setup
-- No plugin sandboxing or signing
+- iOS Widgets (WidgetKit).
+- Universal Plugin Runners (Declarative/Dart).
+- Advanced Desktop UI.
 
-### 🎯 v1.1.0 (Q1 2026 - Next Priority)
+### 🎯 v1.4.0 (Next)
 
-**Focus**: Platform builds & marketplace enhancements
+**Advanced Desktop UI**
 
-**High Priority**:
+- Global Hotkey (Ctrl+Alt+C).
+- Tray Overflow Logic (Smart Collapse).
+- Window State Persistence.
 
-- 🏗️ Complete macOS/Windows/Android/iOS builds
-- ⭐ Plugin ratings and reviews in marketplace
-- 📊 Plugin performance metrics dashboard
-- 🛡️ Optional plugin sandboxing
-- 📦 Package managers (Homebrew, Snap, winget, AUR)
+### 🌟 Visão de Longo Prazo (v2.0.0+)
 
-**Also Planned**:
+- 🌐 Plugins remotos (execução server-side).
+- 📊 Integração OpenTelemetry e Grafana.
+- 🤖 Sugestões de plugins com IA.
+- 🔗 Plataforma de integração (webhooks, IFTTT/Zapier).
+- 🎮 Editor visual de plugins (no-code).
+- 🌍 Extensão de navegador e suporte a smartwatch.
 
-- Plugin templates/wizard
-- Output history in UI
-- Auto-updater
-- Additional CLI commands (screenshot, wallpaper, notifications)
-
-### 🚀 v1.2.0 - v1.5.0 (2026)
-
-**Mid-term Goals**:
-
-- 🔄 Config sync via GitHub Gists (v1.2)
-- 🎨 Custom themes & theming system (v1.3)
-- 🔌 Plugin dependencies & inter-plugin communication (v1.4)
-- 📱 Enhanced mobile features (larger widgets, voice commands) (v1.5)
-
-### 🌟 v2.0.0+ (2027+)
-
-**Long-term Vision**:
-
-- 🌐 Remote plugins (server-side execution)
-- 📊 OpenTelemetry & Grafana integration
-- 🤖 AI-powered plugin suggestions
-- 🔗 Webhook & API platform
-- 🎮 Visual plugin editor (no-code)
-- 🌍 Browser extension & smartwatch support
-
-### 📈 Success Metrics
-
-| Milestone        | Stars | Downloads | Contributors | Plugins |
-| ---------------- | ----- | --------- | ------------ | ------- |
-| v1.0.0 (Now)     | 0     | 0         | 1            | 24      |
-| v1.1.0 (Q1 2026) | 100+  | 500+      | 3+           | 40+     |
-| v1.5.0 (Q4 2026) | 500+  | 2.5k+     | 10+          | 100+    |
-| v2.0.0 (2027)    | 1k+   | 10k+      | 20+          | 250+    |
-
-**Want to influence the roadmap?** Vote on features in [GitHub Issues](https://github.com/verseles/crossbar/issues) or join [Discussions](https://github.com/verseles/crossbar/discussions)!
+**Quer influenciar o roadmap?** Vote em funcionalidades nas [GitHub Issues](https://github.com/verseles/crossbar/issues) ou participe das [Discussions](https://github.com/verseles/crossbar/discussions)!
 
 <details>
 <summary>📜 Changelog</summary>
@@ -673,58 +648,6 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - <150MB memory footprint (idle, 3 plugins)
 - <50ms plugin execution overhead
 - 41MB Linux binary size
-</details>
-
-<details>
-<summary>🗺️ Roadmap</summary>
-
-This roadmap outlines the development for Crossbar, tracking completed work, current limitations, and planned future enhancements.
-
-### ✅ v1.0.0 (Current - December 2025)
-
-**Completed**: All 7 phases from `MASTER_PLAN.md`.
-
-- Core plugin system (6 languages).
-- 39 CLI commands.
-- 4+ platform support (Linux, macOS, Windows, Android, iOS - planned).
-- Hot reload & CI/CD.
-- 24 example plugins.
-- i18n (10 languages).
-- Comprehensive documentation.
-
-**Current Limitations**:
-
-- macOS/iOS builds require macOS with Xcode.
-- Android APK requires SDK setup.
-- No plugin sandboxing or signing.
-- No plugin versioning in marketplace.
-- No plugin dependency management.
-- No lazy loading for large plugin lists.
-- No plugin output caching.
-
-### 🎯 v1.1.0 (Q1 2026 - Próxima Prioridade)
-
-**Foco**: Builds de plataforma e melhorias no marketplace.
-
-- 🏗️ Concluir builds para macOS/Windows/Android/iOS.
-- ⭐ Classificações e avaliações de plugins no marketplace.
-- 📊 Painel de métricas de desempenho de plugins.
-- 🛡️ Sandboxing opcional de plugins.
-- 📦 Gerenciadores de pacotes (Homebrew, Snap, winget, AUR).
-- Plugins templates/wizard, histórico de saída na UI, auto-atualizador.
-- Comandos CLI adicionais (captura de tela, papel de parede, notificações).
-
-### 🌟 Visão de Longo Prazo (v2.0.0+)
-
-- 🌐 Plugins remotos (execução server-side).
-- 📊 Integração OpenTelemetry e Grafana.
-- 🤖 Sugestões de plugins com IA.
-- 🔗 Plataforma de integração (webhooks, IFTTT/Zapier).
-- 🎮 Editor visual de plugins (no-code).
-- 🌍 Extensão de navegador e suporte a smartwatch.
-
-**Quer influenciar o roadmap?** Vote em funcionalidades nas [GitHub Issues](https://github.com/verseles/crossbar/issues) ou participe das [Discussions](https://github.com/verseles/crossbar/discussions)!
-
 </details>
 
 <details>

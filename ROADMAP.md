@@ -83,13 +83,13 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] `widget_background.xml` e `widget_background_dark.xml` (drawables).
   - [x] `strings.xml` (labels e descrições).
 
-### Fase 2: iOS Native (WidgetKit) 🚧
+### Fase 2: iOS Native (WidgetKit) ✅
 
-- [x] **SwiftUI View:** Implementar `CrossbarWidget.swift` (placeholder ready).
+- [x] **SwiftUI View:** Implementar `CrossbarWidget.swift` (functional).
   - [x] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
   - [x] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
-- [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS (requer macOS).
-- [ ] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
+- [x] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS (requer macOS).
+- [x] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
 - [x] **Documentação:** Criar guia de setup `docs/ios-widget-setup.md`.
 
 ### Fase 3: Widget Service Logic ✅
