@@ -98,8 +98,13 @@ Future<int> handleCliCommand(List<String> args) async {
 
   final commandName = args[0];
 
-  if (commandName == '--version' || commandName == '-v') {
-    print('Crossbar version $version');
+  if (commandName == '--version') {
+    print('Crossbar $version');
+    return 0;
+  }
+
+  if (commandName == '-v') {
+    print(version);
     return 0;
   }
 
