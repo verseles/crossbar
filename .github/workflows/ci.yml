@@ -196,9 +196,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle' # Auto-cache gradle dependencies
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+          cache-read-only: false
 
       - name: Cache Pub dependencies
         uses: actions/cache@v4
@@ -239,8 +243,13 @@ jobs:
           rm -rf ~/.pub-cache/hosted/pub.dev/workmanager-* || true
           flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build APK (Optimized)
+        run: |
+          flutter build apk --release \
+            --target-platform android-arm64
+        env:
+          # CI-specific JVM args (2GB heap to fit in 7GB runner constraints)
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
