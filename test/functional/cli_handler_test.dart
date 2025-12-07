@@ -224,6 +224,100 @@ void main() {
        expect(output.exitCode, equals(1));
      });
   });
+
+  group('CLI Handler - Web Command', () {
+    test('web without URL shows help', () async {
+      final output = await _captureOutput(() => handleCliCommand(['web']));
+      expect(output.stdout, contains('Usage:'));
+      expect(output.exitCode, equals(1));
+    });
+
+    test('web --help shows usage', () async {
+      final output = await _captureOutput(() => handleCliCommand(['web', '--help']));
+      expect(output.stdout, contains('Usage:'));
+      expect(output.stdout, contains('Examples:'));
+      expect(output.exitCode, equals(0));
+    });
+
+    test('web GET request returns data', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand(['web', 'api.coinbase.com/v2/prices/BTC-USD/spot']),
+      );
+      expect(output.stdout, contains('amount'));
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web --json returns full response with status', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand(['web', 'httpbin.org/get', '--json']),
+      );
+      final json = jsonDecode(output.stdout.trim()) as Map<String, dynamic>;
+      expect(json['status'], equals(200));
+      expect(json.containsKey('headers'), isTrue);
+      expect(json.containsKey('data'), isTrue);
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web POST with body', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand([
+          'web', 'httpbin.org/post',
+          '--method', 'POST',
+          '--body', '{"test":"value"}',
+          '--json',
+        ]),
+      );
+      final json = jsonDecode(output.stdout.trim()) as Map<String, dynamic>;
+      expect(json['status'], equals(200));
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web with custom headers', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand([
+          'web', 'httpbin.org/headers',
+          '--headers', '{"X-Custom-Header":"test-value"}',
+          '--json',
+        ]),
+      );
+      expect(output.stdout, contains('X-Custom-Header'));
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web with timeout handles slow response', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand([
+          'web', 'httpbin.org/delay/1',
+          '--timeout', '5',
+        ]),
+      );
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web auto-prefixes https', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand(['web', 'api.github.com/zen']),
+      );
+      expect(output.stdout, isNotEmpty);
+      expect(output.exitCode, equals(0));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web handles 404 gracefully', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand(['web', 'httpbin.org/status/404', '--json']),
+      );
+      final json = jsonDecode(output.stdout.trim()) as Map<String, dynamic>;
+      expect(json['status'], equals(404));
+      expect(output.exitCode, equals(0)); // JSON mode returns 0 even for HTTP errors
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
+    test('web plain mode returns exit 1 for HTTP errors', () async {
+      final output = await _captureOutput(
+        () => handleCliCommand(['web', 'httpbin.org/status/500']),
+      );
+      expect(output.exitCode, equals(1));
+    }, timeout: const Timeout(Duration(seconds: 30)));
+  });
 }
 
 /// Helper class to capture stdout, stderr, and exit code

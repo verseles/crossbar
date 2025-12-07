@@ -33,21 +33,22 @@ class WebCommand extends CliCommand {
   Future<int> execute(List<String> args) async {
     // Show help
     if (args.isEmpty || args.contains('--help') || args.contains('-h')) {
-      stderr.writeln('Usage: crossbar web <url> [options]');
-      stderr.writeln('');
-      stderr.writeln('Options:');
-      stderr.writeln('  --method GET|POST|PUT|DELETE|PATCH|HEAD');
-      stderr.writeln('  --headers \'{"key":"value"}\'');
-      stderr.writeln('  --body \'{"key":"value"}\'');
-      stderr.writeln('  --body-file path.json');
-      stderr.writeln('  --timeout 10');
-      stderr.writeln('  --user-agent "Custom Agent"');
-      stderr.writeln('  --insecure');
-      stderr.writeln('  --json / --xml');
-      stderr.writeln('');
-      stderr.writeln('Examples:');
-      stderr.writeln('  crossbar web api.github.com/users/octocat');
-      stderr.writeln('  crossbar web httpbin.org/post --method POST --body \'{"test":1}\'');
+      // ignore: avoid_print
+      print('''Usage: crossbar web <url> [options]
+
+Options:
+  --method GET|POST|PUT|DELETE|PATCH|HEAD
+  --headers '{"key":"value"}'
+  --body '{"key":"value"}'
+  --body-file path.json
+  --timeout 10
+  --user-agent "Custom Agent"
+  --insecure
+  --json / --xml
+
+Examples:
+  crossbar web api.github.com/users/octocat
+  crossbar web httpbin.org/post --method POST --body '{"test":1}' ''');
       return args.isEmpty ? 1 : 0;
     }
 
