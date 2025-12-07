@@ -129,14 +129,15 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - [x] **Reescrever Rust:** Usar `Command::new("crossbar").arg("--cpu")`
 - [x] **Estrutura de Pastas:** Reorganizar `plugins/` por funcionalidade
 
-### Fase 2: Sistema de Tags/Categorias Unificado
+### Fase 2: Sistema de Tags/Categorias Unificado ✅
 
-- [ ] **Modelo:** Criar `PluginMetadata` com category, tags, language, type
-- [ ] **Reutilização:** Extrair `PluginFilterWidget` compartilhado
-  - [ ] Usar em `PluginsTab` (plugins instalados)
-  - [ ] Usar em `SamplePluginsDialog` (plugins exemplo)
-- [ ] **Filtros:** Categoria, Linguagem, Tipo, Busca texto
-- [ ] **Agrupamento:** Por linguagem, por configurável, por categoria
+- [x] **Modelo:** Criar `PluginMetadata` com category, tags, language, type
+- [x] **Reutilização:** Atualizar `SamplePluginsDialog` com filtros
+  - [x] Filtro por categoria
+  - [x] Filtro por linguagem
+  - [x] Indicador de compatibilidade mobile
+- [x] **Multi-linguagem:** Cada plugin pode ter múltiplas variantes de linguagem
+- [x] **WebCommand:** Implementar `crossbar web` para HTTP requests (Dio-powered)
 
 ### Fase 3: EmbeddedApi (API Dart Nativa)
 
