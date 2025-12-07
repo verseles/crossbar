@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SystemApi', () {
-    const api = SystemApi();
+    final api = SystemApi();
 
     group('getCpuUsage', () {
       test('returns a string', () async {

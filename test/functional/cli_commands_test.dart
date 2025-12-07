@@ -13,7 +13,7 @@ void main() {
     late SystemApi systemApi;
 
     setUp(() {
-      systemApi = const SystemApi();
+      systemApi = SystemApi();
     });
 
     test('getCpuUsage returns valid percentage string', () async {

@@ -737,10 +737,12 @@ class _PluginsTabState extends State<PluginsTab> {
                       ),
                       IconButton(
                         onPressed: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final successMessage = l10n.errorCopiedToClipboard;
                           await FlutterClipboard.copy(plugin.lastError!);
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.errorCopiedToClipboard)),
+                            messenger.showSnackBar(
+                              SnackBar(content: Text(successMessage)),
                             );
                           }
                         },
@@ -1003,6 +1005,10 @@ class _PluginsTabState extends State<PluginsTab> {
   Future<void> _showConfigDialog(BuildContext context, Plugin plugin) async {
     if (plugin.config == null) return;
 
+    // Capture context-dependent objects before async gap
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     final currentValues = await _configService.loadValues(
       plugin.id,
       schema: plugin.config,
@@ -1025,17 +1031,17 @@ class _PluginsTabState extends State<PluginsTab> {
       );
 
       // Re-run plugin immediately
-      if (!context.mounted) return;
+      if (!mounted) return;
       await _runPlugin(plugin);
 
-      if (!context.mounted) return;
-      final appL10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(appL10n.configurationSaved),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.configurationSaved),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -1334,6 +1340,11 @@ class _PluginsTabState extends State<PluginsTab> {
 
   /// Actually delete the plugin
   Future<void> _deletePlugin(BuildContext context, Plugin plugin) async {
+    // Capture context-dependent objects before async gap
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final pluginName = _formatPluginName(plugin.id);
+
     try {
       final file = File(plugin.path);
       if (await file.exists()) {
@@ -1352,15 +1363,15 @@ class _PluginsTabState extends State<PluginsTab> {
       await TrayService().refreshMenu();
       
       if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.deletedPlugin(_formatPluginName(plugin.id)))),
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.deletedPlugin(pluginName))),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToDeletePlugin(e.toString()))),
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.failedToDeletePlugin(e.toString()))),
         );
       }
     }
@@ -1368,6 +1379,10 @@ class _PluginsTabState extends State<PluginsTab> {
 
   /// Copies the plugin output to clipboard
   Future<void> _copyOutput(PluginOutput output) async {
+    // Capture context-dependent objects before async gap
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     final buffer = StringBuffer();
     
     if (output.icon.isNotEmpty) {
@@ -1392,8 +1407,8 @@ class _PluginsTabState extends State<PluginsTab> {
     await FlutterClipboard.copy(buffer.toString());
     
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.outputCopiedToClipboard)),
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.outputCopiedToClipboard)),
       );
     }
   }
