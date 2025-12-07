@@ -31,10 +31,10 @@ import '../bridge/crossbar_bridge.dart';
 ///     action: refresh
 /// ```
 class DeclarativeRunner {
+  factory DeclarativeRunner() => instance;
   DeclarativeRunner._();
   
   static final DeclarativeRunner instance = DeclarativeRunner._();
-  factory DeclarativeRunner() => instance;
   
   final CrossbarBridge _bridge = CrossbarBridge();
   
@@ -110,7 +110,7 @@ class DeclarativeRunner {
         return {'response': {'body': response.toString()}};
         
       case 'system':
-        return await _getSystemData(source.command!);
+        return _getSystemData(source.command!);
         
       case 'exec':
         final command = _interpolateEnv(source.command!);
@@ -250,9 +250,7 @@ class DeclarativeRunner {
 class PluginConfig {
   PluginConfig({
     required this.name,
-    this.interval,
-    required this.source,
-    required this.output,
+    required this.source, required this.output, this.interval,
     this.menu = const [],
     this.requires = const [],
   });
@@ -264,7 +262,7 @@ class PluginConfig {
       source: SourceConfig.fromYaml(yaml['source'] as YamlMap? ?? YamlMap()),
       output: OutputConfig.fromYaml(yaml['output'] as YamlMap? ?? YamlMap()),
       menu: (yaml['menu'] as YamlList?)
-          ?.map((item) => MenuItemConfig.fromYaml(item))
+          ?.map(MenuItemConfig.fromYaml)
           .toList() ?? [],
       requires: (yaml['requires'] as YamlList?)
           ?.map((e) => e.toString())

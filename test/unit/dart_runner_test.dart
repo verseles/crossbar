@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:crossbar/core/runners/dart_runner.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final runner = DartRunner();
@@ -18,10 +17,10 @@ void main() {
     });
 
     test('runs simple expression', () async {
-      const code = '''
+      const code = r'''
 void main() {
   final x = 2 + 2;
-  print('Result: \$x');
+  print('Result: $x');
 }
 ''';
       final result = await runner.runSource(code);
@@ -43,13 +42,13 @@ void main() {
 
   group('DartRunner - CrossbarBridge Integration', () {
     test('accesses CrossbarBridge().time()', () async {
-      const code = '''
+      const code = r'''
 import 'package:crossbar_bridge/crossbar_bridge.dart';
 
 void main() {
   final bridge = CrossbarBridge();
   final time = bridge.time();
-  print('Time: \$time');
+  print('Time: $time');
 }
 ''';
       final result = await runner.runSource(code);
@@ -58,13 +57,13 @@ void main() {
     });
 
     test('accesses CrossbarBridge().date()', () async {
-      const code = '''
+      const code = r'''
 import 'package:crossbar_bridge/crossbar_bridge.dart';
 
 void main() {
   final bridge = CrossbarBridge();
   final date = bridge.date();
-  print('Date: \$date');
+  print('Date: $date');
 }
 ''';
       final result = await runner.runSource(code);
@@ -73,12 +72,12 @@ void main() {
     });
 
     test('accesses CrossbarBridge().platform', () async {
-      const code = '''
+      const code = r'''
 import 'package:crossbar_bridge/crossbar_bridge.dart';
 
 void main() {
   final bridge = CrossbarBridge();
-  print('Platform: \${bridge.platform}');
+  print('Platform: ${bridge.platform}');
 }
 ''';
       final result = await runner.runSource(code);
@@ -91,12 +90,12 @@ void main() {
     });
 
     test('accesses CrossbarBridge().isDesktop', () async {
-      const code = '''
+      const code = r'''
 import 'package:crossbar_bridge/crossbar_bridge.dart';
 
 void main() {
   final bridge = CrossbarBridge();
-  print('Is Desktop: \${bridge.isDesktop}');
+  print('Is Desktop: ${bridge.isDesktop}');
 }
 ''';
       final result = await runner.runSource(code);

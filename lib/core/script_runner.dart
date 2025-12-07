@@ -10,8 +10,7 @@ abstract class IProcessRunner {
   Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
-    Map<String, String>? environment,
-    required Duration timeout,
+    required Duration timeout, Map<String, String>? environment,
   });
 }
 
@@ -22,8 +21,7 @@ class SystemProcessRunner implements IProcessRunner {
   Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
-    Map<String, String>? environment,
-    required Duration timeout,
+    required Duration timeout, Map<String, String>? environment,
   }) async {
     final process = await Process.start(
       executable,
@@ -72,8 +70,7 @@ class MockProcessRunner implements IProcessRunner {
   Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
-    Map<String, String>? environment,
-    required Duration timeout,
+    required Duration timeout, Map<String, String>? environment,
   }) async {
     final key = arguments.isNotEmpty ? arguments.first : executable;
     final output = mockOutputs[key] ?? '';

@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:crossbar/core/runners/declarative_runner.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final runner = DeclarativeRunner();
@@ -18,14 +17,14 @@ output:
     });
 
     test('parses plugin with static data', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Static Data
 source:
   type: static
   data:
     value: 42
 output:
-  text: "The answer is \${response.value}"
+  text: "The answer is ${response.value}"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -51,13 +50,13 @@ name: Minimal
 
   group('DeclarativeRunner - System Source', () {
     test('fetches time from system', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Clock
 source:
   type: system
   command: time
 output:
-  text: "⏰ \${response.value}"
+  text: "⏰ ${response.value}"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -65,13 +64,13 @@ output:
     });
 
     test('fetches date from system', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Calendar
 source:
   type: system
   command: date
 output:
-  text: "📅 \${response.value}"
+  text: "📅 ${response.value}"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -79,13 +78,13 @@ output:
     });
 
     test('fetches CPU usage from system', () async {
-      const yaml = '''
+      const yaml = r'''
 name: CPU Monitor
 source:
   type: system
   command: cpu
 output:
-  text: "💻 \${response.percent}%"
+  text: "💻 ${response.percent}%"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -95,7 +94,7 @@ output:
 
   group('DeclarativeRunner - Template Rendering', () {
     test('renders nested object paths', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Nested Data
 source:
   type: static
@@ -104,7 +103,7 @@ source:
       name: John
       age: 30
 output:
-  text: "\${response.user.name} is \${response.user.age} years old"
+  text: "${response.user.name} is ${response.user.age} years old"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -112,14 +111,14 @@ output:
     });
 
     test('handles missing paths gracefully', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Missing Path
 source:
   type: static
   data:
     foo: bar
 output:
-  text: "Value: \${response.missing.path}"
+  text: "Value: ${response.missing.path}"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);
@@ -129,14 +128,14 @@ output:
 
   group('DeclarativeRunner - Menu Support', () {
     test('parses menu items', () async {
-      const yaml = '''
+      const yaml = r'''
 name: With Menu
 source:
   type: static
   data:
     value: 100
 output:
-  text: "Value: \${response.value}"
+  text: "Value: ${response.value}"
 menu:
   - title: "Option 1"
   - title: "Option 2"
@@ -157,13 +156,13 @@ menu:
 
   group('DeclarativeRunner - HTTP Source', () {
     test('fetches data from HTTP API', () async {
-      const yaml = '''
+      const yaml = r'''
 name: Bitcoin Price
 source:
   type: http
   url: "https://api.coinbase.com/v2/prices/BTC-USD/spot"
 output:
-  text: "₿ \$\${response.data.amount}"
+  text: "₿ $${response.data.amount}"
 ''';
       final result = await runner.runSource(yaml);
       expect(result.success, isTrue);

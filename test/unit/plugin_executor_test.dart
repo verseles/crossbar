@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:crossbar/core/plugin_executor.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final executor = PluginExecutor();

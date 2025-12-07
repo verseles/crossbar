@@ -362,7 +362,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                     value: isSelected,
                     onChanged: (value) {
                       setState(() {
-                        if (value == true) {
+                        if (value ?? false) {
                           _selectedPlugins.add(plugin.id);
                         } else {
                           _selectedPlugins.remove(plugin.id);

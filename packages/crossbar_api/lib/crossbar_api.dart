@@ -47,7 +47,7 @@
 /// - [Crossbar.notify] - Send notifications
 /// - [Crossbar.clipboard] - Clipboard access
 /// - [Crossbar.openUrl] - Open URLs
-library crossbar_api;
+library;
 
 export 'src/crossbar.dart';
 export 'src/models/memory_info.dart';

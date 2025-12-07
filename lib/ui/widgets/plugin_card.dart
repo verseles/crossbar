@@ -6,8 +6,7 @@ import '../../models/plugin_output.dart';
 class PluginCard extends StatelessWidget {
 
   const PluginCard({
-    super.key,
-    required this.plugin,
+    required this.plugin, super.key,
     this.output,
     this.onTap,
     this.onToggle,
@@ -186,8 +185,7 @@ class PluginCard extends StatelessWidget {
 class PluginTile extends StatelessWidget {
 
   const PluginTile({
-    super.key,
-    required this.plugin,
+    required this.plugin, super.key,
     this.output,
     this.onTap,
   });

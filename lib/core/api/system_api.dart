@@ -131,7 +131,7 @@ class SystemApi {
     final result = await Process.run('vm_stat', []);
     final output = result.stdout as String;
 
-    final pageSize = 4096;
+    const pageSize = 4096;
     final freeMatch = RegExp(r'Pages free:\s+(\d+)').firstMatch(output);
     final activeMatch = RegExp(r'Pages active:\s+(\d+)').firstMatch(output);
     final inactiveMatch = RegExp(r'Pages inactive:\s+(\d+)').firstMatch(output);
@@ -198,11 +198,11 @@ class SystemApi {
   }
 
   Future<String> _getLinuxBatteryStatus() async {
-    final batteryPath = '/sys/class/power_supply/BAT0';
+    const batteryPath = '/sys/class/power_supply/BAT0';
     final batteryDir = Directory(batteryPath);
 
     if (!await batteryDir.exists()) {
-      final bat1Path = '/sys/class/power_supply/BAT1';
+      const bat1Path = '/sys/class/power_supply/BAT1';
       final bat1Dir = Directory(bat1Path);
       if (!await bat1Dir.exists()) {
         return 'N/A';

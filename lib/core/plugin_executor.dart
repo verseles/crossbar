@@ -18,10 +18,10 @@ import 'script_runner.dart';
 /// - DartRunner: Interpreted Dart plugins (all platforms)
 /// - DeclarativeRunner: YAML-based plugins (all platforms)
 class PluginExecutor {
+  factory PluginExecutor() => instance;
   PluginExecutor._();
   
   static final PluginExecutor instance = PluginExecutor._();
-  factory PluginExecutor() => instance;
   
   final ScriptRunner _scriptRunner = const ScriptRunner();
   final DartRunner _dartRunner = DartRunner();

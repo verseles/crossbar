@@ -1,7 +1,7 @@
 #!/usr/bin/env dart
 /// Battery Monitor Plugin - Uses Crossbar API for portability
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 String? crossbar(List<String> args) {
   try {
@@ -13,7 +13,7 @@ String? crossbar(List<String> args) {
 }
 
 void main() {
-  var batteryStr = crossbar(['battery']) ?? 'N/A';
+  final batteryStr = crossbar(['battery']) ?? 'N/A';
   var charging = false;
 
   final jsonStr = crossbar(['battery', '--json']);

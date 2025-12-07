@@ -1,7 +1,7 @@
 #!/usr/bin/env dart
 /// Weather Plugin - Uses Crossbar web API
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 String? crossbarWeb(String url) {
   try {
@@ -27,7 +27,7 @@ void main() async {
   final url = 'api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric';
 
   // Try Crossbar web first
-  String? response = crossbarWeb(url);
+  var response = crossbarWeb(url);
 
   // Fallback to HttpClient
   if (response == null || response.isEmpty) {
@@ -44,10 +44,10 @@ void main() async {
       final temp = data['main']?['temp'] ?? '--';
       final desc = (data['weather'] as List?)?.first?['description'] ?? '';
       
-      print('🌡️ ${temp}°C');
+      print('🌡️ $temp°C');
       print('---');
       print('Location: $city');
-      print('Temperature: ${temp}°C');
+      print('Temperature: $temp°C');
       print('Condition: $desc');
     } catch (_) {
       print('🌡️ Parse Error');

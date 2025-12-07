@@ -11,10 +11,10 @@ export '../models/plugin_metadata.dart';
 
 /// Service for managing sample/example plugins bundled with the app.
 class SamplePluginsService {
+  factory SamplePluginsService() => _instance;
   SamplePluginsService._();
 
   static final SamplePluginsService _instance = SamplePluginsService._();
-  factory SamplePluginsService() => _instance;
 
   final PluginManager _pluginManager = PluginManager();
 

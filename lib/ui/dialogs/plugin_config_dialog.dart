@@ -7,9 +7,7 @@ import '../widgets/config_fields/config_field.dart';
 class PluginConfigDialog extends StatefulWidget {
 
   const PluginConfigDialog({
-    super.key,
-    required this.plugin,
-    required this.config,
+    required this.plugin, required this.config, super.key,
     this.initialValues = const {},
   });
   final Plugin plugin;
@@ -191,8 +189,7 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
 class PluginInfoDialog extends StatelessWidget {
 
   const PluginInfoDialog({
-    super.key,
-    required this.plugin,
+    required this.plugin, super.key,
     this.onConfigure,
     this.onToggle,
     this.onRun,

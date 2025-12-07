@@ -12,7 +12,7 @@ String? crossbar(List<String> args) {
 }
 
 void main() {
-  var memoryStr = crossbar(['memory']) ?? 'N/A';
+  final memoryStr = crossbar(['memory']) ?? 'N/A';
   
   final memory = int.tryParse(memoryStr.replaceAll('%', '')) ?? 0;
   String color;

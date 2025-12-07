@@ -95,11 +95,9 @@ class MarketplaceService {
   }
 
   Future<List<MarketplacePlugin>> _searchViaGitHubApi({
-    String? query,
+    required String owner, required String repo, String? query,
     String? language,
     String? category,
-    required String owner,
-    required String repo,
   }) async {
     final url = '$_githubApiBase/repos/$owner/$repo/contents/plugins';
     final response = await _dio.get(

@@ -198,8 +198,7 @@ class _ShortTimeoutRunner implements IProcessRunner {
   Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
-    Map<String, String>? environment,
-    required Duration timeout,
+    required Duration timeout, Map<String, String>? environment,
   }) async {
     // Use 2 second timeout instead of default 30s
     final process = await Process.start(

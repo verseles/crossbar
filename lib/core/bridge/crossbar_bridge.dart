@@ -20,10 +20,10 @@ import '../api/utils_api.dart';
 /// final weather = await crossbar.web('api.example.com/weather');
 /// ```
 class CrossbarBridge {
+  factory CrossbarBridge() => instance;
   CrossbarBridge._();
   
   static final CrossbarBridge instance = CrossbarBridge._();
-  factory CrossbarBridge() => instance;
   
   final SystemApi _systemApi = const SystemApi();
   final NetworkApi _networkApi = const NetworkApi();

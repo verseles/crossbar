@@ -5,17 +5,13 @@ import '../../../models/plugin_config.dart';
 abstract class ConfigField extends StatelessWidget {
 
   const ConfigField({
-    super.key,
-    required this.setting,
+    required this.setting, required this.onChanged, super.key,
     this.value,
-    required this.onChanged,
   });
 
   factory ConfigField.fromSetting({
-    Key? key,
-    required Setting setting,
+    required Setting setting, required ValueChanged<String> onChanged, Key? key,
     String? value,
-    required ValueChanged<String> onChanged,
   }) {
     switch (setting.type) {
       case 'text':
@@ -83,10 +79,8 @@ abstract class ConfigField extends StatelessWidget {
 
 class TextConfigField extends ConfigField {
   const TextConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -106,10 +100,8 @@ class TextConfigField extends ConfigField {
 
 class PasswordConfigField extends ConfigField {
   const PasswordConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -127,11 +119,9 @@ class PasswordConfigField extends ConfigField {
 class _PasswordField extends StatefulWidget {
 
   const _PasswordField({
-    this.initialValue,
-    required this.label,
+    required this.label, required this.onChanged, this.initialValue,
     this.placeholder,
     this.help,
-    required this.onChanged,
   });
   final String? initialValue;
   final String label;
@@ -172,10 +162,8 @@ class _PasswordFieldState extends State<_PasswordField> {
 
 class NumberConfigField extends ConfigField {
   const NumberConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -196,10 +184,8 @@ class NumberConfigField extends ConfigField {
 
 class SelectConfigField extends ConfigField {
   const SelectConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -207,7 +193,7 @@ class SelectConfigField extends ConfigField {
     final options = setting.options ?? [];
 
     return DropdownButtonFormField<String>(
-      value: value ?? setting.defaultValue,
+      initialValue: value ?? setting.defaultValue,
       decoration: InputDecoration(
         labelText: setting.label,
         helperText: setting.help,
@@ -230,10 +216,8 @@ class SelectConfigField extends ConfigField {
 
 class CheckboxConfigField extends ConfigField {
   const CheckboxConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -255,10 +239,8 @@ class CheckboxConfigField extends ConfigField {
 
 class ColorConfigField extends ConfigField {
   const ColorConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -308,10 +290,8 @@ class ColorConfigField extends ConfigField {
 
 class FileConfigField extends ConfigField {
   const FileConfigField({
-    super.key,
-    required super.setting,
+    required super.setting, required super.onChanged, super.key,
     super.value,
-    required super.onChanged,
   });
 
   @override
@@ -345,10 +325,7 @@ class FileConfigField extends ConfigField {
 class ConfigFormBuilder extends StatelessWidget {
 
   const ConfigFormBuilder({
-    super.key,
-    required this.settings,
-    required this.values,
-    required this.onFieldChanged,
+    required this.settings, required this.values, required this.onFieldChanged, super.key,
     this.columns = 2,
   });
   final List<Setting> settings;

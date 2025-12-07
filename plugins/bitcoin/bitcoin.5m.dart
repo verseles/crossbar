@@ -1,7 +1,7 @@
 #!/usr/bin/env dart
 /// Bitcoin Price Plugin - Uses Crossbar web API
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 String? crossbarWeb(String url) {
   try {
@@ -14,7 +14,7 @@ String? crossbarWeb(String url) {
 }
 
 void main() async {
-  String? response = crossbarWeb('api.coinbase.com/v2/prices/BTC-USD/spot');
+  var response = crossbarWeb('api.coinbase.com/v2/prices/BTC-USD/spot');
   
   // Fallback to HttpClient
   if (response == null || response.isEmpty) {

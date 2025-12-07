@@ -4,13 +4,12 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import 'paths/platform_paths.dart'
-    if (dart.library.ui) 'paths/platform_paths_flutter.dart';
-
 import '../models/plugin.dart';
 import '../models/plugin_config.dart';
 import '../models/plugin_output.dart';
 import '../services/config_service.dart';
+import 'paths/platform_paths.dart'
+    if (dart.library.ui) 'paths/platform_paths_flutter.dart';
 import 'plugin_executor.dart';
 
 class PluginManager {
@@ -122,7 +121,7 @@ class PluginManager {
     final refreshInterval = _parseRefreshInterval(fileName);
 
     // Determine enabled state
-    bool isEnabled = true;
+    var isEnabled = true;
 
     // 1. Check filename for .off.
     if (fileName.contains('.off.')) {
@@ -255,7 +254,7 @@ class PluginManager {
   Future<PluginOutput?> _runPlugin(Plugin plugin) async {
     try {
       // Load config values if plugin has config
-      Map<String, String> configEnv = {};
+      var configEnv = <String, String>{};
       if (plugin.config != null) {
         configEnv = await _configService.getAsEnvironmentVariables(
           plugin.id,

@@ -33,10 +33,10 @@ import '../bridge/crossbar_bridge.dart';
 /// - Env: env(name), platform, homeDir, isMobile, isDesktop
 /// - Encoding: hash(), uuid(), base64Encode/Decode(), random()
 class DartRunner {
+  factory DartRunner() => instance;
   DartRunner._();
   
   static final DartRunner instance = DartRunner._();
-  factory DartRunner() => instance;
   
   /// Execute a Dart plugin file and capture its output
   Future<DartRunResult> run(String pluginPath) async {
@@ -214,7 +214,7 @@ class CrossbarPlugin implements EvalPlugin {
     );
   }
   
-  static final _crossbarGetterDeclaration = BridgeFunctionDeclaration(
+  static const _crossbarGetterDeclaration = BridgeFunctionDeclaration(
     'package:crossbar_bridge/crossbar_bridge.dart',
     'crossbar',
     BridgeFunctionDef(
@@ -226,7 +226,7 @@ class CrossbarPlugin implements EvalPlugin {
 }
 
 /// Bridge declaration for CrossbarBridge
-BridgeClassDef $CrossbarBridgeDeclaration() => BridgeClassDef(
+BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
   BridgeClassType(
     BridgeTypeRef(BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge')),
   ),
@@ -346,7 +346,7 @@ class $CrossbarBridge implements $Instance {
     return $CrossbarBridge.wrap(CrossbarBridge.instance);
   }
   
-  static final $type = BridgeTypeRef(
+  static const $type = BridgeTypeRef(
     BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge'),
   );
 
@@ -364,7 +364,7 @@ class $CrossbarBridge implements $Instance {
     switch (identifier) {
       case 'cpu':
         return $Function((runtime, target, args) {
-          return $Future.wrap($value.cpu().then((v) => $double(v)));
+          return $Future.wrap($value.cpu().then($double.new));
         });
       case 'memory':
         return $Function((runtime, target, args) {
@@ -388,7 +388,7 @@ class $CrossbarBridge implements $Instance {
         return $Function((runtime, target, args) {
           final title = args[0]!.$value as String;
           final message = args[1]!.$value as String;
-          return $Future.wrap($value.notify(title, message).then((_) => $null()));
+          return $Future.wrap($value.notify(title, message).then((_) => const $null()));
         });
       case 'web':
         return $Function((runtime, target, args) {
@@ -409,7 +409,7 @@ class $CrossbarBridge implements $Instance {
         return $Function((runtime, target, args) {
           final name = args[0]!.$value as String;
           final envValue = $value.env(name);
-          return envValue != null ? $String(envValue) : $null();
+          return envValue != null ? $String(envValue) : const $null();
         });
       case 'platform':
         return $String($value.platform);
@@ -438,7 +438,7 @@ class $CrossbarBridge implements $Instance {
   
   /// Wrap a dynamic value for dart_eval
   static $Value _wrapValue(dynamic v) {
-    if (v == null) return $null();
+    if (v == null) return const $null();
     if (v is bool) return $bool(v);
     if (v is int) return $int(v);
     if (v is double) return $double(v);

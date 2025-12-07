@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class ResponsiveGrid extends StatelessWidget {
 
   const ResponsiveGrid({
-    super.key,
-    required this.children,
+    required this.children, super.key,
     this.minItemsPerRow = 1,
     this.maxItemsPerRow = 4,
     this.itemMinWidth = 200,
@@ -49,8 +48,7 @@ class ResponsiveGrid extends StatelessWidget {
 class PluginGrid extends StatelessWidget {
 
   const PluginGrid({
-    super.key,
-    required this.plugins,
+    required this.plugins, super.key,
     this.minColumns = 1,
     this.maxColumns = 6,
     this.minPluginWidth = 180,
@@ -98,10 +96,9 @@ class PluginGrid extends StatelessWidget {
 class AdaptiveLayout extends StatelessWidget {
 
   const AdaptiveLayout({
-    super.key,
+    required this.desktop, super.key,
     this.mobile,
     this.tablet,
-    required this.desktop,
     this.mobileBreakpoint = 600,
     this.tabletBreakpoint = 900,
   });
@@ -130,8 +127,7 @@ class AdaptiveLayout extends StatelessWidget {
 class FlexibleGridView extends StatelessWidget {
 
   const FlexibleGridView({
-    super.key,
-    required this.children,
+    required this.children, super.key,
     this.minCrossAxisExtent = 200,
     this.mainAxisExtent = 100,
     this.crossAxisSpacing = 16,
@@ -170,8 +166,7 @@ class FlexibleGridView extends StatelessWidget {
 class BreakpointBuilder extends StatelessWidget {
 
   const BreakpointBuilder({
-    super.key,
-    required this.builder,
+    required this.builder, super.key,
   });
   final Widget Function(BuildContext context, Breakpoint breakpoint) builder;
 

@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:crossbar/core/bridge/crossbar_bridge.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final bridge = CrossbarBridge();

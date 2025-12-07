@@ -78,18 +78,18 @@ void main() {
       });
 
       test('saves password values to secure storage', () async {
-        final schema = PluginConfig(
+        const schema = PluginConfig(
           name: 'Test Plugin',
           description: 'Test',
           icon: '🔐',
           configRequired: 'optional',
           settings: [
-            const Setting(
+            Setting(
               key: 'api_key',
               label: 'API Key',
               type: 'text',
             ),
-            const Setting(
+            Setting(
               key: 'password',
               label: 'Password',
               type: 'password',
@@ -119,13 +119,13 @@ void main() {
       });
 
       test('loads password values from secure storage', () async {
-        final schema = PluginConfig(
+        const schema = PluginConfig(
           name: 'Test',
           description: 'Test',
           icon: '',
           configRequired: 'optional',
           settings: [
-            const Setting(key: 'secret', label: 'Secret', type: 'password'),
+            Setting(key: 'secret', label: 'Secret', type: 'password'),
           ],
         );
 
@@ -182,13 +182,13 @@ void main() {
       });
 
       test('deletes secure values', () async {
-        final schema = PluginConfig(
+        const schema = PluginConfig(
           name: 'Test',
           description: 'Test',
           icon: '',
           configRequired: 'optional',
           settings: [
-            const Setting(key: 'pass', label: 'Pass', type: 'password'),
+            Setting(key: 'pass', label: 'Pass', type: 'password'),
           ],
         );
 
@@ -264,13 +264,13 @@ void main() {
       });
 
       test('includes password values', () async {
-        final schema = PluginConfig(
+        const schema = PluginConfig(
           name: 'Test',
           description: 'Test',
           icon: '',
           configRequired: 'optional',
           settings: [
-            const Setting(key: 'token', label: 'Token', type: 'password'),
+            Setting(key: 'token', label: 'Token', type: 'password'),
           ],
         );
 
@@ -422,22 +422,22 @@ class _MockSecureStorage implements FlutterSecureStorage {
       const Stream.empty();
 
   @override
-  AndroidOptions get aOptions => const AndroidOptions();
+  AndroidOptions get aOptions => AndroidOptions.defaultOptions;
 
   @override
-  IOSOptions get iOptions => const IOSOptions();
+  IOSOptions get iOptions => IOSOptions.defaultOptions;
 
   @override
-  LinuxOptions get lOptions => const LinuxOptions();
+  LinuxOptions get lOptions => LinuxOptions.defaultOptions;
 
   @override
-  MacOsOptions get mOptions => const MacOsOptions();
+  MacOsOptions get mOptions => MacOsOptions.defaultOptions;
 
   @override
-  WebOptions get webOptions => const WebOptions();
+  WebOptions get webOptions => WebOptions.defaultOptions;
 
   @override
-  WindowsOptions get wOptions => const WindowsOptions();
+  WindowsOptions get wOptions => WindowsOptions.defaultOptions;
 
   @override
   void registerListener({

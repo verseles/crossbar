@@ -54,9 +54,7 @@ class TrayService with TrayListener {
     // Check for theme changes periodically since platformDispatcher
     // callbacks may not work reliably for tray services
     final dispatcher = SchedulerBinding.instance.platformDispatcher;
-    dispatcher.onPlatformBrightnessChanged = () {
-      _onThemeChanged();
-    };
+    dispatcher.onPlatformBrightnessChanged = _onThemeChanged;
   }
 
   void _onThemeChanged() {

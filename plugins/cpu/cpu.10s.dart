@@ -13,9 +13,9 @@ String? crossbar(List<String> args) {
 
 void main() {
   // Get CPU from Crossbar API
-  var cpuStr = crossbar(['cpu']) ?? 'N/A';
+  final cpuStr = crossbar(['cpu']) ?? 'N/A';
   
-  double cpu = double.tryParse(cpuStr) ?? 0;
+  final cpu = double.tryParse(cpuStr) ?? 0;
   String color;
   if (cpu > 80) {
     color = 'red';
