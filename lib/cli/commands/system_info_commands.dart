@@ -30,7 +30,7 @@ class CpuCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     final result = await api.getCpuUsage();
     final val = double.tryParse(result) ?? 0;
 
@@ -52,7 +52,7 @@ class MemoryCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     final result = await api.getMemoryUsage();
 
     var data = <String, dynamic>{'memory': result};
@@ -85,7 +85,7 @@ class BatteryCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     final result = await api.getBatteryStatus();
 
     final match = RegExp(r'(\d+)%').firstMatch(result);
@@ -114,7 +114,7 @@ class UptimeCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     final result = await api.getUptime();
     printFormatted(
         {'uptime': result},
@@ -134,7 +134,7 @@ class DiskCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     final values = args.where((a) => !a.startsWith('--')).toList();
     final path = values.isNotEmpty ? values[0] : null;
     final result = await api.getDiskUsage(path);
@@ -159,7 +159,7 @@ class OsCommand extends CliCommand {
 
   @override
   Future<int> execute(List<String> args) async {
-    const api = SystemApi();
+    final api = SystemApi();
     printFormatted(
         api.getOsDetails(),
         json: args.contains('--json'),
