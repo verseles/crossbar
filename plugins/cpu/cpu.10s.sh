@@ -17,8 +17,8 @@ else
     color="green"
 fi
 
-echo "⚡ ${cpu}% | color=$color"
+echo "⚡ ${cpu} | color=$color"
 echo "---"
-echo "CPU Usage: ${cpu}%"
+echo "CPU Usage: ${cpu}"
 echo "---"
 echo "Refresh | refresh=true"

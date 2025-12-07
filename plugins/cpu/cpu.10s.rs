@@ -26,9 +26,9 @@ fn main() {
         "gray"
     };
 
-    println!("⚡ {}% | color={}", cpu_str, color);
+    println!("⚡ {} | color={}", cpu_str, color);
     println!("---");
-    println!("CPU Usage: {}%", cpu_str);
+    println!("CPU Usage: {}", cpu_str);
     println!("---");
     println!("Refresh | refresh=true");
 }

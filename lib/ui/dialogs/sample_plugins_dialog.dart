@@ -63,8 +63,16 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   }
 
   bool _isPluginInstalled(PluginMetadata plugin) {
-    // A plugin is considered installed if any variant is installed
+    // A plugin is considered installed if ANY variant is installed
     return plugin.variants.any((v) => _installedStatus[v.filename] ?? false);
+  }
+
+  /// Check if the currently selected variant is installed
+  bool _isVariantInstalled(PluginMetadata plugin) {
+    final language = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+    final variant = plugin.getVariant(language);
+    if (variant == null) return false;
+    return _installedStatus[variant.filename] ?? false;
   }
 
   Future<void> _installPlugin(PluginMetadata plugin) async {
@@ -264,6 +272,8 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   Widget _buildPluginList(ThemeData theme) {
     final plugins = _filteredPlugins;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final useGrid = screenWidth > 700;
     
     if (plugins.isEmpty) {
       return Center(
@@ -283,214 +293,220 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       );
     }
 
+    if (useGrid) {
+      // Grid layout for larger screens
+      return GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: screenWidth > 1000 ? 3 : 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.6,
+        ),
+        itemCount: plugins.length,
+        itemBuilder: (context, index) => _buildPluginCard(theme, plugins[index]),
+      );
+    }
+
+    // List layout for smaller screens
     return ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: plugins.length,
-      itemBuilder: (context, index) {
-        final plugin = plugins[index];
-        final isInstalled = _isPluginInstalled(plugin);
-        final isInstalling = _installingPlugins.contains(plugin.id);
-        final selectedLang = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
-
-        return Card(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 4,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title row
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: theme.colorScheme.secondaryContainer,
-                      child: Text(
-                        plugin.categoryIcon,
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                plugin.name,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                              if (plugin.mobileCompatible) ...[
-                                const SizedBox(width: 8),
-                                Tooltip(
-                                  message: 'Mobile compatible',
-                                  child: Icon(
-                                    Icons.smartphone,
-                                    size: 16,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ],
-                              if (isInstalled) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.tertiary,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'Installed',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: theme.colorScheme.onTertiary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          Text(
-                            plugin.description,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Action row: Language selector + Install button
-                Row(
-                  children: [
-                    // Language dropdown
-                    if (plugin.variants.length > 1) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<PluginLanguage>(
-                            value: selectedLang,
-                            isDense: true,
-                            items: plugin.availableLanguages.map((lang) {
-                              return DropdownMenuItem(
-                                value: lang,
-                                child: Text(
-                                  '${lang.icon} ${lang.displayName}',
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: isInstalled ? null : (lang) {
-                              if (lang != null) {
-                                setState(() {
-                                  _selectedLanguages[plugin.id] = lang;
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ] else ...[
-                      // Single language - just show a chip
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${selectedLang.icon} ${selectedLang.displayName}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    // Interval chip
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.timer, size: 12, color: theme.colorScheme.outline),
-                          const SizedBox(width: 4),
-                          Text(
-                            _extractInterval(plugin.defaultVariant.filename),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: theme.colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (plugin.configRequired) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.settings, size: 12, color: theme.colorScheme.outline),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Config',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.outline,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
-                    // Install button
-                    if (isInstalling)
-                      const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    else if (!isInstalled)
-                      FilledButton.tonal(
-                        onPressed: () => _installPlugin(plugin),
-                        child: const Text('Install'),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      itemBuilder: (context, index) => _buildPluginCard(theme, plugins[index]),
     );
   }
 
-  String _extractInterval(String filename) {
-    final match = RegExp(r'\.(\d+[smhd])\.').firstMatch(filename);
-    return match?.group(1) ?? '5m';
+  Widget _buildPluginCard(ThemeData theme, PluginMetadata plugin) {
+    final hasInstalledVariant = _isPluginInstalled(plugin);
+    final isVariantInstalled = _isVariantInstalled(plugin);
+    final isInstalling = _installingPlugins.contains(plugin.id);
+    final selectedLang = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 4,
+        vertical: 4,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  child: Text(
+                    plugin.categoryIcon,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              plugin.name,
+                              style: theme.textTheme.titleMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (plugin.mobileCompatible) ...[
+                            const SizedBox(width: 4),
+                            Tooltip(
+                              message: 'Mobile compatible',
+                              child: Icon(
+                                Icons.smartphone,
+                                size: 14,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                          if (hasInstalledVariant) ...[
+                            const SizedBox(width: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.tertiary,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Installed',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.onTertiary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(
+                        plugin.description,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            // Action row: Language selector + Install button
+            Row(
+              children: [
+                // Language dropdown
+                if (plugin.variants.length > 1) ...[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<PluginLanguage>(
+                          value: selectedLang,
+                          isDense: true,
+                          isExpanded: true,
+                          items: plugin.availableLanguages.map((lang) {
+                            final langVariant = plugin.getVariant(lang);
+                            final langInstalled = langVariant != null && (_installedStatus[langVariant.filename] ?? false);
+                            return DropdownMenuItem(
+                              value: lang,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '${lang.icon} ${lang.displayName}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  if (langInstalled) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.check, size: 12, color: theme.colorScheme.primary),
+                                  ],
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (lang) {
+                            if (lang != null) {
+                              setState(() {
+                                _selectedLanguages[plugin.id] = lang;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ] else ...[
+                  // Single language - just show a chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${selectedLang.icon} ${selectedLang.displayName}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+                // Install button
+                if (isInstalling)
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (!isVariantInstalled)
+                  FilledButton.tonal(
+                    onPressed: () => _installPlugin(plugin),
+                    child: const Text('Install'),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Installed',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildFooter(ThemeData theme) {

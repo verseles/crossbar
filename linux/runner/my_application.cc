@@ -54,10 +54,21 @@ static void my_application_activate(GApplication* application) {
   }
 
   // Set window icon from Flutter assets
-  // Try multiple paths: relative (dev) and bundle (release)
+  // Get the executable directory to construct the path
+  gchar* exe_path = g_file_read_link("/proc/self/exe", NULL);
+  gchar* exe_dir = g_path_get_dirname(exe_path);
+  
+  // Build paths relative to executable
+  gchar* bundle_icon_path = g_build_filename(exe_dir, "data", "flutter_assets", "assets", "icons", "icon.png", NULL);
+  gchar* bundle_icon_opaque_path = g_build_filename(exe_dir, "data", "flutter_assets", "assets", "icons", "icon_opaque.png", NULL);
+  
+  // Paths to try in order of priority
   const char* icon_paths[] = {
-    "assets/icons/icon.png",
-    "data/flutter_assets/assets/icons/icon.png",
+    bundle_icon_path,
+    bundle_icon_opaque_path,
+    "assets/icons/icon.png",                              // Dev mode (relative)
+    "assets/icons/icon_opaque.png",
+    "data/flutter_assets/assets/icons/icon.png",          // Release bundle (relative)
     NULL
   };
   
@@ -73,6 +84,11 @@ static void my_application_activate(GApplication* application) {
       g_error_free(error);
     }
   }
+  
+  g_free(bundle_icon_path);
+  g_free(bundle_icon_opaque_path);
+  g_free(exe_dir);
+  g_free(exe_path);
 
   gtk_window_set_default_size(window, 1280, 720);
 

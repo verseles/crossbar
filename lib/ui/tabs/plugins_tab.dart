@@ -39,6 +39,8 @@ class _PluginsTabState extends State<PluginsTab> {
   String? _expandedPluginId;
   final Map<String, PluginOutput?> _pluginOutputs = {};
   final Map<String, bool> _runningPlugins = {};
+  String? _pendingDeletePluginId;
+  DateTime? _pendingDeleteTime;
 
   @override
   void initState() {
@@ -781,7 +783,7 @@ class _PluginsTabState extends State<PluginsTab> {
                   label: const Text('Edit'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () => _confirmDeletePlugin(context, plugin),
+                  onPressed: () => _handleDeleteClick(context, plugin),
                   icon: Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
                   label: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
@@ -1056,6 +1058,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     if (installed != null && installed.isNotEmpty) {
                       if (!context.mounted) return;
                       await _refreshPlugins();
+                      await TrayService().refreshMenu();
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -1297,31 +1300,35 @@ class _PluginsTabState extends State<PluginsTab> {
     }
   }
 
-  /// Shows confirmation dialog and deletes the plugin
-  Future<void> _confirmDeletePlugin(BuildContext context, Plugin plugin) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Plugin'),
-        content: Text('Are you sure you want to delete "${_formatPluginName(plugin.id)}"?\n\nThis will permanently delete the plugin file.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+  /// Handle delete button click - requires double-click to confirm
+  void _handleDeleteClick(BuildContext context, Plugin plugin) {
+    final now = DateTime.now();
+    
+    // Check if this is a "second click" within 3 seconds
+    if (_pendingDeletePluginId == plugin.id && 
+        _pendingDeleteTime != null &&
+        now.difference(_pendingDeleteTime!).inSeconds < 3) {
+      // Second click - delete the plugin
+      _pendingDeletePluginId = null;
+      _pendingDeleteTime = null;
+      _deletePlugin(context, plugin);
+    } else {
+      // First click - show toast and wait for confirmation
+      _pendingDeletePluginId = plugin.id;
+      _pendingDeleteTime = now;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Click Delete again to remove "${_formatPluginName(plugin.id)}"'),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
 
-    if (confirmed != true) return;
-
+  /// Actually delete the plugin
+  Future<void> _deletePlugin(BuildContext context, Plugin plugin) async {
     try {
       final file = File(plugin.path);
       if (await file.exists()) {
@@ -1340,6 +1347,7 @@ class _PluginsTabState extends State<PluginsTab> {
       await TrayService().refreshMenu();
       
       if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Deleted ${_formatPluginName(plugin.id)}')),
         );

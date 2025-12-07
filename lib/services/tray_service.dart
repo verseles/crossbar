@@ -41,6 +41,18 @@ class TrayService with TrayListener {
 
     await _resolveAndSetIcon();
     await _updateMenu();
+    
+    // Set initial tooltip (title isn't supported on Linux)
+    if (!Platform.isLinux) {
+      try {
+        await trayManager.setToolTip('Crossbar');
+      } catch (_) {}
+    }
+    
+    // Set initial title
+    try {
+      await trayManager.setTitle('Crossbar');
+    } catch (_) {}
 
     // Listen for theme changes on Linux
     if (Platform.isLinux) {
