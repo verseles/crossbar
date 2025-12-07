@@ -3,7 +3,9 @@
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
 > Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
 
-Plano granndioso e teorico:
+Atenção: Este projeto ainda não foi lançado, não se preocupe com breking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
+
+Plano granndioso e teorico mas ainda a fonte de verdade:
 @./original_plan.md
 Plano de execucao baseado em original_plan.md, pode estar defasado:
 @./MASTER_PLAN.md
@@ -15,12 +17,34 @@ Roadmap de implementacao, atualizado regularmente:
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
 - **Leitura Inicial**: Sempre leia @./original_plan.md, @./MASTER_PLAN.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
-- **Testes e Análise**: **JAMAIS** commite código sem rodar testes (`flutter test --coverage`), verificar coverage mínimo de 43% e análise estática (`flutter analyze --no-fatal-infos`). Se alterar UI/Lógica, adicione novos testes.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes (`flutter test --coverage`), verificar coverage mínimo de 43%. Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
 - **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act` ou simplesmente execute os comandos necessários diretamente.
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
+- **Branches**: Está autorizado trabalhar diretamente na branch 'main', atualmente é apenas um desenvolvedor.
+
+# Processo após alterações
+
+Quando terminar uma tarefa OU o usuário desenvolvedor disser simplesmente "ship", significa que ele quer que você faça as seguintes etapas, mas apenas as que ainda não fez:
+
+1. flutter analyze --no-fatal-infos
+2. flutter test --coverage
+3. make linux
+4. make android
+5. Verificar se ROADMAP.md necessita de atualização
+6. Verificar se README.md necessita de atualização
+7. Verificar se docs/ necessita de atualização
+8. Commit das alterações
+9. Merge na main (se necessário)
+10. Criar uma nova tag v patch incremental (dispara pipeline de release)
+11. Push para o github
+12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
+13. Notificar o usuário com a tool play_notification (se disponível) para notificar o usuário
+
+Caso alguma dessas etapas falhe, corrija e repita.
+Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
 
 ---
 
