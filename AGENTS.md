@@ -36,13 +36,14 @@ Quando terminar uma tarefa OU o usuário desenvolvedor disser simplesmente "ship
 5. Verificar se ROADMAP.md necessita de atualização
 6. Verificar se README.md necessita de atualização
 7. Verificar se docs/ necessita de atualização
-8. Commit das alterações
-9. Merge na main (se necessário)
-10. Criar uma nova tag v patch incremental (dispara pipeline de release)
-11. Push para o github
-12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
-13. Notificar o usuário com a tool play_notification para notificar o usuário
-14. Apresentar resumo das alterações
+8. **Atualizar AGENTS.md** se houve mudanças arquiteturais (nova ADR) ou operacionais (versão, estrutura, regras)
+9. Commit das alterações
+10. Merge na main (se necessário)
+11. Criar uma nova tag v patch incremental (dispara pipeline de release)
+12. Push para o github
+13. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
+14. Notificar o usuário com a tool play_notification para notificar o usuário
+15. Apresentar resumo das alterações
 
 Caso alguma dessas etapas falhe, corrija e repita.
 Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
@@ -52,26 +53,24 @@ Use essa sequência de etapas para todas as alterações significativas pois red
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.3.1+4` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.3.2+6` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
 
 ---
 
-## 3. Arquitetura de Execução (Tri-Binary)
+## 3. Arquitetura de Execução (Dual-Binary)
 
-O projeto compila **3 binários** para resolver problemas de dependência (GTK) e UX:
+O projeto compila **2 binários** para resolver problemas de dependência (GTK) e UX:
 
-1.  **`crossbar` (Launcher)**:
-    - Fonte: `bin/launcher.dart`
-    - Função: Roteador. Se houver argumentos, chama CLI. Se não, chama GUI.
+1.  **`crossbar` (CLI + Launcher)**:
+    - Fonte: `bin/crossbar.dart` → `lib/cli/cli_handler.dart`
+    - Função: CLI unificado + launcher. Sem args ou com `gui` → lança GUI. Com args CLI → executa comando.
+    - Comandos: `crossbar cpu`, `crossbar --version`, `crossbar gui`
 2.  **`crossbar-gui` (Flutter App)**:
     - Fonte: `lib/main.dart`
     - Função: Interface gráfica, Tray, Services. Depende de GTK/Cocoa.
-3.  **`crossbar-cli` (Pure Dart)**:
-    - Fonte: `bin/crossbar.dart` -> `lib/cli/cli_handler.dart`
-    - Função: Comandos de sistema (`--cpu`, `--notify`). **Zero dependências de UI**.
 
 ---
 
@@ -80,27 +79,25 @@ O projeto compila **3 binários** para resolver problemas de dependência (GTK) 
 ```text
 crossbar/
 ├── bin/
-│   ├── launcher.dart           # Entrypoint do Launcher (Router)
-│   └── crossbar.dart           # Entrypoint da CLI
+│   └── crossbar.dart           # Entrypoint unificado (CLI + Launcher)
 ├── lib/
 │   ├── main.dart               # Entrypoint da GUI Flutter
 │   ├── cli/
-│   │   ├── cli_handler.dart    # Switch-case gigante com ~75 comandos
+│   │   ├── cli_handler.dart    # Switch-case com comandos CLI
 │   │   └── plugin_scaffolding.dart # Lógica de 'crossbar init'
 │   ├── core/
 │   │   ├── plugin_manager.dart # Descoberta e ciclo de vida de plugins
-│   │   ├── script_runner.dart  # Execução de scripts (Process.run com timeout)
-│   │   └── output_parser.dart  # BitBar Text parser & JSON parser
+│   │   ├── plugin_executor.dart # Roteador de runners
+│   │   ├── script_runner.dart  # Execução de scripts nativos (bash, python...)
+│   │   ├── output_parser.dart  # BitBar Text parser & JSON parser
+│   │   └── runners/
+│   │       ├── lua_runner.dart      # Executa .lua via lua_dardo (embarcado)
+│   │       ├── quickjs_runner.dart  # Executa .js via QuickJS (embarcado)
+│   │       ├── dart_runner.dart     # Executa .dart via dart_eval
+│   │       └── declarative_runner.dart # Executa .yaml plugins
 │   ├── services/               # Singleton Services
-│   │   ├── ipc_server.dart     # REST API (localhost:48291)
-│   │   ├── tray_service.dart   # Gerenciamento de ícones de bandeja
-│   │   ├── scheduler_service.dart # Timers para refresh de plugins
-│   │   ├── notification_service.dart # Notificações push
-│   │   ├── plugin_config_service.dart # Gestão de config e secrets
-│   │   ├── marketplace_service.dart # Instalação de plugins
-│   │   └── widget_service.dart    # Mobile Home Widgets
 │   └── ui/                     # Widgets Flutter (Material 3)
-├── plugins/                    # Exemplos de plugins (Go, Rust, Py, JS, Sh, Dart)
+├── plugins/                    # Exemplos de plugins (Lua, Bash, Python, JS, Dart...)
 ├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
 └── Makefile                    # Comandos de dev (make linux, make test)
 ```
@@ -117,8 +114,13 @@ crossbar/
 
 ### Execução
 
-- **Runner**: `lib/core/script_runner.dart`
-- **Interpreters**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
+- **Executor**: `lib/core/plugin_executor.dart` (roteador de runners)
+- **Runners**:
+  - `LuaRunner`: Plugins `.lua` via lua_dardo (Dart puro, funciona em TODAS as plataformas)
+  - `QuickJsRunner`: Plugins `.js` via flutter_js (mobile ou desktop sem Node)
+  - `ScriptRunner`: Plugins bash, python, node, go, rust (desktop only)
+  - `DeclarativeRunner`: Plugins `.yaml` (DSL declarativa)
+- **Interpreters Nativos**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
 - **Output**: Suporta formato texto legado (BitBar) OU JSON estruturado (Crossbar).
 
 ### API de Plugins (CLI)
@@ -327,3 +329,84 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
     curl -L "https://context7.com/docs/api-guide"
     ```
   - Use o guia recuperado para corrigir o formato da sua requisição à API antes de tentar novamente.
+
+---
+
+## 11. Architecture Decision Records (ADRs)
+
+> Decisões arquiteturais importantes que impactam todo o projeto.
+
+### ADR-001: Unified CLI Binary (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: Originalmente havia 3 binários: `crossbar` (launcher), `crossbar-cli` e `crossbar-gui`. Isso causava complexidade na distribuição e spawning de processos.  
+**Decision**: Unificar launcher e CLI em um único `crossbar`. O GUI permanece separado como `crossbar-gui`.  
+**Consequences**:
+
+- Menos um binário para gerenciar
+- CLI mais rápido (não spawna processo extra)
+- `crossbar --version` funciona diretamente
+- `crossbar gui` lança a GUI em modo detached
+
+### ADR-002: Embedded Lua Interpreter (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: Plugins `.sh`, `.py`, `.js` requerem interpretadores instalados e NÃO funcionam no mobile (Android/iOS).  
+**Decision**: Usar `lua_dardo` (implementação Lua 5.3 em Dart puro) como interpretador embarcado universal.  
+**Consequences**:
+
+- Plugins `.lua` funcionam em TODAS as plataformas (Linux, macOS, Windows, Android, iOS)
+- Zero dependências externas
+- Lua é agora a linguagem padrão recomendada para plugins universais
+- Trade-off: Lua é ~2-5x mais lento que Node nativo
+
+### ADR-003: QuickJS Fallback for JavaScript (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: Plugins `.js` existentes precisam funcionar no mobile, mas Node.js não está disponível.  
+**Decision**: Usar `flutter_js` (QuickJS no Android/desktop, JavaScriptCore no iOS) como fallback.  
+**Behavior**:
+
+- Mobile: Sempre usa QuickJS embarcado
+- Desktop com Node: Usa Node nativo (mais rápido)
+- Desktop sem Node: Usa QuickJS embarcado  
+  **Consequences**:
+- Plugins JS funcionam em todas as plataformas
+- Fallback inteligente mantém performance no desktop
+- Apple permite JavaScript interpretado (App Store friendly)
+
+### ADR-004: GNOME Desktop Integration (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: O ícone do Crossbar não aparecia corretamente na dock do GNOME.  
+**Decision**: Usar `APPLICATION_ID` (`com.verseles.crossbar`) consistentemente em:
+
+- Nome do arquivo `.desktop`
+- Campo `Icon` e `StartupWMClass` no `.desktop`
+- `WM_CLASS` no código C++ do runner GTK
+- Nome do arquivo de ícone  
+  **Consequences**:
+- Ícone aparece corretamente na dock/taskbar
+- Compatível com GNOME moderno e outros DEs
+
+### ADR-005: Separated Icon for Linux (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: O ícone original com fundo transparente não ficava bom em alguns contextos do Linux.  
+**Decision**: Gerar `icon_linux.png` com cantos arredondados (squircle style) via ImageMagick no `make icons`.  
+**Consequences**:
+
+- Ícone com aparência nativa no GNOME
+- Geração automatizada no build
+- Consistência visual entre sistemas
+
+### Template para Novas ADRs
+
+```markdown
+### ADR-XXX: Título (YYYY-MM-DD)
+
+**Status**: 🟡 Proposed | ✅ Accepted | ❌ Rejected | ⚠️ Deprecated  
+**Context**: Qual problema estamos resolvendo?  
+**Decision**: O que decidimos fazer?  
+**Consequences**: Quais são os trade-offs e impactos?
+```
