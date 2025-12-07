@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.3.1 (UX Fixes & Plugin Management ✅)
-**Próximo Ciclo:** v1.3.2 (Internationalization & Polish)
+**Status Atual:** v1.3.2+6 (Universal Plugins & Lua Embedded ✅)
+**Próximo Ciclo:** v1.3.3 (Android Polish & Marketplace)
 
 ---
 
@@ -13,8 +13,9 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ### ✅ O que está Sólido
 
-- **Core Architecture:** `PluginManager` e `ScriptRunner` funcionam bem.
-- **CLI Foundation:** Estrutura de comandos e parser de argumentos robustos.
+- **Core Architecture:** `PluginManager`, `PluginExecutor` e Runners (Lua, Dart, Declarative, Script) unificados.
+- **Unified Binary:** CLI e Launcher fundidos em um único executável `crossbar`.
+- **Embedded Scripting:** Lua 5.3 nativo via `lua_dardo` (zero deps).
 - **UI Desktop:** Janela principal e abas implementadas.
 - **Tray Básico:** Ícone único e menu funcionam via `tray_manager`.
 
@@ -105,7 +106,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ## � Epic v1.3.0: Universal Plugins (Multi-Runner Architecture)
 
-**Status: 🚧 EM PROGRESSO**
+**Status: ✅ CONCLUÍDO**
 
 **Objetivo:** Permitir que plugins funcionem em TODAS as plataformas através de múltiplos runners e uso extensivo da API CLI do Crossbar.
 
@@ -280,17 +281,18 @@ menu:
 ### Fase 7: Plugin Executor Unificado ✅
 
 - [x] **Criar:** `lib/core/plugin_executor.dart`
-- [x] **RunnerType enum:** declarative, dart, script, unknown
+- [x] **RunnerType enum:** declarative, dart, lua, script, unknown
 - [x] **Auto-detecção:** Baseado em extensão do arquivo
   - `.yaml`, `.yml` → DeclarativeRunner
-  - `.dart` → DartRunner
-  - `.sh`, `.py`, `.js`, `.go`, `.rs` → ScriptRunner
-  - `.dart.exe` → ScriptRunner (compiled)
+  - `.lua` → LuaRunner (Embedded)
+  - `.dart` → DartRunner (Eval) ou ScriptRunner (Compiled)
+  - `.sh`, `.py`, `.go`, `.rs` → ScriptRunner
+  - `.js` → ScriptRunner (Node nativo) - QuickJS removido (ADR-003)
 - [x] **Platform Check:** `canRunOnPlatform()` para mobile compatibility
 - [x] **Integração:** PluginManager agora usa PluginExecutor
-- [x] **Extensões:** `.yaml` e `.yml` adicionados a allowedExtensions
-- [x] **Testes:** 13 testes unitários passando
-- [x] **Build:** 337 testes totais passando
+- [x] **Extensões:** `.yaml`, `.yml` e `.lua` adicionados a allowedExtensions
+- [x] **Testes:** 13+ testes unitários passando
+- [x] **Build:** ~340 testes totais passando
 
 ### Fase 8: Documentação Completa ✅
 
