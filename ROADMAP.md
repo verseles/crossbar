@@ -2,7 +2,7 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.3.2 (Internationalization & Polish ✅)
+**Status Atual:** v1.3.4 (Internationalization & Polish ✅)
 **Próximo Ciclo:** v1.4.0 (Advanced Desktop UI)
 
 ---
@@ -343,7 +343,7 @@ menu:
 
 ---
 
-## 🌍 Epic v1.3.2: Internationalization & Polish
+## 🌍 Epic v1.3.4: Internationalization & Polish
 
 **Status: ✅ CONCLUÍDO**
 
