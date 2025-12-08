@@ -180,6 +180,24 @@ class SamplePluginsService {
       ],
     ),
     PluginMetadata(
+      id: 'uptime',
+      name: 'System Uptime',
+      description: 'Shows how long the system has been running',
+      category: PluginCategory.system,
+      mobileCompatible: true,
+      tags: ['uptime', 'boot', 'system'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
+        PluginVariant(language: PluginLanguage.python, filename: 'uptime.1m.py', assetPath: 'plugins/uptime/uptime.1m.py'),
+        PluginVariant(language: PluginLanguage.node, filename: 'uptime.1m.js', assetPath: 'plugins/uptime/uptime.1m.js'),
+        PluginVariant(language: PluginLanguage.dart, filename: 'uptime.1m.dart', assetPath: 'plugins/uptime/uptime.1m.dart'),
+        PluginVariant(language: PluginLanguage.go, filename: 'uptime.1m.go', assetPath: 'plugins/uptime/uptime.1m.go'),
+        PluginVariant(language: PluginLanguage.rust, filename: 'uptime.1m.rs', assetPath: 'plugins/uptime/uptime.1m.rs'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'uptime.1m.lua', assetPath: 'plugins/uptime/uptime.1m.lua'),
+        PluginVariant(language: PluginLanguage.yaml, filename: 'uptime.1m.yaml', assetPath: 'plugins/yaml/uptime.1m.yaml'),
+      ],
+    ),
+    PluginMetadata(
       id: 'network-status',
       name: 'Network Status',
       description: 'Shows network interface status (YAML no-code)',
@@ -203,16 +221,6 @@ class SamplePluginsService {
       tags: ['disk', 'storage', 'space'],
       variants: [
         PluginVariant(language: PluginLanguage.bash, filename: 'disk.5m.sh', assetPath: 'plugins/disk.5m.sh'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'uptime',
-      name: 'Uptime',
-      description: 'Shows system uptime',
-      category: PluginCategory.system,
-      tags: ['uptime', 'boot'],
-      variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
       ],
     ),
 

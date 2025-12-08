@@ -197,6 +197,35 @@ void main() {
       });
     });
 
+    group('Uptime Plugins', () {
+      test('all uptime.1m.* variants produce output with uptime format', () async {
+        final variants = findPluginVariants('uptime.1m');
+        expect(variants, isNotEmpty, reason: 'Should have uptime plugin variants');
+
+        for (final plugin in variants) {
+          final ext = plugin.path.split('.').last;
+          if (ext == 'lua' || ext == 'go' || ext == 'rs' || ext == 'yaml') continue;
+
+          final output = await executePlugin(plugin.path);
+          if (output == null) continue;
+
+          // Uptime plugins should have:
+          // 1. An uptime icon (⬆️)
+          // 2. Menu separator
+          expect(
+            output,
+            contains('⬆️'),
+            reason: '${plugin.path} should have uptime icon',
+          );
+          expect(
+            output,
+            contains('---'),
+            reason: '${plugin.path} should have menu separator',
+          );
+        }
+      });
+    });
+
     group('Output Format Consistency', () {
       test(
         'all interpreted plugins produce valid BitBar output',
