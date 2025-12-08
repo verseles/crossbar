@@ -16,7 +16,7 @@ Roadmap de implementacao, atualizado regularmente:
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
 - **Leitura Inicial**: Sempre leia @./original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
-- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes (`flutter test --coverage`), verificar coverage mínimo de 43%. Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
@@ -26,10 +26,10 @@ Roadmap de implementacao, atualizado regularmente:
 
 # Processo após alterações
 
-Quando terminar uma tarefa OU o usuário desenvolvedor disser simplesmente "ship", significa que ele quer que você faça as seguintes etapas, mas apenas as que ainda não fez:
+Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
 1. flutter analyze --no-fatal-infos
-2. flutter test --coverage
+2. make coverage (verificar meta de 60%)
 3. make linux
 4. make android
 5. Verificar se ROADMAP.md necessita de atualização
@@ -44,8 +44,9 @@ Quando terminar uma tarefa OU o usuário desenvolvedor disser simplesmente "ship
 14. Notificar o usuário com a tool play_notification para notificar o usuário
 15. Apresentar resumo das alterações
 
-Caso alguma dessas etapas falhe, corrija e repita.
-Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
+- Caso alguma dessas etapas falhe, corrija e repita.
+- Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
+- NÃO PULE ETAPAS. NÃO PULE ETAPAS. NÃO PULE ETAPAS.
 
 ---
 

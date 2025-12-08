@@ -1,0 +1,9 @@
+# Crossbar lcov configuration
+# Exclude generated/auto-generated files from coverage
+
+# Remove branch coverage (not needed for Dart)
+lcov_branch_coverage=0
+
+# Exclude patterns
+# Note: These patterns are applied after coverage collection
+# For runtime exclusion, use lcov --remove

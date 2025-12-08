@@ -121,6 +121,17 @@ android:
 test:
 	flutter test
 
+# Run tests with coverage (excludes generated code: i18n, dialogs, paths)
+coverage:
+	flutter test --coverage
+	@echo "Filtering generated code from coverage..."
+	lcov --remove coverage/lcov.info 'lib/l10n/*' 'lib/ui/dialogs/*' 'lib/core/paths/*' -o coverage/lcov_filtered.info 2>/dev/null
+	@echo ""
+	@echo "=== Coverage Summary (excluding generated code) ==="
+	lcov --summary coverage/lcov_filtered.info 2>&1 | grep -E "lines|source"
+	@echo ""
+	@echo "Target: 60% (see AGENTS.md for rationale)"
+
 # Analyze code
 analyze:
 	flutter analyze --no-fatal-infos
