@@ -2,8 +2,10 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.3.4 (Internationalization & Polish ✅)
-**Próximo Ciclo:** v1.4.0 (Advanced Desktop UI)
+**Status Atual:** v1.4.0 (i18n & Android Polish ✅)
+**Próximo Ciclo:** v1.5.0 (Advanced Desktop UI)
+
+> **Versionamento:** Minor (v1.X.0) para features/epics, Patch (v1.x.Y) para bugfixes.
 
 ---
 
@@ -343,7 +345,7 @@ menu:
 
 ---
 
-## 🌍 Epic v1.3.4: Internationalization & Polish
+## 🌍 Epic v1.4.0: Internationalization & Polish
 
 **Status: ✅ CONCLUÍDO**
 
@@ -398,7 +400,7 @@ menu:
 
 ---
 
-## 🖥️ Epic v1.4.0: Advanced Desktop UI
+## 🖥️ Epic v1.5.0: Advanced Desktop UI
 
 **Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
 
@@ -432,7 +434,7 @@ menu:
 
 ---
 
-## 🌐 Epic v1.5.0: API & Marketplace Completion
+## 🌐 Epic v1.6.0: API & Marketplace Completion
 
 **Objetivo:** Preencher as lacunas nos comandos CLI e tornar o Marketplace funcional.
 

@@ -43,7 +43,9 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 7. Verificar se docs/ necessita de atualização
 8. **Atualizar AGENTS.md** se houve mudanças arquiteturais (nova ADR) ou operacionais (versão, estrutura, regras)
 9. Commit das alterações
-10. Criar uma nova tag v patch incremental (dispara pipeline de release)
+10. Criar uma nova tag:
+    - **Minor** (v1.X.0): Para features, epics completas, ou mudanças significativas
+    - **Patch** (v1.x.Y): Apenas para bugfixes e pequenos ajustes isolados
 11. Push para o github
 12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
 13. Notificar o usuário com a tool play_notification (quando estiver disponível) para notificar o usuário
@@ -58,7 +60,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.3.4+9` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.4.0+10` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
