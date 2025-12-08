@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../models/plugin.dart';
 import '../models/plugin_output.dart';
+import 'output_parser.dart';
 import 'runners/dart_runner.dart';
 import 'runners/declarative_runner.dart';
 import 'runners/lua_runner.dart';
@@ -158,7 +159,7 @@ class PluginExecutor {
     }
     
     // Parse the output using standard format
-    return _parseOutput(plugin.id, result.output);
+    return OutputParser.parse(result.output, plugin.id);
   }
   
   /// Run Lua plugin using embedded interpreter
@@ -169,7 +170,7 @@ class PluginExecutor {
       return PluginOutput.error(plugin.id, result.error ?? 'Unknown error');
     }
     
-    return _parseOutput(plugin.id, result.output);
+    return OutputParser.parse(result.output, plugin.id);
   }
   
   /// Run script plugin (bash, python, node, etc.)
@@ -178,40 +179,6 @@ class PluginExecutor {
     Map<String, String> additionalEnv,
   ) async {
     return _scriptRunner.run(plugin, additionalEnv: additionalEnv);
-  }
-  
-  /// Parse raw output into PluginOutput
-  PluginOutput _parseOutput(String pluginId, String rawOutput) {
-    final lines = rawOutput.split('\n');
-    if (lines.isEmpty) {
-      return PluginOutput(pluginId: pluginId, icon: '', text: '');
-    }
-    
-    // First line is the main output
-    final firstLine = lines.first;
-    
-    // Check for icon at start
-    var icon = '';
-    var text = firstLine;
-    
-    // Simple icon detection (emoji at start)
-    if (firstLine.isNotEmpty) {
-      final firstCodeUnit = firstLine.codeUnitAt(0);
-      if (firstCodeUnit > 127) {
-        // Likely an emoji, split it
-        final parts = firstLine.split(' ');
-        if (parts.length >= 2) {
-          icon = parts.first;
-          text = parts.skip(1).join(' ');
-        }
-      }
-    }
-    
-    return PluginOutput(
-      pluginId: pluginId,
-      icon: icon,
-      text: text.trim(),
-    );
   }
   
   /// Convert DeclarativeMenuItem to MenuItem
