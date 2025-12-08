@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:crossbar/services/logger_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum TrayDisplayMode {
@@ -152,7 +153,26 @@ X-GNOME-Autostart-enabled=true
     if (_showInTray != value) {
       _showInTray = value;
       _saveBool(_keyShowInTray, value);
+      _updateAndroidForegroundService(value);
       notifyListeners();
+    }
+  }
+
+  /// Starts or stops the Android foreground service based on the setting.
+  Future<void> _updateAndroidForegroundService(bool enable) async {
+    if (!Platform.isAndroid) return;
+
+    try {
+      const channel = MethodChannel('com.verseles.crossbar/system');
+      if (enable) {
+        await channel.invokeMethod('startForegroundService');
+        LoggerService().info('Android foreground service started');
+      } else {
+        await channel.invokeMethod('stopForegroundService');
+        LoggerService().info('Android foreground service stopped');
+      }
+    } catch (e, stackTrace) {
+      LoggerService().error('Failed to update Android foreground service', e, stackTrace);
     }
   }
 

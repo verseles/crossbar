@@ -370,34 +370,26 @@ menu:
 ### Fase 3: Android Polish
 
 - [x] **Android strings:** Adicionar e traduzir `keepOnBackground` e `showPersistentNotification` para 12 idiomas
-- [ ] **Testar notification:** Verificar que persistent notification aparece após build
+- [x] **Testar notification:** Verificar que persistent notification aparece após build
 - [ ] **Widget styling:** Melhorar visual dos widgets Android
 
-### Fase 4: Android UX & Integration (Próximas Tarefas)
+### Fase 4: Android UX & Integration ✅
 
-- [ ] **Start on Boot:** Implementar auto-início do sistema Android quando "Start on Boot" for ativado
-  - Usar `android:permission="android.permission.RECEIVE_BOOT_COMPLETED"` no AndroidManifest
-  - Implementar `BootReceiver` em Kotlin para iniciar o serviço
-  - Solicitar permissão adequada ao usuário
-  - Testar em diferentes versões do Android (8+, 12+, 13+)
+- [x] **Start on Boot:** Implementar auto-início do sistema Android quando "Start on Boot" for ativado
 
-- [ ] **Undismissable Notification:** Não permitir que a notificação persistente seja dispensada quando "Keep on Background" estiver ativado
-  - Definir `NotificationChannel` como IMPORTANCE_HIGH e com "on-going" flag
-  - Bloquear ação de "dismiss" via `NotificationListenerService`
-  - Permitir swipe-down para expandir menu de ações (refresh, open app, disable)
-  - Mostrar count de plugins ativos na notificação
+  - Criado `BootReceiver.kt` para interceptar BOOT_COMPLETED
+  - Permissão RECEIVE_BOOT_COMPLETED adicionada ao AndroidManifest
+  - Integração com SettingsService via Method Channel
 
-- [ ] **Plugins Directory Strategy:** Definir e implementar abordagem para localização dos plugins no Android
-  - **Opção A (Simples):** Usar pasta interna do app (`/data/data/com.verseles.crossbar/files/plugins/`)
-    - ✅ Mais seguro, isolamento completo
-    - ❌ Difícil para usuários acessarem/manterem plugins
-  - **Opção B (Custom Path):** Folder picker para o usuário escolher pasta externa
-    - ✅ Controle total do usuário
-    - ❌ Permissões Android 10+, Scoped Storage complexities
-  - **Opção C (Híbrida):** pasta interna + suporte a symbolic links ou pasta compartilhada
-    - ✅ Melhor dos dois mundos
-    - ❌ Mais complexo de implementar
-  - **Decisão recomendada:** Opção C (Híbrida) - pasta interna como padrão + pasta compartilhada opcional
+- [x] **Foreground Service Notification:** Notificação persistente quando "Keep on Background" ativado
+
+  - Criado `CrossbarForegroundService.kt` com NotificationChannel
+  - Notificação ongoing mostra contagem de plugins ativos
+  - Ações: Refresh e Stop
+
+- [x] **Plugins Directory Strategy:** Decidido usar apenas pasta interna (ADR-008)
+  - Pasta interna: `/data/data/com.verseles.crossbar/files/plugins/`
+  - Plugins instalados via "Sample Plugins" ou Marketplace
 
 ---
 

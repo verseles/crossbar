@@ -7,4 +7,15 @@
     <string name="widget_no_data">No data</string>
     <string name="widget_tap_to_refresh">Tap to refresh</string>
     <string name="widget_last_updated">Updated %1$s</string>
+    
+    <!-- Foreground Service Notification -->
+    <string name="notification_channel_name">Crossbar Service</string>
+    <string name="notification_channel_description">Keeps plugins running in the background</string>
+    <string name="notification_title">Crossbar</string>
+    <plurals name="notification_text_plugins">
+        <item quantity="one">%d active plugin</item>
+        <item quantity="other">%d active plugins</item>
+    </plurals>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_stop">Stop</string>
 </resources>

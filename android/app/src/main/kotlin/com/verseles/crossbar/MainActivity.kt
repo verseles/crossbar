@@ -35,6 +35,14 @@ class MainActivity : FlutterActivity() {
                     val memory = getMemoryInfo()
                     result.success(memory)
                 }
+                "startForegroundService" -> {
+                    startCrossbarForegroundService()
+                    result.success(true)
+                }
+                "stopForegroundService" -> {
+                    stopCrossbarForegroundService()
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         }
@@ -141,6 +149,30 @@ class MainActivity : FlutterActivity() {
             flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
                 MethodChannel(messenger, CHANNEL).invokeMethod("onWidgetRefresh", null)
             }
+        }
+    }
+
+    private fun startCrossbarForegroundService() {
+        try {
+            val serviceIntent = Intent(this, CrossbarForegroundService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+            android.util.Log.d("Crossbar", "Foreground service started")
+        } catch (e: Exception) {
+            android.util.Log.e("Crossbar", "Failed to start foreground service", e)
+        }
+    }
+
+    private fun stopCrossbarForegroundService() {
+        try {
+            val serviceIntent = Intent(this, CrossbarForegroundService::class.java)
+            stopService(serviceIntent)
+            android.util.Log.d("Crossbar", "Foreground service stopped")
+        } catch (e: Exception) {
+            android.util.Log.e("Crossbar", "Failed to stop foreground service", e)
         }
     }
 }

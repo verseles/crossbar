@@ -424,6 +424,23 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - CPU pode não funcionar em Android moderno (limitação do OS)
 - Widget refresh implementado via Intent + Method Channel (código nativo mantido)
 
+### ADR-008: Android Internal Plugins Directory (2024-12-08)
+
+**Status**: ✅ Accepted  
+**Context**: Plugins no Android precisam de um diretório definido. Três opções foram consideradas:
+
+- Opção A: Apenas pasta interna (`/data/data/com.verseles.crossbar/files/plugins/`) - simples e seguro
+- Opção B: SAF folder picker para pasta externa - complexo devido a Scoped Storage Android 10+
+- Opção C: Híbrida (interna + externa) - mais complexo de implementar
+
+**Decision**: Usar apenas a pasta interna do app. Usuários instalam plugins via "Sample Plugins" ou Marketplace (futuro).  
+**Consequences**:
+
+- Implementação simples, sem necessidade de lidar com SAF e persistência de permissões
+- Plugins protegidos contra acesso externo não autorizado
+- Usuários não podem adicionar plugins manualmente via file manager (limitação aceitável)
+- Consistência com modelo de apps mobile modernos
+
 ### Template para Novas ADRs
 
 ```markdown
