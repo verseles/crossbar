@@ -24,6 +24,12 @@ Roadmap de implementacao, atualizado regularmente:
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
 - **Branches**: Está autorizado trabalhar diretamente na branch 'main', atualmente é apenas um desenvolvedor.
 
+# Processo antes de iniciar CADA tarefa (a cada passo a ser iniciado, repita esses passos)
+
+1. Busque na web por informações sobre a tarefa solicitada, ele deve servir para engrandecer seu conhecimento com detalhes mais recentes de cada tarefa, não deixe de realizar a pesquisa e visitar sites.
+2. Repita por texto (ou to-do) suas tarefas feitas e tarefas pendentes, assim, mesmo que seu contexto seja truncado, você tem informações claras do que deve ser feito
+3. Repita por texto suas regras importantes e a ordem a serem feitas
+
 # Processo após alterações
 
 Quando terminar as tarefas solicitadas faça as seguintes etapas:
@@ -37,12 +43,11 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 7. Verificar se docs/ necessita de atualização
 8. **Atualizar AGENTS.md** se houve mudanças arquiteturais (nova ADR) ou operacionais (versão, estrutura, regras)
 9. Commit das alterações
-10. Merge na main (se necessário)
-11. Criar uma nova tag v patch incremental (dispara pipeline de release)
-12. Push para o github
-13. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
-14. Notificar o usuário com a tool play_notification (quando estiver disponível) para notificar o usuário
-15. Apresentar resumo das alterações
+10. Criar uma nova tag v patch incremental (dispara pipeline de release)
+11. Push para o github
+12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
+13. Notificar o usuário com a tool play_notification (quando estiver disponível) para notificar o usuário
+14. Apresentar resumo das alterações
 
 - Caso alguma dessas etapas falhe, corrija e repita.
 - Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
