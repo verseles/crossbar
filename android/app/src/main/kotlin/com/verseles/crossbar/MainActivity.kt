@@ -35,8 +35,25 @@ class MainActivity : FlutterActivity() {
                     val memory = getMemoryInfo()
                     result.success(memory)
                 }
+                "updateNotification" -> {
+                    val count = call.argument<Int>("count") ?: 0
+                    updateNotification(count)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
+        }
+    }
+
+    private fun updateNotification(count: Int) {
+        val intent = Intent(this, CrossbarService::class.java).apply {
+            action = CrossbarService.ACTION_UPDATE_COUNT
+            putExtra(CrossbarService.EXTRA_PLUGIN_COUNT, count)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 

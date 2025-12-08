@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -215,6 +216,21 @@ class NotificationService {
   }) async {
     if (!Platform.isAndroid) return;
     if (!_initialized) return;
+
+    // Delegate to native service if on Android
+    // This ensures consistency with the native BootReceiver service
+    const channel = MethodChannel('com.verseles.crossbar/system');
+    try {
+      await channel.invokeMethod('updateNotification', {
+        'count': enabledPlugins,
+      });
+      _persistentNotificationShown = true;
+      return;
+    } catch (e) {
+      // Fallback to local notification if native channel fails
+      // ignore: avoid_print
+      print('Failed to update native notification: $e');
+    }
     
     final actualBody = enabledPlugins > 0 
         ? '$enabledPlugins plugin(s) active' 
