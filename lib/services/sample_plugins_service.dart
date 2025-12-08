@@ -212,7 +212,7 @@ class SamplePluginsService {
       category: PluginCategory.system,
       tags: ['uptime', 'boot'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime.1m.sh'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
       ],
     ),
 

@@ -80,6 +80,7 @@ flutter:
     - plugins/clock/
     - plugins/weather/
     - plugins/bitcoin/
+    - plugins/uptime/
     - plugins/yaml/
 
 flutter_launcher_icons:
