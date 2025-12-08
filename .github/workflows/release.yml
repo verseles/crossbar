@@ -89,13 +89,13 @@ jobs:
       - name: Compress artifact
         run: |
           cd build/macos/Build/Products/Release
-          tar -czvf $GITHUB_WORKSPACE/crossbar-macos-universal.tar.gz crossbar.app
+          tar -czvf $GITHUB_WORKSPACE/crossbar-macos-arm64.tar.gz crossbar.app
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: crossbar-macos
-          path: crossbar-macos-universal.tar.gz
+          path: crossbar-macos-arm64.tar.gz
 
   build-windows:
     runs-on: windows-latest
@@ -190,17 +190,17 @@ jobs:
             echo "Warning: ANDROID_KEYSTORE_BASE64 secret not found. Skipping signing configuration."
           fi
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build APK (arm64 only)
+        run: flutter build apk --release --target-platform android-arm64
 
       - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk crossbar-android.apk
+        run: mv build/app/outputs/flutter-apk/app-release.apk crossbar-android-arm64.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: crossbar-android
-          path: crossbar-android.apk
+          path: crossbar-android-arm64.apk
 
   create-release:
     needs: [build-linux, build-macos, build-windows, build-android]
@@ -223,9 +223,9 @@ jobs:
         with:
           files: |
             artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
-            artifacts/crossbar-macos/crossbar-macos-universal.tar.gz
+            artifacts/crossbar-macos/crossbar-macos-arm64.tar.gz
             artifacts/crossbar-windows/crossbar-windows-x64.zip
-            artifacts/crossbar-android/crossbar-android.apk
+            artifacts/crossbar-android/crossbar-android-arm64.apk
           generate_release_notes: true
           draft: false
           prerelease: false
