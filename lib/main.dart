@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'core/plugin_manager.dart';
 import 'services/hot_reload_service.dart';
@@ -10,8 +11,12 @@ import 'services/logger_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
 import 'services/tray_service.dart';
+import 'services/widget_service.dart';
 import 'services/window_service.dart';
 import 'ui/main_window.dart';
+
+/// Pending widget refresh flag - set early if refresh requested before scheduler ready
+bool _pendingWidgetRefresh = false;
 
 void main(List<String> args) async {
   // ignore: unnecessary_lambdas
@@ -32,6 +37,25 @@ void main(List<String> args) async {
 
   try {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Register Android widget refresh handler EARLY
+    // This catches refresh requests even before services are fully initialized
+    if (Platform.isAndroid) {
+      const channel = MethodChannel('com.verseles.crossbar/system');
+      channel.setMethodCallHandler((call) async {
+        if (call.method == 'onWidgetRefresh') {
+          // Check if WidgetService is already initialized
+          final widgetService = WidgetService();
+          if (widgetService.isInitialized) {
+            await widgetService.updateAllWidgets();
+          } else {
+            // Mark pending refresh - will be processed when scheduler starts
+            _pendingWidgetRefresh = true;
+          }
+        }
+        return null;
+      });
+    }
 
     // Initialize services
     final logger = LoggerService();
@@ -106,6 +130,13 @@ void main(List<String> args) async {
     scheduler.addListener(trayService.updatePluginOutput);
     await scheduler.start();
     logger.info('Scheduler started');
+
+    // Process any pending widget refresh requested before scheduler was ready
+    if (_pendingWidgetRefresh && Platform.isAndroid) {
+      _pendingWidgetRefresh = false;
+      logger.info('Processing pending widget refresh');
+      await WidgetService().updateAllWidgets();
+    }
 
     // Initialize hot reload
     final hotReload = HotReloadService();

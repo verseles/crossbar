@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 
 import '../core/plugin_manager.dart';
@@ -23,6 +22,9 @@ class WidgetService {
 
   bool _initialized = false;
 
+  /// Check if service has been initialized
+  bool get isInitialized => _initialized;
+
   Future<void> init() async {
     if (_initialized) return;
     if (!Platform.isAndroid && !Platform.isIOS) return;
@@ -32,16 +34,8 @@ class WidgetService {
     // Register callback for when widget is clicked
     HomeWidget.widgetClicked.listen(_handleWidgetClick);
 
-    // Listen for widget refresh requests from native Android
-    if (Platform.isAndroid) {
-      const channel = MethodChannel('com.verseles.crossbar/system');
-      channel.setMethodCallHandler((call) async {
-        if (call.method == 'onWidgetRefresh') {
-          await updateAllWidgets();
-        }
-        return null;
-      });
-    }
+    // Note: Widget refresh handler is registered early in main.dart
+    // to catch requests before WidgetService is initialized
 
     _initialized = true;
   }
