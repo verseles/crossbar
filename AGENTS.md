@@ -406,6 +406,18 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - Simplifica a escrita de plugins universais.
 - Trade-off: Chamadas bloqueantes no LuaRunner bloqueiam o Isolate Dart.
 
+### ADR-007: Android System Info via /proc (2024-12-07)
+
+**Status**: ✅ Accepted  
+**Context**: Plugins Lua precisam de dados de CPU, memória e bateria no Android. A abordagem inicial tentou usar Method Channels nativos (BatteryManager, ActivityManager), mas isso introduziu dependência de `package:flutter` no `SystemApi`, quebrando a compilação AOT do CLI (`dart compile exe`).  
+**Decision**: Usar `/proc/stat`, `/proc/meminfo` e `/sys/class/power_supply` no Android, assim como no Linux. Aceitar que CPU pode retornar 0% em Android 8+ devido a restrições de segurança do `/proc/stat`.  
+**Consequences**:
+
+- CLI compila corretamente como binário nativo
+- Memória e bateria funcionam no Android via `/proc` e `/sys`
+- CPU pode não funcionar em Android moderno (limitação do OS)
+- Widget refresh implementado via Intent + Method Channel (código nativo mantido)
+
 ### Template para Novas ADRs
 
 ```markdown
