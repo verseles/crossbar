@@ -210,13 +210,30 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
     }
 
     private fun setNoDataState(views: RemoteViews, layoutId: Int) {
-        views.setTextViewText(R.id.widget_icon, "⚙️")
-        views.setTextViewText(R.id.widget_value, "Open app")
-        
-        if (layoutId == R.layout.crossbar_widget_medium) {
-            views.setTextViewText(R.id.widget_title, "Crossbar")
-            views.setTextViewText(R.id.widget_subtitle, "Tap to start")
-            views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
+        when (layoutId) {
+            R.layout.crossbar_widget_large -> {
+                // For large layout, show "No plugins" message in first item
+                views.setViewVisibility(R.id.plugin_item_1, View.VISIBLE)
+                views.setTextViewText(R.id.plugin_1_icon, "⚙️")
+                views.setTextViewText(R.id.plugin_1_title, "Crossbar")
+                views.setTextViewText(R.id.plugin_1_value, "Open app to start")
+                // Hide other items
+                views.setViewVisibility(R.id.plugin_item_2, View.GONE)
+                views.setViewVisibility(R.id.plugin_item_3, View.GONE)
+                views.setViewVisibility(R.id.plugin_item_4, View.GONE)
+            }
+            R.layout.crossbar_widget_medium -> {
+                views.setTextViewText(R.id.widget_icon, "⚙️")
+                views.setTextViewText(R.id.widget_value, "Open app")
+                views.setTextViewText(R.id.widget_title, "Crossbar")
+                views.setTextViewText(R.id.widget_subtitle, "Tap to start")
+                views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
+            }
+            else -> {
+                // Small layout
+                views.setTextViewText(R.id.widget_icon, "⚙️")
+                views.setTextViewText(R.id.widget_value, "Open app")
+            }
         }
     }
 
