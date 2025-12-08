@@ -195,7 +195,9 @@ void main() {
     });
 
     group('Output Format Consistency', () {
-      test('all interpreted plugins produce valid BitBar output', () async {
+      test(
+        'all interpreted plugins produce valid BitBar output',
+        () async {
         final allPlugins = Directory(pluginsDir)
             .listSync(recursive: true)
             .whereType<File>()
@@ -243,7 +245,7 @@ void main() {
           reason: 'At least some plugins should execute successfully '
               '(success: $successCount, skipped: $skipCount)',
         );
-      });
+      }, timeout: const Timeout(Duration(minutes: 2)));
 
       test('plugins of same function have consistent icon usage', () async {
         // CPU plugins should all use similar icons

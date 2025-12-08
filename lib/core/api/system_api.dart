@@ -1,16 +1,11 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
-import 'android_system_channel.dart';
-
 class SystemApi {
   SystemApi();
 
   // State for CPU calculation (Linux)
   List<int>? _lastLinuxCpuValues;
-
-  // Native Android channel for accurate system info
-  final AndroidSystemChannel _androidChannel = AndroidSystemChannel();
 
   Future<String> getCpuUsage() async {
     try {
@@ -154,17 +149,11 @@ class SystemApi {
     return '0.0';
   }
 
-  /// Android CPU usage via native Method Channel
-  /// Falls back to /proc/stat if channel unavailable
+  /// Android CPU usage via /proc/stat
+  /// Note: May be blocked on Android 8+ due to security
   Future<String> _getAndroidCpuUsage() async {
     try {
-      // Try native Method Channel first (more reliable)
-      final cpu = await _androidChannel.getCpuUsage();
-      if (cpu >= 0) {
-        return cpu.toStringAsFixed(1);
-      }
-
-      // Fallback to /proc/stat (may be blocked on Android 8+)
+      // Use /proc/stat (may be blocked on Android 8+)
       final stat1 = await File('/proc/stat').readAsString();
       await Future<void>.delayed(const Duration(milliseconds: 100));
       final stat2 = await File('/proc/stat').readAsString();
@@ -195,16 +184,8 @@ class SystemApi {
 
   Future<String> getMemoryUsage() async {
     try {
-      if (Platform.isAndroid) {
-        // Use native Method Channel for accurate Android memory info
-        final info = await _androidChannel.getMemoryInfo();
-        final usedMem = info['usedMem'] as int? ?? 0;
-        final totalMem = info['totalMem'] as int? ?? 0;
-        final usedGB = (usedMem / 1024 / 1024 / 1024).toStringAsFixed(1);
-        final totalGB = (totalMem / 1024 / 1024 / 1024).toStringAsFixed(1);
-        return '$usedGB/$totalGB GB';
-      }
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
+        // Android can also read /proc/meminfo
         return _getLinuxMemoryUsage();
       }
       if (Platform.isMacOS) {
@@ -309,15 +290,8 @@ class SystemApi {
 
   Future<String> getBatteryStatus() async {
     try {
-      if (Platform.isAndroid) {
-        // Use native Method Channel for accurate Android battery info
-        final info = await _androidChannel.getBatteryStatus();
-        final level = info['level'] as int? ?? -1;
-        final isCharging = info['isCharging'] as bool? ?? false;
-        if (level < 0) return 'N/A';
-        return '$level%${isCharging ? " ⚡" : ""}';
-      }
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
+        // Android can also read /sys/class/power_supply
         return _getLinuxBatteryStatus();
       }
       if (Platform.isMacOS) {
