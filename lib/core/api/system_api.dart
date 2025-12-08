@@ -1,8 +1,6 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
-import 'package:battery_plus/battery_plus.dart';
-
 class SystemApi {
   SystemApi();
 
@@ -291,11 +289,9 @@ class SystemApi {
 
   // BATTERY
 
-  final Battery _battery = Battery();
-
   Future<String> getBatteryStatus() async {
     try {
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxBatteryStatus();
       }
       if (Platform.isMacOS) {
@@ -304,24 +300,7 @@ class SystemApi {
       if (Platform.isWindows) {
         return _getWindowsBatteryStatus();
       }
-      if (Platform.isAndroid || Platform.isIOS) {
-        return _getMobileBatteryStatus();
-      }
       return 'N/A';
-    } catch (e) {
-      return 'N/A';
-    }
-  }
-
-  /// Mobile battery status using battery_plus
-  Future<String> _getMobileBatteryStatus() async {
-    try {
-      final level = await _battery.batteryLevel;
-      final state = await _battery.batteryState;
-
-      final isCharging =
-          state == BatteryState.charging || state == BatteryState.full;
-      return '$level%${isCharging ? " ⚡" : ""}';
     } catch (e) {
       return 'N/A';
     }
@@ -339,8 +318,30 @@ class SystemApi {
   }
 
   Future<String> _getLinuxBatteryStatus() async {
-    const batteryPath = '/sys/class/power_supply/BAT0';
+    // Find battery path dynamically (works on Linux and Android)
+    final batteryPath = await _findBatteryPath();
+    if (batteryPath == null) return 'N/A';
     return _readLinuxBattery(batteryPath);
+  }
+
+  /// Finds the battery path in /sys/class/power_supply/
+  /// Returns the first directory that has a 'capacity' file
+  Future<String?> _findBatteryPath() async {
+    const basePath = '/sys/class/power_supply';
+    try {
+      final dir = Directory(basePath);
+      if (!await dir.exists()) return null;
+
+      await for (final entity in dir.list()) {
+        if (entity is Directory) {
+          final capacityFile = File('${entity.path}/capacity');
+          if (await capacityFile.exists()) {
+            return entity.path;
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   String _getLinuxBatteryStatusSync() {
