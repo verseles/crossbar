@@ -373,6 +373,32 @@ menu:
 - [ ] **Testar notification:** Verificar que persistent notification aparece após build
 - [ ] **Widget styling:** Melhorar visual dos widgets Android
 
+### Fase 4: Android UX & Integration (Próximas Tarefas)
+
+- [ ] **Start on Boot:** Implementar auto-início do sistema Android quando "Start on Boot" for ativado
+  - Usar `android:permission="android.permission.RECEIVE_BOOT_COMPLETED"` no AndroidManifest
+  - Implementar `BootReceiver` em Kotlin para iniciar o serviço
+  - Solicitar permissão adequada ao usuário
+  - Testar em diferentes versões do Android (8+, 12+, 13+)
+
+- [ ] **Undismissable Notification:** Não permitir que a notificação persistente seja dispensada quando "Keep on Background" estiver ativado
+  - Definir `NotificationChannel` como IMPORTANCE_HIGH e com "on-going" flag
+  - Bloquear ação de "dismiss" via `NotificationListenerService`
+  - Permitir swipe-down para expandir menu de ações (refresh, open app, disable)
+  - Mostrar count de plugins ativos na notificação
+
+- [ ] **Plugins Directory Strategy:** Definir e implementar abordagem para localização dos plugins no Android
+  - **Opção A (Simples):** Usar pasta interna do app (`/data/data/com.verseles.crossbar/files/plugins/`)
+    - ✅ Mais seguro, isolamento completo
+    - ❌ Difícil para usuários acessarem/manterem plugins
+  - **Opção B (Custom Path):** Folder picker para o usuário escolher pasta externa
+    - ✅ Controle total do usuário
+    - ❌ Permissões Android 10+, Scoped Storage complexities
+  - **Opção C (Híbrida):** pasta interna + suporte a symbolic links ou pasta compartilhada
+    - ✅ Melhor dos dois mundos
+    - ❌ Mais complexo de implementar
+  - **Decisão recomendada:** Opção C (Híbrida) - pasta interna como padrão + pasta compartilhada opcional
+
 ---
 
 ## 🖥️ Epic v1.4.0: Advanced Desktop UI
