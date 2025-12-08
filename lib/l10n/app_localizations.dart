@@ -318,6 +318,12 @@ abstract class AppLocalizations {
   /// **'System'**
   String get systemTheme;
 
+  /// No description provided for @followSystemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system theme automatically'**
+  String get followSystemTheme;
+
   /// No description provided for @notifications.
   ///
   /// In en, this message translates to:

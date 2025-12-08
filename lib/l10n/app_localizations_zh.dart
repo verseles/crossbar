@@ -108,6 +108,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get systemTheme => '系统';
 
   @override
+  String get followSystemTheme => 'Follow system theme automatically';
+
+  @override
   String get notifications => '通知';
 
   @override

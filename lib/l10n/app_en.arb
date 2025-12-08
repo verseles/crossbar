@@ -33,6 +33,7 @@
   "lightTheme": "Light",
   "darkTheme": "Dark",
   "systemTheme": "System",
+  "followSystemTheme": "Follow system theme automatically",
   "notifications": "Notifications",
   "enableNotifications": "Enable Notifications",
   "startOnBoot": "Start on Boot",

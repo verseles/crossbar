@@ -109,6 +109,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get systemTheme => 'النظام';
 
   @override
+  String get followSystemTheme => 'Follow system theme automatically';
+
+  @override
   String get notifications => 'الإشعارات';
 
   @override

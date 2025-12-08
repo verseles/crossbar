@@ -20,7 +20,7 @@ void main() {
       // If a previous test called init, it returns early.
       await settingsService.init();
 
-      expect(settingsService.darkMode, false);
+      expect(settingsService.themeMode, ThemeModeOption.system);
       expect(settingsService.startWithSystem, false);
       expect(settingsService.showInTray, true);
       expect(settingsService.language, 'system');
@@ -29,12 +29,12 @@ void main() {
     test('Values are persisted', () async {
       await settingsService.init();
 
-      settingsService.darkMode = true;
-      expect(settingsService.darkMode, true);
+      settingsService.themeMode = ThemeModeOption.dark;
+      expect(settingsService.themeMode, ThemeModeOption.dark);
 
       // Verify persistence
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool('dark_mode'), true);
+      expect(prefs.getString('theme_mode'), 'dark');
 
       settingsService.language = 'pt_BR';
       expect(settingsService.language, 'pt_BR');

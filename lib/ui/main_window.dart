@@ -10,6 +10,18 @@ import 'tabs/settings_tab.dart';
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
 
+  /// Convert ThemeModeOption to Flutter's ThemeMode
+  ThemeMode _getThemeMode(ThemeModeOption option) {
+    switch (option) {
+      case ThemeModeOption.light:
+        return ThemeMode.light;
+      case ThemeModeOption.dark:
+        return ThemeMode.dark;
+      case ThemeModeOption.system:
+        return ThemeMode.system;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -46,7 +58,7 @@ class MainWindow extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          themeMode: settings.darkMode ? ThemeMode.dark : ThemeMode.light,
+          themeMode: _getThemeMode(settings.themeMode),
           home: const MainScreen(),
         );
       },

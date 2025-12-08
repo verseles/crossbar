@@ -109,6 +109,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get systemTheme => 'システム';
 
   @override
+  String get followSystemTheme => 'Follow system theme automatically';
+
+  @override
   String get notifications => '通知';
 
   @override

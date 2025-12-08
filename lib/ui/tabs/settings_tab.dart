@@ -56,13 +56,11 @@ class _SettingsTabState extends State<SettingsTab> {
                 title: l10n.appearance,
                 icon: Icons.palette,
                 children: [
-                  SwitchListTile(
+                  ListTile(
                     title: Text(l10n.darkTheme),
-                    subtitle: Text(l10n.useDarkTheme),
-                    value: settings.darkMode,
-                    onChanged: (value) {
-                      settings.darkMode = value;
-                    },
+                    subtitle: Text(_getThemeModeLabel(settings.themeMode, l10n)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showThemeModeDialog(settings, l10n),
                   ),
                   ListTile(
                     title: Text(l10n.language),
@@ -258,6 +256,65 @@ class _SettingsTabState extends State<SettingsTab> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(l10n.close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getThemeModeLabel(ThemeModeOption mode, AppLocalizations l10n) {
+    switch (mode) {
+      case ThemeModeOption.light:
+        return l10n.lightTheme;
+      case ThemeModeOption.dark:
+        return l10n.darkTheme;
+      case ThemeModeOption.system:
+        return '${l10n.system} (Auto)';
+    }
+  }
+
+  void _showThemeModeDialog(SettingsService settings, AppLocalizations l10n) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.darkTheme),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeModeOption>(
+              title: Text(l10n.lightTheme),
+              value: ThemeModeOption.light,
+              groupValue: settings.themeMode,
+              onChanged: (value) {
+                settings.themeMode = value!;
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<ThemeModeOption>(
+              title: Text(l10n.darkTheme),
+              value: ThemeModeOption.dark,
+              groupValue: settings.themeMode,
+              onChanged: (value) {
+                settings.themeMode = value!;
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<ThemeModeOption>(
+              title: Text('${l10n.system} (Auto)'),
+              subtitle: Text(l10n.followSystemTheme),
+              value: ThemeModeOption.system,
+              groupValue: settings.themeMode,
+              onChanged: (value) {
+                settings.themeMode = value!;
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
           ),
         ],
       ),

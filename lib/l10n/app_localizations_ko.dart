@@ -108,6 +108,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get systemTheme => '시스템';
 
   @override
+  String get followSystemTheme => 'Follow system theme automatically';
+
+  @override
   String get notifications => '알림';
 
   @override

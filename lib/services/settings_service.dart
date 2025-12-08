@@ -11,6 +11,13 @@ enum TrayDisplayMode {
   smartOverflow,
 }
 
+/// Theme mode options: light, dark, or system (auto-detect)
+enum ThemeModeOption {
+  light,
+  dark,
+  system,
+}
+
 class SettingsService extends ChangeNotifier {
 
   factory SettingsService() => _instance;
@@ -22,7 +29,7 @@ class SettingsService extends ChangeNotifier {
   bool _initialized = false;
 
   // Keys
-  static const String _keyDarkMode = 'dark_mode';
+  static const String _keyThemeMode = 'theme_mode';
   static const String _keyStartWithSystem = 'start_with_system';
   static const String _keyShowInTray = 'show_in_tray';
   static const String _keyLanguage = 'language';
@@ -30,7 +37,7 @@ class SettingsService extends ChangeNotifier {
   static const String _keyTrayClusterThreshold = 'tray_cluster_threshold';
 
   // Default Values
-  static const bool _defaultDarkMode = false;
+  static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
   static const bool _defaultStartWithSystem = false;
   static const bool _defaultShowInTray = true;
   static const String _defaultLanguage = 'system';
@@ -41,7 +48,7 @@ class SettingsService extends ChangeNotifier {
   static const int _defaultTrayClusterThreshold = 3;
 
   // State
-  bool _darkMode = _defaultDarkMode;
+  ThemeModeOption _themeMode = _defaultThemeMode;
   bool _startWithSystem = _defaultStartWithSystem;
   bool _showInTray = _defaultShowInTray;
   String _language = _defaultLanguage;
@@ -51,7 +58,11 @@ class SettingsService extends ChangeNotifier {
   bool get isInitialized => _initialized;
 
   // Getters
-  bool get darkMode => _darkMode;
+  ThemeModeOption get themeMode => _themeMode;
+  
+  /// Legacy getter for backwards compatibility
+  @Deprecated('Use themeMode instead')
+  bool get darkMode => _themeMode == ThemeModeOption.dark;
   bool get startWithSystem => _startWithSystem;
   bool get showInTray => _showInTray;
   String get language => _language;
@@ -59,12 +70,18 @@ class SettingsService extends ChangeNotifier {
   int get trayClusterThreshold => _trayClusterThreshold;
 
   // Setters
-  set darkMode(bool value) {
-    if (_darkMode != value) {
-      _darkMode = value;
-      _saveBool(_keyDarkMode, value);
+  set themeMode(ThemeModeOption value) {
+    if (_themeMode != value) {
+      _themeMode = value;
+      _saveString(_keyThemeMode, value.name);
       notifyListeners();
     }
+  }
+
+  /// Legacy setter for backwards compatibility
+  @Deprecated('Use themeMode instead')
+  set darkMode(bool value) {
+    themeMode = value ? ThemeModeOption.dark : ThemeModeOption.light;
   }
 
   set startWithSystem(bool value) {
@@ -169,7 +186,26 @@ X-GNOME-Autostart-enabled=true
     try {
       _prefs = await SharedPreferences.getInstance();
 
-      _darkMode = _prefs.getBool(_keyDarkMode) ?? _defaultDarkMode;
+      // Load theme mode (with migration from old darkMode boolean)
+      final themeModeString = _prefs.getString(_keyThemeMode);
+      if (themeModeString != null) {
+        _themeMode = ThemeModeOption.values.firstWhere(
+          (e) => e.name == themeModeString,
+          orElse: () => _defaultThemeMode,
+        );
+      } else {
+        // Migrate from old boolean darkMode setting
+        final oldDarkMode = _prefs.getBool('dark_mode');
+        if (oldDarkMode != null) {
+          _themeMode = oldDarkMode ? ThemeModeOption.dark : ThemeModeOption.light;
+          // Save migrated value
+          await _prefs.setString(_keyThemeMode, _themeMode.name);
+          // Remove old key
+          await _prefs.remove('dark_mode');
+        } else {
+          _themeMode = _defaultThemeMode;
+        }
+      }
       _startWithSystem = _prefs.getBool(_keyStartWithSystem) ?? _defaultStartWithSystem;
       _showInTray = _prefs.getBool(_keyShowInTray) ?? _defaultShowInTray;
       _language = _prefs.getString(_keyLanguage) ?? _defaultLanguage;
@@ -225,7 +261,7 @@ X-GNOME-Autostart-enabled=true
   @visibleForTesting
   void resetForTesting() {
     _initialized = false;
-    _darkMode = _defaultDarkMode;
+    _themeMode = _defaultThemeMode;
     _startWithSystem = _defaultStartWithSystem;
     _showInTray = _defaultShowInTray;
     _language = _defaultLanguage;

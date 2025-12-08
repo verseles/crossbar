@@ -33,11 +33,11 @@ void main() {
       expect(app.darkTheme, isNotNull);
     });
 
-    testWidgets('uses configured theme mode (default light)', (tester) async {
+    testWidgets('uses configured theme mode (default system/auto)', (tester) async {
       await tester.pumpWidget(const MainWindow());
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-      expect(app.themeMode, ThemeMode.light);
+      expect(app.themeMode, ThemeMode.system);
     });
 
     testWidgets('does not show debug banner', (tester) async {
