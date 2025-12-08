@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Small Widget Layout (1x1): Icon + Short Value -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="12dp"
+    tools:ignore="Overdraw">
 
     <!-- Icon/Emoji -->
     <TextView
         android:id="@+id/widget_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="📊"
-        android:textSize="24sp"
-        android:gravity="center" />
+        android:textSize="32sp" />
 
     <!-- Main Value -->
     <TextView
         android:id="@+id/widget_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="--"
-        android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"
+        android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:ellipsize="end" />
+        android:text="--"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>

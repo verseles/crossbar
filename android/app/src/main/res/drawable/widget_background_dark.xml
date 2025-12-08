@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modern Widget Background with rounded corners and semi-transparency (Dark Theme) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <corners android:radius="16dp" />
-    <solid android:color="#1E1E1E" />
-    <stroke
-        android:width="0dp"
-        android:color="@android:color/transparent" />
+    <corners android:radius="24dp" />
+    <solid android:color="@color/widget_background_transparent" />
 </shape>

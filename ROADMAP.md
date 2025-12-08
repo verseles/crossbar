@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.3.2+6 (Universal Plugins & Lua Embedded ✅)
-**Próximo Ciclo:** v1.3.3 (Android Polish & Marketplace)
+**Status Atual:** v1.3.2 (Internationalization & Polish ✅)
+**Próximo Ciclo:** v1.4.0 (Advanced Desktop UI)
 
 ---
 
@@ -345,7 +345,7 @@ menu:
 
 ## 🌍 Epic v1.3.2: Internationalization & Polish
 
-**Status: 🚧 EM PROGRESSO**
+**Status: ✅ CONCLUÍDO**
 
 **Objetivo:** Internacionalizar a aplicação e finalizar integração desktop.
 
@@ -371,7 +371,12 @@ menu:
 
 - [x] **Android strings:** Adicionar e traduzir `keepOnBackground` e `showPersistentNotification` para 12 idiomas
 - [x] **Testar notification:** Verificar que persistent notification aparece após build
-- [ ] **Widget styling:** Melhorar visual dos widgets Android
+- [x] **Widget styling:** Melhorar visual dos widgets Android
+  - Sistema de cores semânticas (light/dark theme)
+  - Backgrounds com cantos arredondados (24dp) e semi-transparência
+  - Tipografia maior e espaçamento Material 3
+  - Ícone de refresh customizado com ripple effect
+  - Preview image para widget picker
 
 ### Fase 4: Android UX & Integration ✅
 

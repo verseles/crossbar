@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FFFFFF</color>
+    
+    <!-- Widget Colors (Light Theme) -->
+    <color name="widget_background">#F5F5F5</color>
+    <color name="widget_background_ripple">#1F000000</color>
+    <color name="widget_text_primary">#1F1F1F</color>
+    <color name="widget_text_secondary">#5F5F5F</color>
+    <color name="widget_text_tertiary">#8F8F8F</color>
+    <color name="widget_icon_tint">#5F5F5F</color>
+    <color name="widget_divider">#1A000000</color>
+    <color name="widget_accent">#6750A4</color>
+    
+    <!-- Transparent background for system dynamic color support (Android 12+) -->
+    <color name="widget_background_transparent">#E6FFFFFF</color>
 </resources>

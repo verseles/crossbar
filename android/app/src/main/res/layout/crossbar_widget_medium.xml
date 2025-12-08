@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Medium Widget Layout (2x1): Icon + Title + Value + Action area -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="12dp">
+    android:padding="16dp"
+    tools:ignore="Overdraw">
 
     <!-- Icon/Emoji on the left -->
     <TextView
         android:id="@+id/widget_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="📊"
-        android:textSize="28sp"
+        android:layout_marginEnd="16dp"
         android:gravity="center"
-        android:layout_marginEnd="12dp" />
+        android:text="📊"
+        android:textSize="36sp" />
 
     <!-- Text content in the middle (takes remaining space) -->
     <LinearLayout
@@ -31,34 +33,37 @@
             android:id="@+id/widget_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Plugin"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
+            android:ellipsize="end"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:text="Plugin"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="12sp"
+            android:letterSpacing="0.02" />
 
         <!-- Main Value -->
         <TextView
             android:id="@+id/widget_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="--"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
+            android:ellipsize="end"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:text="--"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp" />
 
         <!-- Subtitle/Description (optional) -->
         <TextView
             android:id="@+id/widget_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="10sp"
-            android:textColor="@android:color/darker_gray"
-            android:maxLines="1"
             android:ellipsize="end"
+            android:maxLines="1"
+            android:text=""
+            android:textColor="@color/widget_text_tertiary"
+            android:textSize="11sp"
+            android:layout_marginTop="2dp"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -66,10 +71,14 @@
     <!-- Refresh action button on the right -->
     <ImageView
         android:id="@+id/widget_refresh"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@android:drawable/ic_popup_sync"
-        android:contentDescription="Refresh"
-        android:layout_marginStart="8dp" />
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="12dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_refresh"
+        android:padding="4dp"
+        android:src="@drawable/ic_refresh"
+        android:tint="@color/widget_icon_tint"
+        tools:ignore="UseAppTint" />
 
 </LinearLayout>

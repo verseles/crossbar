@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget Colors (Dark Theme) -->
+    <color name="widget_background">#1E1E1E</color>
+    <color name="widget_background_ripple">#1FFFFFFF</color>
+    <color name="widget_text_primary">#E1E1E1</color>
+    <color name="widget_text_secondary">#A1A1A1</color>
+    <color name="widget_text_tertiary">#717171</color>
+    <color name="widget_icon_tint">#A1A1A1</color>
+    <color name="widget_divider">#1AFFFFFF</color>
+    <color name="widget_accent">#D0BCFF</color>
+    
+    <!-- Transparent background for system dynamic color support (Android 12+) -->
+    <color name="widget_background_transparent">#E61E1E1E</color>
+</resources>
