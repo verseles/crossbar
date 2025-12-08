@@ -369,6 +369,7 @@ menu:
 
 ### Fase 3: Android Polish
 
+- [x] **Android strings:** Adicionar e traduzir `keepOnBackground` e `showPersistentNotification` para 12 idiomas
 - [ ] **Testar notification:** Verificar que persistent notification aparece após build
 - [ ] **Widget styling:** Melhorar visual dos widgets Android
 

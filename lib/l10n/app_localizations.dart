@@ -348,6 +348,18 @@ abstract class AppLocalizations {
   /// **'Minimize to Tray'**
   String get minimizeToTray;
 
+  /// No description provided for @keepOnBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep on Background'**
+  String get keepOnBackground;
+
+  /// No description provided for @showPersistentNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Show persistent notification'**
+  String get showPersistentNotification;
+
   /// No description provided for @pluginsDirectory.
   ///
   /// In en, this message translates to:

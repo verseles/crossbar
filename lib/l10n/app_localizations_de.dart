@@ -124,6 +124,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minimizeToTray => 'In Taskleiste minimieren';
 
   @override
+  String get keepOnBackground => 'Im Hintergrund behalten';
+
+  @override
+  String get showPersistentNotification =>
+      'Persistent Benachrichtigung anzeigen';
+
+  @override
   String get pluginsDirectory => 'Plugin-Verzeichnis';
 
   @override

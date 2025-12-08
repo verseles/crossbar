@@ -123,6 +123,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get minimizeToTray => '트레이로 최소화';
 
   @override
+  String get keepOnBackground => '백그라운드에 유지';
+
+  @override
+  String get showPersistentNotification => '영구 알림 표시';
+
+  @override
   String get pluginsDirectory => '플러그인 디렉토리';
 
   @override

@@ -124,6 +124,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get minimizeToTray => 'トレイに最小化';
 
   @override
+  String get keepOnBackground => 'バックグラウンドで保持';
+
+  @override
+  String get showPersistentNotification => '永続通知を表示';
+
+  @override
   String get pluginsDirectory => 'プラグインディレクトリ';
 
   @override

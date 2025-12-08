@@ -37,6 +37,8 @@
   "enableNotifications": "启用通知",
   "startOnBoot": "开机启动",
   "minimizeToTray": "最小化到托盘",
+  "keepOnBackground": "保持后台运行",
+  "showPersistentNotification": "显示持久通知",
   "pluginsDirectory": "插件目录",
   "openPluginsDirectory": "打开插件目录",
   "about": "关于",

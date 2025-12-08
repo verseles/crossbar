@@ -37,6 +37,8 @@
   "enableNotifications": "تفعيل الإشعارات",
   "startOnBoot": "البدء عند الإقلاع",
   "minimizeToTray": "تصغير إلى شريط المهام",
+  "keepOnBackground": "الاحتفاظ في الخلفية",
+  "showPersistentNotification": "عرض إشعار دائم",
   "pluginsDirectory": "مجلد الإضافات",
   "openPluginsDirectory": "فتح مجلد الإضافات",
   "about": "حول",

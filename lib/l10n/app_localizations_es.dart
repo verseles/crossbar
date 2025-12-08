@@ -124,6 +124,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get minimizeToTray => 'Minimizar a la bandeja';
 
   @override
+  String get keepOnBackground => 'Mantener en Segundo Plano';
+
+  @override
+  String get showPersistentNotification => 'Mostrar notificación persistente';
+
+  @override
   String get pluginsDirectory => 'Directorio de Plugins';
 
   @override

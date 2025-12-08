@@ -37,6 +37,8 @@
   "enableNotifications": "Включить Уведомления",
   "startOnBoot": "Запуск при загрузке",
   "minimizeToTray": "Свернуть в трей",
+  "keepOnBackground": "Держать в фоне",
+  "showPersistentNotification": "Показывать постоянное уведомление",
   "pluginsDirectory": "Каталог Плагинов",
   "openPluginsDirectory": "Открыть Каталог Плагинов",
   "about": "О программе",

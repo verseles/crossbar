@@ -124,6 +124,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get minimizeToTray => 'Minimizza nella barra';
 
   @override
+  String get keepOnBackground => 'Mantieni in Background';
+
+  @override
+  String get showPersistentNotification => 'Mostra notifica persistente';
+
+  @override
   String get pluginsDirectory => 'Directory dei Plugin';
 
   @override

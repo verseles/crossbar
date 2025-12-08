@@ -37,6 +37,8 @@
   "enableNotifications": "Benachrichtigungen Aktivieren",
   "startOnBoot": "Beim Start ausführen",
   "minimizeToTray": "In Taskleiste minimieren",
+  "keepOnBackground": "Im Hintergrund behalten",
+  "showPersistentNotification": "Persistent Benachrichtigung anzeigen",
   "pluginsDirectory": "Plugin-Verzeichnis",
   "openPluginsDirectory": "Plugin-Verzeichnis Öffnen",
   "about": "Über",

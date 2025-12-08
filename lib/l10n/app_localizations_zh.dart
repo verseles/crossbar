@@ -123,6 +123,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get minimizeToTray => '最小化到托盘';
 
   @override
+  String get keepOnBackground => '保持后台运行';
+
+  @override
+  String get showPersistentNotification => '显示持久通知';
+
+  @override
   String get pluginsDirectory => '插件目录';
 
   @override

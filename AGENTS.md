@@ -41,7 +41,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 11. Criar uma nova tag v patch incremental (dispara pipeline de release)
 12. Push para o github
 13. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
-14. Notificar o usuário com a tool play_notification para notificar o usuário
+14. Notificar o usuário com a tool play_notification (quando estiver disponível) para notificar o usuário
 15. Apresentar resumo das alterações
 
 - Caso alguma dessas etapas falhe, corrija e repita.
@@ -53,7 +53,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.3.2+6` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.3.2+7` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.

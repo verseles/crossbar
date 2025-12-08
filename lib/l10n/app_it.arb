@@ -37,6 +37,8 @@
   "enableNotifications": "Abilita Notifiche",
   "startOnBoot": "Avvia all'avvio",
   "minimizeToTray": "Minimizza nella barra",
+  "keepOnBackground": "Mantieni in Background",
+  "showPersistentNotification": "Mostra notifica persistente",
   "pluginsDirectory": "Directory dei Plugin",
   "openPluginsDirectory": "Apri Directory dei Plugin",
   "about": "Informazioni",

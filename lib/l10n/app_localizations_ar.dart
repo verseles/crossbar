@@ -124,6 +124,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get minimizeToTray => 'تصغير إلى شريط المهام';
 
   @override
+  String get keepOnBackground => 'الاحتفاظ في الخلفية';
+
+  @override
+  String get showPersistentNotification => 'عرض إشعار دائم';
+
+  @override
   String get pluginsDirectory => 'مجلد الإضافات';
 
   @override

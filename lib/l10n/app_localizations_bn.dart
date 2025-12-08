@@ -124,6 +124,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get minimizeToTray => 'ট্রেতে মিনিমাইজ করুন';
 
   @override
+  String get keepOnBackground => 'পটভূমিতে রাখুন';
+
+  @override
+  String get showPersistentNotification => 'স্থায়ী বিজ্ঞপ্তি দেখান';
+
+  @override
   String get pluginsDirectory => 'প্লাগইন ডিরেক্টরি';
 
   @override

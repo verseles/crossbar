@@ -124,6 +124,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get minimizeToTray => 'Свернуть в трей';
 
   @override
+  String get keepOnBackground => 'Держать в фоне';
+
+  @override
+  String get showPersistentNotification => 'Показывать постоянное уведомление';
+
+  @override
   String get pluginsDirectory => 'Каталог Плагинов';
 
   @override

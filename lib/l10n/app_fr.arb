@@ -37,6 +37,8 @@
   "enableNotifications": "Activer les Notifications",
   "startOnBoot": "Démarrer au démarrage",
   "minimizeToTray": "Réduire dans la barre",
+  "keepOnBackground": "Garder en Arrière-plan",
+  "showPersistentNotification": "Afficher une notification persistante",
   "pluginsDirectory": "Répertoire des Plugins",
   "openPluginsDirectory": "Ouvrir le Répertoire des Plugins",
   "about": "À propos",

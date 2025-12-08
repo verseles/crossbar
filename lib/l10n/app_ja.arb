@@ -37,6 +37,8 @@
   "enableNotifications": "通知を有効にする",
   "startOnBoot": "起動時に開始",
   "minimizeToTray": "トレイに最小化",
+  "keepOnBackground": "バックグラウンドで保持",
+  "showPersistentNotification": "永続通知を表示",
   "pluginsDirectory": "プラグインディレクトリ",
   "openPluginsDirectory": "プラグインディレクトリを開く",
   "about": "について",

@@ -37,6 +37,8 @@
   "enableNotifications": "알림 활성화",
   "startOnBoot": "부팅 시 시작",
   "minimizeToTray": "트레이로 최소화",
+  "keepOnBackground": "백그라운드에 유지",
+  "showPersistentNotification": "영구 알림 표시",
   "pluginsDirectory": "플러그인 디렉토리",
   "openPluginsDirectory": "플러그인 디렉토리 열기",
   "about": "정보",

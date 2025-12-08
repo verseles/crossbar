@@ -37,6 +37,8 @@
   "enableNotifications": "বিজ্ঞপ্তি সক্রিয় করুন",
   "startOnBoot": "বুটে শুরু করুন",
   "minimizeToTray": "ট্রেতে মিনিমাইজ করুন",
+  "keepOnBackground": "পটভূমিতে রাখুন",
+  "showPersistentNotification": "স্থায়ী বিজ্ঞপ্তি দেখান",
   "pluginsDirectory": "প্লাগইন ডিরেক্টরি",
   "openPluginsDirectory": "প্লাগইন ডিরেক্টরি খুলুন",
   "about": "সম্পর্কে",

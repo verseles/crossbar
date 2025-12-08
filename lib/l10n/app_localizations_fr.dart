@@ -124,6 +124,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get minimizeToTray => 'Réduire dans la barre';
 
   @override
+  String get keepOnBackground => 'Garder en Arrière-plan';
+
+  @override
+  String get showPersistentNotification =>
+      'Afficher une notification persistante';
+
+  @override
   String get pluginsDirectory => 'Répertoire des Plugins';
 
   @override

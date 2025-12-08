@@ -124,6 +124,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get minimizeToTray => 'ट्रे में मिनिमाइज़ करें';
 
   @override
+  String get keepOnBackground => 'पृष्ठभूमि में रखें';
+
+  @override
+  String get showPersistentNotification => 'सतत अधिसूचना दिखाएं';
+
+  @override
   String get pluginsDirectory => 'प्लगइन डायरेक्टरी';
 
   @override

@@ -38,6 +38,8 @@
   "enableNotifications": "Enable Notifications",
   "startOnBoot": "Start on Boot",
   "minimizeToTray": "Minimize to Tray",
+  "keepOnBackground": "Keep on Background",
+  "showPersistentNotification": "Show persistent notification",
   "pluginsDirectory": "Plugins Directory",
   "openPluginsDirectory": "Open Plugins Directory",
   "about": "About",

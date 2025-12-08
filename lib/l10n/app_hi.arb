@@ -37,6 +37,8 @@
   "enableNotifications": "नोटिफ़िकेशन सक्षम करें",
   "startOnBoot": "बूट पर शुरू करें",
   "minimizeToTray": "ट्रे में मिनिमाइज़ करें",
+  "keepOnBackground": "पृष्ठभूमि में रखें",
+  "showPersistentNotification": "सतत अधिसूचना दिखाएं",
   "pluginsDirectory": "प्लगइन डायरेक्टरी",
   "openPluginsDirectory": "प्लगइन डायरेक्टरी खोलें",
   "about": "के बारे में",

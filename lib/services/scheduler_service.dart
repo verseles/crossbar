@@ -7,6 +7,8 @@ import '../core/plugin_manager.dart';
 import '../models/plugin.dart';
 import '../models/plugin_output.dart';
 import 'notification_service.dart';
+
+import 'settings_service.dart';
 import 'widget_service.dart';
 
 typedef PluginOutputCallback = void Function(String pluginId, PluginOutput output);
@@ -51,11 +53,9 @@ class SchedulerService {
 
     await _pluginManager.discoverPlugins();
 
-    // Show persistent notification on Android
-    final enabledCount = _pluginManager.plugins.where((p) => p.enabled).length;
-    await _notificationService.showPersistentNotification(
-      enabledPlugins: enabledCount,
-    );
+    // Show persistent notification on Android if enabled
+    SettingsService().addListener(_onSettingsChanged);
+    await _updatePersistentNotification();
 
     for (final plugin in _pluginManager.plugins) {
       if (plugin.enabled) {
@@ -66,6 +66,7 @@ class SchedulerService {
 
   Future<void> stop() async {
     _running = false;
+    SettingsService().removeListener(_onSettingsChanged);
 
     for (final timer in _timers.values) {
       timer.cancel();
@@ -74,6 +75,21 @@ class SchedulerService {
     
     // Hide persistent notification
     await _notificationService.hidePersistentNotification();
+  }
+
+  void _onSettingsChanged() {
+    _updatePersistentNotification();
+  }
+
+  Future<void> _updatePersistentNotification() async {
+    if (SettingsService().showInTray) {
+      final enabledCount = _pluginManager.plugins.where((p) => p.enabled).length;
+      await _notificationService.showPersistentNotification(
+        enabledPlugins: enabledCount,
+      );
+    } else {
+      await _notificationService.hidePersistentNotification();
+    }
   }
 
   void _schedulePlugin(Plugin plugin) {

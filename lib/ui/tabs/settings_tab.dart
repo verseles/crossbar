@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -87,8 +88,12 @@ class _SettingsTabState extends State<SettingsTab> {
                     },
                   ),
                   SwitchListTile(
-                    title: Text(l10n.minimizeToTray),
-                    subtitle: Text(l10n.keepInTray),
+                    title: Text(Platform.isAndroid 
+                        ? l10n.keepOnBackground 
+                        : l10n.minimizeToTray),
+                    subtitle: Text(Platform.isAndroid 
+                        ? l10n.showPersistentNotification 
+                        : l10n.keepInTray),
                     value: settings.showInTray,
                     onChanged: (value) {
                       settings.showInTray = value;
