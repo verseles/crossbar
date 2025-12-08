@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 
@@ -139,9 +141,16 @@ class _SettingsTabState extends State<SettingsTab> {
                 title: l10n.about,
                 icon: Icons.info,
                 children: [
-                  ListTile(
-                    title: Text(l10n.version),
-                    subtitle: const Text('1.0.0'),
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      final version = snapshot.data?.version ?? '...';
+                      final buildNumber = snapshot.data?.buildNumber ?? '';
+                      return ListTile(
+                        title: Text(l10n.version),
+                        subtitle: Text('$version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}'),
+                      );
+                    },
                   ),
                   ListTile(
                     title: Text(l10n.license),
@@ -153,8 +162,11 @@ class _SettingsTabState extends State<SettingsTab> {
                     title: const Text('GitHub'),
                     subtitle: const Text('verseles/crossbar'),
                     trailing: const Icon(Icons.open_in_new),
-                    onTap: () {
-                      // TODO: Open GitHub
+                    onTap: () async {
+                      final uri = Uri.parse('https://github.com/verseles/crossbar');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
                     },
                   ),
                 ],
