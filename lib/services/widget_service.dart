@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 
 import '../core/plugin_manager.dart';
@@ -30,6 +31,17 @@ class WidgetService {
 
     // Register callback for when widget is clicked
     HomeWidget.widgetClicked.listen(_handleWidgetClick);
+
+    // Listen for widget refresh requests from native Android
+    if (Platform.isAndroid) {
+      const channel = MethodChannel('com.verseles.crossbar/system');
+      channel.setMethodCallHandler((call) async {
+        if (call.method == 'onWidgetRefresh') {
+          await updateAllWidgets();
+        }
+        return null;
+      });
+    }
 
     _initialized = true;
   }

@@ -238,17 +238,18 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
 
-        // Refresh button triggers widget update
+        // Refresh button launches app with refresh action to re-execute plugins
         if (layoutId != R.layout.crossbar_widget_small) {
-            val refreshIntent = Intent(context, CrossbarWidgetProvider::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-                // Use a unique URI to make sure PendingIntent is unique
+            val refreshIntent = Intent(context, MainActivity::class.java).apply {
+                action = ACTION_REFRESH
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("refresh_widgets", true)
+                // Use a unique data URI to make sure PendingIntent is unique
                 data = Uri.parse("crossbar://refresh/$appWidgetId")
             }
-            val refreshPendingIntent = PendingIntent.getBroadcast(
+            val refreshPendingIntent = PendingIntent.getActivity(
                 context,
-                appWidgetId,
+                appWidgetId + 1000, // Different request code than open intent
                 refreshIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
