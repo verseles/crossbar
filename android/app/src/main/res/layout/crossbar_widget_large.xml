@@ -1,31 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Large Widget Layout (2x2 or bigger): List of plugins -->
+<!-- Large Widget Layout (2x2): List of plugins - Simplified for RemoteViews compatibility -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:ignore="Overdraw">
+    android:padding="16dp">
 
-    <!-- Header -->
+    <!-- Header - Text only, no ImageView to avoid RemoteViews issues -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal">
-
-        <!-- App Icon -->
-        <ImageView
-            android:id="@+id/widget_app_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="10dp"
-            android:contentDescription="Crossbar"
-            android:src="@mipmap/ic_launcher" />
 
         <!-- Title -->
         <TextView
@@ -36,29 +25,18 @@
             android:text="Crossbar"
             android:textColor="@color/widget_text_primary"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.01" />
+            android:textStyle="bold" />
 
-        <!-- Refresh button -->
-        <ImageView
+        <!-- Refresh button as text emoji for simplicity -->
+        <TextView
             android:id="@+id/widget_refresh"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/action_refresh"
-            android:padding="2dp"
-            android:src="@drawable/ic_refresh"
-            android:tint="@color/widget_icon_tint"
-            tools:ignore="UseAppTint" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔄"
+            android:textSize="20sp"
+            android:padding="4dp" />
 
     </LinearLayout>
-
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="12dp"
-        android:background="@color/widget_divider" />
 
     <!-- Plugin List Container -->
     <LinearLayout
@@ -75,15 +53,15 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="6dp">
+            android:paddingVertical="4dp">
 
             <TextView
                 android:id="@+id/plugin_1_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:text="📊"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/plugin_1_title"
@@ -94,7 +72,7 @@
                 android:maxLines="1"
                 android:text="Plugin 1"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/plugin_1_value"
@@ -102,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:text="--"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -114,16 +92,16 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="6dp"
+            android:paddingVertical="4dp"
             android:visibility="gone">
 
             <TextView
                 android:id="@+id/plugin_2_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:text="📊"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/plugin_2_title"
@@ -134,7 +112,7 @@
                 android:maxLines="1"
                 android:text="Plugin 2"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/plugin_2_value"
@@ -142,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:text="--"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -154,16 +132,16 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="6dp"
+            android:paddingVertical="4dp"
             android:visibility="gone">
 
             <TextView
                 android:id="@+id/plugin_3_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:text="📊"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/plugin_3_title"
@@ -174,7 +152,7 @@
                 android:maxLines="1"
                 android:text="Plugin 3"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/plugin_3_value"
@@ -182,7 +160,7 @@
                 android:layout_height="wrap_content"
                 android:text="--"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -194,16 +172,16 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="6dp"
+            android:paddingVertical="4dp"
             android:visibility="gone">
 
             <TextView
                 android:id="@+id/plugin_4_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:text="📊"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/plugin_4_title"
@@ -214,7 +192,7 @@
                 android:maxLines="1"
                 android:text="Plugin 4"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/plugin_4_value"
@@ -222,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:text="--"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -234,7 +212,7 @@
         android:id="@+id/widget_last_updated"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:gravity="end"
         android:text="Updated just now"
         android:textColor="@color/widget_text_tertiary"
