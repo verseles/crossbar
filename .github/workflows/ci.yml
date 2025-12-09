@@ -113,6 +113,7 @@ jobs:
         with:
           name: crossbar-linux
           path: build/linux/x64/release/bundle/
+          retention-days: 7
 
   build-macos:
     if: false # Temporarily disabled
@@ -149,6 +150,7 @@ jobs:
         with:
           name: crossbar-macos
           path: build/macos/Build/Products/Release/
+          retention-days: 7
 
   build-windows:
     if: false # Temporarily disabled
@@ -185,6 +187,7 @@ jobs:
         with:
           name: crossbar-windows
           path: build/windows/x64/runner/Release/
+          retention-days: 7
 
   build-android:
     runs-on: ubuntu-latest
@@ -257,6 +260,7 @@ jobs:
         with:
           name: crossbar-android
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
 
   # Final check: ensures workflow fails if tests failed
   # Builds run to completion regardless of test status

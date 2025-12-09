@@ -54,6 +54,7 @@ jobs:
         with:
           name: crossbar-linux
           path: crossbar-linux-x64.tar.gz
+          retention-days: 7
 
   build-macos:
     if: false # Temporarily disabled
@@ -98,6 +99,7 @@ jobs:
         with:
           name: crossbar-macos
           path: crossbar-macos-arm64.tar.gz
+          retention-days: 7
 
   build-windows:
     if: false # Temporarily disabled
@@ -142,6 +144,7 @@ jobs:
         with:
           name: crossbar-windows
           path: crossbar-windows-x64.zip
+          retention-days: 7
 
   build-android:
     runs-on: ubuntu-latest
@@ -204,6 +207,7 @@ jobs:
         with:
           name: crossbar-android
           path: crossbar-android-arm64.apk
+          retention-days: 7
 
   create-release:
     needs: [build-android] # linux/macos/windows temporarily disabled
