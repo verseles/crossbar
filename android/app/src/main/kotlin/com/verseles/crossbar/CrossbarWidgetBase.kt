@@ -53,18 +53,35 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
-            // Get plugin IDs from stored data
-            val pluginIdsJson = widgetData.getString("plugin_ids", null)
-            val pluginIds = try {
-                if (pluginIdsJson != null) {
-                    val jsonArray = JSONArray(pluginIdsJson)
-                    (0 until jsonArray.length()).map { jsonArray.getString(it) }
-                } else {
+            // First, try to get widget-specific plugin configuration
+            val widgetPluginsJson = widgetData.getString("widget_${appWidgetId}_plugins", null)
+            var pluginIds: List<String> = emptyList()
+            
+            if (widgetPluginsJson != null) {
+                // Use widget-specific plugin selection
+                try {
+                    val jsonArray = JSONArray(widgetPluginsJson)
+                    pluginIds = (0 until jsonArray.length()).map { jsonArray.getString(it) }
+                    android.util.Log.d(TAG, "Widget $appWidgetId using configured plugins: $pluginIds")
+                } catch (e: Exception) {
+                    android.util.Log.e(TAG, "Error parsing widget config for $appWidgetId", e)
+                }
+            }
+            
+            // Fallback to global plugin_ids if no specific config
+            if (pluginIds.isEmpty()) {
+                val pluginIdsJson = widgetData.getString("plugin_ids", null)
+                pluginIds = try {
+                    if (pluginIdsJson != null) {
+                        val jsonArray = JSONArray(pluginIdsJson)
+                        (0 until jsonArray.length()).map { jsonArray.getString(it) }
+                    } else {
+                        emptyList()
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e(TAG, "Error parsing plugin IDs", e)
                     emptyList()
                 }
-            } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error parsing plugin IDs", e)
-                emptyList()
             }
 
             if (pluginIds.isEmpty()) {
