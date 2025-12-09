@@ -570,35 +570,28 @@ Built with:
 - 💬 [Discussions](https://github.com/verseles/crossbar/discussions)
 - 📧 Email: support@crossbar.dev (coming soon)
 
-## 🗺️ Roadmap
+### 🗺️ Roadmap
 
 > **Full roadmap**: See [ROADMAP.md](ROADMAP.md) for detailed timeline, completed features, and technical debt tracking.
 
-### ✅ v1.3.0 (Current - 2025)
+### ✅ v1.4.0 (Current - 2025)
 
-**Universal Plugins (Multi-Runner Architecture)**
+**Mobile Mastery & Configuration Engine**
 
-- Core plugin system (Declarative YAML, Dart, Script).
-- 47+ CLI commands.
-- 5 platform support (Linux, macOS, Windows, Android, iOS).
-- Hot reload & CI/CD.
-- 24+ example plugins.
-- i18n (10 languages).
-- Comprehensive documentation.
+- **Configuration Engine**: JSON schema support, secure storage (Keychain), and UI generation.
+- **Mobile Widgets**: Native Android (XML) and iOS (WidgetKit) home screen widgets.
+- **Core**: Plugin Manager, Script Runner, Output Parser.
+- **CLI**: 47+ commands.
+- **Platforms**: Linux, macOS, Windows, Android, iOS.
 
-**Current Focus**:
+### 🎯 v1.5.0 (Next)
 
-- iOS Widgets (WidgetKit).
-- Universal Plugin Runners (Declarative/Dart).
-- Advanced Desktop UI.
-
-### 🎯 v1.4.0 (Next)
-
-**Advanced Desktop UI**
+**Advanced Desktop UI & API Completion**
 
 - Global Hotkey (Ctrl+Alt+C).
 - Tray Overflow Logic (Smart Collapse).
 - Window State Persistence.
+- New CLI commands: `location`, `qr`.
 
 ### 🌟 Visão de Longo Prazo (v2.0.0+)
 

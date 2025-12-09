@@ -2,12 +2,12 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.0.0 (MVP lançado)
-**Próximo Ciclo:** v1.1.0 (Configuration Engine)
+**Status Atual:** v1.4.0 (Polimento e Expansão)
+**Próximo Ciclo:** v1.5.0 (Advanced Desktop & Marketplace)
 
 ---
 
-## 🔍 Auditoria do Estado Atual (v1.0.0)
+## 🔍 Auditoria do Estado Atual (v1.4.0)
 
 Antes de avançar, reconhecemos o que existe e o que falta para atingir a promessa do "Write Once, Run Everywhere".
 
@@ -17,78 +17,79 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **CLI Foundation:** Estrutura de comandos e parser de argumentos robustos.
 - **UI Desktop:** Janela principal e abas implementadas.
 - **Tray Básico:** Ícone único e menu funcionam via `tray_manager`.
+- **Configuration Engine:** Persistência, UI e injeção de variáveis implementados.
+- **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
 
-- **Configuração:** UI existe, mas não salva dados nem injeta no plugin.
-- **Mobile Widgets:** `WidgetService` existe mas não comunica com layouts nativos (XML/SwiftUI).
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
 - **API Gaps:** Comandos como `--location` (geocoding) e `--qr` não têm lógica implementada.
+- **Marketplace:** Ainda não integrado com a API do GitHub.
 
 ---
 
-## 🎯 Epic v1.1.0: The Configuration Engine
+## 🎯 Epic v1.1.0: The Configuration Engine (Concluído)
 
 **Objetivo:** Permitir que plugins declarem configurações (JSON), o usuário preencha (UI), e o sistema injete (ENV vars) com segurança.
 
 ### Fase 1: Persistência e Segurança
 
-- [ ] **Criar Service:** `lib/services/plugin_config_service.dart`.
-  - [ ] Implementar `loadValues(pluginId)` lendo de `~/.crossbar/configs/`.
-  - [ ] Implementar `saveValues(pluginId, map)` escrevendo JSON.
-  - [ ] Integrar `flutter_secure_storage` para detectar chaves definidas como `type: password` no schema e salvar separadamente.
-- [ ] **Vincular Plugin:** Em `lib/core/plugin_manager.dart`:
-  - [ ] No método `_createPluginFromFile`, verificar existência de `[plugin].config.json`.
-  - [ ] Parsear JSON para `PluginConfig` object.
-  - [ ] Adicionar campo `PluginConfig? config` ao model `Plugin`.
-- [ ] **Teste Unitário:** `test/unit/services/plugin_config_service_test.dart` cobrindo criptografia e I/O.
+- [x] **Criar Service:** `lib/services/plugin_config_service.dart`.
+  - [x] Implementar `loadValues(pluginId)` lendo de `~/.crossbar/configs/`.
+  - [x] Implementar `saveValues(pluginId, map)` escrevendo JSON.
+  - [x] Integrar `flutter_secure_storage` para detectar chaves definidas como `type: password` no schema e salvar separadamente.
+- [x] **Vincular Plugin:** Em `lib/core/plugin_manager.dart`:
+  - [x] No método `_createPluginFromFile`, verificar existência de `[plugin].config.json`.
+  - [x] Parsear JSON para `PluginConfig` object.
+  - [x] Adicionar campo `PluginConfig? config` ao model `Plugin`.
+- [x] **Teste Unitário:** `test/unit/services/plugin_config_service_test.dart` cobrindo criptografia e I/O.
 
 ### Fase 2: Injeção de Variáveis
 
-- [ ] **Update Runner:** Em `lib/core/script_runner.dart`:
-  - [ ] Injetar `PluginConfigService` no construtor.
-  - [ ] No método `run`, chamar `loadValues`.
-  - [ ] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
-- [ ] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
+- [x] **Update Runner:** Em `lib/core/script_runner.dart`:
+  - [x] Injetar `PluginConfigService` no construtor.
+  - [x] No método `run`, chamar `loadValues`.
+  - [x] Mesclar valores carregados ao mapa `environment` passado para `Process.start`.
+- [x] **Teste Funcional:** Criar `test/functional/fixtures/env_dump.sh` e validar se variáveis salvas aparecem no STDOUT.
 
 ### Fase 3: Conexão UI
 
-- [ ] **Plugins Tab:** Em `lib/ui/tabs/plugins_tab.dart`:
-  - [ ] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
-  - [ ] Carregar valores atuais antes de abrir o dialog.
-  - [ ] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
+- [x] **Plugins Tab:** Em `lib/ui/tabs/plugins_tab.dart`:
+  - [x] Adicionar botão "Configurar" (ícone engrenagem) se `plugin.config != null`.
+  - [x] Carregar valores atuais antes de abrir o dialog.
+  - [x] Chamar `saveValues` no callback `onSave` do `PluginConfigDialog`.
 
 ---
 
-## 📱 Epic v1.2.0: Mobile Mastery (Widgets & Services)
+## 📱 Epic v1.2.0: Mobile Mastery (Widgets & Services) (Concluído)
 
 **Objetivo:** Transformar o Crossbar em um cidadão de primeira classe no Android e iOS, usando o package `home_widget` corretamente.
 
 ### Fase 1: Android Native (XML & Receiver)
 
-- [ ] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
-  - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
-  - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
-  - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
-- [ ] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
-  - [ ] Implementar lógica de atualização via `RemoteViews`.
-  - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
-- [ ] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
+- [x] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
+  - [x] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
+  - [x] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
+  - [x] `widget_layout_large.xml` (Lista/Grid para menu items).
+- [x] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
+  - [x] Implementar lógica de atualização via `RemoteViews`.
+  - [x] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
+- [x] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
 
 ### Fase 2: iOS Native (WidgetKit)
 
-- [ ] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS.
-- [ ] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
-- [ ] **SwiftUI View:** Implementar `CrossbarWidget.swift`.
-  - [ ] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
-  - [ ] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
+- [x] **XCode Target:** Adicionar target "Widget Extension" ao projeto iOS.
+- [x] **App Groups:** Configurar App Groups no XCode (Runner + Widget) para compartilhamento de dados `UserDefaults`.
+- [x] **SwiftUI View:** Implementar `CrossbarWidget.swift`.
+  - [x] Criar TimelineProvider que lê JSON do `UserDefaults` (via `home_widget`).
+  - [x] Desenhar View adaptativa (family: .systemSmall, .systemMedium).
 
 ### Fase 3: Widget Service Logic
 
-- [ ] **Serialização:** Em `lib/services/widget_service.dart`:
-  - [ ] Implementar `updateWidget(pluginId, output)`.
-  - [ ] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
-  - [ ] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
+- [x] **Serialização:** Em `lib/services/widget_service.dart`:
+  - [x] Implementar `updateWidget(pluginId, output)`.
+  - [x] Serializar `PluginOutput` para formato plano (chave/valor) que o `home_widget` consome.
+  - [x] Chamar `HomeWidget.updateWidget` com o nome correto do provider.
 - [x] **Background Sync:** Implementado via WorkManager para atualização de widgets em background (Android).
   - Criado `lib/services/background_service.dart` com `callbackDispatcher`
   - Tarefa periódica de 15 minutos para atualizar widgets
