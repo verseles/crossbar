@@ -3,6 +3,7 @@ package com.verseles.crossbar
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.appwidget.AppWidgetManager
 import android.os.BatteryManager
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
@@ -13,10 +14,15 @@ import java.io.RandomAccessFile
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.verseles.crossbar/system"
+    private val WIDGET_CONFIG_CHANNEL = "com.verseles.crossbar/widget_config"
+    
+    // Stores widget configuration data when launched from WidgetConfigActivity
+    private var widgetConfigData: Map<String, Any?>? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
 
+        // System channel for battery, CPU, memory, etc.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "getBatteryLevel" -> {
@@ -46,6 +52,29 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // Widget configuration channel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CONFIG_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getWidgetConfigIntent" -> {
+                        result.success(widgetConfigData)
+                    }
+                    "configurationComplete" -> {
+                        android.util.Log.d("Crossbar", "Widget configuration complete")
+                        setResult(RESULT_OK)
+                        finish()
+                        result.success(true)
+                    }
+                    "configurationCancelled" -> {
+                        android.util.Log.d("Crossbar", "Widget configuration cancelled")
+                        setResult(RESULT_CANCELED)
+                        finish()
+                        result.success(true)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     private fun getBatteryLevel(): Int {
@@ -130,6 +159,17 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Capture widget config data BEFORE calling super (which initializes Flutter)
+        widgetConfigData = if (intent?.getBooleanExtra(WidgetConfigActivity.EXTRA_WIDGET_CONFIG_MODE, false) == true) {
+            val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+            val widgetSize = intent.getStringExtra(WidgetConfigActivity.EXTRA_WIDGET_SIZE) ?: "medium"
+            android.util.Log.d("Crossbar", "Widget config mode: widgetId=$widgetId, size=$widgetSize")
+            mapOf(
+                "widgetId" to widgetId,
+                "widgetSize" to widgetSize
+            )
+        } else null
+
         super.onCreate(savedInstanceState)
         Thread.setDefaultUncaughtExceptionHandler { thread, ex ->
             android.util.Log.e("Crossbar", "Uncaught exception", ex)

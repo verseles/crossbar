@@ -495,4 +495,25 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get licenseText =>
       'Crossbar - نظام إضافات عالمي\n\nحقوق الطبع والنشر (C) 2025\n\nهذا البرنامج هو برنامج حر: يمكنك إعادة توزيعه و/أو تعديله بموجب شروط رخصة GNU Affero العمومية التي نشرتها مؤسسة البرمجيات الحرة، إما الإصدار 3 من الرخصة، أو (حسب اختيارك) أي إصدار لاحق.\n\nيتم توزيع هذا البرنامج على أمل أن يكون مفيدًا، ولكن بدون أي ضمان؛ حتى بدون الضمان الضمني للتسويق أو الملاءمة لغرض معين. راجع رخصة GNU Affero العمومية لمزيد من التفاصيل.\n\nيجب أن تكون قد تلقيت نسخة من رخصة GNU Affero العمومية مع هذا البرنامج. إن لم تفعل، انظر <https://www.gnu.org/licenses/>.';
+
+  @override
+  String get configureWidget => 'Configure Widget';
+
+  @override
+  String get selectOnePlugin => 'Select a plugin to display:';
+
+  @override
+  String selectUpToPlugins(int count) {
+    return 'Select up to $count plugins:';
+  }
+
+  @override
+  String get noEnabledPlugins =>
+      'No enabled plugins found.\nEnable some plugins first.';
+
+  @override
+  String get selectAtLeastOnePlugin => 'Select at least one plugin';
+
+  @override
+  String get selected => 'Selected';
 }

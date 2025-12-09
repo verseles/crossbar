@@ -53,17 +53,29 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
-            // Get plugin IDs from stored data
-            val pluginIdsJson = widgetData.getString("plugin_ids", null)
+            // Get plugin IDs - first try widget-specific config, then fallback to global
+            val widgetSpecificKey = "widget_${appWidgetId}_plugins"
+            val widgetPluginsJson = widgetData.getString(widgetSpecificKey, null)
+            val globalPluginsJson = widgetData.getString("plugin_ids", null)
+            
             val pluginIds = try {
-                if (pluginIdsJson != null) {
-                    val jsonArray = JSONArray(pluginIdsJson)
-                    (0 until jsonArray.length()).map { jsonArray.getString(it) }
-                } else {
-                    emptyList()
+                when {
+                    // First priority: widget-specific configuration
+                    widgetPluginsJson != null -> {
+                        android.util.Log.d(TAG, "Using widget-specific config for widget $appWidgetId")
+                        val jsonArray = JSONArray(widgetPluginsJson)
+                        (0 until jsonArray.length()).map { jsonArray.getString(it) }
+                    }
+                    // Fallback: global plugin list
+                    globalPluginsJson != null -> {
+                        android.util.Log.d(TAG, "Using global config for widget $appWidgetId")
+                        val jsonArray = JSONArray(globalPluginsJson)
+                        (0 until jsonArray.length()).map { jsonArray.getString(it) }
+                    }
+                    else -> emptyList()
                 }
             } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error parsing plugin IDs", e)
+                android.util.Log.e(TAG, "Error parsing plugin IDs for widget $appWidgetId", e)
                 emptyList()
             }
 

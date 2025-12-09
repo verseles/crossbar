@@ -492,4 +492,25 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get licenseText =>
       'Crossbar - 범용 플러그인 시스템\n\nCopyright (C) 2025\n\n이 프로그램은 자유 소프트웨어입니다: Free Software Foundation에서 발행한 GNU Affero 일반 공중 라이선스의 조건에 따라 라이선스 버전 3 또는 (선택에 따라) 이후 버전에 따라 재배포 및/또는 수정할 수 있습니다.\n\n이 프로그램은 유용할 것이라는 희망으로 배포되지만, 상품성 또는 특정 목적에 대한 적합성에 대한 묵시적 보증조차 없이 어떠한 보증도 없이 배포됩니다. 자세한 내용은 GNU Affero 일반 공중 라이선스를 참조하세요.\n\n이 프로그램과 함께 GNU Affero 일반 공중 라이선스 사본을 받았어야 합니다. 받지 못한 경우 <https://www.gnu.org/licenses/>를 참조하세요.';
+
+  @override
+  String get configureWidget => 'Configure Widget';
+
+  @override
+  String get selectOnePlugin => 'Select a plugin to display:';
+
+  @override
+  String selectUpToPlugins(int count) {
+    return 'Select up to $count plugins:';
+  }
+
+  @override
+  String get noEnabledPlugins =>
+      'No enabled plugins found.\nEnable some plugins first.';
+
+  @override
+  String get selectAtLeastOnePlugin => 'Select at least one plugin';
+
+  @override
+  String get selected => 'Selected';
 }

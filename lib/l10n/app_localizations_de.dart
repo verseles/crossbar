@@ -503,4 +503,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get licenseText =>
       'Crossbar - Universelles Plugin-System\n\nCopyright (C) 2025\n\nDieses Programm ist freie Software: Sie können es unter den Bedingungen der GNU Affero General Public License wie von der Free Software Foundation veröffentlicht, entweder Version 3 der Lizenz oder (nach Ihrer Wahl) jeder späteren Version, weitergeben und/oder modifizieren.\n\nDieses Programm wird in der Hoffnung verteilt, dass es nützlich sein wird, aber OHNE JEDE GARANTIE; sogar ohne die implizite Garantie der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK. Siehe die GNU Affero General Public License für weitere Details.\n\nSie sollten eine Kopie der GNU Affero General Public License zusammen mit diesem Programm erhalten haben. Falls nicht, siehe <https://www.gnu.org/licenses/>.';
+
+  @override
+  String get configureWidget => 'Configure Widget';
+
+  @override
+  String get selectOnePlugin => 'Select a plugin to display:';
+
+  @override
+  String selectUpToPlugins(int count) {
+    return 'Select up to $count plugins:';
+  }
+
+  @override
+  String get noEnabledPlugins =>
+      'No enabled plugins found.\nEnable some plugins first.';
+
+  @override
+  String get selectAtLeastOnePlugin => 'Select at least one plugin';
+
+  @override
+  String get selected => 'Selected';
 }

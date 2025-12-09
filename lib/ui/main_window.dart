@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
+import 'dialogs/widget_config_dialog.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
 import 'tabs/settings_tab.dart';
@@ -75,12 +77,43 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  static const _widgetConfigChannel = MethodChannel('com.verseles.crossbar/widget_config');
 
   final List<Widget> _tabs = const [
     PluginsTab(),
     SettingsTab(),
     MarketplaceTab(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Check for widget configuration intent on Android
+    if (Platform.isAndroid) {
+      _checkWidgetConfigIntent();
+    }
+  }
+
+  Future<void> _checkWidgetConfigIntent() async {
+    try {
+      final data = await _widgetConfigChannel
+          .invokeMethod<Map<dynamic, dynamic>>('getWidgetConfigIntent');
+      
+      if (data != null && data['widgetId'] != null) {
+        final widgetId = data['widgetId'] as int;
+        final widgetSize = data['widgetSize'] as String? ?? 'medium';
+
+        // Wait for context to be ready, then show dialog
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            WidgetConfigDialog.show(context, widgetId, widgetSize);
+          }
+        });
+      }
+    } catch (e) {
+      // No widget config intent - normal app launch, ignore
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

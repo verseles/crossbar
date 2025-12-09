@@ -1031,6 +1031,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.'**
   String get licenseText;
+
+  /// No description provided for @configureWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Widget'**
+  String get configureWidget;
+
+  /// No description provided for @selectOnePlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a plugin to display:'**
+  String get selectOnePlugin;
+
+  /// No description provided for @selectUpToPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Select up to {count} plugins:'**
+  String selectUpToPlugins(int count);
+
+  /// No description provided for @noEnabledPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'No enabled plugins found.\nEnable some plugins first.'**
+  String get noEnabledPlugins;
+
+  /// No description provided for @selectAtLeastOnePlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one plugin'**
+  String get selectAtLeastOnePlugin;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get selected;
 }
 
 class _AppLocalizationsDelegate
