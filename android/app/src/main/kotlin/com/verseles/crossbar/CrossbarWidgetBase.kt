@@ -5,10 +5,10 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -53,32 +53,53 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
-            // Get plugin IDs from stored data
-            val pluginIdsJson = widgetData.getString("plugin_ids", null)
-            val pluginIds = try {
-                if (pluginIdsJson != null) {
-                    val jsonArray = JSONArray(pluginIdsJson)
-                    (0 until jsonArray.length()).map { jsonArray.getString(it) }
-                } else {
-                    emptyList()
-                }
-            } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error parsing plugin IDs", e)
-                emptyList()
-            }
+            if (layoutId == R.layout.crossbar_widget_large) {
+                 // Bind ListService for ListView
+                 val serviceIntent = Intent(context, CrossbarWidgetListService::class.java).apply {
+                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                     data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+                 }
 
-            if (pluginIds.isEmpty()) {
-                setNoDataState(views, layoutId)
+                 views.setRemoteAdapter(R.id.widget_list_view, serviceIntent)
+                 // Note: we don't set empty view ID here because we handle fallback manually or via adapter count 0
+
+                 // Template for item clicks
+                 val clickIntent = Intent(context, MainActivity::class.java).apply {
+                      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                 }
+                 val pendingIntent = PendingIntent.getActivity(
+                     context,
+                     appWidgetId,
+                     clickIntent,
+                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                 )
+                 views.setPendingIntentTemplate(R.id.widget_list_view, pendingIntent)
+
+                 appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_list_view)
+
             } else {
-                when (layoutId) {
-                    R.layout.crossbar_widget_large -> {
-                        updateLargeWidget(views, widgetData, pluginIds.take(4))
-                    }
-                    else -> {
-                        val firstPluginId = pluginIds.first()
-                        updateSinglePluginWidget(views, widgetData, firstPluginId, layoutId)
-                    }
-                }
+                 // Small/Medium: Parse JSON manually
+                 val allDataJson = widgetData.getString("flutter.widget_data", null)
+                 var hasData = false
+
+                 if (allDataJson != null) {
+                     try {
+                         val allData = JSONObject(allDataJson)
+                         val myData = allData.optJSONArray(appWidgetId.toString())
+
+                         if (myData != null && myData.length() > 0) {
+                              val item = myData.getJSONObject(0)
+                              updateSinglePluginWidget(views, item, layoutId)
+                              hasData = true
+                         }
+                     } catch (e: Exception) {
+                         android.util.Log.e(TAG, "Error parsing widget data", e)
+                     }
+                 }
+
+                 if (!hasData) {
+                     setNoDataState(views, layoutId)
+                 }
             }
 
             setupClickHandlers(context, views, layoutId, appWidgetId)
@@ -118,37 +139,20 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
     private fun updateSinglePluginWidget(
         views: RemoteViews,
-        widgetData: SharedPreferences,
-        pluginId: String,
+        pluginData: JSONObject,
         layoutId: Int
     ) {
-        val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
-        
-        if (pluginDataJson == null) {
-            setNoDataState(views, layoutId)
-            return
-        }
-
         try {
-            val pluginData = JSONObject(pluginDataJson)
-            
             val icon = pluginData.optString("icon", "📊")
             val text = pluginData.optString("text", "--")
-            val title = pluginData.optString("pluginId", "Plugin")
-            val tooltip = pluginData.optString("tooltip", "")
+            val title = pluginData.optString("title", "Plugin")
 
             views.setTextViewText(R.id.widget_icon, icon)
             views.setTextViewText(R.id.widget_value, text)
 
             if (layoutId == R.layout.crossbar_widget_medium) {
                 views.setTextViewText(R.id.widget_title, formatPluginTitle(title))
-                
-                if (tooltip.isNotEmpty()) {
-                    views.setTextViewText(R.id.widget_subtitle, tooltip)
-                    views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
-                } else {
-                    views.setViewVisibility(R.id.widget_subtitle, View.GONE)
-                }
+                views.setViewVisibility(R.id.widget_subtitle, View.GONE)
             }
 
             val colorHex = pluginData.optString("color", null)
@@ -157,72 +161,20 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                     val color = android.graphics.Color.parseColor("#$colorHex")
                     views.setTextColor(R.id.widget_value, color)
                 } catch (e: Exception) {
-                    // Ignore invalid colors
+                    // Ignore
                 }
             }
 
         } catch (e: Exception) {
-            android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
+            android.util.Log.e(TAG, "Error parsing plugin data", e)
             setNoDataState(views, layoutId)
         }
-    }
-
-    private fun updateLargeWidget(
-        views: RemoteViews,
-        widgetData: SharedPreferences,
-        pluginIds: List<String>
-    ) {
-        val itemContainerIds = listOf(
-            R.id.plugin_item_1, R.id.plugin_item_2, R.id.plugin_item_3, R.id.plugin_item_4
-        )
-        val iconIds = listOf(
-            R.id.plugin_1_icon, R.id.plugin_2_icon, R.id.plugin_3_icon, R.id.plugin_4_icon
-        )
-        val titleIds = listOf(
-            R.id.plugin_1_title, R.id.plugin_2_title, R.id.plugin_3_title, R.id.plugin_4_title
-        )
-        val valueIds = listOf(
-            R.id.plugin_1_value, R.id.plugin_2_value, R.id.plugin_3_value, R.id.plugin_4_value
-        )
-
-        itemContainerIds.forEach { views.setViewVisibility(it, View.GONE) }
-
-        pluginIds.forEachIndexed { index, pluginId ->
-            if (index >= 4) return@forEachIndexed
-
-            val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
-            if (pluginDataJson != null) {
-                try {
-                    val pluginData = JSONObject(pluginDataJson)
-                    
-                    val icon = pluginData.optString("icon", "📊")
-                    val text = pluginData.optString("text", "--")
-                    val title = pluginData.optString("pluginId", "Plugin")
-
-                    views.setViewVisibility(itemContainerIds[index], View.VISIBLE)
-                    views.setTextViewText(iconIds[index], icon)
-                    views.setTextViewText(titleIds[index], formatPluginTitle(title))
-                    views.setTextViewText(valueIds[index], text)
-
-                } catch (e: Exception) {
-                    android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
-                }
-            }
-        }
-
-        views.setTextViewText(R.id.widget_last_updated, "Updated just now")
     }
 
     private fun setNoDataState(views: RemoteViews, layoutId: Int) {
         when (layoutId) {
             R.layout.crossbar_widget_large -> {
-                views.setViewVisibility(R.id.plugin_item_1, View.VISIBLE)
-                views.setTextViewText(R.id.plugin_1_icon, "⚙️")
-                views.setTextViewText(R.id.plugin_1_title, "Crossbar")
-                views.setTextViewText(R.id.plugin_1_value, "Open app to start")
-                views.setViewVisibility(R.id.plugin_item_2, View.GONE)
-                views.setViewVisibility(R.id.plugin_item_3, View.GONE)
-                views.setViewVisibility(R.id.plugin_item_4, View.GONE)
+                // Handled by ListService usually, but if we fell back here?
             }
             R.layout.crossbar_widget_medium -> {
                 views.setTextViewText(R.id.widget_icon, "⚙️")

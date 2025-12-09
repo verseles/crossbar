@@ -20,7 +20,7 @@ void main() {
 
     service = PluginConfigService();
     service.resetForTesting();
-    service.configsDirectory = tempDir.path;
+    service.setConfigsDirectoryForTesting(tempDir.path);
     service.setSecureStorage(mockSecureStorage);
     await service.init();
   });
@@ -44,7 +44,7 @@ void main() {
 
         final newService = PluginConfigService();
         newService.resetForTesting();
-        newService.configsDirectory = configsPath;
+        newService.setConfigsDirectoryForTesting(configsPath);
         newService.setSecureStorage(mockSecureStorage);
         await newService.init();
 

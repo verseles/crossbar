@@ -1,189 +1,175 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:home_widget/home_widget.dart';
+import 'package:crossbar/core/plugin_manager.dart';
+import 'package:crossbar/core/navigation.dart';
+import 'package:crossbar/services/logger_service.dart';
+import 'package:crossbar/ui/dialogs/widget_configuration_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart';
-
+/// Manages Android Home Screen Widgets.
 class WidgetService {
+  static const MethodChannel _channel = MethodChannel('com.verseles.crossbar/widget');
 
-  factory WidgetService() => _instance;
-
-  WidgetService._internal();
+  // Singleton instance
   static final WidgetService _instance = WidgetService._internal();
+  factory WidgetService() => _instance;
+  WidgetService._internal();
 
-  static const String appGroupId = 'group.crossbar.widgets';
-  static const String iOSWidgetName = 'CrossbarWidget';
-  static const String androidWidgetName = 'CrossbarWidgetProvider';
+  SharedPreferences? _prefs;
+  static const String _activeWidgetsKey = 'crossbar_active_widgets';
+  static const String _widgetConfigPrefix = 'crossbar_widget_config_';
 
-  final PluginManager _pluginManager = PluginManager();
-  final Map<String, PluginOutput> _widgetData = {};
+  bool get isInitialized => _prefs != null;
 
-  bool _initialized = false;
+  @visibleForTesting
+  bool forcePlatformCheck = false;
 
-  /// Check if service has been initialized
-  bool get isInitialized => _initialized;
-
+  /// Initializes the service and sets up method call handlers.
   Future<void> init() async {
-    if (_initialized) return;
-    if (!Platform.isAndroid && !Platform.isIOS) return;
+    if (!forcePlatformCheck && !Platform.isAndroid) return;
 
-    await HomeWidget.setAppGroupId(appGroupId);
+    _prefs = await SharedPreferences.getInstance();
 
-    // Register callback for when widget is clicked
-    HomeWidget.widgetClicked.listen(_handleWidgetClick);
-
-    // Note: Widget refresh handler is registered early in main.dart
-    // to catch requests before WidgetService is initialized
-
-    _initialized = true;
+    _channel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'refresh':
+          // Native side requested a refresh (e.g. widget tap or update period)
+          await PluginManager().refreshAll();
+          await updateWidgets();
+          break;
+        case 'configureWidget':
+             final args = call.arguments as Map;
+             final int widgetId = args['widgetId'];
+             // widgetType sent from native: 'small', 'medium', 'large'
+             final String size = args['type'] ?? 'small';
+             _showConfigurationDialog(widgetId, size);
+             break;
+        case 'widgetDeleted':
+             final args = call.arguments as Map;
+             final int widgetId = args['widgetId'];
+             await _removeWidgetConfig(widgetId);
+             break;
+        default:
+          break;
+      }
+    });
   }
 
-  void _handleWidgetClick(Uri? uri) {
-    if (uri == null) return;
-
-    final pluginId = uri.queryParameters['pluginId'];
-    if (pluginId != null) {
-      // Handle plugin click - could open app to plugin details
-      // or execute a specific action
+  void _showConfigurationDialog(int widgetId, String size) {
+    // Ensure we have a navigator context
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => WidgetConfigurationDialog(
+            widgetId: widgetId,
+            widgetSize: size,
+          ),
+        ),
+      );
+    } else {
+        print('WidgetService: No navigator context available to show dialog');
     }
   }
 
-  Future<void> updateWidget(String pluginId, PluginOutput output) async {
-    if (!_initialized) return;
+  Future<void> finishConfiguration(int widgetId, List<String> pluginIds) async {
+    if (_prefs == null) return;
 
-    _widgetData[pluginId] = output;
+    // Save config
+    await _prefs!.setStringList('$_widgetConfigPrefix$widgetId', pluginIds);
 
-    // Store data for the widget
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_$pluginId',
-      jsonEncode(output.toJson()),
-    );
+    // Add to active set
+    final active = _prefs!.getStringList(_activeWidgetsKey) ?? [];
+    if (!active.contains(widgetId.toString())) {
+      active.add(widgetId.toString());
+      await _prefs!.setStringList(_activeWidgetsKey, active);
+    }
 
-    // Store list of all plugin IDs
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_ids',
-      jsonEncode(_widgetData.keys.toList()),
-    );
+    // Notify native that config is done
+    try {
+        await _channel.invokeMethod('configurationFinished', {'widgetId': widgetId, 'success': true});
+    } catch (e) {
+        print('Error calling configurationFinished: $e');
+    }
 
-    // Update the widget
-    if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
-    } else if (Platform.isIOS) {
-      await HomeWidget.updateWidget(
-        name: iOSWidgetName,
-        iOSName: iOSWidgetName,
-      );
+    // Force an update so the widget shows data immediately
+    // We might want to run the selected plugins first if they haven't run
+    for(final pid in pluginIds) {
+        if (PluginManager().getLastOutput(pid) == null) {
+            await PluginManager().runPlugin(pid);
+        }
+    }
+    await updateWidgets();
+  }
+
+  // Alias for main.dart compatibility if needed
+  Future<void> updateAllWidgets() => updateWidgets();
+
+  Future<void> cancelConfiguration(int widgetId) async {
+    try {
+        await _channel.invokeMethod('configurationFinished', {'widgetId': widgetId, 'success': false});
+    } catch (e) {
+        print('Error calling configurationFinished (cancel): $e');
     }
   }
 
-  Future<void> updateAllWidgets() async {
-    if (!_initialized) return;
+  Future<void> _removeWidgetConfig(int widgetId) async {
+      if (_prefs == null) return;
+      await _prefs!.remove('$_widgetConfigPrefix$widgetId');
+       final active = _prefs!.getStringList(_activeWidgetsKey) ?? [];
+       if (active.remove(widgetId.toString())) {
+           await _prefs!.setStringList(_activeWidgetsKey, active);
+       }
+  }
 
-    final outputs = await _pluginManager.runAllEnabled();
-    for (final output in outputs) {
-      await updateWidget(output.pluginId, output);
+  /// Updates all widgets with the latest data from [PluginManager].
+  Future<void> updateWidgets() async {
+    if (!Platform.isAndroid || _prefs == null) return;
+
+    final activeWidgets = _prefs!.getStringList(_activeWidgetsKey) ?? [];
+
+    // Payload: Map<String(WidgetID), List<Data>>
+    final Map<String, dynamic> widgetsPayload = {};
+
+    for (final idStr in activeWidgets) {
+        final pluginIds = _prefs!.getStringList('$_widgetConfigPrefix$idStr') ?? [];
+        final List<Map<String, dynamic>> widgetData = [];
+
+        for (final pId in pluginIds) {
+             final output = PluginManager().getLastOutput(pId);
+             final plugin = PluginManager().getPlugin(pId);
+             final title = plugin?.id ?? pId;
+
+             if (output != null && (output.text?.isNotEmpty ?? false)) {
+                // Use the output text
+                String text = output.text!;
+                text = text.replaceAll(RegExp(r'\x1B\[[0-?]*[ -/]*[@-~]'), '');
+
+                widgetData.add({
+                  'id': pId,
+                  'title': title,
+                  'text': text,
+                });
+             } else {
+                 widgetData.add({
+                     'id': pId,
+                     'title': title,
+                     'text': 'Loading...',
+                 });
+             }
+        }
+        widgetsPayload[idStr] = widgetData;
     }
-  }
-
-  Future<void> clearWidget(String pluginId) async {
-    if (!_initialized) return;
-
-    _widgetData.remove(pluginId);
-
-    await HomeWidget.saveWidgetData<String?>(
-      'plugin_$pluginId',
-      null,
-    );
-
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_ids',
-      jsonEncode(_widgetData.keys.toList()),
-    );
-
-    if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
-    } else if (Platform.isIOS) {
-      await HomeWidget.updateWidget(
-        name: iOSWidgetName,
-        iOSName: iOSWidgetName,
-      );
-    }
-  }
-
-  Future<void> requestWidgetPin(String pluginId) async {
-    if (!Platform.isAndroid) return;
-
-    // Request Android to pin the widget to home screen
-    await HomeWidget.requestPinWidget(
-      name: androidWidgetName,
-      androidName: androidWidgetName,
-    );
-  }
-
-  Future<bool> isWidgetInstalled() async {
-    if (!_initialized) return false;
 
     try {
-      // Check if widget is available
-      return await HomeWidget.getWidgetData<String>('plugin_ids') != null;
-    } catch (_) {
-      return false;
+      await _channel.invokeMethod('updateWidgets', {
+        'data': jsonEncode(widgetsPayload),
+      });
+    } catch (e) {
+      print('Failed to update widgets: $e');
     }
-  }
-
-  void dispose() {
-    _initialized = false;
-    _widgetData.clear();
-  }
-}
-
-class WidgetDataBuilder {
-
-  const WidgetDataBuilder({
-    required this.pluginId,
-    this.icon,
-    this.title,
-    this.subtitle,
-    this.value,
-    this.color,
-    this.deepLink,
-  });
-
-  factory WidgetDataBuilder.fromPluginOutput(PluginOutput output) {
-    return WidgetDataBuilder(
-      pluginId: output.pluginId,
-      icon: output.icon,
-      title: output.pluginId,
-      value: output.text,
-      color: output.color?.toRadixString(16),
-      deepLink: 'crossbar://plugin/${output.pluginId}',
-    );
-  }
-  final String pluginId;
-  final String? icon;
-  final String? title;
-  final String? subtitle;
-  final String? value;
-  final String? color;
-  final String? deepLink;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'pluginId': pluginId,
-      'icon': icon,
-      'title': title,
-      'subtitle': subtitle,
-      'value': value,
-      'color': color,
-      'deepLink': deepLink,
-    };
   }
 }

@@ -30,7 +30,9 @@ class PluginConfigService extends ChangeNotifier {
   bool get isInitialized => _initialized;
 
   @visibleForTesting
-  set configsDirectory(String? path) => _configsDirectory = path;
+  void setConfigsDirectoryForTesting(String? path) {
+    _configsDirectory = path;
+  }
 
   @visibleForTesting
   void setSecureStorage(FlutterSecureStorage storage) {

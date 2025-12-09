@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../../core/navigation.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 import 'tabs/marketplace_tab.dart';

@@ -66,14 +66,14 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ### Fase 1: Android Native (XML & Receiver)
 
-- [ ] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
-  - [ ] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
-  - [ ] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
-  - [ ] `widget_layout_large.xml` (Lista/Grid para menu items).
-- [ ] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
-  - [ ] Implementar lógica de atualização via `RemoteViews`.
-  - [ ] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
-- [ ] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
+- [x] **Layouts:** Criar arquivos XML em `android/app/src/main/res/layout/`:
+  - [x] `widget_layout_small.xml` (1x1: Ícone + Texto curto).
+  - [x] `widget_layout_medium.xml` (2x1: Ícone + Texto + 1 Ação).
+  - [x] `widget_layout_large.xml` (Lista/Grid para menu items).
+- [x] **Kotlin Provider:** Criar `CrossbarWidgetProvider.kt` estendendo `HomeWidgetProvider`.
+  - [x] Implementar lógica de atualização via `RemoteViews` e `RemoteViewsService` (ListView).
+  - [x] Mapear dados do JSON (salvo pelo Flutter) para os IDs do layout XML.
+- [x] **Manifest:** Registrar o receiver e o provider no `AndroidManifest.xml`.
 
 ### Fase 2: iOS Native (WidgetKit)
 

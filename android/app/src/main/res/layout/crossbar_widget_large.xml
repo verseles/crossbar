@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Large Widget Layout (2x2): List of plugins - Simplified for RemoteViews compatibility -->
+<!-- Large Widget Layout (2x2): Scrollable List of plugins -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Header - Text only, no ImageView to avoid RemoteViews issues -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Refresh button as text emoji for simplicity -->
+        <!-- Refresh button -->
         <TextView
             android:id="@+id/widget_refresh"
             android:layout_width="wrap_content"
@@ -38,174 +38,16 @@
 
     </LinearLayout>
 
-    <!-- Plugin List Container -->
-    <LinearLayout
-        android:id="@+id/widget_list_container"
+    <!-- Plugin List (Scrollable) -->
+    <ListView
+        android:id="@+id/widget_list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
-
-        <!-- Plugin Item 1 -->
-        <LinearLayout
-            android:id="@+id/plugin_item_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp">
-
-            <TextView
-                android:id="@+id/plugin_1_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="📊"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/plugin_1_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Plugin 1"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/plugin_1_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="--"
-                android:textColor="@color/widget_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Plugin Item 2 -->
-        <LinearLayout
-            android:id="@+id/plugin_item_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/plugin_2_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="📊"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/plugin_2_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Plugin 2"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/plugin_2_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="--"
-                android:textColor="@color/widget_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Plugin Item 3 -->
-        <LinearLayout
-            android:id="@+id/plugin_item_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/plugin_3_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="📊"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/plugin_3_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Plugin 3"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/plugin_3_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="--"
-                android:textColor="@color/widget_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Plugin Item 4 -->
-        <LinearLayout
-            android:id="@+id/plugin_item_4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingVertical="4dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/plugin_4_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="📊"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/plugin_4_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Plugin 4"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/plugin_4_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="--"
-                android:textColor="@color/widget_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false" />
 
     <!-- Footer: Last updated -->
     <TextView

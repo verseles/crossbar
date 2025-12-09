@@ -21,6 +21,7 @@ class PluginManager {
   static final PluginManager _instance = PluginManager._internal();
 
   final List<Plugin> _plugins = [];
+  final Map<String, PluginOutput> _lastOutputs = {};
   final PluginExecutor _pluginExecutor = PluginExecutor();
   final PluginConfigService _configService = PluginConfigService();
   static const int maxConcurrent = 10;
@@ -60,6 +61,17 @@ class PluginManager {
   ];
 
   List<Plugin> get plugins => List.unmodifiable(_plugins);
+
+  PluginOutput? getLastOutput(String pluginId) => _lastOutputs[pluginId];
+
+  Future<void> refreshAll() => runAllEnabled();
+
+  Future<List<Plugin>> getPlugins() async {
+    if (_plugins.isEmpty) {
+      await discoverPlugins();
+    }
+    return plugins;
+  }
 
   String? _customPluginsDirectory;
 
@@ -271,6 +283,8 @@ class PluginManager {
         additionalEnv: configEnv,
       );
 
+      _lastOutputs[plugin.id] = output;
+
       final index = _plugins.indexWhere((p) => p.id == plugin.id);
       if (index >= 0) {
         _plugins[index] = plugin.copyWith(
@@ -281,6 +295,8 @@ class PluginManager {
 
       return output;
     } catch (e) {
+      _lastOutputs[plugin.id] = PluginOutput.error(plugin.id, e.toString());
+
       final index = _plugins.indexWhere((p) => p.id == plugin.id);
       if (index >= 0) {
         _plugins[index] = plugin.copyWith(
