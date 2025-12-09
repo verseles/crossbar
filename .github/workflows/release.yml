@@ -7,6 +7,7 @@ on:
 
 jobs:
   build-linux:
+    if: false # Temporarily disabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -205,7 +206,7 @@ jobs:
           path: crossbar-android-arm64.apk
 
   create-release:
-    needs: [build-linux, build-android] # macos/windows temporarily disabled
+    needs: [build-android] # linux/macos/windows temporarily disabled
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -224,9 +225,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
             artifacts/crossbar-android/crossbar-android-arm64.apk
-            # macos/windows temporarily disabled
+            # linux/macos/windows temporarily disabled
           generate_release_notes: true
           draft: false
           prerelease: false

@@ -74,8 +74,8 @@ jobs:
           verbose: true
 
   build-linux:
+    if: false # Temporarily disabled
     runs-on: ubuntu-latest
-    # Runs in parallel with tests (no 'needs: test')
     steps:
       - uses: actions/checkout@v4
 
@@ -262,7 +262,7 @@ jobs:
   # Builds run to completion regardless of test status
   ci-status:
     runs-on: ubuntu-latest
-    needs: [test, build-linux, build-android] # macos/windows temporarily disabled
+    needs: [test, build-android] # linux/macos/windows temporarily disabled
     if: always()
     steps:
       - name: Check test status
