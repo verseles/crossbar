@@ -40,6 +40,7 @@ dependencies:
   home_widget: ^0.8.1
   flutter_local_notifications: ^19.5.0
   clipboard: ^2.0.2
+  workmanager: ^0.9.0+3
 
   # UI Components
   flutter_colorpicker: ^1.1.0

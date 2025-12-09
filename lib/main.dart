@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'core/plugin_manager.dart';
+import 'services/background_service.dart';
 import 'services/hot_reload_service.dart';
 import 'services/ipc_server.dart';
 import 'services/logger_service.dart';
@@ -61,6 +62,13 @@ void main(List<String> args) async {
     final logger = LoggerService();
     await logger.init();
     logger.info('Crossbar starting...');
+
+    // Initialize background service for Android widget updates
+    if (Platform.isAndroid) {
+      final backgroundService = BackgroundService();
+      await backgroundService.init();
+      logger.info('Background service initialized');
+    }
 
     final startMinimized = args.contains('--minimized');
 
