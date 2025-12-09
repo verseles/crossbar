@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-linux:
@@ -14,8 +14,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Install Linux dependencies
@@ -55,6 +55,7 @@ jobs:
           path: crossbar-linux-x64.tar.gz
 
   build-macos:
+    if: false # Temporarily disabled
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,8 +63,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Cache Pub dependencies
@@ -98,6 +99,7 @@ jobs:
           path: crossbar-macos-arm64.tar.gz
 
   build-windows:
+    if: false # Temporarily disabled
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,8 +107,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Cache Pub dependencies
@@ -148,8 +150,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -157,8 +159,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Cache Pub dependencies
@@ -203,7 +205,7 @@ jobs:
           path: crossbar-android-arm64.apk
 
   create-release:
-    needs: [build-linux, build-macos, build-windows, build-android]
+    needs: [build-linux, build-android] # macos/windows temporarily disabled
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -223,9 +225,8 @@ jobs:
         with:
           files: |
             artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
-            artifacts/crossbar-macos/crossbar-macos-arm64.tar.gz
-            artifacts/crossbar-windows/crossbar-windows-x64.zip
             artifacts/crossbar-android/crossbar-android-arm64.apk
+            # macos/windows temporarily disabled
           generate_release_notes: true
           draft: false
           prerelease: false
