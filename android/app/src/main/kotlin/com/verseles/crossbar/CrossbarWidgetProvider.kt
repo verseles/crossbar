@@ -50,55 +50,83 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         appWidgetId: Int,
         widgetData: SharedPreferences
     ) {
-        // Get widget dimensions to determine which layout to use
-        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-        val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
-        val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
+        try {
+            // Get widget dimensions to determine which layout to use
+            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
 
-        // Choose layout based on size
-        val layoutId = when {
-            minWidth >= 180 && minHeight >= 100 -> R.layout.crossbar_widget_large
-            minWidth >= 110 -> R.layout.crossbar_widget_medium
-            else -> R.layout.crossbar_widget_small
-        }
+            // Choose layout based on size
+            val layoutId = when {
+                minWidth >= 180 && minHeight >= 100 -> R.layout.crossbar_widget_large
+                minWidth >= 110 -> R.layout.crossbar_widget_medium
+                else -> R.layout.crossbar_widget_small
+            }
 
-        val views = RemoteViews(context.packageName, layoutId)
+            val views = RemoteViews(context.packageName, layoutId)
 
-        // Get plugin IDs from stored data
-        val pluginIdsJson = widgetData.getString("plugin_ids", null)
-        val pluginIds = try {
-            if (pluginIdsJson != null) {
-                val jsonArray = JSONArray(pluginIdsJson)
-                (0 until jsonArray.length()).map { jsonArray.getString(it) }
-            } else {
+            // Get plugin IDs from stored data
+            val pluginIdsJson = widgetData.getString("plugin_ids", null)
+            val pluginIds = try {
+                if (pluginIdsJson != null) {
+                    val jsonArray = JSONArray(pluginIdsJson)
+                    (0 until jsonArray.length()).map { jsonArray.getString(it) }
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "Error parsing plugin IDs", e)
                 emptyList()
             }
-        } catch (e: Exception) {
-            android.util.Log.e(TAG, "Error parsing plugin IDs", e)
-            emptyList()
-        }
 
-        if (pluginIds.isEmpty()) {
-            // Show "No data" state
-            setNoDataState(views, layoutId)
-        } else {
-            // Display first plugin for small/medium, multiple for large
-            when (layoutId) {
-                R.layout.crossbar_widget_large -> {
-                    updateLargeWidget(views, widgetData, pluginIds.take(4))
-                }
-                else -> {
-                    val firstPluginId = pluginIds.first()
-                    updateSinglePluginWidget(views, widgetData, firstPluginId, layoutId)
+            if (pluginIds.isEmpty()) {
+                // Show "No data" state
+                setNoDataState(views, layoutId)
+            } else {
+                // Display first plugin for small/medium, multiple for large
+                when (layoutId) {
+                    R.layout.crossbar_widget_large -> {
+                        updateLargeWidget(views, widgetData, pluginIds.take(4))
+                    }
+                    else -> {
+                        val firstPluginId = pluginIds.first()
+                        updateSinglePluginWidget(views, widgetData, firstPluginId, layoutId)
+                    }
                 }
             }
+
+            // Set up click handlers
+            setupClickHandlers(context, views, layoutId, appWidgetId)
+
+            // Update the widget
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        } catch (e: Exception) {
+            // Log the error for debugging
+            android.util.Log.e(TAG, "Error updating widget $appWidgetId", e)
+            
+            // Fallback: show a simple error state instead of system's "Reload" button
+            try {
+                val fallbackViews = RemoteViews(context.packageName, R.layout.crossbar_widget_small)
+                fallbackViews.setTextViewText(R.id.widget_icon, "⚠️")
+                fallbackViews.setTextViewText(R.id.widget_value, "Tap to open")
+                
+                // Set up click to open app so user can fix issues
+                val openAppIntent = Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+                val openAppPendingIntent = PendingIntent.getActivity(
+                    context,
+                    appWidgetId,
+                    openAppIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                fallbackViews.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
+                
+                appWidgetManager.updateAppWidget(appWidgetId, fallbackViews)
+            } catch (fallbackError: Exception) {
+                android.util.Log.e(TAG, "Failed to show fallback widget", fallbackError)
+            }
         }
-
-        // Set up click handlers
-        setupClickHandlers(context, views, layoutId, appWidgetId)
-
-        // Update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
     private fun updateSinglePluginWidget(
@@ -290,8 +318,13 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         appWidgetId: Int,
         newOptions: android.os.Bundle
     ) {
-        // Re-render when widget is resized
-        val widgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
-        updateWidget(context, appWidgetManager, appWidgetId, widgetData)
+        try {
+            // Re-render when widget is resized
+            val widgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
+            updateWidget(context, appWidgetManager, appWidgetId, widgetData)
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Error in onAppWidgetOptionsChanged for widget $appWidgetId", e)
+            // updateWidget already has its own fallback, but this catches getData errors
+        }
     }
 }
