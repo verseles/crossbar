@@ -3,7 +3,6 @@ package com.verseles.crossbar
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 
 /**
@@ -12,12 +11,13 @@ import android.os.Bundle
  * This activity launches when a widget is added to the home screen,
  * allowing the user to select which plugin(s) to display.
  * 
- * It opens the Flutter app with a deep link to the widget configuration screen,
- * passing the widget ID so the user can configure that specific widget instance.
+ * It opens the Flutter app and finishes itself. When the user returns,
+ * we check if the widget was configured via SharedPreferences.
  */
 class WidgetConfigActivity : Activity() {
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+    private var hasLaunchedFlutter = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,66 +32,60 @@ class WidgetConfigActivity : Activity() {
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
 
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+            android.util.Log.e("WidgetConfig", "Invalid widget ID, finishing")
             finish()
             return
         }
 
+        android.util.Log.d("WidgetConfig", "Configuring widget ID: $appWidgetId")
+
         // Get widget size from the class that launched this
         val widgetSize = intent?.getStringExtra("widget_size") ?: "medium"
 
-        // Launch Flutter app with deep link to configuration screen
+        // Launch Flutter app with widget config extras
         val configIntent = Intent(this, MainActivity::class.java).apply {
-            action = Intent.ACTION_VIEW
-            data = Uri.parse("crossbar://widget-config/$appWidgetId?size=$widgetSize")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             putExtra("widget_size", widgetSize)
+            putExtra("widget_config_mode", true)
         }
         
-        startActivityForResult(configIntent, REQUEST_CONFIGURE_WIDGET)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        
-        if (requestCode == REQUEST_CONFIGURE_WIDGET) {
-            if (resultCode == RESULT_OK) {
-                // Configuration complete, widget should be added
-                val resultValue = Intent().apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                }
-                setResult(RESULT_OK, resultValue)
-            }
-            finish()
-        }
+        hasLaunchedFlutter = true
+        startActivity(configIntent)
     }
 
     override fun onResume() {
         super.onResume()
-        // If returning from Flutter without explicit result, check if widget was configured
-        // by seeing if SharedPreferences has data for this widget
-        val widgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(this)
-        val configuredPlugins = widgetData.getString("widget_${appWidgetId}_plugins", null)
         
-        if (configuredPlugins != null) {
-            // Widget was configured, update it and return success
-            val appWidgetManager = AppWidgetManager.getInstance(this)
+        // Only check for configuration after we've launched Flutter and returned
+        if (!hasLaunchedFlutter) return
+        
+        android.util.Log.d("WidgetConfig", "onResume - checking if widget was configured")
+        
+        try {
+            val widgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(this)
+            val configuredPlugins = widgetData.getString("widget_${appWidgetId}_plugins", null)
             
-            // Trigger widget update
-            val updateIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-            }
-            sendBroadcast(updateIntent)
+            if (configuredPlugins != null) {
+                android.util.Log.d("WidgetConfig", "Widget $appWidgetId configured with: $configuredPlugins")
+                
+                // Trigger widget update
+                val updateIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                }
+                sendBroadcast(updateIntent)
 
-            val resultValue = Intent().apply {
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                val resultValue = Intent().apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                }
+                setResult(RESULT_OK, resultValue)
+            } else {
+                android.util.Log.d("WidgetConfig", "Widget $appWidgetId NOT configured, canceling")
             }
-            setResult(RESULT_OK, resultValue)
-            finish()
+        } catch (e: Exception) {
+            android.util.Log.e("WidgetConfig", "Error checking widget config", e)
         }
-    }
-
-    companion object {
-        private const val REQUEST_CONFIGURE_WIDGET = 1001
+        
+        finish()
     }
 }

@@ -90,17 +90,23 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     // Check for widget configuration deep link on Android
     if (Platform.isAndroid) {
-      _checkWidgetConfigIntent();
+      // Delay slightly to ensure MainActivity has processed the intent
+      Future.delayed(const Duration(milliseconds: 500), _checkWidgetConfigIntent);
     }
   }
 
   Future<void> _checkWidgetConfigIntent() async {
     try {
+      debugPrint('Checking for widget config intent...');
       // Get the initial intent data
       final data = await _channel.invokeMethod<Map<dynamic, dynamic>>('getWidgetConfigIntent');
+      debugPrint('Widget config intent data: $data');
+      
       if (data != null && data['widgetId'] != null) {
         final widgetId = data['widgetId'] as int;
         final widgetSize = data['widgetSize'] as String? ?? 'medium';
+        
+        debugPrint('Opening widget config dialog for widget $widgetId (size: $widgetSize)');
         
         // Wait for context to be ready
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -108,9 +114,12 @@ class _MainScreenState extends State<MainScreen> {
             WidgetConfigDialog.show(context, widgetId, widgetSize);
           }
         });
+      } else {
+        debugPrint('No widget config data found');
       }
-    } catch (e) {
-      // No widget config intent, normal app launch
+    } catch (e, stack) {
+      debugPrint('Error checking widget config intent: $e');
+      debugPrint('Stack: $stack');
     }
   }
 
