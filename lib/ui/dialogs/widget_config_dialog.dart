@@ -85,26 +85,37 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
   }
 
   Future<void> _loadPlugins() async {
-    await _pluginManager.discoverPlugins();
+    try {
+      await _pluginManager.discoverPlugins();
 
-    // Load existing selection for this widget if any
-    final existing = await HomeWidget.getWidgetData<String>(
-      'widget_${widget.widgetId}_plugins',
-    );
-    if (existing != null) {
-      try {
-        final List<dynamic> savedPlugins = jsonDecode(existing);
-        _selectedPlugins.addAll(savedPlugins.map((e) => e.toString()));
-      } catch (_) {
-        // Ignore invalid saved data
+      // Load existing selection for this widget if any
+      final existing = await HomeWidget.getWidgetData<String>(
+        'widget_${widget.widgetId}_plugins',
+      );
+      if (existing != null) {
+        try {
+          final List<dynamic> savedPlugins = jsonDecode(existing);
+          _selectedPlugins.addAll(savedPlugins.map((e) => e.toString()));
+        } catch (_) {
+          // Ignore invalid saved data
+        }
       }
-    }
 
-    setState(() {
-      _plugins = _pluginManager.plugins.where((p) => p.enabled).toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
-      _loading = false;
-    });
+      if (!mounted) return;
+      
+      setState(() {
+        _plugins = _pluginManager.plugins.where((p) => p.enabled).toList()
+          ..sort((a, b) => a.id.compareTo(b.id));
+        _loading = false;
+      });
+    } catch (e) {
+      // If loading fails, still show the dialog but with empty list
+      if (!mounted) return;
+      setState(() {
+        _plugins = [];
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _saveAndClose() async {

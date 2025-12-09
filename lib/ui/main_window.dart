@@ -103,15 +103,17 @@ class _MainScreenState extends State<MainScreen> {
         final widgetId = data['widgetId'] as int;
         final widgetSize = data['widgetSize'] as String? ?? 'medium';
 
-        // Wait for context to be ready, then show dialog
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            WidgetConfigDialog.show(context, widgetId, widgetSize);
-          }
-        });
+        // Wait for widget tree to be fully built before showing dialog
+        // Using a small delay ensures MaterialApp context is available
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        if (mounted && context.mounted) {
+          await WidgetConfigDialog.show(context, widgetId, widgetSize);
+        }
       }
     } catch (e) {
-      // No widget config intent - normal app launch, ignore
+      // No widget config intent or error - normal app launch, ignore
+      debugPrint('Widget config check: $e');
     }
   }
 
