@@ -492,4 +492,20 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get licenseText =>
       'Crossbar - 通用插件系统\n\nCopyright (C) 2025\n\n本程序为自由软件：您可以根据自由软件基金会发布的 GNU Affero 通用公共许可证的条款重新分发和/或修改它，可以是许可证的第 3 版，也可以是（由您选择）任何更高版本。\n\n本程序的分发是希望它有用，但没有任何担保；甚至没有适销性或特定用途适用性的暗示担保。有关更多详细信息，请参阅 GNU Affero 通用公共许可证。\n\n您应该已经收到一份 GNU Affero 通用公共许可证的副本以及本程序。如果没有，请参阅 <https://www.gnu.org/licenses/>。';
+
+  @override
+  String get widgetConfiguration => 'Widget Configuration';
+
+  @override
+  String get selectPluginsForWidget => 'Select plugins to display';
+
+  @override
+  String get selectOnePlugin => 'Select one plugin';
+
+  @override
+  String get selectPlugins => 'Select plugins';
+
+  @override
+  String get noPluginsAvailable =>
+      'No plugins available. Install some plugins first.';
 }
