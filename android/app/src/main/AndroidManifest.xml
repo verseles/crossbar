@@ -32,17 +32,44 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Home Screen Widget Provider -->
+        <!-- Home Screen Widgets - Fixed sizes for stability -->
+        <!-- Small Widget (1x1) -->
         <receiver
-            android:name=".CrossbarWidgetProvider"
+            android:name=".CrossbarWidgetSmall"
             android:exported="true"
-            android:label="@string/widget_name">
+            android:label="@string/widget_name_small">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/crossbar_widget_info" />
+                android:resource="@xml/crossbar_widget_small_info" />
+        </receiver>
+
+        <!-- Medium Widget (2x1) -->
+        <receiver
+            android:name=".CrossbarWidgetMedium"
+            android:exported="true"
+            android:label="@string/widget_name_medium">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/crossbar_widget_medium_info" />
+        </receiver>
+
+        <!-- Large Widget (2x2) -->
+        <receiver
+            android:name=".CrossbarWidgetLarge"
+            android:exported="true"
+            android:label="@string/widget_name_large">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/crossbar_widget_large_info" />
         </receiver>
         
         <!-- Boot Completed Receiver for auto-start -->

@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
@@ -13,25 +12,25 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * CrossbarWidgetProvider - Android Home Screen Widget
- * 
- * This provider handles the display of Crossbar plugin data on Android home screen widgets.
- * It reads data saved by the Flutter app via the home_widget package and displays it
- * using RemoteViews.
- * 
- * Supports three layout sizes:
- * - Small (1x1): Icon + Value only
- * - Medium (2x1): Icon + Title + Value + Refresh action
- * - Large (2x2+): Multiple plugins in a list
+ * Base class for Crossbar widgets with shared functionality.
+ * Each size-specific widget extends this class.
  */
-class CrossbarWidgetProvider : HomeWidgetProvider() {
+abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
     companion object {
         private const val TAG = "CrossbarWidget"
         private const val ACTION_REFRESH = "com.verseles.crossbar.ACTION_REFRESH"
-        private const val ACTION_OPEN_APP = "com.verseles.crossbar.ACTION_OPEN_APP"
-        private const val EXTRA_PLUGIN_ID = "pluginId"
     }
+
+    /**
+     * Returns the layout resource ID for this widget size.
+     */
+    abstract fun getLayoutId(): Int
+
+    /**
+     * Returns whether this widget shows refresh button.
+     */
+    open fun hasRefreshButton(): Boolean = false
 
     override fun onUpdate(
         context: Context,
@@ -51,18 +50,7 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         widgetData: SharedPreferences
     ) {
         try {
-            // Get widget dimensions to determine which layout to use
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
-
-            // Choose layout based on size
-            val layoutId = when {
-                minWidth >= 180 && minHeight >= 100 -> R.layout.crossbar_widget_large
-                minWidth >= 110 -> R.layout.crossbar_widget_medium
-                else -> R.layout.crossbar_widget_small
-            }
-
+            val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
             // Get plugin IDs from stored data
@@ -80,10 +68,8 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
             }
 
             if (pluginIds.isEmpty()) {
-                // Show "No data" state
                 setNoDataState(views, layoutId)
             } else {
-                // Display first plugin for small/medium, multiple for large
                 when (layoutId) {
                     R.layout.crossbar_widget_large -> {
                         updateLargeWidget(views, widgetData, pluginIds.take(4))
@@ -95,37 +81,38 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
                 }
             }
 
-            // Set up click handlers
             setupClickHandlers(context, views, layoutId, appWidgetId)
-
-            // Update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
         } catch (e: Exception) {
-            // Log the error for debugging
             android.util.Log.e(TAG, "Error updating widget $appWidgetId", e)
+            showFallbackWidget(context, appWidgetManager, appWidgetId)
+        }
+    }
+
+    private fun showFallbackWidget(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int
+    ) {
+        try {
+            val fallbackViews = RemoteViews(context.packageName, R.layout.crossbar_widget_small)
+            fallbackViews.setTextViewText(R.id.widget_icon, "⚠️")
+            fallbackViews.setTextViewText(R.id.widget_value, "Tap to open")
             
-            // Fallback: show a simple error state instead of system's "Reload" button
-            try {
-                val fallbackViews = RemoteViews(context.packageName, R.layout.crossbar_widget_small)
-                fallbackViews.setTextViewText(R.id.widget_icon, "⚠️")
-                fallbackViews.setTextViewText(R.id.widget_value, "Tap to open")
-                
-                // Set up click to open app so user can fix issues
-                val openAppIntent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                val openAppPendingIntent = PendingIntent.getActivity(
-                    context,
-                    appWidgetId,
-                    openAppIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                fallbackViews.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
-                
-                appWidgetManager.updateAppWidget(appWidgetId, fallbackViews)
-            } catch (fallbackError: Exception) {
-                android.util.Log.e(TAG, "Failed to show fallback widget", fallbackError)
+            val openAppIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
+            val openAppPendingIntent = PendingIntent.getActivity(
+                context,
+                appWidgetId,
+                openAppIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            fallbackViews.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
+            
+            appWidgetManager.updateAppWidget(appWidgetId, fallbackViews)
+        } catch (fallbackError: Exception) {
+            android.util.Log.e(TAG, "Failed to show fallback widget", fallbackError)
         }
     }
 
@@ -145,23 +132,17 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         try {
             val pluginData = JSONObject(pluginDataJson)
             
-            // Extract data
             val icon = pluginData.optString("icon", "📊")
             val text = pluginData.optString("text", "--")
             val title = pluginData.optString("pluginId", "Plugin")
             val tooltip = pluginData.optString("tooltip", "")
 
-            // Set icon
             views.setTextViewText(R.id.widget_icon, icon)
-            
-            // Set value
             views.setTextViewText(R.id.widget_value, text)
 
-            // Set title for medium layout
             if (layoutId == R.layout.crossbar_widget_medium) {
                 views.setTextViewText(R.id.widget_title, formatPluginTitle(title))
                 
-                // Show subtitle if tooltip exists
                 if (tooltip.isNotEmpty()) {
                     views.setTextViewText(R.id.widget_subtitle, tooltip)
                     views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
@@ -170,7 +151,6 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
                 }
             }
 
-            // Handle colors if present
             val colorHex = pluginData.optString("color", null)
             if (colorHex != null && colorHex.length >= 6) {
                 try {
@@ -192,7 +172,6 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         widgetData: SharedPreferences,
         pluginIds: List<String>
     ) {
-        // Plugin item IDs
         val itemContainerIds = listOf(
             R.id.plugin_item_1, R.id.plugin_item_2, R.id.plugin_item_3, R.id.plugin_item_4
         )
@@ -206,10 +185,8 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
             R.id.plugin_1_value, R.id.plugin_2_value, R.id.plugin_3_value, R.id.plugin_4_value
         )
 
-        // Hide all items first
         itemContainerIds.forEach { views.setViewVisibility(it, View.GONE) }
 
-        // Populate with data
         pluginIds.forEachIndexed { index, pluginId ->
             if (index >= 4) return@forEachIndexed
 
@@ -233,19 +210,16 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
             }
         }
 
-        // Update last updated timestamp
         views.setTextViewText(R.id.widget_last_updated, "Updated just now")
     }
 
     private fun setNoDataState(views: RemoteViews, layoutId: Int) {
         when (layoutId) {
             R.layout.crossbar_widget_large -> {
-                // For large layout, show "No plugins" message in first item
                 views.setViewVisibility(R.id.plugin_item_1, View.VISIBLE)
                 views.setTextViewText(R.id.plugin_1_icon, "⚙️")
                 views.setTextViewText(R.id.plugin_1_title, "Crossbar")
                 views.setTextViewText(R.id.plugin_1_value, "Open app to start")
-                // Hide other items
                 views.setViewVisibility(R.id.plugin_item_2, View.GONE)
                 views.setViewVisibility(R.id.plugin_item_3, View.GONE)
                 views.setViewVisibility(R.id.plugin_item_4, View.GONE)
@@ -258,7 +232,6 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
                 views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
             }
             else -> {
-                // Small layout
                 views.setTextViewText(R.id.widget_icon, "⚙️")
                 views.setTextViewText(R.id.widget_value, "Open app")
             }
@@ -271,7 +244,6 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         layoutId: Int,
         appWidgetId: Int
     ) {
-        // Click on widget container opens the app
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -283,18 +255,16 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
 
-        // Refresh button launches app with refresh action to re-execute plugins
-        if (layoutId != R.layout.crossbar_widget_small) {
+        if (hasRefreshButton() && layoutId != R.layout.crossbar_widget_small) {
             val refreshIntent = Intent(context, MainActivity::class.java).apply {
                 action = ACTION_REFRESH
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 putExtra("refresh_widgets", true)
-                // Use a unique data URI to make sure PendingIntent is unique
-                data = Uri.parse("crossbar://refresh/$appWidgetId")
+                data = android.net.Uri.parse("crossbar://refresh/$appWidgetId")
             }
             val refreshPendingIntent = PendingIntent.getActivity(
                 context,
-                appWidgetId + 1000, // Different request code than open intent
+                appWidgetId + 1000,
                 refreshIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -302,29 +272,9 @@ class CrossbarWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    /**
-     * Format plugin ID to a readable title
-     * e.g., "cpu.10s.sh" -> "Cpu"
-     */
     private fun formatPluginTitle(pluginId: String): String {
         return pluginId
             .substringBefore(".")
             .replaceFirstChar { it.uppercase() }
-    }
-
-    override fun onAppWidgetOptionsChanged(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetId: Int,
-        newOptions: android.os.Bundle
-    ) {
-        try {
-            // Re-render when widget is resized
-            val widgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
-            updateWidget(context, appWidgetManager, appWidgetId, widgetData)
-        } catch (e: Exception) {
-            android.util.Log.e(TAG, "Error in onAppWidgetOptionsChanged for widget $appWidgetId", e)
-            // updateWidget already has its own fallback, but this catches getData errors
-        }
     }
 }

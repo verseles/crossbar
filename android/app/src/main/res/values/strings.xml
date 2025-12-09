@@ -2,11 +2,12 @@
 <resources>
     <string name="app_name">Crossbar</string>
     <string name="widget_name">Crossbar Plugin</string>
+    <string name="widget_name_small">Crossbar Small</string>
+    <string name="widget_name_medium">Crossbar Medium</string>
+    <string name="widget_name_large">Crossbar Large</string>
     <string name="widget_description">Display plugin output on your home screen</string>
     <string name="widget_loading">Loading…</string>
     <string name="widget_no_data">No data</string>
-    <string name="widget_tap_to_refresh">Tap to refresh</string>
-    <string name="widget_last_updated">Updated %1$s</string>
     
     <!-- Foreground Service Notification -->
     <string name="notification_channel_name">Crossbar Service</string>
