@@ -6,6 +6,7 @@ import '../../services/settings_service.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
 import 'tabs/settings_tab.dart';
+import '../../main.dart'; // Import for navigatorKey
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
@@ -29,6 +30,7 @@ class MainWindow extends StatelessWidget {
       builder: (context, _) {
         final settings = SettingsService();
         return MaterialApp(
+          navigatorKey: navigatorKey,
           title: 'Crossbar',
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

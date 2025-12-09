@@ -1,5 +1,6 @@
 package com.verseles.crossbar
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -42,6 +43,15 @@ class MainActivity : FlutterActivity() {
                 "stopForegroundService" -> {
                     stopCrossbarForegroundService()
                     result.success(true)
+                }
+                "finishWidgetConfiguration" -> {
+                    val appWidgetId = call.argument<Int>("appWidgetId")
+                    if (appWidgetId != null) {
+                        finishWidgetConfiguration(appWidgetId)
+                        result.success(true)
+                    } else {
+                        result.error("INVALID_ID", "AppWidgetId is required", null)
+                    }
                 }
                 else -> result.notImplemented()
             }
@@ -143,13 +153,58 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent?.action == "com.verseles.crossbar.ACTION_REFRESH") {
+        if (intent == null) return
+
+        if (intent.action == "com.verseles.crossbar.ACTION_REFRESH") {
             android.util.Log.d("Crossbar", "Widget refresh requested")
             // Notify Flutter to refresh widgets via Method Channel
             flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
                 MethodChannel(messenger, CHANNEL).invokeMethod("onWidgetRefresh", null)
             }
+        } else if (intent.action == AppWidgetManager.ACTION_APPWIDGET_CONFIGURE) {
+            val appWidgetId = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID
+            )
+
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                // Determine widget type
+                val appWidgetManager = AppWidgetManager.getInstance(this)
+                val providerInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
+                val providerClassName = providerInfo?.provider?.className ?: ""
+
+                val type = when {
+                    providerClassName.endsWith("CrossbarWidgetLarge") -> "large"
+                    providerClassName.endsWith("CrossbarWidgetMedium") -> "medium"
+                    else -> "small"
+                }
+
+                android.util.Log.d("Crossbar", "Configuring widget $appWidgetId of type $type")
+
+                // Notify Flutter to open configuration screen
+                flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                    MethodChannel(messenger, CHANNEL).invokeMethod("configureWidget", mapOf(
+                        "appWidgetId" to appWidgetId,
+                        "type" to type
+                    ))
+                }
+            }
         }
+    }
+
+    private fun finishWidgetConfiguration(appWidgetId: Int) {
+        val resultValue = Intent()
+        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        setResult(RESULT_OK, resultValue)
+
+        // Update the widget immediately
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val intent = Intent(this, CrossbarWidgetLarge::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+        sendBroadcast(intent)
+
+        finish()
     }
 
     private fun startCrossbarForegroundService() {

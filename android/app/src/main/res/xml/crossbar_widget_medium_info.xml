@@ -9,4 +9,5 @@
     android:targetCellWidth="2"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
+    android:configure="com.verseles.crossbar.MainActivity"
     android:widgetCategory="home_screen" />

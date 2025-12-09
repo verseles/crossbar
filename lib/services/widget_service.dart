@@ -50,6 +50,40 @@ class WidgetService {
     }
   }
 
+  /// Saves the configuration for a specific widget instance
+  Future<void> saveWidgetConfiguration(String appWidgetId, List<String> plugins) async {
+    if (!_initialized) await init();
+
+    await HomeWidget.saveWidgetData<String>(
+      'widget_config_$appWidgetId',
+      jsonEncode(plugins),
+    );
+
+    // Trigger update for this specific widget to apply changes immediately
+    if (Platform.isAndroid) {
+      // Note: We use the updateWidget method which triggers a broadcast
+      // The native side will read the new config
+      await HomeWidget.updateWidget(
+        name: androidWidgetName,
+        androidName: androidWidgetName,
+      );
+    }
+  }
+
+  Future<List<String>> getWidgetConfiguration(String appWidgetId) async {
+    if (!_initialized) await init();
+    try {
+      final data = await HomeWidget.getWidgetData<String>('widget_config_$appWidgetId');
+      if (data != null) {
+        final List<dynamic> json = jsonDecode(data);
+        return json.cast<String>();
+      }
+    } catch (_) {
+      // Ignore
+    }
+    return [];
+  }
+
   Future<void> updateWidget(String pluginId, PluginOutput output) async {
     if (!_initialized) return;
 
@@ -61,7 +95,7 @@ class WidgetService {
       jsonEncode(output.toJson()),
     );
 
-    // Store list of all plugin IDs
+    // Legacy: Store list of all plugin IDs (might still be used by old widgets or fallbacks)
     await HomeWidget.saveWidgetData<String>(
       'plugin_ids',
       jsonEncode(_widgetData.keys.toList()),

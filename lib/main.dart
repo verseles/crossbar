@@ -14,10 +14,14 @@ import 'services/settings_service.dart';
 import 'services/tray_service.dart';
 import 'services/widget_service.dart';
 import 'services/window_service.dart';
+import 'ui/dialogs/widget_configuration_dialog.dart';
 import 'ui/main_window.dart';
 
 /// Pending widget refresh flag - set early if refresh requested before scheduler ready
 bool _pendingWidgetRefresh = false;
+
+/// Global key to allow navigation from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main(List<String> args) async {
   // ignore: unnecessary_lambdas
@@ -39,20 +43,33 @@ void main(List<String> args) async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Register Android widget refresh handler EARLY
-    // This catches refresh requests even before services are fully initialized
+    // Register Android widget handlers EARLY
     if (Platform.isAndroid) {
       const channel = MethodChannel('com.verseles.crossbar/system');
       channel.setMethodCallHandler((call) async {
         if (call.method == 'onWidgetRefresh') {
-          // Check if WidgetService is already initialized
           final widgetService = WidgetService();
           if (widgetService.isInitialized) {
             await widgetService.updateAllWidgets();
           } else {
-            // Mark pending refresh - will be processed when scheduler starts
             _pendingWidgetRefresh = true;
           }
+        } else if (call.method == 'configureWidget') {
+          final args = call.arguments as Map;
+          final appWidgetId = args['appWidgetId'] as int;
+          final type = args['type'] as String;
+
+          // Use a small delay to ensure app is mounted if starting up
+          Future.delayed(const Duration(milliseconds: 100), () {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => WidgetConfigurationDialog(
+                  appWidgetId: appWidgetId,
+                  widgetType: type,
+                ),
+              ),
+            );
+          });
         }
         return null;
       });
@@ -194,6 +211,12 @@ class CrossbarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // MainWindow already wraps itself in MaterialApp (which is wrong if we want global navigator key usage)
+    // But MainWindow actually *creates* a MaterialApp inside its build.
+    // If we wrap MainWindow in MaterialApp, we have double MaterialApps.
+    // We should refactor MainWindow to NOT create MaterialApp, OR pass the navigatorKey to it.
+    // Since MainWindow handles Localization and Settings listeners which need to be above MaterialApp or part of it,
+    // let's pass navigatorKey to MainWindow and let it use it.
     return const MainWindow();
   }
 }

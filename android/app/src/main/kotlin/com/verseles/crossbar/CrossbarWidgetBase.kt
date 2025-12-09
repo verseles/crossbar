@@ -53,13 +53,18 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
-            // Get plugin IDs from stored data
-            val pluginIdsJson = widgetData.getString("plugin_ids", null)
+            // Read specific configuration for this widget ID
+            val configKey = "widget_config_$appWidgetId"
+            val pluginIdsJson = widgetData.getString(configKey, null)
+
             val pluginIds = try {
                 if (pluginIdsJson != null) {
                     val jsonArray = JSONArray(pluginIdsJson)
                     (0 until jsonArray.length()).map { jsonArray.getString(it) }
                 } else {
+                    // Legacy fallback: Try global list only if specific config not found?
+                    // Or strictly empty? Let's check global for migration or just show "Configure"
+                    // User requirement: "No more random defaults". So if no config, show Configure state.
                     emptyList()
                 }
             } catch (e: Exception) {
@@ -72,7 +77,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             } else {
                 when (layoutId) {
                     R.layout.crossbar_widget_large -> {
-                        updateLargeWidget(views, widgetData, pluginIds.take(4))
+                        updateLargeWidget(context, views, appWidgetId)
                     }
                     else -> {
                         val firstPluginId = pluginIds.first()
@@ -125,7 +130,13 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
         
         if (pluginDataJson == null) {
-            setNoDataState(views, layoutId)
+            // Configured but no data yet (or plugin disabled/removed)
+            views.setTextViewText(R.id.widget_icon, "⏳")
+            views.setTextViewText(R.id.widget_value, "Loading...")
+            if (layoutId == R.layout.crossbar_widget_medium) {
+                 views.setTextViewText(R.id.widget_title, formatPluginTitle(pluginId))
+                 views.setViewVisibility(R.id.widget_subtitle, View.GONE)
+            }
             return
         }
 
@@ -167,73 +178,41 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         }
     }
 
-    private fun updateLargeWidget(
+    open fun updateLargeWidget(
+        context: Context,
         views: RemoteViews,
-        widgetData: SharedPreferences,
-        pluginIds: List<String>
+        appWidgetId: Int
     ) {
-        val itemContainerIds = listOf(
-            R.id.plugin_item_1, R.id.plugin_item_2, R.id.plugin_item_3, R.id.plugin_item_4
-        )
-        val iconIds = listOf(
-            R.id.plugin_1_icon, R.id.plugin_2_icon, R.id.plugin_3_icon, R.id.plugin_4_icon
-        )
-        val titleIds = listOf(
-            R.id.plugin_1_title, R.id.plugin_2_title, R.id.plugin_3_title, R.id.plugin_4_title
-        )
-        val valueIds = listOf(
-            R.id.plugin_1_value, R.id.plugin_2_value, R.id.plugin_3_value, R.id.plugin_4_value
-        )
-
-        itemContainerIds.forEach { views.setViewVisibility(it, View.GONE) }
-
-        pluginIds.forEachIndexed { index, pluginId ->
-            if (index >= 4) return@forEachIndexed
-
-            val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
-            if (pluginDataJson != null) {
-                try {
-                    val pluginData = JSONObject(pluginDataJson)
-                    
-                    val icon = pluginData.optString("icon", "📊")
-                    val text = pluginData.optString("text", "--")
-                    val title = pluginData.optString("pluginId", "Plugin")
-
-                    views.setViewVisibility(itemContainerIds[index], View.VISIBLE)
-                    views.setTextViewText(iconIds[index], icon)
-                    views.setTextViewText(titleIds[index], formatPluginTitle(title))
-                    views.setTextViewText(valueIds[index], text)
-
-                } catch (e: Exception) {
-                    android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
-                }
-            }
+        // Default implementation for standard list widget
+        // Bind the RemoteViewsService to the ListView
+        val intent = Intent(context, CrossbarWidgetService::class.java).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            data = android.net.Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
         }
+        views.setRemoteAdapter(R.id.widget_list_view, intent)
+        views.setEmptyView(R.id.widget_list_view, R.id.widget_last_updated) // Or a dedicated empty view
 
-        views.setTextViewText(R.id.widget_last_updated, "Updated just now")
+        // Notify the list to refresh its data
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_list_view)
     }
 
     private fun setNoDataState(views: RemoteViews, layoutId: Int) {
         when (layoutId) {
             R.layout.crossbar_widget_large -> {
-                views.setViewVisibility(R.id.plugin_item_1, View.VISIBLE)
-                views.setTextViewText(R.id.plugin_1_icon, "⚙️")
-                views.setTextViewText(R.id.plugin_1_title, "Crossbar")
-                views.setTextViewText(R.id.plugin_1_value, "Open app to start")
-                views.setViewVisibility(R.id.plugin_item_2, View.GONE)
-                views.setViewVisibility(R.id.plugin_item_3, View.GONE)
-                views.setViewVisibility(R.id.plugin_item_4, View.GONE)
+                 // For large widget, maybe show a "Tap to Configure" message inside the list or header
+                 views.setTextViewText(R.id.widget_header_title, "Crossbar (Tap to set up)")
             }
             R.layout.crossbar_widget_medium -> {
                 views.setTextViewText(R.id.widget_icon, "⚙️")
-                views.setTextViewText(R.id.widget_value, "Open app")
+                views.setTextViewText(R.id.widget_value, "Configure")
                 views.setTextViewText(R.id.widget_title, "Crossbar")
-                views.setTextViewText(R.id.widget_subtitle, "Tap to start")
+                views.setTextViewText(R.id.widget_subtitle, "Tap to select plugin")
                 views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
             }
             else -> {
                 views.setTextViewText(R.id.widget_icon, "⚙️")
-                views.setTextViewText(R.id.widget_value, "Open app")
+                views.setTextViewText(R.id.widget_value, "Setup")
             }
         }
     }
@@ -244,16 +223,26 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         layoutId: Int,
         appWidgetId: Int
     ) {
-        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+        // If not configured (no data state), click should open config
+        // Actually, MainActivity handles Intent. If we send ACTION_APPWIDGET_CONFIGURE,
+        // it triggers the config flow again.
+
+        val configIntent = Intent(context, MainActivity::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_CONFIGURE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            data = android.net.Uri.parse("crossbar://configure/$appWidgetId")
         }
-        val openAppPendingIntent = PendingIntent.getActivity(
+
+        val configPendingIntent = PendingIntent.getActivity(
             context,
             appWidgetId,
-            openAppIntent,
+            configIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        views.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
+
+        // Bind click to main container
+        views.setOnClickPendingIntent(R.id.widget_container, configPendingIntent)
 
         if (hasRefreshButton() && layoutId != R.layout.crossbar_widget_small) {
             val refreshIntent = Intent(context, MainActivity::class.java).apply {
