@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
-import 'dialogs/widget_config_dialog.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
 import 'tabs/settings_tab.dart';
@@ -77,51 +75,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  static const _channel = MethodChannel('com.verseles.crossbar/widget_config');
 
   final List<Widget> _tabs = const [
     PluginsTab(),
     SettingsTab(),
     MarketplaceTab(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    // Check for widget configuration deep link on Android
-    if (Platform.isAndroid) {
-      // Delay slightly to ensure MainActivity has processed the intent
-      Future.delayed(const Duration(milliseconds: 500), _checkWidgetConfigIntent);
-    }
-  }
-
-  Future<void> _checkWidgetConfigIntent() async {
-    try {
-      debugPrint('Checking for widget config intent...');
-      // Get the initial intent data
-      final data = await _channel.invokeMethod<Map<dynamic, dynamic>>('getWidgetConfigIntent');
-      debugPrint('Widget config intent data: $data');
-      
-      if (data != null && data['widgetId'] != null) {
-        final widgetId = data['widgetId'] as int;
-        final widgetSize = data['widgetSize'] as String? ?? 'medium';
-        
-        debugPrint('Opening widget config dialog for widget $widgetId (size: $widgetSize)');
-        
-        // Wait for context to be ready
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            WidgetConfigDialog.show(context, widgetId, widgetSize);
-          }
-        });
-      } else {
-        debugPrint('No widget config data found');
-      }
-    } catch (e, stack) {
-      debugPrint('Error checking widget config intent: $e');
-      debugPrint('Stack: $stack');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

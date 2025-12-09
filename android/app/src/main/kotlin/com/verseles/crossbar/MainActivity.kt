@@ -13,10 +13,6 @@ import java.io.RandomAccessFile
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.verseles.crossbar/system"
-    private val WIDGET_CONFIG_CHANNEL = "com.verseles.crossbar/widget_config"
-    
-    // Store widget config intent data to pass to Flutter
-    private var pendingWidgetConfig: Map<String, Any>? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
@@ -46,17 +42,6 @@ class MainActivity : FlutterActivity() {
                 "stopForegroundService" -> {
                     stopCrossbarForegroundService()
                     result.success(true)
-                }
-                else -> result.notImplemented()
-            }
-        }
-
-        // Widget configuration channel
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CONFIG_CHANNEL).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "getWidgetConfigIntent" -> {
-                    result.success(pendingWidgetConfig)
-                    pendingWidgetConfig = null // Clear after reading
                 }
                 else -> result.notImplemented()
             }
@@ -158,42 +143,12 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent == null) return
-        
-        // Handle widget refresh action
-        if (intent.action == "com.verseles.crossbar.ACTION_REFRESH") {
+        if (intent?.action == "com.verseles.crossbar.ACTION_REFRESH") {
             android.util.Log.d("Crossbar", "Widget refresh requested")
+            // Notify Flutter to refresh widgets via Method Channel
             flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
                 MethodChannel(messenger, CHANNEL).invokeMethod("onWidgetRefresh", null)
             }
-        }
-        
-        // Handle widget configuration deep link
-        val data = intent.data
-        if (data != null && data.scheme == "crossbar" && data.host == "widget-config") {
-            val widgetIdStr = data.pathSegments.firstOrNull()
-            val widgetId = widgetIdStr?.toIntOrNull()
-            val widgetSize = data.getQueryParameter("size") ?: 
-                             intent.getStringExtra("widget_size") ?: "medium"
-            
-            if (widgetId != null) {
-                android.util.Log.d("Crossbar", "Widget config requested for widget $widgetId (size: $widgetSize)")
-                pendingWidgetConfig = mapOf(
-                    "widgetId" to widgetId,
-                    "widgetSize" to widgetSize
-                )
-            }
-        }
-        
-        // Also check for extras (from WidgetConfigActivity)
-        val extraWidgetId = intent.getIntExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-        if (extraWidgetId != -1 && pendingWidgetConfig == null) {
-            val widgetSize = intent.getStringExtra("widget_size") ?: "medium"
-            android.util.Log.d("Crossbar", "Widget config from extras for widget $extraWidgetId (size: $widgetSize)")
-            pendingWidgetConfig = mapOf(
-                "widgetId" to extraWidgetId,
-                "widgetSize" to widgetSize
-            )
         }
     }
 
