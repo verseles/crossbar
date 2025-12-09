@@ -114,7 +114,8 @@ windows:
 
 # Android build
 android:
-	flutter build apk --release --target-platform android-arm64 && tdl up -t 6 --path=./build/app/outputs/flutter-apk/app-release.apk
+	flutter build apk --release --target-platform android-arm64
+	@if command -v tdl >/dev/null 2>&1; then tdl up -t 6 --path=./build/app/outputs/flutter-apk/app-release.apk; fi
 	@echo "Done! APK at build/app/outputs/flutter-apk/app-release.apk"
 
 # Run tests

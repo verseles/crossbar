@@ -23,8 +23,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
-    needs: test
+    # Runs in parallel with tests (no 'needs: test')
     steps:
       - uses: actions/checkout@v4
 
@@ -90,8 +90,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Install Linux dependencies
@@ -116,7 +116,7 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
-    needs: test
+    # Runs in parallel with tests (no 'needs: test')
     steps:
       - uses: actions/checkout@v4
 
@@ -131,8 +131,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Build macOS GUI
@@ -152,7 +152,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    needs: test
+    # Runs in parallel with tests (no 'needs: test')
     steps:
       - uses: actions/checkout@v4
 
@@ -167,8 +167,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Build Windows GUI
@@ -188,16 +188,16 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
-    needs: test
+    # Runs in parallel with tests (no 'needs: test')
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle' # Auto-cache gradle dependencies
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle" # Auto-cache gradle dependencies
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -216,8 +216,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.3'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Download Android Keystore
@@ -257,3 +257,18 @@ jobs:
         with:
           name: crossbar-android
           path: build/app/outputs/flutter-apk/app-release.apk
+
+  # Final check: ensures workflow fails if tests failed
+  # Builds run to completion regardless of test status
+  ci-status:
+    runs-on: ubuntu-latest
+    needs: [test, build-linux, build-macos, build-windows, build-android]
+    if: always()
+    steps:
+      - name: Check test status
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            echo "::error::Tests failed! Result: ${{ needs.test.result }}"
+            exit 1
+          fi
+          echo "All tests passed and builds completed successfully!"

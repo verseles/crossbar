@@ -1,7 +1,7 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification para notificar o usuário.
+> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
 
 Atenção: Este projeto ainda não foi lançado, não se preocupe com breking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
@@ -30,7 +30,7 @@ Roadmap de implementacao, atualizado regularmente:
 2. Repita por texto (ou to-do) suas tarefas feitas e tarefas pendentes, assim, mesmo que seu contexto seja truncado, você tem informações claras do que deve ser feito
 3. Repita por texto suas regras importantes e a ordem a serem feitas
 
-# Processo após alterações
+# Processo após alterações (NÃO PULE ETAPAS - NÃO PULE ETAPAS - NÃO PULE ETAPAS)
 
 Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
@@ -41,11 +41,19 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 5. Verificar se ROADMAP.md necessita de atualização
 6. Verificar se README.md necessita de atualização
 7. Verificar se docs/ necessita de atualização
-8. **Atualizar AGENTS.md** se houve mudanças arquiteturais (nova ADR) ou operacionais (versão, estrutura, regras)
+8. Atualizar AGENTS.md se houve mudanças arquiteturais (nova ADR) ou operacionais (versão, estrutura, regras)
 9. Commit das alterações
+
+- Caso alguma dessas etapas falhe, corrija e repita.
+- Use essa sequência de etapas para todas as alterações significativas pois reduz muito a chance de erros e perda de tempo de buscar corrigir a pipeline do github actions que é muito mais lenta que a máquina atual.
+- NÃO PULE ETAPAS. NÃO PULE ETAPAS. NÃO PULE ETAPAS.
+
+## Abaixo apenas se for em uma máquina local
+
 10. Criar uma nova tag:
     - **Minor** (v1.X.0): Para features, epics completas, ou mudanças significativas
     - **Patch** (v1.x.Y): Apenas para bugfixes e pequenos ajustes isolados
+    - Nunca regresse para uma versão inferior
 11. Push para o github
 12. Monitorar a pipeline de CI e release usando gh (em background pois é demorada), monitorar a cada 30 segundos
 13. Notificar o usuário com a tool play_notification (quando estiver disponível) para notificar o usuário
