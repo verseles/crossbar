@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_slow_async_io
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -9,23 +9,18 @@ import 'package:tray_manager/tray_manager.dart';
 import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart' hide MenuItem;
 import 'logger_service.dart';
-import 'scheduler_service.dart';
+import 'refresh_service.dart';
 import 'window_service.dart';
 
-/// TrayService - Manages a single system tray icon using tray_manager.
-///
-/// Uses tray_manager for all desktop platforms (Linux, Windows, macOS).
-/// Shows plugin outputs in a unified menu under a single tray icon.
-/// On Linux, automatically switches between light/dark icons based on system theme.
 class TrayService with TrayListener {
   factory TrayService() => _instance;
-
   TrayService._internal();
-
   static final TrayService _instance = TrayService._internal();
 
   final PluginManager _pluginManager = PluginManager();
-  final Map<String, PluginOutput> _pluginOutputs = {};
+  final RefreshService _refreshService = RefreshService();
+  StreamSubscription? _pluginOutputSubscription;
+  Map<String, PluginOutput> _pluginOutputs = {};
 
   bool _initialized = false;
   String? _iconPath;
@@ -33,28 +28,25 @@ class TrayService with TrayListener {
 
   Future<void> init() async {
     if (_initialized) return;
-    if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) {
-      return;
-    }
+    if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) return;
 
     trayManager.addListener(this);
+    _pluginOutputSubscription =
+        _refreshService.outputsStream.listen(_onPluginOutput);
 
     await _resolveAndSetIcon();
     await _updateMenu();
-    
-    // Set initial tooltip (title isn't supported on Linux)
+
     if (!Platform.isLinux) {
       try {
         await trayManager.setToolTip('Crossbar');
       } catch (_) {}
     }
-    
-    // Set initial title
+
     try {
       await trayManager.setTitle('Crossbar');
     } catch (_) {}
 
-    // Listen for theme changes on Linux
     if (Platform.isLinux) {
       _setupThemeListener();
     }
@@ -63,19 +55,22 @@ class TrayService with TrayListener {
     LoggerService().info('Tray service initialized');
   }
 
+  void _onPluginOutput(Map<String, PluginOutput> outputs) {
+    _pluginOutputs = outputs;
+    _updateMenu();
+    _updateTitle();
+    _updateTooltip();
+  }
+
   void _setupThemeListener() {
-    // Check for theme changes periodically since platformDispatcher
-    // callbacks may not work reliably for tray services
     final dispatcher = SchedulerBinding.instance.platformDispatcher;
     dispatcher.onPlatformBrightnessChanged = _onThemeChanged;
   }
 
   void _onThemeChanged() {
     if (!Platform.isLinux) return;
-
     final currentBrightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
-
     if (_lastBrightness != currentBrightness) {
       _lastBrightness = currentBrightness;
       LoggerService().info('Theme changed to: $currentBrightness');
@@ -85,20 +80,13 @@ class TrayService with TrayListener {
 
   Future<void> _resolveAndSetIcon() async {
     String candidate;
-
     if (Platform.isLinux) {
-      // Detect system theme and use appropriate icon
       final brightness =
           SchedulerBinding.instance.platformDispatcher.platformBrightness;
       _lastBrightness = brightness;
-
-      if (brightness == Brightness.dark) {
-        // Dark theme: use light (white) icon for visibility
-        candidate = 'assets/icons/tray_icon_light.png';
-      } else {
-        // Light theme: use dark (black) icon for visibility
-        candidate = 'assets/icons/tray_icon_dark.png';
-      }
+      candidate = brightness == Brightness.dark
+          ? 'assets/icons/tray_icon_light.png'
+          : 'assets/icons/tray_icon_dark.png';
       LoggerService().info('Linux theme: $brightness, using icon: $candidate');
     } else if (Platform.isMacOS) {
       candidate = 'assets/icons/tray_icon_macos.png';
@@ -106,29 +94,22 @@ class TrayService with TrayListener {
       candidate = 'assets/icons/tray_icon.ico';
     }
 
-    // Check if icon exists at relative path (dev mode)
     if (await File(candidate).exists()) {
       _iconPath = candidate;
-    } else {
-      // Try to find in bundle (release mode)
-      if (Platform.isLinux || Platform.isWindows) {
-        try {
-          final exeDir = p.dirname(Platform.resolvedExecutable);
-          final bundlePath =
-              p.join(exeDir, 'data', 'flutter_assets', candidate);
-          if (await File(bundlePath).exists()) {
-            _iconPath = bundlePath;
-          }
-        } catch (_) {
-          // Ignore resolution errors
+    } else if (Platform.isLinux || Platform.isWindows) {
+      try {
+        final exeDir = p.dirname(Platform.resolvedExecutable);
+        final bundlePath = p.join(exeDir, 'data', 'flutter_assets', candidate);
+        if (await File(bundlePath).exists()) {
+          _iconPath = bundlePath;
         }
-      }
+      } catch (_) {}
     }
 
     if (_iconPath == null) {
-      LoggerService().warning(
-          'Tray icon not found at $candidate. Tray icon may not display.');
-      _iconPath = candidate; // Use anyway as fallback
+      LoggerService()
+          .warning('Tray icon not found at $candidate. May not display.');
+      _iconPath = candidate;
     } else {
       LoggerService().info('Tray icon resolved to: $_iconPath');
     }
@@ -142,8 +123,6 @@ class TrayService with TrayListener {
 
   Future<void> _updateMenu() async {
     final menuItems = <MenuItem>[];
-
-    // Plugin outputs - show enabled plugins
     for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
       final output = _pluginOutputs[plugin.id];
       if (output != null && output.text != null && output.text!.isNotEmpty) {
@@ -158,21 +137,11 @@ class TrayService with TrayListener {
       menuItems.add(MenuItem.separator());
     }
 
-    // Standard menu items
     menuItems.addAll([
-      MenuItem(
-        key: 'show',
-        label: 'Show Crossbar',
-      ),
-      MenuItem(
-        key: 'refresh',
-        label: 'Refresh All Plugins',
-      ),
+      MenuItem(key: 'show', label: 'Show Crossbar'),
+      MenuItem(key: 'refresh', label: 'Refresh All Plugins'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'quit',
-        label: 'Quit',
-      ),
+      MenuItem(key: 'quit', label: 'Quit'),
     ]);
 
     try {
@@ -182,23 +151,12 @@ class TrayService with TrayListener {
     }
   }
 
-  void updatePluginOutput(String pluginId, PluginOutput output) {
-    _pluginOutputs[pluginId] = output;
-    _updateMenu();
-    _updateTitle(pluginId, output);
-    _updateTooltip();
-  }
-
-  /// Public method to refresh the tray menu (e.g., after plugin toggle/delete)
   Future<void> refreshMenu() async {
     await _updateMenu();
   }
 
   void _updateTooltip() {
-    // setToolTip is not supported on Linux by tray_manager
-    if (Platform.isLinux) return;
-    if (_pluginOutputs.isEmpty) return;
-
+    if (Platform.isLinux || _pluginOutputs.isEmpty) return;
     final tooltipParts = <String>[];
     for (final entry in _pluginOutputs.entries.take(3)) {
       final output = entry.value;
@@ -206,7 +164,6 @@ class TrayService with TrayListener {
         tooltipParts.add('${output.icon} ${output.text}');
       }
     }
-
     try {
       trayManager.setToolTip(tooltipParts.join(' | '));
     } catch (e) {
@@ -214,59 +171,53 @@ class TrayService with TrayListener {
     }
   }
 
-  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
-    // Find the first enabled plugin to use as the main tray title
+  Future<void> _updateTitle() async {
     final firstEnabled =
         _pluginManager.plugins.where((p) => p.enabled).firstOrNull;
+    if (firstEnabled == null) return;
 
-    if (firstEnabled?.id == pluginId) {
-      var title = '';
-      // Use emoji icon from plugin output if available
-      if (output.icon.isNotEmpty && output.icon != '⚙️') {
-        title += '${output.icon} ';
-      }
-      if (output.text != null) {
-        title += output.text!;
-      }
+    final output = _pluginOutputs[firstEnabled.id];
+    if (output == null) return;
 
-      try {
-        await trayManager.setTitle(title);
-      } catch (e) {
-        LoggerService().warning('Failed to set tray title: $e');
-      }
+    var title = '';
+    if (output.icon.isNotEmpty && output.icon != '⚙️') {
+      title += '${output.icon} ';
+    }
+    if (output.text != null) {
+      title += output.text!;
+    }
+
+    try {
+      await trayManager.setTitle(title);
+    } catch (e) {
+      LoggerService().warning('Failed to set tray title: $e');
     }
   }
 
-  void clearPluginOutput(String pluginId) {
-    _pluginOutputs.remove(pluginId);
-    _updateMenu();
-  }
+  @override
+  void onTrayIconMouseDown() => WindowService().show();
 
   @override
-  void onTrayIconMouseDown() {
-    WindowService().show();
-  }
-
-  @override
-  void onTrayIconRightMouseDown() {
-    trayManager.popUpContextMenu();
-  }
+  void onTrayIconRightMouseDown() => trayManager.popUpContextMenu();
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
     switch (menuItem.key) {
       case 'show':
         WindowService().show();
+        break;
       case 'refresh':
-        SchedulerService().refreshAll();
+        _refreshService.refreshAll();
+        break;
       case 'quit':
         WindowService().quit();
+        break;
     }
   }
 
   Future<void> dispose() async {
     if (!_initialized) return;
-
+    _pluginOutputSubscription?.cancel();
     trayManager.removeListener(this);
     try {
       await trayManager.destroy();

@@ -7,53 +7,37 @@ import '../core/plugin_manager.dart';
 import '../models/plugin.dart';
 import '../models/plugin_output.dart';
 import 'notification_service.dart';
-
+import 'refresh_service.dart';
 import 'settings_service.dart';
 import 'widget_service.dart';
 
-typedef PluginOutputCallback = void Function(String pluginId, PluginOutput output);
-
 class SchedulerService {
-
   factory SchedulerService() => _instance;
-
   SchedulerService._internal();
   static final SchedulerService _instance = SchedulerService._internal();
 
   final PluginManager _pluginManager = PluginManager();
   final NotificationService _notificationService = NotificationService();
   final WidgetService _widgetService = WidgetService();
+  final RefreshService _refreshService = RefreshService();
 
   final Map<String, Timer> _timers = {};
-  final Map<String, PluginOutput> _lastOutputs = {};
-  final List<PluginOutputCallback> _listeners = [];
+  StreamSubscription? _pluginOutputSubscription;
 
   bool _running = false;
-
   bool get isRunning => _running;
-
-  Map<String, PluginOutput> get lastOutputs => Map.unmodifiable(_lastOutputs);
-
-  void addListener(PluginOutputCallback callback) {
-    _listeners.add(callback);
-  }
-
-  void removeListener(PluginOutputCallback callback) {
-    _listeners.remove(callback);
-  }
 
   Future<void> start() async {
     if (_running) return;
-
     _running = true;
 
-    // Initialize services for mobile platforms
     await _widgetService.init();
     await _notificationService.init();
-
     await _pluginManager.discoverPlugins();
 
-    // Show persistent notification on Android if enabled
+    _pluginOutputSubscription =
+        _refreshService.pluginOutputEventStream.listen(_onPluginOutput);
+
     SettingsService().addListener(_onSettingsChanged);
     await _updatePersistentNotification();
 
@@ -65,15 +49,12 @@ class SchedulerService {
   }
 
   Future<void> stop() async {
+    if (!_running) return;
     _running = false;
     SettingsService().removeListener(_onSettingsChanged);
-
-    for (final timer in _timers.values) {
-      timer.cancel();
-    }
+    _pluginOutputSubscription?.cancel();
+    _timers.values.forEach((timer) => timer.cancel());
     _timers.clear();
-    
-    // Hide persistent notification
     await _notificationService.hidePersistentNotification();
   }
 
@@ -83,7 +64,8 @@ class SchedulerService {
 
   Future<void> _updatePersistentNotification() async {
     if (SettingsService().showInTray) {
-      final enabledCount = _pluginManager.plugins.where((p) => p.enabled).length;
+      final enabledCount =
+          _pluginManager.plugins.where((p) => p.enabled).length;
       await _notificationService.showPersistentNotification(
         enabledPlugins: enabledCount,
       );
@@ -94,46 +76,27 @@ class SchedulerService {
 
   void _schedulePlugin(Plugin plugin) {
     _timers[plugin.id]?.cancel();
-
-    // Run immediately first
-    _runPlugin(plugin);
-
-    // Then schedule periodic runs
+    _refreshService.refreshPlugin(plugin.id);
     _timers[plugin.id] = Timer.periodic(
       plugin.refreshInterval,
-      (_) => _runPlugin(plugin),
+      (_) => _refreshService.refreshPlugin(plugin.id),
     );
   }
 
-  Future<void> _runPlugin(Plugin plugin) async {
-    if (!_running) return;
-    if (!plugin.enabled) return;
+  void _onPluginOutput(PluginOutput output) {
+    _widgetService.updateWidget(output.pluginId, output);
 
-    final output = await _pluginManager.runPlugin(plugin.id);
-    if (output == null) return;
-
-    _lastOutputs[plugin.id] = output;
-
-    // Notify listeners
-    for (final listener in _listeners) {
-      listener(plugin.id, output);
-    }
-
-    // Update widget
-    await _widgetService.updateWidget(plugin.id, output);
-
-    // Update persistent notification with latest time
     final now = DateTime.now();
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    await _notificationService.updatePersistentNotification(
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    _notificationService.updatePersistentNotification(
       enabledPlugins: _pluginManager.plugins.where((p) => p.enabled).length,
       lastUpdate: timeStr,
     );
 
-    // Handle error notifications
     if (output.hasError) {
-      await _notificationService.showErrorNotification(
-        pluginId: plugin.id,
+      _notificationService.showErrorNotification(
+        pluginId: output.pluginId,
         error: output.errorMessage ?? 'Unknown error',
       );
     }
@@ -151,51 +114,29 @@ class SchedulerService {
     }
   }
 
-  Future<PluginOutput?> runPluginNow(String pluginId) async {
-    final plugin = _pluginManager.getPlugin(pluginId);
-    if (plugin == null) return null;
-
-    final output = await _pluginManager.runPlugin(pluginId);
-    if (output != null) {
-      _lastOutputs[pluginId] = output;
-
-      for (final listener in _listeners) {
-        listener(pluginId, output);
-      }
-
-      await _widgetService.updateWidget(pluginId, output);
-    }
-
-    return output;
+  Future<void> runPluginNow(String pluginId) async {
+    await _refreshService.refreshPlugin(pluginId);
   }
 
   Future<void> refreshAll() async {
-    for (final plugin in _pluginManager.plugins) {
-      if (plugin.enabled) {
-        await _runPlugin(plugin);
-      }
-    }
+    await _refreshService.refreshAll();
   }
 
   PluginOutput? getLastOutput(String pluginId) {
-    return _lastOutputs[pluginId];
+    return _refreshService.getOutput(pluginId);
   }
 
   void clearLastOutput(String pluginId) {
-    _lastOutputs.remove(pluginId);
+    _refreshService.clearOutput(pluginId);
   }
 
   void dispose() {
     stop();
-    _listeners.clear();
-    _lastOutputs.clear();
   }
 
   @visibleForTesting
   void resetForTesting() {
     stop();
-    _listeners.clear();
-    _lastOutputs.clear();
   }
 }
 

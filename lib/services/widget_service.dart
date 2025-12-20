@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,11 +6,10 @@ import 'package:home_widget/home_widget.dart';
 
 import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart';
+import 'refresh_service.dart';
 
 class WidgetService {
-
   factory WidgetService() => _instance;
-
   WidgetService._internal();
   static final WidgetService _instance = WidgetService._internal();
 
@@ -18,11 +18,11 @@ class WidgetService {
   static const String androidWidgetName = 'CrossbarWidgetProvider';
 
   final PluginManager _pluginManager = PluginManager();
+  final RefreshService _refreshService = RefreshService();
+  StreamSubscription? _pluginOutputSubscription;
   final Map<String, PluginOutput> _widgetData = {};
 
   bool _initialized = false;
-
-  /// Check if service has been initialized
   bool get isInitialized => _initialized;
 
   Future<void> init() async {
@@ -30,12 +30,10 @@ class WidgetService {
     if (!Platform.isAndroid && !Platform.isIOS) return;
 
     await HomeWidget.setAppGroupId(appGroupId);
-
-    // Register callback for when widget is clicked
     HomeWidget.widgetClicked.listen(_handleWidgetClick);
 
-    // Note: Widget refresh handler is registered early in main.dart
-    // to catch requests before WidgetService is initialized
+    _pluginOutputSubscription = _refreshService.pluginOutputEventStream
+        .listen((output) => updateWidget(output.pluginId, output));
 
     _initialized = true;
   }
@@ -140,6 +138,7 @@ class WidgetService {
   }
 
   void dispose() {
+    _pluginOutputSubscription?.cancel();
     _initialized = false;
     _widgetData.clear();
   }

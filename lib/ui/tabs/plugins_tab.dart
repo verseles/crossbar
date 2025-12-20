@@ -9,15 +9,11 @@ import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
 import '../../models/plugin_output.dart';
 import '../../services/plugin_config_service.dart';
+import '../../services/refresh_service.dart';
 import '../../services/tray_service.dart';
 import '../dialogs/plugin_config_dialog.dart';
 import '../dialogs/sample_plugins_dialog.dart';
 
-/// Redesigned Plugins Tab with:
-/// - Search & filtering
-/// - Sorting (enabled first, alphabetical)
-/// - Grouping options (language, configurable)
-/// - Expandable plugin cards with live output preview
 class PluginsTab extends StatefulWidget {
   const PluginsTab({super.key});
 
@@ -31,14 +27,13 @@ enum PluginGroupBy { none, language, configurable }
 class _PluginsTabState extends State<PluginsTab> {
   final PluginManager _pluginManager = PluginManager();
   final PluginConfigService _configService = PluginConfigService();
-  
+  final RefreshService _refreshService = RefreshService();
+
   bool _isLoading = true;
   String _searchQuery = '';
   PluginSortOrder _sortOrder = PluginSortOrder.enabledFirst;
   PluginGroupBy _groupBy = PluginGroupBy.none;
   String? _expandedPluginId;
-  final Map<String, PluginOutput?> _pluginOutputs = {};
-  final Map<String, bool> _runningPlugins = {};
   String? _pendingDeletePluginId;
   DateTime? _pendingDeleteTime;
 
@@ -51,40 +46,32 @@ class _PluginsTabState extends State<PluginsTab> {
   Future<void> _loadPlugins() async {
     await _pluginManager.discoverPlugins();
     if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _refreshPlugins() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
     _pluginManager.clear();
-    _pluginOutputs.clear();
     await _loadPlugins();
   }
 
   List<Plugin> get _filteredAndSortedPlugins {
     var plugins = _pluginManager.plugins.toList();
-    
-    // Apply search filter
+
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      plugins = plugins.where((p) {
-        return p.id.toLowerCase().contains(query) ||
-               p.interpreter.toLowerCase().contains(query);
-      }).toList();
+      plugins = plugins
+          .where((p) =>
+              p.id.toLowerCase().contains(query) ||
+              p.interpreter.toLowerCase().contains(query))
+          .toList();
     }
-    
-    // Apply sorting
+
     plugins.sort((a, b) {
       switch (_sortOrder) {
         case PluginSortOrder.enabledFirst:
-          if (a.enabled != b.enabled) {
-            return a.enabled ? -1 : 1;
-          }
+          if (a.enabled != b.enabled) return a.enabled ? -1 : 1;
           return a.id.toLowerCase().compareTo(b.id.toLowerCase());
         case PluginSortOrder.alphabetical:
           return a.id.toLowerCase().compareTo(b.id.toLowerCase());
@@ -96,102 +83,59 @@ class _PluginsTabState extends State<PluginsTab> {
           return a.refreshInterval.compareTo(b.refreshInterval);
       }
     });
-    
+
     return plugins;
   }
 
   Map<String, List<Plugin>> get _groupedPlugins {
     final plugins = _filteredAndSortedPlugins;
-    
-    if (_groupBy == PluginGroupBy.none) {
-      return {'All': plugins};
-    }
-    
+    if (_groupBy == PluginGroupBy.none) return {'All': plugins};
+
     final groups = <String, List<Plugin>>{};
-    
     for (final plugin in plugins) {
       String groupKey;
       switch (_groupBy) {
         case PluginGroupBy.language:
           groupKey = _getLanguageDisplayName(plugin.interpreter);
+          break;
         case PluginGroupBy.configurable:
           groupKey = plugin.hasConfig ? 'Configurable' : 'Standard';
+          break;
         case PluginGroupBy.none:
           groupKey = 'All';
+          break;
       }
       groups.putIfAbsent(groupKey, () => []).add(plugin);
     }
-    
     return groups;
   }
 
   String _getLanguageDisplayName(String interpreter) {
-    switch (interpreter) {
-      case 'bash':
-      case 'sh':
-        return '🐚 Bash';
-      case 'python3':
-      case 'python':
-        return '🐍 Python';
-      case 'node':
-        return '📦 Node.js';
-      case 'dart':
-        return '🎯 Dart';
-      case 'go':
-        return '🐹 Go';
-      case 'rust':
-        return '🦀 Rust';
-      default:
-        return '📄 $interpreter';
-    }
+    const displayNames = {
+      'bash': '🐚 Bash',
+      'sh': '🐚 Bash',
+      'python3': '🐍 Python',
+      'python': '🐍 Python',
+      'node': '📦 Node.js',
+      'dart': '🎯 Dart',
+      'go': '🐹 Go',
+      'rust': '🦀 Rust',
+    };
+    return displayNames[interpreter] ?? '📄 $interpreter';
   }
 
   String _getLanguageIcon(String interpreter) {
-    switch (interpreter) {
-      case 'bash':
-      case 'sh':
-        return '🐚';
-      case 'python3':
-      case 'python':
-        return '🐍';
-      case 'node':
-        return '📦';
-      case 'dart':
-        return '🎯';
-      case 'go':
-        return '🐹';
-      case 'rust':
-        return '🦀';
-      default:
-        return '📄';
-    }
-  }
-
-  Future<void> _runPlugin(Plugin plugin) async {
-    setState(() {
-      _runningPlugins[plugin.id] = true;
-    });
-    
-    try {
-      final output = await _pluginManager.runPlugin(plugin.id);
-      if (mounted) {
-        setState(() {
-          _pluginOutputs[plugin.id] = output;
-          _runningPlugins[plugin.id] = false;
-        });
-        
-        // Update tray if available
-        if (output != null) {
-          TrayService().updatePluginOutput(plugin.id, output);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _runningPlugins[plugin.id] = false;
-        });
-      }
-    }
+    const icons = {
+      'bash': '🐚',
+      'sh': '🐚',
+      'python3': '🐍',
+      'python': '🐍',
+      'node': '📦',
+      'dart': '🎯',
+      'go': '🐹',
+      'rust': '🦀',
+    };
+    return icons[interpreter] ?? '📄';
   }
 
   @override
@@ -202,10 +146,7 @@ class _PluginsTabState extends State<PluginsTab> {
     return Scaffold(
       body: Column(
         children: [
-          // Search and Filter Bar
           _buildSearchAndFilterBar(theme, l10n),
-          
-          // Content
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -230,7 +171,7 @@ class _PluginsTabState extends State<PluginsTab> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
+            color: theme.shadowColor.withAlpha(10),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -238,7 +179,6 @@ class _PluginsTabState extends State<PluginsTab> {
       ),
       child: Column(
         children: [
-          // Search bar
           TextField(
             onChanged: (value) => setState(() => _searchQuery = value),
             decoration: InputDecoration(
@@ -259,15 +199,11 @@ class _PluginsTabState extends State<PluginsTab> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
           ),
-          
           const SizedBox(height: 12),
-          
-          // Filter chips row
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                // Sort dropdown
                 PopupMenuButton<PluginSortOrder>(
                   initialValue: _sortOrder,
                   onSelected: (value) => setState(() => _sortOrder = value),
@@ -294,10 +230,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     ),
                   ],
                 ),
-                
                 const SizedBox(width: 8),
-                
-                // Group by dropdown
                 PopupMenuButton<PluginGroupBy>(
                   initialValue: _groupBy,
                   onSelected: (value) => setState(() => _groupBy = value),
@@ -320,10 +253,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     ),
                   ],
                 ),
-                
                 const SizedBox(width: 8),
-                
-                // Quick filters
                 FilterChip(
                   label: Text(l10n.enabled),
                   selected: _sortOrder == PluginSortOrder.enabledFirst,
@@ -331,10 +261,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     _sortOrder = PluginSortOrder.enabledFirst;
                   }),
                 ),
-                
                 const SizedBox(width: 8),
-                
-                // Refresh button
                 ActionChip(
                   avatar: const Icon(Icons.refresh, size: 18),
                   label: Text(l10n.refresh),
@@ -407,7 +334,6 @@ class _PluginsTabState extends State<PluginsTab> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Group header (only if grouping is enabled)
             if (_groupBy != PluginGroupBy.none) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -441,8 +367,6 @@ class _PluginsTabState extends State<PluginsTab> {
                 ),
               ),
             ],
-            
-            // Plugin cards
             ...groupPlugins.map((plugin) => _buildExpandablePluginCard(
               context,
               plugin,
@@ -462,129 +386,129 @@ class _PluginsTabState extends State<PluginsTab> {
     AppLocalizations l10n,
   ) {
     final isExpanded = _expandedPluginId == plugin.id;
-    final output = _pluginOutputs[plugin.id];
-    final isRunning = _runningPlugins[plugin.id] ?? false;
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          // Main card content (always visible)
-          InkWell(
-            onTap: () {
-              setState(() {
-                _expandedPluginId = isExpanded ? null : plugin.id;
-              });
-              // Auto-run plugin when expanded if no output yet
-              if (!isExpanded && output == null && plugin.enabled) {
-                _runPlugin(plugin);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
+
+    return StreamBuilder<Map<String, PluginOutput>>(
+      stream: _refreshService.outputsStream,
+      initialData: _refreshService.getAllOutputs(),
+      builder: (context, outputsSnapshot) {
+        final output = outputsSnapshot.data?[plugin.id];
+        return StreamBuilder<String?>(
+          stream: _refreshService.pluginRefreshingStream,
+          initialData: null,
+          builder: (context, refreshingSnapshot) {
+            final isRunning = refreshingSnapshot.data == plugin.id;
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
                 children: [
-                  // Language icon
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: plugin.enabled
-                          ? theme.colorScheme.primaryContainer
-                          : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        _getLanguageIcon(plugin.interpreter),
-                        style: const TextStyle(fontSize: 24),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _expandedPluginId = isExpanded ? null : plugin.id;
+                      });
+                      if (!isExpanded && output == null && plugin.enabled) {
+                        _refreshService.refreshPlugin(plugin.id);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: plugin.enabled
+                                  ? theme.colorScheme.primaryContainer
+                                  : theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _getLanguageIcon(plugin.interpreter),
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _formatPluginName(plugin.id),
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (plugin.hasConfig)
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 4),
+                                        child: Icon(
+                                          Icons.settings,
+                                          size: 16,
+                                          color: theme.colorScheme.outline,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    _buildInfoChip(
+                                      theme,
+                                      _formatInterval(plugin.refreshInterval),
+                                      Icons.timer_outlined,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildInfoChip(
+                                      theme,
+                                      plugin.interpreter,
+                                      Icons.code,
+                                    ),
+                                    if (plugin.lastRun != null) ...[
+                                      const SizedBox(width: 8),
+                                      _buildInfoChip(
+                                        theme,
+                                        _formatTimeAgo(plugin.lastRun!),
+                                        Icons.history,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: plugin.enabled,
+                            onChanged: (_) async {
+                              await _pluginManager.togglePlugin(plugin.id);
+                              setState(() {});
+                            },
+                          ),
+                          Icon(
+                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  
-                  const SizedBox(width: 12),
-                  
-                  // Plugin info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _formatPluginName(plugin.id),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (plugin.hasConfig)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: Icon(
-                                  Icons.settings,
-                                  size: 16,
-                                  color: theme.colorScheme.outline,
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            _buildInfoChip(
-                              theme,
-                              _formatInterval(plugin.refreshInterval),
-                              Icons.timer_outlined,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildInfoChip(
-                              theme,
-                              plugin.interpreter,
-                              Icons.code,
-                            ),
-                            if (plugin.lastRun != null) ...[
-                              const SizedBox(width: 8),
-                              _buildInfoChip(
-                                theme,
-                                _formatTimeAgo(plugin.lastRun!),
-                                Icons.history,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // Toggle switch
-                  Switch(
-                    value: plugin.enabled,
-                    onChanged: (_) async {
-                      await _pluginManager.togglePlugin(plugin.id);
-                      setState(() {});
-                    },
-                  ),
-                  
-                  // Expand indicator
-                  Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.colorScheme.outline,
-                  ),
+                  if (isExpanded)
+                    _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
                 ],
               ),
-            ),
-          ),
-          
-          // Expanded content
-          if (isExpanded)
-            _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -635,7 +559,6 @@ class _PluginsTabState extends State<PluginsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Output Preview Section
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -660,7 +583,6 @@ class _PluginsTabState extends State<PluginsTab> {
                       ),
                     ),
                     const Spacer(),
-                    // Copy button
                     if (output != null)
                       IconButton(
                         onPressed: () => _copyOutput(output),
@@ -668,9 +590,10 @@ class _PluginsTabState extends State<PluginsTab> {
                         tooltip: l10n.copyOutput,
                       ),
                     const SizedBox(width: 4),
-                    // Run button
                     FilledButton.tonalIcon(
-                      onPressed: isRunning ? null : () => _runPlugin(plugin),
+                      onPressed: isRunning
+                          ? null
+                          : () => _refreshService.refreshPlugin(plugin.id),
                       icon: isRunning
                           ? const SizedBox(
                               width: 16,
@@ -683,8 +606,6 @@ class _PluginsTabState extends State<PluginsTab> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                
-                // Output display
                 Container(
                   width: double.infinity,
                   constraints: const BoxConstraints(minHeight: 80),
@@ -703,8 +624,6 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
             ),
           ),
-          
-          // Details Section
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -755,8 +674,6 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
             ),
           ),
-          
-          // Action buttons
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Wrap(
@@ -772,7 +689,6 @@ class _PluginsTabState extends State<PluginsTab> {
                 OutlinedButton.icon(
                   onPressed: () async {
                     await _pluginManager.togglePlugin(plugin.id);
-                    // Update tray after toggle
                     await TrayService().refreshMenu();
                     setState(() {});
                   },
@@ -869,7 +785,6 @@ class _PluginsTabState extends State<PluginsTab> {
       );
     }
     
-    // Successful output - show icon and text
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1005,7 +920,6 @@ class _PluginsTabState extends State<PluginsTab> {
   Future<void> _showConfigDialog(BuildContext context, Plugin plugin) async {
     if (plugin.config == null) return;
 
-    // Capture context-dependent objects before async gap
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
 
@@ -1030,9 +944,8 @@ class _PluginsTabState extends State<PluginsTab> {
         schema: plugin.config,
       );
 
-      // Re-run plugin immediately
       if (!mounted) return;
-      await _runPlugin(plugin);
+      await _refreshService.refreshPlugin(plugin.id);
 
       if (mounted) {
         messenger.showSnackBar(
@@ -1058,14 +971,12 @@ class _PluginsTabState extends State<PluginsTab> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Sample Plugins option (primary)
               Card(
                 color: theme.colorScheme.primaryContainer,
                 child: InkWell(
                   onTap: () async {
                     Navigator.pop(context);
                     final installed = await SamplePluginsDialog.show(context);
-                    // Always refresh to pick up any installed plugins
                     if (!context.mounted) return;
                     await _refreshPlugins();
                     await TrayService().refreshMenu();
@@ -1115,7 +1026,7 @@ class _PluginsTabState extends State<PluginsTab> {
                                 l10n.chooseFromPlugins,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onPrimaryContainer
-                                      .withValues(alpha: 0.8),
+                                      .withAlpha(200),
                                 ),
                               ),
                             ],
@@ -1130,9 +1041,7 @@ class _PluginsTabState extends State<PluginsTab> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(child: Divider(color: theme.colorScheme.outline)),
@@ -1148,16 +1057,12 @@ class _PluginsTabState extends State<PluginsTab> {
                   Expanded(child: Divider(color: theme.colorScheme.outline)),
                 ],
               ),
-
               const SizedBox(height: 16),
-
-              // Manual creation instructions
               Text(
                 l10n.createYourOwnPlugin,
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 12),
-
               Text(
                 l10n.createScriptStep,
                 style: theme.textTheme.bodySmall,
@@ -1176,7 +1081,6 @@ class _PluginsTabState extends State<PluginsTab> {
                 ],
               ),
               const SizedBox(height: 12),
-
               Text(
                 l10n.nameWithIntervalStep,
                 style: theme.textTheme.bodySmall,
@@ -1196,7 +1100,6 @@ class _PluginsTabState extends State<PluginsTab> {
                 ),
               ),
               const SizedBox(height: 12),
-
               Text(
                 l10n.placeInPluginsStep,
                 style: theme.textTheme.bodySmall,
@@ -1222,8 +1125,6 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   String _formatPluginName(String pluginId) {
-    // Convert "cpu.10s.sh" to "CPU"
-    // or "my-plugin.5m.py" to "My Plugin"
     final name = pluginId.split('.').first;
     return name
         .replaceAll('-', ' ')
@@ -1236,28 +1137,17 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   String _formatInterval(Duration duration) {
-    if (duration.inHours > 0) {
-      return '${duration.inHours}h';
-    }
-    if (duration.inMinutes > 0) {
-      return '${duration.inMinutes}m';
-    }
+    if (duration.inHours > 0) return '${duration.inHours}h';
+    if (duration.inMinutes > 0) return '${duration.inMinutes}m';
     return '${duration.inSeconds}s';
   }
 
   String _formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final diff = now.difference(dateTime);
-    
-    if (diff.inSeconds < 60) {
-      return 'Just now';
-    } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m ago';
-    } else if (diff.inHours < 24) {
-      return '${diff.inHours}h ago';
-    } else {
-      return '${diff.inDays}d ago';
-    }
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -1266,7 +1156,6 @@ class _PluginsTabState extends State<PluginsTab> {
         '${dateTime.second.toString().padLeft(2, '0')}';
   }
 
-  /// Opens the plugin file in the system's default editor
   Future<void> _editPlugin(Plugin plugin) async {
     final file = File(plugin.path);
     if (!await file.exists()) {
@@ -1278,25 +1167,20 @@ class _PluginsTabState extends State<PluginsTab> {
       return;
     }
 
-    // Use xdg-open on Linux, open on macOS, start on Windows
     final String command;
     final List<String> args;
-    
     if (Platform.isLinux) {
       command = 'xdg-open';
       args = [plugin.path];
     } else if (Platform.isMacOS) {
       command = 'open';
-      args = ['-e', plugin.path]; // -e opens in TextEdit
+      args = ['-e', plugin.path];
     } else if (Platform.isWindows) {
       command = 'notepad';
       args = [plugin.path];
     } else {
-      // Fallback: try to launch as file:// URI
       final uri = Uri.file(plugin.path);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      }
+      if (await canLaunchUrl(uri)) await launchUrl(uri);
       return;
     }
 
@@ -1311,20 +1195,16 @@ class _PluginsTabState extends State<PluginsTab> {
     }
   }
 
-  /// Handle delete button click - requires double-click to confirm
   void _handleDeleteClick(BuildContext context, Plugin plugin) {
     final now = DateTime.now();
     
-    // Check if this is a "second click" within 3 seconds
     if (_pendingDeletePluginId == plugin.id && 
         _pendingDeleteTime != null &&
         now.difference(_pendingDeleteTime!).inSeconds < 3) {
-      // Second click - delete the plugin
       _pendingDeletePluginId = null;
       _pendingDeleteTime = null;
       _deletePlugin(context, plugin);
     } else {
-      // First click - show toast and wait for confirmation
       _pendingDeletePluginId = plugin.id;
       _pendingDeleteTime = now;
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -1338,9 +1218,7 @@ class _PluginsTabState extends State<PluginsTab> {
     }
   }
 
-  /// Actually delete the plugin
   Future<void> _deletePlugin(BuildContext context, Plugin plugin) async {
-    // Capture context-dependent objects before async gap
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     final pluginName = _formatPluginName(plugin.id);
@@ -1351,16 +1229,13 @@ class _PluginsTabState extends State<PluginsTab> {
         await file.delete();
       }
       
-      // Also delete schema file if exists
       final schemaFile = File('${plugin.path}.schema.json');
       if (await schemaFile.exists()) {
         await schemaFile.delete();
       }
 
-      // Clear plugin output from tray and refresh
-      TrayService().clearPluginOutput(plugin.id);
+      _refreshService.clearOutput(plugin.id);
       await _refreshPlugins();
-      await TrayService().refreshMenu();
       
       if (mounted) {
         messenger.clearSnackBars();
@@ -1377,32 +1252,18 @@ class _PluginsTabState extends State<PluginsTab> {
     }
   }
 
-  /// Copies the plugin output to clipboard
   Future<void> _copyOutput(PluginOutput output) async {
-    // Capture context-dependent objects before async gap
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     final buffer = StringBuffer();
-    
-    if (output.icon.isNotEmpty) {
-      buffer.write('${output.icon} ');
-    }
+    if (output.icon.isNotEmpty) buffer.write('${output.icon} ');
     buffer.writeln(output.text ?? '');
-    
-    if (output.trayTooltip != null) {
-      buffer.writeln(output.trayTooltip!);
-    }
-    
+    if (output.trayTooltip != null) buffer.writeln(output.trayTooltip!);
     for (final item in output.menu) {
-      if (item.text != null) {
-        buffer.writeln('• ${item.text}');
-      }
+      if (item.text != null) buffer.writeln('• ${item.text}');
     }
-    
-    if (output.errorMessage != null) {
-      buffer.writeln('Error: ${output.errorMessage}');
-    }
+    if (output.errorMessage != null) buffer.writeln('Error: ${output.errorMessage}');
 
     await FlutterClipboard.copy(buffer.toString());
     
