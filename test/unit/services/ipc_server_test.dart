@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:crossbar/core/plugin_manager.dart';
 import 'package:crossbar/services/ipc_server.dart';
+import 'package:crossbar/services/refresh_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
@@ -175,6 +176,7 @@ void main() {
     group('plugin actions', () {
       late Directory tempDir;
       late PluginManager manager;
+      late RefreshService refreshService;
 
       setUp(() async {
         await server.stop(); // Stop the default server
@@ -184,6 +186,9 @@ void main() {
         manager.customPluginsDirectory = tempDir.path;
         manager.clear();
 
+        refreshService = RefreshService();
+        refreshService.resetForTesting();
+
         // Create a test plugin
         final f = File(path.join(tempDir.path, 'test.sh'));
         f.writeAsStringSync('#!/bin/bash\necho "OK"');
@@ -192,7 +197,7 @@ void main() {
         }
         await manager.discoverPlugins();
 
-        server = IpcServer(port: testPort, pluginManager: manager);
+        server = IpcServer(port: testPort, refreshService: refreshService);
         await server.start();
       });
 
@@ -209,8 +214,8 @@ void main() {
 
         expect(response.statusCode, HttpStatus.ok);
 
-        // Check if disabled in manager
-        final p = manager.getPlugin('test.off.sh');
+        // Check if disabled in RefreshService
+        final p = refreshService.getPlugin('test.off.sh');
         expect(p, isNotNull);
         expect(p!.enabled, false);
 
@@ -219,7 +224,7 @@ void main() {
 
       test('PUT /plugins/:id/enable enables plugin', () async {
         // Disable first
-        await manager.disablePlugin('test.sh');
+        await refreshService.disablePlugin('test.sh');
 
         final client = HttpClient();
         final request = await client.open('PUT', 'localhost', testPort, '/plugins/test.off.sh/enable');
@@ -227,7 +232,7 @@ void main() {
 
         expect(response.statusCode, HttpStatus.ok);
 
-        final p = manager.getPlugin('test.sh');
+        final p = refreshService.getPlugin('test.sh');
         expect(p, isNotNull);
         expect(p!.enabled, true);
 

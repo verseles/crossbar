@@ -2,22 +2,28 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../core/plugin_manager.dart';
+import 'refresh_service.dart';
+import 'scheduler_service.dart';
+import 'tray_service.dart';
 import 'window_service.dart';
 
-/// IPC Server for GUI ↔ background communication
+/// IPC Server for GUI <-> background communication
 /// Runs on localhost:48291 and provides REST API for plugin management
+///
+/// All plugin operations use RefreshService to ensure consistent
+/// behavior across UI, Tray, and Widgets.
 class IpcServer {
   IpcServer({
-    PluginManager? pluginManager,
+    RefreshService? refreshService,
     this.port = defaultPort,
-  }) : _pluginManager = pluginManager ?? PluginManager();
+  }) : _refreshService = refreshService ?? RefreshService();
 
   static const int defaultPort = 48291;
   static const String host = 'localhost';
 
   HttpServer? _server;
-  final PluginManager _pluginManager;
+  final RefreshService _refreshService;
+  final SchedulerService _schedulerService = SchedulerService();
   final int port;
 
   bool get isRunning => _server != null;
@@ -101,8 +107,8 @@ class IpcServer {
       'port': port,
       'version': '1.0.0',
       'plugins': {
-        'total': _pluginManager.plugins.length,
-        'enabled': _pluginManager.plugins.where((p) => p.enabled).length,
+        'total': _refreshService.plugins.length,
+        'enabled': _refreshService.plugins.where((p) => p.enabled).length,
       },
     };
 
@@ -117,7 +123,7 @@ class IpcServer {
       return;
     }
 
-    final plugins = _pluginManager.plugins.map((p) => {
+    final plugins = _refreshService.plugins.map((p) => {
       'id': p.id,
       'path': p.path,
       'interpreter': p.interpreter,
@@ -131,14 +137,22 @@ class IpcServer {
   }
 
   /// POST /plugins/refresh - Refresh all plugins
+  ///
+  /// Uses RefreshService to ensure Tray, Widgets, and UI are all updated.
   Future<void> _handleRefresh(HttpRequest request) async {
     if (request.method != 'POST') {
       _sendError(request, HttpStatus.methodNotAllowed, 'Method not allowed');
       return;
     }
 
-    await _pluginManager.runAllEnabled();
-    _sendJson(request, {'status': 'ok', 'message': 'Plugins refreshed'});
+    // Use RefreshService - this notifies all listeners (Tray, Widget, UI)
+    final outputs = await _refreshService.runAllEnabled();
+
+    _sendJson(request, {
+      'status': 'ok',
+      'message': 'Plugins refreshed',
+      'count': outputs.length,
+    });
   }
 
   /// GET /health - Health check endpoint
@@ -189,7 +203,7 @@ class IpcServer {
     final pluginId = Uri.decodeComponent(parts[1]);
     final action = parts.length > 2 ? parts[2] : null;
 
-    final plugin = _pluginManager.getPlugin(pluginId);
+    final plugin = _refreshService.getPlugin(pluginId);
     if (plugin == null) {
       _sendError(request, HttpStatus.notFound, 'Plugin not found: $pluginId');
       return;
@@ -197,6 +211,7 @@ class IpcServer {
 
     if (action == null && request.method == 'GET') {
       // GET /plugins/:id - Get plugin details
+      final output = _refreshService.getLastOutput(pluginId);
       _sendJson(request, {
         'id': plugin.id,
         'path': plugin.path,
@@ -205,6 +220,11 @@ class IpcServer {
         'refreshInterval': plugin.refreshInterval.inMilliseconds,
         'lastRun': plugin.lastRun?.toIso8601String(),
         'lastError': plugin.lastError,
+        'lastOutput': output != null ? {
+          'icon': output.icon,
+          'text': output.text,
+          'hasError': output.hasError,
+        } : null,
       });
       return;
     }
@@ -216,16 +236,22 @@ class IpcServer {
 
     switch (action) {
       case 'enable':
-        await _pluginManager.enablePlugin(pluginId);
+        await _refreshService.enablePlugin(pluginId);
+        _schedulerService.reschedulePlugin(pluginId);
+        await TrayService().refreshMenu();
         _sendJson(request, {'status': 'ok', 'message': 'Plugin enabled', 'id': pluginId});
 
       case 'disable':
-        await _pluginManager.disablePlugin(pluginId);
+        await _refreshService.disablePlugin(pluginId);
+        _schedulerService.reschedulePlugin(pluginId);
+        await TrayService().refreshMenu();
         _sendJson(request, {'status': 'ok', 'message': 'Plugin disabled', 'id': pluginId});
 
       case 'toggle':
-        await _pluginManager.togglePlugin(pluginId);
-        final p = _pluginManager.getPlugin(pluginId);
+        await _refreshService.togglePlugin(pluginId);
+        _schedulerService.reschedulePlugin(pluginId);
+        await TrayService().refreshMenu();
+        final p = _refreshService.getPlugin(pluginId);
         _sendJson(request, {
           'status': 'ok',
           'message': 'Plugin toggled',
@@ -234,7 +260,8 @@ class IpcServer {
         });
 
       case 'run':
-        final output = await _pluginManager.runPlugin(pluginId);
+        // Use RefreshService - this notifies all listeners
+        final output = await _refreshService.runPlugin(pluginId);
         if (output != null) {
           _sendJson(request, {
             'status': 'ok',

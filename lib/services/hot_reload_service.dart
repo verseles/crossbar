@@ -108,7 +108,7 @@ class HotReloadService {
     }
 
     // Check if it's a valid plugin file
-    final extensions = ['.sh', '.py', '.js', '.dart', '.go', '.rs'];
+    final extensions = ['.sh', '.py', '.js', '.dart', '.go', '.rs', '.lua', '.yaml', '.yml'];
     for (final ext in extensions) {
       if (name.endsWith(ext)) {
         return name;
