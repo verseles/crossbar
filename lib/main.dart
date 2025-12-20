@@ -134,8 +134,6 @@ void main(List<String> args) async {
 
     // Start scheduler
     final scheduler = SchedulerService();
-    // Connect tray to scheduler before starting, so we catch initial runs if any
-    scheduler.addListener(trayService.updatePluginOutput);
     await scheduler.start();
     logger.info('Scheduler started');
 

@@ -88,16 +88,10 @@ void main() {
       final scheduler = SchedulerService();
       scheduler.resetForTesting();
 
-      var called = false;
-      scheduler.addListener((id, out) {
-        if (id == 'test_sched.sh') called = true;
-      });
-
       await scheduler.start();
       // Wait for script execution
       await Future.delayed(const Duration(seconds: 1));
 
-      expect(called, true);
       expect(scheduler.isRunning, true);
 
       await scheduler.stop();

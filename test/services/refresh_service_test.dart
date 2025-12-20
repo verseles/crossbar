@@ -22,12 +22,12 @@ void main() {
   });
 
   test('refreshAll runs all enabled plugins and updates stream', () async {
-    final plugin1 = Plugin(id: 'p1', path: 'p1', interpreter: 'sh', enabled: true);
-    final plugin2 = Plugin(id: 'p2', path: 'p2', interpreter: 'sh', enabled: false);
-    final plugin3 = Plugin(id: 'p3', path: 'p3', interpreter: 'sh', enabled: true);
+    final plugin1 = Plugin(id: 'p1', path: 'p1', interpreter: 'sh', enabled: true, refreshInterval: Duration(seconds: 10));
+    final plugin2 = Plugin(id: 'p2', path: 'p2', interpreter: 'sh', enabled: false, refreshInterval: Duration(seconds: 10));
+    final plugin3 = Plugin(id: 'p3', path: 'p3', interpreter: 'sh', enabled: true, refreshInterval: Duration(seconds: 10));
 
-    final output1 = PluginOutput('p1', text: 'out1');
-    final output3 = PluginOutput('p3', text: 'out3');
+    final output1 = PluginOutput(pluginId: 'p1', text: 'out1');
+    final output3 = PluginOutput(pluginId: 'p3', text: 'out3');
 
     when(mockPluginManager.plugins).thenReturn([plugin1, plugin2, plugin3]);
     when(mockPluginManager.runPlugin('p1')).thenAnswer((_) async => output1);
@@ -53,8 +53,8 @@ void main() {
   });
 
   test('refreshPlugin runs a single enabled plugin and updates stream', () async {
-    final plugin = Plugin(id: 'p1', path: 'p1', interpreter: 'sh', enabled: true);
-    final output = PluginOutput('p1', text: 'out');
+    final plugin = Plugin(id: 'p1', path: 'p1', interpreter: 'sh', enabled: true, refreshInterval: Duration(seconds: 10));
+    final output = PluginOutput(pluginId: 'p1', text: 'out');
 
     when(mockPluginManager.getPlugin('p1')).thenReturn(plugin);
     when(mockPluginManager.runPlugin('p1')).thenAnswer((_) async => output);

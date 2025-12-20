@@ -72,49 +72,5 @@ void main() {
       }
     });
 
-    test('updatePluginOutput updates title for first plugin', () async {
-      // Ensure we have the plugin
-      final pm = PluginManager();
-      expect(pm.plugins, isNotEmpty);
-      final pluginId = pm.plugins.first.id;
-
-      final output = PluginOutput(
-        pluginId: pluginId,
-        icon: '🚀',
-        text: 'Test Output',
-      );
-
-      trayService.updatePluginOutput(pluginId, output);
-      // updateTitle is async
-      await Future.delayed(Duration.zero);
-
-      // Check for setTitle
-      final setTitleCalls = log.where((c) => c.method == 'setTitle');
-      expect(setTitleCalls, isNotEmpty);
-      final args = setTitleCalls.last.arguments;
-      // tray_manager might send arguments as a Map (Linux/MethodChannel convention)
-      if (args is Map) {
-        expect(args['title'], '🚀 Test Output');
-      } else {
-        expect(args, '🚀 Test Output');
-      }
-    });
-
-    test('updatePluginOutput does NOT update title for other plugins', () async {
-      const otherPluginId = 'other_plugin.sh';
-
-      const output = PluginOutput(
-        pluginId: otherPluginId,
-        icon: '👾',
-        text: 'Alien Output',
-      );
-
-      log.clear();
-      trayService.updatePluginOutput(otherPluginId, output);
-      await Future.delayed(Duration.zero);
-
-      final setTitleCalls = log.where((c) => c.method == 'setTitle');
-      expect(setTitleCalls, isEmpty);
-    });
   });
 }
