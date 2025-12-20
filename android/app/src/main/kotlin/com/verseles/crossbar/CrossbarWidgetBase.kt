@@ -53,8 +53,13 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
-            // Get plugin IDs from stored data
-            val pluginIdsJson = widgetData.getString("plugin_ids", null)
+            // Get plugin IDs - first try per-widget config, then fallback to global
+            val perWidgetKey = "widget_${appWidgetId}_plugins"
+            val perWidgetJson = widgetData.getString(perWidgetKey, null)
+            val globalJson = widgetData.getString("plugin_ids", null)
+            
+            val pluginIdsJson = perWidgetJson ?: globalJson
+            
             val pluginIds = try {
                 if (pluginIdsJson != null) {
                     val jsonArray = JSONArray(pluginIdsJson)
@@ -63,7 +68,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                     emptyList()
                 }
             } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error parsing plugin IDs", e)
+                android.util.Log.e(TAG, "Error parsing plugin IDs for widget $appWidgetId", e)
                 emptyList()
             }
 

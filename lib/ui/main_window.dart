@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
+import 'dialogs/widget_config_dialog.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
 import 'tabs/settings_tab.dart';
@@ -59,6 +60,27 @@ class MainWindow extends StatelessWidget {
             useMaterial3: true,
           ),
           themeMode: _getThemeMode(settings.themeMode),
+          onGenerateRoute: (routeSettings) {
+            final uri = Uri.parse(routeSettings.name ?? '/');
+            
+            // Handle widget config route: /widget/config?id=X&size=Y
+            if (uri.path == '/widget/config') {
+              final widgetId = int.tryParse(uri.queryParameters['id'] ?? '') ?? 0;
+              final widgetSize = uri.queryParameters['size'] ?? 'small';
+              
+              return MaterialPageRoute(
+                builder: (context) => _WidgetConfigScreen(
+                  widgetId: widgetId,
+                  widgetSize: widgetSize,
+                ),
+              );
+            }
+            
+            // Default route
+            return MaterialPageRoute(
+              builder: (context) => const MainScreen(),
+            );
+          },
           home: const MainScreen(),
         );
       },
@@ -207,6 +229,56 @@ class _MainScreenState extends State<MainScreen> {
             child: _tabs[_currentIndex],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Screen for widget configuration - shows dialog immediately
+class _WidgetConfigScreen extends StatefulWidget {
+  const _WidgetConfigScreen({
+    required this.widgetId,
+    required this.widgetSize,
+  });
+
+  final int widgetId;
+  final String widgetSize;
+
+  @override
+  State<_WidgetConfigScreen> createState() => _WidgetConfigScreenState();
+}
+
+class _WidgetConfigScreenState extends State<_WidgetConfigScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Show dialog after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showConfigDialog();
+    });
+  }
+
+  Future<void> _showConfigDialog() async {
+    await WidgetConfigDialog.show(
+      context: context,
+      widgetId: widget.widgetId,
+      widgetSize: widget.widgetSize,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Simple loading screen while dialog is shown
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(AppLocalizations.of(context)?.widgetConfiguration ?? 'Widget Configuration'),
+          ],
+        ),
       ),
     );
   }

@@ -493,4 +493,20 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get licenseText =>
       'Crossbar - ユニバーサルプラグインシステム\n\nCopyright (C) 2025\n\n本プログラムはフリーソフトウェアです：Free Software Foundationが発行したGNU Affero一般公衆利用許諾書の条件の下で、ライセンスのバージョン3、または（お選びにより）それ以降のバージョンに従って再配布および/または変更することができます。\n\n本プログラムは有用であることを期待して配布されていますが、商品性や特定目的への適合性の暗黙の保証さえも含め、いかなる保証もありません。詳細についてはGNU Affero一般公衆利用許諾書をご覧ください。\n\n本プログラムと共にGNU Affero一般公衆利用許諾書のコピーを受け取っているはずです。受け取っていない場合は、<https://www.gnu.org/licenses/>をご覧ください。';
+
+  @override
+  String get widgetConfiguration => 'Widget Configuration';
+
+  @override
+  String get selectPluginsForWidget => 'Select plugins to display';
+
+  @override
+  String get selectOnePlugin => 'Select one plugin';
+
+  @override
+  String get selectPlugins => 'Select plugins';
+
+  @override
+  String get noPluginsAvailable =>
+      'No plugins available. Install some plugins first.';
 }
