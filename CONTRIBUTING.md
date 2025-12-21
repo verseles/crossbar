@@ -426,7 +426,7 @@ PluginOutput parseTextFormat(String output) {
 
 ### Getting Help
 
-- 📖 Read the [MASTER_PLAN.md](MASTER_PLAN.md) for complete specs
+- 📖 Read the [docs/](docs/) for complete documentation
 - 💬 Use [GitHub Discussions](https://github.com/verseles/crossbar/discussions) for questions
 - 🐛 Check [Issues](https://github.com/verseles/crossbar/issues) for known problems
 

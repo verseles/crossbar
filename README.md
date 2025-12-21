@@ -566,7 +566,7 @@ Built with:
 
 ## 📞 Support
 
-- 📖 [Documentation](MASTER_PLAN.md)
+- 📖 [Documentation](docs/)
 - 🐛 [Issue Tracker](https://github.com/verseles/crossbar/issues)
 - 💬 [Discussions](https://github.com/verseles/crossbar/discussions)
 - 📧 Email: support@crossbar.dev (coming soon)
@@ -609,152 +609,21 @@ Built with:
 <details>
 <summary>📜 Changelog</summary>
 
-### [1.0.0] - 2025-12-01 🎉 Initial Release
+See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
 
-First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
-
-#### ✨ Key Features Highlights:
-
-- **Multi-language plugin support**: Bash, Python, Node.js, Dart, Go, Rust.
-- **BitBar-compatible text format parser** & **JSON output format** for structured data.
-- **Hot reload system** with automatic plugin detection.
-- **39 CLI Commands**: Unified API for System, Network, Device, Audio/Media, Clipboard, Utilities.
-- **Desktop Support**: System tray (Linux/Windows), Menu bar (macOS).
-- **Mobile Features**: Android (Foreground service, persistent notifications), iOS (Home screen widgets - planned).
-- **Declarative plugin configs** with auto-generated UI (25+ field types), secure storage for passwords.
-- **Comprehensive test suite**: >90% coverage for core modules, 0 analysis errors.
-- **CI/CD pipelines** with multi-platform builds (Linux, macOS, Windows, Android).
-- **Internationalization**: 10 languages supported.
-
-#### 🏗️ Architecture Overview:
-
-- **Core**: Plugin Manager, Script Runner, Output Parser, CLI API implementations.
-- **Models**: Plugin, PluginOutput, PluginConfig.
-- **Services**: Scheduler, Tray, Hot Reload, Marketplace, Logger, IPC, Notification, Settings, Widget.
-- **UI**: Modern Material Design 3.
-
-#### 📦 By the Numbers (v1.0.0):
-
-- ~6,661 lines of Dart code
-- 39 CLI commands
-- 24 example plugins (in 6 languages)
-- 10 languages (i18n)
-- 4+ platforms supported (Linux, macOS, Windows, Android, iOS - planned)
-- > 90% test coverage
-- <150MB memory footprint (idle, 3 plugins)
-- <50ms plugin execution overhead
-- 41MB Linux binary size
 </details>
 
 <details>
 <summary>🔒 Security Policy</summary>
 
-Crossbar takes security seriously. If you discover a security vulnerability, please report it responsibly.
-
-### Supported Versions
-
-- **1.x.x**: Fully supported for security patches.
-- **< 1.0**: Not supported.
-
-### Reporting a Vulnerability
-
-**DO NOT** open a public GitHub issue for security vulnerabilities.
-Instead, please report security issues by emailing: **security@verseles.com**
-Alternatively, use GitHub's private vulnerability reporting: [Security tab](https://github.com/verseles/crossbar/security).
-
-**What to Include**: Description, Impact, Steps to Reproduce, Affected Versions, Possible Fix, Your Contact.
-
-**Response Timeline**:
-
-- **Acknowledgment**: Within 48 hours.
-- **Initial Assessment**: Within 7 days.
-- **Resolution**: Aim for 30 days for critical vulnerabilities.
-
-### Security Considerations & Known Limitations
-
-- **Plugin Security**: Plugins execute with the same permissions as the running user. **Only run trusted plugins.** Review third-party plugins.
-- **No Plugin Sandboxing**: Plugins run with full user permissions.
-- **Secure Storage**: Sensitive values (type `password`) are stored using platform-specific secure storage (Keychain, Credential Manager, libsecret).
-- **Network Security**: All HTTP requests use HTTPS by default. The IPC server only listens on `localhost:48291` (not remotely accessible).
-- **File Permissions**: Plugin files should have restricted permissions (`chmod 700`).
-
-### Best Practices for Users
-
-- Keep Crossbar updated.
-- Review plugin source code.
-- Use secure API keys.
-- Limit plugin permissions (if possible).
-- Monitor plugin behavior.
-
-### Best Practices for Plugin Developers
-
-- Validate all inputs.
-- Use HTTPS.
-- Don't hardcode secrets.
-- Handle errors gracefully.
-- Minimize dependencies.
-- Document security requirements.
-
-For security concerns: **security@verseles.com**
+See [SECURITY.md](SECURITY.md) for security policy, vulnerability reporting, and best practices.
 
 </details>
 
 <details>
 <summary>🤝 Contributing</summary>
 
-Thank you for considering contributing to Crossbar!
-
-### How Can I Contribute?
-
-#### Reporting Bugs
-
-- Check existing issues first.
-- Provide a clear description, steps to reproduce, expected behavior, screenshots, and environment details.
-
-#### Suggesting Enhancements
-
-- Use a clear and descriptive title.
-- Provide a detailed description and explain its usefulness.
-- List similar features in other applications.
-
-#### Pull Requests (PRs)
-
-1.  **Before Submitting**: Check existing PRs, create an issue for major changes, follow coding style, write/update tests, update documentation.
-2.  **PR Process**:
-    - Fork the repo and create your branch from `main`.
-    - Make changes following coding standards.
-    - Add tests (`flutter test`).
-    - Ensure all tests pass and analysis is clean (`flutter analyze`).
-    - Update documentation (README.md, CHANGELOG.md, code comments).
-    - Commit using [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`.
-    - Push to your fork and submit a pull request.
-
-### Development Setup
-
-#### Prerequisites
-
-- Flutter 3.35.0+
-- Dart 3.10.0+
-- Git
-- Your favorite IDE
-
-#### Setup Steps
-
-1.  Clone your fork: `git clone https://github.com/YOUR-USERNAME/crossbar.git`
-2.  Add upstream remote: `git remote add upstream https://github.com/verseles/crossbar.git`
-3.  Install dependencies: `flutter pub get`
-4.  Run tests: `flutter test`
-5.  Run the app: `flutter run -d linux`
-
-### Coding Standards
-
-- Follow [Effective Dart](https://dart.dev/guides/language/effective-dart).
-- Use `flutter analyze` and `dart format`.
-- **Test Coverage**: Aim for >90% for new code.
-- **Documentation**: Document public APIs with DartDoc.
-- **Null Safety**: Use strict null safety.
-
-See `CONTRIBUTING.md` for more details.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, development setup, and coding standards.
 
 </details>
 

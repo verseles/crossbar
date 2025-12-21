@@ -5,8 +5,8 @@
 
 Atenção: Este projeto ainda não foi lançado, não se preocupe com breking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
-Plano granndioso e teorico mas ainda a fonte de verdade:
-@./original_plan.md
+Plano grandioso e teórico (arquivo histórico):
+@./docs/archive/original_plan.md
 
 Roadmap de implementacao, atualizado regularmente:
 @./ROADMAP.md
@@ -15,7 +15,7 @@ Roadmap de implementacao, atualizado regularmente:
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
-- **Leitura Inicial**: Sempre leia @./original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
+- **Leitura Inicial**: Sempre leia @./docs/archive/original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
@@ -71,7 +71,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 - **Versão Atual**: `1.4.2+12` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
-- **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
+- **Status**: Estável (v1.0+). Todas as fases do plano original concluídas.
 
 ---
 
@@ -459,6 +459,7 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 **Context**: Originalmente, a lógica de atualização (refresh) estava espalhada entre `SchedulerService` (para plugins), widgets individuais e comandos CLI. Isso causava inconsistências: clicar em "Refresh" na UI nem sempre atualizava o tray imediatamente, e diferentes tipos de plugins (Lua vs Nativo) eram tratados de formas distintas no ciclo de vida.
 **Decision**: Criar um `RefreshService` centralizado que gerencia todas as solicitações de atualização. O `SchedulerService` agora apenas agenda os gatilhos, delegando a execução e notificação ao `RefreshService`. Adicionado suporte a `RefreshSource` para identificar de onde veio o gatilho (timer, manual, boot).
 **Consequences**:
+
 - Comportamento idêntico entre UI, Tray e Background.
 - Eliminação de bugs de race condition no rastreamento de IDs de plugins.
 - Melhor observabilidade do ciclo de vida de atualização.
@@ -479,6 +480,7 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - 📱 **UX**: Plugins mostram mensagem apropriada em vez de erro
 
 **Arquitetura**:
+
 ```
 Plugin Lua → CrossbarBridge.batterySync()
              ↓ (Android)

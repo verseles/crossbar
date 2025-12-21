@@ -14,6 +14,7 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 ### ✨ Features
 
 #### Core Architecture
+
 - **Multi-language plugin support**: Bash, Python, Node.js, Dart, Go, Rust
 - **BitBar-compatible text format parser** with color, emoji, and menu support
 - **JSON output format** for structured data and advanced features
@@ -22,6 +23,7 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - **Refresh interval parsing** from filename (e.g., `cpu.10s.sh`, `weather.5m.py`)
 
 #### CLI API (47 Commands)
+
 - **System Info**: cpu, memory, battery, disk, uptime, hostname, username, kernel, arch
 - **Network**: status, IP (local/public), WiFi SSID, ping, Bluetooth status
 - **Device**: model, screen size, locale, timezone
@@ -32,24 +34,28 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - **Utilities**: hash, UUID, random, base64, QR code generation
 
 #### Desktop Support
+
 - **Linux**: System tray integration with tray_manager
 - **macOS**: Menu bar support (native bindings)
 - **Windows**: System tray (native)
 - **Cross-platform window management** with window_manager
 
 #### Mobile Features
+
 - **Android**: Foreground service with persistent notifications
 - **iOS**: Home screen widgets (WidgetKit)
 - **Home screen widgets** (1x1, 2x2, 4x4 grid layouts)
 - **Push notifications** with flutter_local_notifications
 
 #### Configuration System
+
 - **Declarative plugin configs** in JSON format
 - **25+ field types**: text, password, number, color, file picker, dropdown, etc.
 - **Auto-generated configuration dialogs** from plugin metadata
 - **Secure storage** for passwords (Keychain/KeyStore integration)
 
 #### Services
+
 - **SchedulerService**: Background plugin execution with Timer.periodic
 - **NotificationService**: Cross-platform push notifications
 - **WidgetService**: Home screen widget updates
@@ -59,6 +65,7 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - **HotReloadService**: File watcher integration with auto-reload
 
 #### UI/UX
+
 - **Modern Material Design 3** with adaptive theming
 - **Dark/Light mode** following system preferences
 - **Three main tabs**: Plugins, Settings, Marketplace
@@ -66,11 +73,13 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
 - **Plugin configuration dialogs** with dynamic form generation
 
 #### Internationalization
+
 - **10 languages supported**: English, Portuguese, Spanish, German, French, Chinese, Japanese, Korean, Italian, Russian
 - **ARB-based localization** with compile-time safety
 - **Automatic locale detection** from system
 
 #### Developer Experience
+
 - **24 example plugins** across 4 languages (bash, python, node, dart)
   - System monitoring (CPU, memory, battery, disk, network, uptime)
   - Real-time data (weather, Bitcoin price, world clock)
@@ -84,6 +93,7 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
   - Release workflow with artifact uploads
 
 #### Quality & Testing
+
 - **116 tests** (114 passing, 2 skipped for network/permissions)
 - **Flutter analyze** with zero errors
 - **Test coverage**: >90% for core modules
@@ -125,10 +135,12 @@ bin/
 ### 📦 Dependencies
 
 **Core**:
+
 - Flutter 3.35.0+
 - Dart 3.10.0+
 
 **Key Packages**:
+
 - `tray_manager` ^0.2.3 - System tray integration
 - `window_manager` ^0.4.2 - Window management
 - `dio` ^5.7.0 - HTTP client
@@ -151,6 +163,7 @@ bin/
 ### 📝 Plugin Format Examples
 
 **BitBar Text Format**:
+
 ```bash
 #!/bin/bash
 echo "⚡ 45%"
@@ -160,6 +173,7 @@ echo "Refresh | refresh=true"
 ```
 
 **JSON Format**:
+
 ```python
 #!/usr/bin/env python3
 import json
@@ -182,7 +196,7 @@ print(json.dumps({
 
 ### 📚 Documentation
 
-- See [MASTER_PLAN.md](MASTER_PLAN.md) for complete specification
+- See [docs/](docs/) for complete documentation
 - Plugin examples in `plugins/` directory
 - CLI reference: run `crossbar --help`
 
@@ -198,17 +212,20 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 🔄 Unified Refresh Engine & Architecture Refinement
 
 #### ✨ Features
+
 - **RefreshService**: Introduced a centralized service to manage all plugin and widget updates, ensuring consistent behavior across UI, Tray, and Background.
 - **RefreshSource tracking**: New system to identify the trigger of each refresh (timer, manual, boot, or settings change).
 - **Synchronous Uptime API**: Added `getUptimeSync` to `SystemApi` and `crossbar.uptime()` to LuaRunner, enabling embedded scripts to access system uptime without async overhead.
 
 #### 🔧 Technical Improvements
+
 - **SchedulerService refactor**: Now focuses solely on scheduling, delegating execution to the unified `RefreshService`.
 - **Improved ID tracking**: Resolved race conditions and inconsistencies in tracking plugin update IDs.
 - **UI Responsiveness**: Plugins Tab now uses `RefreshService` for manual triggers, ensuring immediate UI feedback and Tray synchronization.
 - **IPC Server integration**: `RefreshService` now handles remote refresh requests via IPC consistently.
 
 #### 🏗️ Architecture Update
+
 - Moved refresh logic from `SchedulerService` and `PluginsTab` to `RefreshService`.
 - Updated `LuaRunner` to register the new `uptime` sync function.
 - Updated `CrossbarBridge` with synchronous `uptime` support.
@@ -220,6 +237,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 🌍 Internationalization & Android Polish
 
 #### ✨ Features
+
 - **Complete i18n support**: All 12 languages now include Android-specific strings (`keepOnBackground`, `showPersistentNotification`)
 - **Auto theme mode**: Automatic light/dark theme switching based on system preferences
 - **GitHub integration**: Dynamic version display and GitHub button in Settings tab
@@ -233,6 +251,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
   - Preview image for widget picker
 
 #### 🔧 Technical Improvements
+
 - **ADR-008**: Finalized Android plugins directory strategy (internal app folder only)
 - **System info optimization**: Simplified Android system info to avoid Flutter dependency in CLI
 - **Method Channels**: Added native Android integration for system APIs and widget refresh
@@ -240,6 +259,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 - **Versioning**: Updated versioning strategy to prioritize minor versions
 
 #### 🐛 Bug Fixes
+
 - Fixed large widget layout handling in `setNoDataState`
 - Improved Android widget refresh reliability
 - Fixed OutputParser integration for Lua/Dart plugins to parse BitBar attributes
@@ -250,6 +270,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ## [1.3.4] - 2025-12-08
 
 ### 🔧 Bug Fixes
+
 - **Corrected version numbering**: Fixed v1.3.4 version numbering in pubspec.yaml
 
 ---
@@ -259,12 +280,14 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 📱 Android UX & Integration
 
 #### ✨ Features
+
 - **Android Boot Receiver**: Implements `BootReceiver.kt` to intercept BOOT_COMPLETED
 - **Foreground Service**: Persistent notification with NotificationChannel and ongoing status
 - **Auto-start integration**: Settings service integration via Method Channel for Start on Boot
 - **Notification permissions**: Added permission request for Android 13+
 
 #### 📚 Documentation
+
 - Added ADR-007 for Android system info via `/proc`
 - Updated roadmap with Android UX & Integration tasks
 
@@ -275,12 +298,14 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 🔧 Android System Improvements
 
 #### 🔧 Technical Fixes
+
 - **Simplified Android system info**: Removed Flutter dependency from CLI to fix AOT compilation
 - **Method Channels**: Added native Android support for system info and widget refresh
 - **Battery API**: Removed battery_plus from system_api to fix AOT compilation
 - **Build optimization**: Optimized Android build speed for ARM64 targets
 
 #### 🧪 Testing
+
 - Added unified contract tests for multi-language sample plugins
 - Added Android support for system APIs and Lua plugin tests
 - Tagged contract tests as hardware to skip in CI
@@ -292,7 +317,9 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 🔧 UX Fixes & Plugin Management
 
 #### ✨ Features
+
 - **Linux Desktop Integration**:
+
   - `make install/uninstall` for easy Linux installation (~/.local/)
   - Auto-start desktop entry support
   - GNOME dock icon association via APPLICATION_ID
@@ -300,6 +327,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
   - Proper WM_CLASS configuration for window manager
 
 - **Plugin Management UX**:
+
   - Double-click to delete (requires two clicks in 3s)
   - Edit button opens plugin in system default editor
   - Copy live output button
@@ -313,6 +341,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
   - Compact card design
 
 #### 🐛 Bug Fixes
+
 - CPU output unified (returns raw number, plugins add %)
 - Fixed window icon loading via relative paths
 - Added tray tooltip with "Crossbar" title
@@ -328,12 +357,14 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 #### ✨ Major Features
 
 **CrossbarBridge - Unified API**:
+
 - Cross-platform API exposing System, Network, Utils, Time, and Environment APIs
 - 25+ methods: `cpu()`, `memory()`, `battery()`, `web()`, `time()`, `date()`, `ping()`, etc.
 - Works on ALL platforms (desktop + mobile)
 - Global instance accessible in plugins
 
 **Multi-Runner Architecture**:
+
 - **LuaRunner**: Embedded Lua 5.3 via lua_dardo (zero external deps)
 - **DartRunner**: Interpreted Dart plugins via dart_eval (mobile-friendly)
 - **DeclarativeRunner**: YAML-based plugins with template engine
@@ -341,24 +372,28 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 - **PluginExecutor**: Unified router for all runner types
 
 **36 Universal Plugins**:
+
 - 6 plugin types × 6 languages = 36 example plugins
 - Re-written to use Crossbar API instead of direct system calls
 - Categories: clock, cpu, battery, memory, weather, bitcoin
 - Full mobile compatibility (Lua + Dart interpreters)
 
 **crossbar_api Package**:
+
 - Standalone Dart package for compiled plugins
 - Supports external packages and FFI
 - IntelliSense/Autocomplete support
 - Maximum performance for desktop plugins
 
 **YAML Plugins**:
+
 - Ultra-portable declarative plugins
 - HTTP, system, exec, and static providers
 - Template engine with `${variable}` interpolation
 - Environment variable support
 
 #### 🔧 Technical Improvements
+
 - **ADR-006**: Universal Synchronous API for embedded scripting
 - **ADR-003**: QuickJS removed (conflicted with CLI requirements)
 - **ADR-002**: Lua embedded interpreter for universal plugins
@@ -373,6 +408,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 📱 Mobile Mastery (Android & iOS Widgets)
 
 #### ✨ Android Native Implementation
+
 - **Widget layouts**: Created XML layouts for 1x1, 2x1, and 4x4 widgets
 - **Kotlin Provider**: `CrossbarWidgetProvider.kt` with RemoteViews
 - **Widget backgrounds**: Theme-aware drawable resources
@@ -380,12 +416,14 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 - **Android Manifest**: Registered receiver and provider
 
 #### ✨ iOS Native Implementation (WidgetKit)
+
 - **SwiftUI Views**: Functional TimelineProvider for widget updates
 - **App Groups**: Configured shared data between Runner and Widget targets
 - **Adaptive layouts**: Support for systemSmall and systemMedium widgets
 - **Documentation**: Complete iOS widget setup guide
 
 #### 🔧 Technical Features
+
 - **Widget Service**: Serializes PluginOutput for native consumption
 - **Scheduler Integration**: Auto-updates widgets after plugin execution
 - **Background Sync**: Headless task support for Android (future enhancement)
@@ -397,6 +435,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### ⚙️ Configuration Engine
 
 #### ✨ Complete Configuration System
+
 - **PluginConfigService**: Full CRUD for plugin configurations
 - **Secure storage**: flutter_secure_storage for password fields
 - **Environment injection**: Auto-injects config values as ENV vars
@@ -404,6 +443,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 - **UI integration**: Auto-generated config dialogs from schema
 
 #### 🔧 Technical Implementation
+
 - **Schema format**: `.schema.json` for config definitions
 - **Values storage**: `~/.crossbar/configs/` for user data
 - **Plugin binding**: Automatic config detection and loading
@@ -411,6 +451,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 - **Environment building**: Seamless injection into plugin execution
 
 #### 🧪 Testing
+
 - **Unit tests**: PluginConfigService with encryption and I/O
 - **Functional tests**: End-to-end config save → execute → output verification
 
@@ -421,6 +462,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 ### 🐛 Hotfix Release
 
 #### 🔧 Critical Fixes
+
 - Fixed startup crash on some Linux distributions
 - Corrected plugin discovery path in development mode
 - Updated dependency constraints for Flutter 3.38.3

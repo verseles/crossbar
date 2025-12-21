@@ -4,7 +4,7 @@ Este documento foi dividido em três partes para facilitar a manutenção e leit
 
 ## Estrutura da Documentação Original
 
-1.  **[original_plan_vision.md](@./original_plan_vision.md)**
+1.  **[original_plan_vision.md](original_plan_vision.md)**
 
     - **Foco**: Visão, Filosofia, Arquitetura de Alto Nível e DNA do projeto.
     - **Contém**:
@@ -13,7 +13,7 @@ Este documento foi dividido em três partes para facilitar a manutenção e leit
       - Porquês Essenciais (DNA)
       - Roadmap Futuro (Visão)
 
-2.  **[original_plan_specs.md](@./original_plan_specs.md)**
+2.  **[original_plan_specs.md](original_plan_specs.md)**
 
     - **Foco**: Especificações Técnicas detalhadas.
     - **Contém**:
@@ -23,7 +23,7 @@ Este documento foi dividido em três partes para facilitar a manutenção e leit
       - Internacionalização (i18n)
       - Testes e Qualidade
 
-3.  **[original_plan_resources.md](@./original_plan_resources.md)**
+3.  **[original_plan_resources.md](original_plan_resources.md)**
     - **Foco**: Implementação, Build, UI e Referências.
     - **Contém**:
       - UI/UX Multi-Plataforma
@@ -34,4 +34,4 @@ Este documento foi dividido em três partes para facilitar a manutenção e leit
 
 ---
 
-_Nota: Para status de execução atual e tarefas, consulte sempre o [ROADMAP.md](@./ROADMAP.md)._
+_Nota: Para status de execução atual e tarefas, consulte sempre o [ROADMAP.md](../../ROADMAP.md)._
