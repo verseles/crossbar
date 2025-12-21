@@ -308,7 +308,7 @@ class SystemApi {
 
   String getBatteryStatusSync() {
     try {
-      if (Platform.isLinux) {
+      if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxBatteryStatusSync();
       }
       return 'N/A';
@@ -345,14 +345,29 @@ class SystemApi {
   }
 
   String _getLinuxBatteryStatusSync() {
-    const batteryPath = '/sys/class/power_supply/BAT0';
-    if (Directory(batteryPath).existsSync()) {
-      return _readLinuxBatterySync(batteryPath);
-    }
-    if (Directory('/sys/class/power_supply/BAT1').existsSync()) {
-       return _readLinuxBatterySync('/sys/class/power_supply/BAT1');
-    }
-    return 'N/A';
+    final batteryPath = _findBatteryPathSync();
+    if (batteryPath == null) return 'N/A';
+    return _readLinuxBatterySync(batteryPath);
+  }
+
+  /// Finds the battery path synchronously in /sys/class/power_supply/
+  /// Returns the first directory that has a 'capacity' file
+  String? _findBatteryPathSync() {
+    const basePath = '/sys/class/power_supply';
+    try {
+      final dir = Directory(basePath);
+      if (!dir.existsSync()) return null;
+
+      for (final entity in dir.listSync()) {
+        if (entity is Directory) {
+          final capacityFile = File('${entity.path}/capacity');
+          if (capacityFile.existsSync()) {
+            return entity.path;
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   Future<String> _readLinuxBattery(String batteryPath) async {

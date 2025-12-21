@@ -100,15 +100,16 @@ class CrossbarBridge {
 
   Map<String, dynamic> _parseBatteryResult(String result) {
     final match = RegExp(r'(\d+)%').firstMatch(result);
-    final isCharging = result.contains('⚡') || 
+    final isCharging = result.contains('⚡') ||
                        result.toLowerCase().contains('charging');
-    
+
     return {
       'level': match != null ? int.parse(match.group(1)!) : null,
       'charging': isCharging,
       'status': result,
       'available': !result.toLowerCase().contains('unavailable') &&
-                   !result.toLowerCase().contains('no battery'),
+                   !result.toLowerCase().contains('no battery') &&
+                   !result.toLowerCase().contains('n/a'),
     };
   }
   
