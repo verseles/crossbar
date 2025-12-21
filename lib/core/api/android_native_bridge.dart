@@ -87,4 +87,64 @@ class AndroidNativeBridge {
     if (!Platform.isAndroid) return null;
     return 0.0;
   }
+
+  /// Get system uptime using SystemClock.elapsedRealtime()
+  ///
+  /// Note: On Android 8+, /proc/uptime is blocked by SELinux.
+  /// This uses the native SystemClock API which works on all Android versions.
+  ///
+  /// Returns:
+  /// - Formatted uptime string (e.g., "2d 5h 30m")
+  /// - null: Not on Android platform
+  Future<String?> getUptime() async {
+    if (!Platform.isAndroid) return null;
+
+    try {
+      final seconds = await _channel.invokeMethod<int>('getUptime');
+      if (seconds == null) return null;
+
+      return _formatUptime(Duration(seconds: seconds));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Cached uptime value for sync calls
+  String? _uptimeCache;
+  DateTime? _uptimeCacheTime;
+
+  /// Get uptime synchronously (uses cache)
+  String? getUptimeSync() {
+    if (!Platform.isAndroid) return null;
+
+    // If cache exists and is fresh (< 2 seconds), use it
+    if (_uptimeCache != null &&
+        _uptimeCacheTime != null &&
+        DateTime.now().difference(_uptimeCacheTime!).inSeconds < 2) {
+      return _uptimeCache;
+    }
+
+    // Cache is stale - trigger async update for next time
+    getUptime().then((value) {
+      _uptimeCache = value;
+      _uptimeCacheTime = DateTime.now();
+    });
+
+    // Return cached (possibly stale) value or null
+    return _uptimeCache;
+  }
+
+  /// Format uptime duration into human-readable string
+  String _formatUptime(Duration duration) {
+    final days = duration.inDays;
+    final hours = duration.inHours % 24;
+    final minutes = duration.inMinutes % 60;
+
+    final parts = <String>[];
+    if (days > 0) parts.add('${days}d');
+    if (hours > 0) parts.add('${hours}h');
+    if (minutes > 0 || parts.isEmpty) parts.add('${minutes}m');
+
+    return parts.join(' ');
+  }
 }

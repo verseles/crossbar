@@ -35,6 +35,10 @@ class MainActivity : FlutterActivity() {
                     val memory = getMemoryInfo()
                     result.success(memory)
                 }
+                "getUptime" -> {
+                    val uptime = getUptime()
+                    result.success(uptime)
+                }
                 "startForegroundService" -> {
                     startCrossbarForegroundService()
                     result.success(true)
@@ -96,6 +100,12 @@ class MainActivity : FlutterActivity() {
             "threshold" to memInfo.threshold,
             "lowMemory" to if (memInfo.lowMemory) 1L else 0L
         )
+    }
+
+    private fun getUptime(): Long {
+        // SystemClock.elapsedRealtime() returns uptime in milliseconds since boot
+        // Convert to seconds for consistency with /proc/uptime format
+        return android.os.SystemClock.elapsedRealtime() / 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

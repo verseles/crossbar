@@ -181,12 +181,38 @@ class CrossbarBridge {
   }
   
   /// Get system uptime
+  ///
+  /// Note: On Android 8+, uses SystemClock.elapsedRealtime() (native API)
+  /// On Desktop, uses /proc/uptime or platform-specific commands
   Future<String> uptime() async {
+    // On Android, use native SystemClock (SELinux blocks /proc/uptime)
+    if (Platform.isAndroid) {
+      final nativeResult = await _androidBridge.getUptime();
+      if (nativeResult != null) {
+        // Update cache for sync calls
+        return nativeResult;
+      }
+      return 'Unknown';
+    }
+
+    // Desktop: use /proc/uptime or native commands
     return _systemApi.getUptime();
   }
 
   /// Get system uptime (sync)
+  ///
+  /// Note: On Android, uses cached value from SystemClock.elapsedRealtime()
   String uptimeSync() {
+    // On Android, use cached native value
+    if (Platform.isAndroid) {
+      final nativeResult = _androidBridge.getUptimeSync();
+      if (nativeResult != null) {
+        return nativeResult;
+      }
+      return 'Unknown';
+    }
+
+    // Desktop: use /proc/uptime or native commands
     return _systemApi.getUptimeSync();
   }
 
