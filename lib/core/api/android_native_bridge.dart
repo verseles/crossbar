@@ -63,15 +63,28 @@ class AndroidNativeBridge {
     }
   }
 
-  /// Get CPU usage (async version that works around SELinux restrictions)
+  /// Get CPU usage (always returns 0.0 on Android due to SELinux restrictions)
+  ///
+  /// Note: On Android 8+, /proc/stat is blocked by SELinux.
+  /// System-wide CPU monitoring is unavailable.
+  ///
+  /// Returns:
+  /// - 0.0: CPU monitoring unavailable on Android
+  /// - null: Not on Android platform
   Future<double?> getCpuUsage() async {
     if (!Platform.isAndroid) return null;
 
     try {
       final result = await _channel.invokeMethod<double>('getCpuUsage');
-      return result;
+      return result ?? 0.0;
     } catch (e) {
-      return null;
+      return 0.0;
     }
+  }
+
+  /// Get CPU usage synchronously (always returns 0.0 on Android)
+  double? getCpuUsageSync() {
+    if (!Platform.isAndroid) return null;
+    return 0.0;
   }
 }

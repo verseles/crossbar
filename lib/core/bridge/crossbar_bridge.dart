@@ -45,13 +45,29 @@ class CrossbarBridge {
   // ═══════════════════════════════════════════════════════════════
   
   /// Get CPU usage percentage (0-100)
+  ///
+  /// Note: Returns 0.0 on Android due to SELinux restrictions blocking /proc/stat access
   Future<double> cpu() async {
+    // On Android, always return 0 (SELinux blocks /proc/stat since Android 8+)
+    if (Platform.isAndroid) {
+      return 0.0;
+    }
+
+    // Desktop: use /proc/stat (system-wide CPU)
     final result = await _systemApi.getCpuUsage();
     return double.tryParse(result.replaceAll('%', '')) ?? 0.0;
   }
 
   /// Get CPU usage percentage synchronously (Stateful)
+  ///
+  /// Note: Returns 0.0 on Android due to SELinux restrictions blocking /proc/stat access
   double cpuSync() {
+    // On Android, always return 0 (SELinux blocks /proc/stat since Android 8+)
+    if (Platform.isAndroid) {
+      return 0.0;
+    }
+
+    // Desktop: use /proc/stat (system-wide CPU)
     final result = _systemApi.getCpuUsageSync();
     return double.tryParse(result.replaceAll('%', '')) ?? 0.0;
   }

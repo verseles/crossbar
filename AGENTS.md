@@ -68,7 +68,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.4.1+11` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.4.2+12` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
@@ -422,17 +422,19 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - Simplifica a escrita de plugins universais.
 - Trade-off: Chamadas bloqueantes no LuaRunner bloqueiam o Isolate Dart.
 
-### ADR-007: Android System Info via /proc (2024-12-07)
+### ADR-007: Android System Info via /proc (2024-12-07) ⚠️ SUPERSEDED
 
-**Status**: ✅ Accepted  
-**Context**: Plugins Lua precisam de dados de CPU, memória e bateria no Android. A abordagem inicial tentou usar Method Channels nativos (BatteryManager, ActivityManager), mas isso introduziu dependência de `package:flutter` no `SystemApi`, quebrando a compilação AOT do CLI (`dart compile exe`).  
-**Decision**: Usar `/proc/stat`, `/proc/meminfo` e `/sys/class/power_supply` no Android, assim como no Linux. Aceitar que CPU pode retornar 0% em Android 8+ devido a restrições de segurança do `/proc/stat`.  
+**Status**: ⚠️ Deprecated (Superseded by ADR-010)
+**Context**: Plugins Lua precisam de dados de CPU, memória e bateria no Android. A abordagem inicial tentou usar Method Channels nativos (BatteryManager, ActivityManager), mas isso introduziu dependência de `package:flutter` no `SystemApi`, quebrando a compilação AOT do CLI (`dart compile exe`).
+**Decision**: Usar `/proc/stat`, `/proc/meminfo` e `/sys/class/power_supply` no Android, assim como no Linux. Aceitar que CPU pode retornar 0% em Android 8+ devido a restrições de segurança do `/proc/stat`.
 **Consequences**:
 
 - CLI compila corretamente como binário nativo
-- Memória e bateria funcionam no Android via `/proc` e `/sys`
-- CPU pode não funcionar em Android moderno (limitação do OS)
-- Widget refresh implementado via Intent + Method Channel (código nativo mantido)
+- Memória funciona via `/proc/meminfo`
+- ❌ Bateria NÃO funciona - `/sys/class/power_supply` bloqueado no Android 16
+- ❌ CPU retorna sempre 0% - `/proc/stat` bloqueado desde Android 8
+
+**Note**: Esta abordagem foi substituída pela ADR-010 que usa AndroidNativeBridge para bateria.
 
 ### ADR-008: Android Internal Plugins Directory (2024-12-08)
 
@@ -453,14 +455,39 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 
 ### ADR-009: Unified Refresh Behavior via RefreshService (2025-12-21)
 
-**Status**: ✅ Accepted  
-**Context**: Originalmente, a lógica de atualização (refresh) estava espalhada entre `SchedulerService` (para plugins), widgets individuais e comandos CLI. Isso causava inconsistências: clicar em "Refresh" na UI nem sempre atualizava o tray imediatamente, e diferentes tipos de plugins (Lua vs Nativo) eram tratados de formas distintas no ciclo de vida.  
-**Decision**: Criar um `RefreshService` centralizado que gerencia todas as solicitações de atualização. O `SchedulerService` agora apenas agenda os gatilhos, delegando a execução e notificação ao `RefreshService`. Adicionado suporte a `RefreshSource` para identificar de onde veio o gatilho (timer, manual, boot).  
+**Status**: ✅ Accepted
+**Context**: Originalmente, a lógica de atualização (refresh) estava espalhada entre `SchedulerService` (para plugins), widgets individuais e comandos CLI. Isso causava inconsistências: clicar em "Refresh" na UI nem sempre atualizava o tray imediatamente, e diferentes tipos de plugins (Lua vs Nativo) eram tratados de formas distintas no ciclo de vida.
+**Decision**: Criar um `RefreshService` centralizado que gerencia todas as solicitações de atualização. O `SchedulerService` agora apenas agenda os gatilhos, delegando a execução e notificação ao `RefreshService`. Adicionado suporte a `RefreshSource` para identificar de onde veio o gatilho (timer, manual, boot).
 **Consequences**:
 - Comportamento idêntico entre UI, Tray e Background.
 - Eliminação de bugs de race condition no rastreamento de IDs de plugins.
 - Melhor observabilidade do ciclo de vida de atualização.
 - Facilidade para implementar novos gatilhos (ex: sensores de hardware).
+
+### ADR-010: Android Native APIs via Method Channel (2025-12-21)
+
+**Status**: ✅ Accepted
+**Context**: Android 8+ bloqueia `/proc/stat` (CPU) e Android 16 bloqueia `/sys/class/power_supply` (bateria) via SELinux. A abordagem de ler diretamente arquivos sysfs (ADR-007) não funciona mais. Plugins retornavam "No battery detected" e CPU sempre 0%.
+**Decision**: Criar `AndroidNativeBridge` que usa Method Channel para chamar APIs nativas do Android (BatteryManager, ActivityManager) implementadas em Kotlin no `MainActivity.kt`. Usar sistema de cache para compatibilidade com chamadas síncronas do Lua.
+**Consequences**:
+
+- ✅ **Bateria**: Funciona corretamente usando `BatteryManager.getIntProperty()`
+- ❌ **CPU**: Retorna sempre 0.0 com nota "unavailable" (limitação do Android, sem API alternativa para CPU global)
+- ✅ **API JSON/XML**: Mantém compatibilidade retornando valor numérico (0.0) em vez de erro
+- ⚠️ **Cache**: `batterySync()` usa cache de 5 segundos (platform channels são async)
+- ✅ **Separação de concerns**: `AndroidNativeBridge` isola dependências Flutter, não quebra CLI
+- 📱 **UX**: Plugins mostram mensagem apropriada em vez de erro
+
+**Arquitetura**:
+```
+Plugin Lua → CrossbarBridge.batterySync()
+             ↓ (Android)
+             AndroidNativeBridge → MethodChannel
+                                   ↓
+                                   MainActivity.kt → BatteryManager (API oficial)
+             ↓ (Desktop)
+             SystemApi → /sys/class/power_supply (acesso direto)
+```
 
 ### Template para Novas ADRs
 

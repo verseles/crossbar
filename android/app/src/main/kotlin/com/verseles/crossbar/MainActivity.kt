@@ -76,42 +76,11 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun getCpuUsage(): Double {
-        // Try to read /proc/stat (may fail on Android 8+)
-        try {
-            val reader = RandomAccessFile("/proc/stat", "r")
-            val load = reader.readLine()
-            reader.close()
-
-            val toks = load.split(" ".toRegex()).filter { it.isNotEmpty() }
-            if (toks.size >= 5) {
-                val idle1 = toks[4].toLong()
-                val cpu1 = toks[1].toLong() + toks[2].toLong() + toks[3].toLong() + toks[4].toLong() +
-                          toks[5].toLong() + toks[6].toLong() + toks[7].toLong()
-
-                Thread.sleep(100)
-
-                val reader2 = RandomAccessFile("/proc/stat", "r")
-                val load2 = reader2.readLine()
-                reader2.close()
-
-                val toks2 = load2.split(" ".toRegex()).filter { it.isNotEmpty() }
-                if (toks2.size >= 5) {
-                    val idle2 = toks2[4].toLong()
-                    val cpu2 = toks2[1].toLong() + toks2[2].toLong() + toks2[3].toLong() + toks2[4].toLong() +
-                              toks2[5].toLong() + toks2[6].toLong() + toks2[7].toLong()
-
-                    val idleDiff = idle2 - idle1
-                    val cpuDiff = cpu2 - cpu1
-
-                    if (cpuDiff > 0) {
-                        return ((cpuDiff - idleDiff).toDouble() / cpuDiff.toDouble()) * 100.0
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.w("Crossbar", "Could not read CPU: ${e.message}")
-        }
-        return -1.0 // Indicates unavailable
+        // Android 8+ blocks /proc/stat via SELinux
+        // System-wide CPU monitoring is unavailable - return 0.0
+        // Note: Dart layer will add "unavailable" message to status
+        android.util.Log.d("Crossbar", "CPU monitoring unavailable on Android 8+ (SELinux blocks /proc/stat)")
+        return 0.0
     }
 
     private fun getMemoryInfo(): Map<String, Long> {
