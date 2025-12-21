@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../api/android_native_bridge.dart';
 import '../api/network_api.dart';
 import '../api/system_api.dart';
 import '../api/utils_api.dart';
@@ -24,10 +25,15 @@ class CrossbarBridge {
   CrossbarBridge._();
   
   static final CrossbarBridge instance = CrossbarBridge._();
-  
+
   final SystemApi _systemApi = SystemApi();
   final NetworkApi _networkApi = const NetworkApi();
   final UtilsApi _utilsApi = const UtilsApi();
+  final AndroidNativeBridge _androidBridge = AndroidNativeBridge();
+
+  // Cache for Android battery status (platform channels are async)
+  Map<String, dynamic>? _androidBatteryCache;
+  DateTime? _androidBatteryCacheTime;
   
   late final Dio _dio = Dio(BaseOptions(
     connectTimeout: const Duration(seconds: 30),
@@ -89,11 +95,46 @@ class CrossbarBridge {
   
   /// Get battery status as map {level, charging, status}
   Future<Map<String, dynamic>> battery() async {
+    // On Android, use native BatteryManager (SELinux blocks /sys access)
+    if (Platform.isAndroid) {
+      final nativeResult = await _androidBridge.getBatteryStatus();
+      if (nativeResult != null) {
+        final parsed = _parseAndroidBatteryResult(nativeResult);
+        // Update cache for sync calls
+        _androidBatteryCache = parsed;
+        _androidBatteryCacheTime = DateTime.now();
+        return parsed;
+      }
+    }
+
+    // Fallback to /sys (Linux, macOS, Windows)
     final result = await _systemApi.getBatteryStatus();
     return _parseBatteryResult(result);
   }
 
   Map<String, dynamic> batterySync() {
+    // On Android, use cached value from last async call
+    if (Platform.isAndroid) {
+      // If cache exists and is fresh (< 5 seconds), use it
+      if (_androidBatteryCache != null &&
+          _androidBatteryCacheTime != null &&
+          DateTime.now().difference(_androidBatteryCacheTime!).inSeconds < 5) {
+        return _androidBatteryCache!;
+      }
+
+      // Cache is stale or doesn't exist - trigger async update for next time
+      battery(); // Fire and forget
+
+      // Return fallback or cached (stale) value
+      return _androidBatteryCache ?? {
+        'level': null,
+        'charging': false,
+        'status': 'Initializing...',
+        'available': false,
+      };
+    }
+
+    // Fallback to /sys (Linux, macOS, Windows)
     final result = _systemApi.getBatteryStatusSync();
     return _parseBatteryResult(result);
   }
@@ -110,6 +151,16 @@ class CrossbarBridge {
       'available': !result.toLowerCase().contains('unavailable') &&
                    !result.toLowerCase().contains('no battery') &&
                    !result.toLowerCase().contains('n/a'),
+    };
+  }
+
+  /// Parse native Android battery result from BatteryManager
+  Map<String, dynamic> _parseAndroidBatteryResult(Map<String, dynamic> result) {
+    return {
+      'level': result['level'],
+      'charging': result['isCharging'] ?? false,
+      'status': result['status'] ?? 'unknown',
+      'available': true,
     };
   }
   
