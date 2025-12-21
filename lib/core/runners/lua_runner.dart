@@ -106,7 +106,7 @@ class LuaRunner {
 
     // Utility functions (sync)
     _registerSyncStringFunc(lua, 'hash', (String? text) => _bridge.hash(text ?? ''));
-    _registerSyncNoArgFunc(lua, 'uuid', () => _bridge.uuid());
+    _registerSyncNoArgFunc(lua, 'uuid', _bridge.uuid);
     _registerSyncIntFunc(lua, 'random', (int? max) => _bridge.random(max ?? 100));
     _registerSyncStringFunc(lua, 'base64Encode', (String? text) => _bridge.base64Encode(text ?? ''));
     _registerSyncStringFunc(lua, 'base64Decode', (String? text) => _bridge.base64Decode(text ?? ''));
@@ -118,9 +118,10 @@ class LuaRunner {
     _registerSyncNoArgBool(lua, 'isDesktop', () => _bridge.isDesktop);
 
     // System info (sync)
-    _registerSyncDoubleFunc(lua, 'cpu', () => _bridge.cpuSync());
-    _registerSyncMapFunc(lua, 'memory', () => _bridge.memorySync());
-    _registerSyncMapFunc(lua, 'battery', () => _bridge.batterySync());
+    _registerSyncDoubleFunc(lua, 'cpu', _bridge.cpuSync);
+    _registerSyncMapFunc(lua, 'memory', _bridge.memorySync);
+    _registerSyncMapFunc(lua, 'battery', _bridge.batterySync);
+    _registerSyncNoArgFunc(lua, 'uptime', _bridge.uptimeSync);
 
     lua.setGlobal('crossbar');
   }
@@ -193,7 +194,7 @@ class LuaRunner {
     lua.setField(-2, name);
   }
 
-  /// Register a sync function that returns a Map<String, dynamic> converted to Lua Table
+  /// Register a sync function that returns a Map converted to Lua Table
   void _registerSyncMapFunc(LuaState lua, String name, Map<String, dynamic> Function() fn) {
     lua.pushDartFunction((LuaState ls) {
       try {

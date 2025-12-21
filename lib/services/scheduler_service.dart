@@ -189,6 +189,7 @@ class SchedulerService {
   @visibleForTesting
   void resetForTesting() {
     stop();
+    // ignore: invalid_use_of_visible_for_testing_member
     _refreshService.resetForTesting();
   }
 }

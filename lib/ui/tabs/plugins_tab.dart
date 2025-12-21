@@ -1301,6 +1301,7 @@ class _PluginsTabState extends State<PluginsTab> {
   /// Opens the plugin file in the system's default editor
   Future<void> _editPlugin(Plugin plugin) async {
     final file = File(plugin.path);
+    // ignore: avoid_slow_async_io
     if (!await file.exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1379,12 +1380,14 @@ class _PluginsTabState extends State<PluginsTab> {
 
     try {
       final file = File(plugin.path);
+      // ignore: avoid_slow_async_io
       if (await file.exists()) {
         await file.delete();
       }
 
       // Also delete schema file if exists
       final schemaFile = File('${plugin.path}.schema.json');
+      // ignore: avoid_slow_async_io
       if (await schemaFile.exists()) {
         await schemaFile.delete();
       }

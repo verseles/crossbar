@@ -263,8 +263,7 @@ void main() {
       await refreshService.discoverPlugins();
       await refreshService.runPlugin('reset.1s.sh');
 
-      var listenerCalled = false;
-      refreshService.addOutputListener((_, __) => listenerCalled = true);
+      refreshService.addOutputListener((_, output) {});
 
       refreshService.resetForTesting();
 

@@ -116,7 +116,12 @@ class CrossbarBridge {
   Future<String> uptime() async {
     return _systemApi.getUptime();
   }
-  
+
+  /// Get system uptime (sync)
+  String uptimeSync() {
+    return _systemApi.getUptimeSync();
+  }
+
   /// Get disk usage for path (default: root)
   Future<String> disk([String? path]) async {
     return _systemApi.getDiskUsage(path);

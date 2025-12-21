@@ -49,7 +49,7 @@ void main() {
         // Should contain a time-related emoji
         expect(
           result.output,
-          matches(RegExp(r'[☀️🏙️🌆🌙]')),
+          matches(RegExp('[☀️🏙️🌆🌙]')),
           reason: 'Should start with a time-of-day emoji',
         );
 

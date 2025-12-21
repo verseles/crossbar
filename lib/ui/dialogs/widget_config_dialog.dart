@@ -264,7 +264,7 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
   String _formatPluginName(String pluginId) {
     return pluginId
         .replaceAll(RegExp(r'\.\d+[smh]\..*$'), '')
-        .replaceFirstMapped(RegExp(r'^.'), (m) => m.group(0)!.toUpperCase());
+        .replaceFirstMapped(RegExp('^.'), (m) => m.group(0)!.toUpperCase());
   }
 
   String _formatInterval(Duration duration) {

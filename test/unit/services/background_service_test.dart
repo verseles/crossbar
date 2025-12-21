@@ -59,37 +59,37 @@ void main() {
   group('_isBackgroundCompatible logic', () {
     // We can't directly test private functions, but we can verify the concept
     test('Lua files are background compatible', () {
-      final luaPath = 'test.lua';
+      const luaPath = 'test.lua';
       expect(luaPath.endsWith('.lua'), isTrue);
     });
 
     test('YAML files are background compatible', () {
-      final yamlPath = 'test.yaml';
-      final ymlPath = 'test.yml';
+      const yamlPath = 'test.yaml';
+      const ymlPath = 'test.yml';
       expect(yamlPath.endsWith('.yaml'), isTrue);
       expect(ymlPath.endsWith('.yml'), isTrue);
     });
 
     test('Dart files are background compatible', () {
-      final dartPath = 'test.dart';
+      const dartPath = 'test.dart';
       expect(dartPath.endsWith('.dart'), isTrue);
     });
 
     test('Shell files are NOT background compatible', () {
-      final shPath = 'test.sh';
-      final bashExtensions = ['.sh', '.bash'];
-      expect(bashExtensions.any((ext) => shPath.endsWith(ext)), isTrue);
+      const shPath = 'test.sh';
+      const bashExtensions = ['.sh', '.bash'];
+      expect(bashExtensions.any(shPath.endsWith), isTrue);
       // These require external interpreters
     });
 
     test('Python files are NOT background compatible', () {
-      final pyPath = 'test.py';
+      const pyPath = 'test.py';
       expect(pyPath.endsWith('.py'), isTrue);
       // These require external interpreters
     });
 
     test('JavaScript files are NOT background compatible', () {
-      final jsPath = 'test.js';
+      const jsPath = 'test.js';
       expect(jsPath.endsWith('.js'), isTrue);
       // These require Node.js
     });

@@ -451,11 +451,32 @@ class SystemApi {
     }
   }
 
+  /// Synchronous uptime getter (Linux/Android only)
+  String getUptimeSync() {
+    try {
+      if (Platform.isLinux || Platform.isAndroid) {
+        return _getLinuxUptimeSync();
+      }
+      return 'Unknown';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
   Future<String> _getLinuxUptime() async {
     final uptimeFile = File('/proc/uptime');
     if (!await uptimeFile.exists()) return 'Unknown';
 
     final content = await uptimeFile.readAsString();
+    final seconds = double.parse(content.split(' ')[0]);
+    return _formatUptime(Duration(seconds: seconds.round()));
+  }
+
+  String _getLinuxUptimeSync() {
+    final uptimeFile = File('/proc/uptime');
+    if (!uptimeFile.existsSync()) return 'Unknown';
+
+    final content = uptimeFile.readAsStringSync();
     final seconds = double.parse(content.split(' ')[0]);
     return _formatUptime(Duration(seconds: seconds.round()));
   }
