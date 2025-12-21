@@ -19,7 +19,7 @@ import 'commands/wallpaper_command.dart';
 import 'commands/web_command.dart';
 import 'commands/wifi_command.dart';
 
-const String version = '1.1.0';
+const String version = '1.4.1';
 
 final Map<String, CliCommand> _commands = {};
 

@@ -68,7 +68,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.4.0+10` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.4.1+11` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do `MASTER_PLAN.md` concluídas.
@@ -450,6 +450,17 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - Plugins protegidos contra acesso externo não autorizado
 - Usuários não podem adicionar plugins manualmente via file manager (limitação aceitável)
 - Consistência com modelo de apps mobile modernos
+
+### ADR-009: Unified Refresh Behavior via RefreshService (2025-12-21)
+
+**Status**: ✅ Accepted  
+**Context**: Originalmente, a lógica de atualização (refresh) estava espalhada entre `SchedulerService` (para plugins), widgets individuais e comandos CLI. Isso causava inconsistências: clicar em "Refresh" na UI nem sempre atualizava o tray imediatamente, e diferentes tipos de plugins (Lua vs Nativo) eram tratados de formas distintas no ciclo de vida.  
+**Decision**: Criar um `RefreshService` centralizado que gerencia todas as solicitações de atualização. O `SchedulerService` agora apenas agenda os gatilhos, delegando a execução e notificação ao `RefreshService`. Adicionado suporte a `RefreshSource` para identificar de onde veio o gatilho (timer, manual, boot).  
+**Consequences**:
+- Comportamento idêntico entre UI, Tray e Background.
+- Eliminação de bugs de race condition no rastreamento de IDs de plugins.
+- Melhor observabilidade do ciclo de vida de atualização.
+- Facilidade para implementar novos gatilhos (ex: sensores de hardware).
 
 ### Template para Novas ADRs
 

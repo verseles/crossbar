@@ -193,6 +193,28 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 
 ---
 
+## [1.4.1] - 2025-12-21
+
+### 🔄 Unified Refresh Engine & Architecture Refinement
+
+#### ✨ Features
+- **RefreshService**: Introduced a centralized service to manage all plugin and widget updates, ensuring consistent behavior across UI, Tray, and Background.
+- **RefreshSource tracking**: New system to identify the trigger of each refresh (timer, manual, boot, or settings change).
+- **Synchronous Uptime API**: Added `getUptimeSync` to `SystemApi` and `crossbar.uptime()` to LuaRunner, enabling embedded scripts to access system uptime without async overhead.
+
+#### 🔧 Technical Improvements
+- **SchedulerService refactor**: Now focuses solely on scheduling, delegating execution to the unified `RefreshService`.
+- **Improved ID tracking**: Resolved race conditions and inconsistencies in tracking plugin update IDs.
+- **UI Responsiveness**: Plugins Tab now uses `RefreshService` for manual triggers, ensuring immediate UI feedback and Tray synchronization.
+- **IPC Server integration**: `RefreshService` now handles remote refresh requests via IPC consistently.
+
+#### 🏗️ Architecture Update
+- Moved refresh logic from `SchedulerService` and `PluginsTab` to `RefreshService`.
+- Updated `LuaRunner` to register the new `uptime` sync function.
+- Updated `CrossbarBridge` with synchronous `uptime` support.
+
+---
+
 ## [1.4.0] - 2025-12-08
 
 ### 🌍 Internationalization & Android Polish
@@ -405,6 +427,7 @@ Licensed under AGPLv3 - ensuring all derivatives remain open source.
 
 ---
 
+[1.4.1]: https://github.com/verseles/crossbar/releases/tag/v1.4.1
 [1.4.0]: https://github.com/verseles/crossbar/releases/tag/v1.4.0
 [1.3.4]: https://github.com/verseles/crossbar/releases/tag/v1.3.4
 [1.3.3]: https://github.com/verseles/crossbar/releases/tag/v1.3.3
