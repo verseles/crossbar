@@ -152,26 +152,45 @@ class RefreshService {
   /// - Widget updates
   Future<void> togglePlugin(String pluginId) async {
     await _pluginManager.togglePlugin(pluginId);
+    _notifyListChangedListeners();
 
-    final plugin = _pluginManager.getPlugin(pluginId);
-    if (plugin == null) return;
-
-    // If now enabled, run immediately and cache output
-    if (plugin.enabled) {
-      await runPlugin(pluginId);
-    } else {
-      // If disabled, clear cached output
+    // Check if plugin exists with original ID
+    var plugin = _pluginManager.getPlugin(pluginId);
+    
+    // If not found, it might have been renamed (e.g. .off removed)
+    if (plugin == null && pluginId.contains('.off.')) {
+      final newId = pluginId.replaceFirst('.off.', '.');
+      plugin = _pluginManager.getPlugin(newId);
+    } else if (plugin == null) {
+      // Plugin disabled and renamed to .off
       _lastOutputs.remove(pluginId);
+      return;
     }
 
-    _notifyListChangedListeners();
+    // If now enabled (and found), run immediately and cache output
+    if (plugin != null && plugin.enabled) {
+      await runPlugin(plugin.id);
+    } else if (plugin != null && !plugin.enabled) {
+      // If disabled (but ID stayed same for some reason), clear cached output
+      _lastOutputs.remove(plugin.id);
+    }
   }
 
   /// Enable a plugin and run it immediately
   Future<void> enablePlugin(String pluginId) async {
     await _pluginManager.enablePlugin(pluginId);
-    await runPlugin(pluginId);
     _notifyListChangedListeners();
+
+    // Try to find the plugin with the new ID (without .off.)
+    var plugin = _pluginManager.getPlugin(pluginId);
+    if (plugin == null && pluginId.contains('.off.')) {
+      final newId = pluginId.replaceFirst('.off.', '.');
+      plugin = _pluginManager.getPlugin(newId);
+    }
+
+    if (plugin != null) {
+      await runPlugin(plugin.id);
+    }
   }
 
   /// Disable a plugin and clear its output

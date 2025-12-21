@@ -352,6 +352,19 @@ class CrossbarBridge {
       return 'Error: $e';
     }
   }
+
+  /// Execute shell command synchronously and return output
+  String execSync(String command) {
+    try {
+      final result = Process.runSync(
+        Platform.isWindows ? 'cmd' : 'sh',
+        Platform.isWindows ? ['/c', command] : ['-c', command],
+      );
+      return (result.stdout as String).trim();
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
   
   /// Send desktop notification
   Future<void> notify(String title, String message, {String? icon}) async {

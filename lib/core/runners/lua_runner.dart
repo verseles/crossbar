@@ -106,6 +106,7 @@ class LuaRunner {
 
     // Utility functions (sync)
     _registerSyncStringFunc(lua, 'hash', (String? text) => _bridge.hash(text ?? ''));
+    _registerSyncStringFunc(lua, 'exec', (String? cmd) => _bridge.execSync(cmd ?? ''));
     _registerSyncNoArgFunc(lua, 'uuid', _bridge.uuid);
     _registerSyncIntFunc(lua, 'random', (int? max) => _bridge.random(max ?? 100));
     _registerSyncStringFunc(lua, 'base64Encode', (String? text) => _bridge.base64Encode(text ?? ''));

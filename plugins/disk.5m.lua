@@ -2,15 +2,15 @@
 -- Disk Usage Monitor for the root partition in Lua
 
 -- 1. Get disk usage from Crossbar CLI
-local success, result = crossbar.exec('crossbar disk /')
+-- crossbar.exec returns the stdout string or "Error: ..."
+local result = crossbar.exec('crossbar disk /')
 
-if not success then
+-- Check for execution error
+if string.sub(result, 1, 6) == "Error:" or result == "" then
     print("? | color=gray")
     print("---")
     print("Error: Could not get disk info")
-    if result and result ~= '' then
-        print(result) -- Show stderr
-    end
+    print(result) -- Show error message
     return
 end
 
