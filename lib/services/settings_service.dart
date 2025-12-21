@@ -112,6 +112,7 @@ class SettingsService extends ChangeNotifier {
 
       if (enable) {
         // Create autostart directory if it doesn't exist
+        // ignore: avoid_slow_async_io
         if (!await autostartDir.exists()) {
           await autostartDir.create(recursive: true);
         }
@@ -119,8 +120,9 @@ class SettingsService extends ChangeNotifier {
         // Create the desktop entry content
         // Try to find the installed executable path
         final localBin = '$homeDir/.local/bin/crossbar';
-        final execPath = await File(localBin).exists() 
-            ? localBin 
+        // ignore: avoid_slow_async_io
+        final execPath = await File(localBin).exists()
+            ? localBin
             : 'crossbar'; // Fallback to PATH lookup
 
         final desktopEntry = '''[Desktop Entry]
@@ -138,6 +140,7 @@ X-GNOME-Autostart-enabled=true
         LoggerService().info('Autostart entry created at ${autostartFile.path}');
       } else {
         // Remove autostart file if it exists
+        // ignore: avoid_slow_async_io
         if (await autostartFile.exists()) {
           await autostartFile.delete();
           LoggerService().info('Autostart entry removed: ${autostartFile.path}');

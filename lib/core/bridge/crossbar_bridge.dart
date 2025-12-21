@@ -116,7 +116,12 @@ class CrossbarBridge {
   Future<String> uptime() async {
     return _systemApi.getUptime();
   }
-  
+
+  /// Get system uptime (sync)
+  String uptimeSync() {
+    return _systemApi.getUptimeSync();
+  }
+
   /// Get disk usage for path (default: root)
   Future<String> disk([String? path]) async {
     return _systemApi.getDiskUsage(path);
@@ -339,6 +344,19 @@ class CrossbarBridge {
   Future<String> exec(String command) async {
     try {
       final result = await Process.run(
+        Platform.isWindows ? 'cmd' : 'sh',
+        Platform.isWindows ? ['/c', command] : ['-c', command],
+      );
+      return (result.stdout as String).trim();
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+
+  /// Execute shell command synchronously and return output
+  String execSync(String command) {
+    try {
+      final result = Process.runSync(
         Platform.isWindows ? 'cmd' : 'sh',
         Platform.isWindows ? ['/c', command] : ['-c', command],
       );

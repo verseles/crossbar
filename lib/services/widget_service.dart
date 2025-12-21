@@ -3,21 +3,30 @@ import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
 
-import '../core/plugin_manager.dart';
 import '../models/plugin_output.dart';
+import 'refresh_service.dart';
 
+/// WidgetService - Manages mobile home screen widgets (Android/iOS).
+///
+/// This service handles:
+/// - Storing widget data in UserDefaults/SharedPreferences
+/// - Triggering native widget updates
+/// - Handling widget click events
+///
+/// Widget updates are triggered by RefreshService through listeners,
+/// ensuring consistent data across UI, Tray, and Widgets.
 class WidgetService {
-
   factory WidgetService() => _instance;
 
   WidgetService._internal();
+
   static final WidgetService _instance = WidgetService._internal();
 
   static const String appGroupId = 'group.crossbar.widgets';
   static const String iOSWidgetName = 'CrossbarWidget';
   static const String androidWidgetName = 'CrossbarWidgetProvider';
 
-  final PluginManager _pluginManager = PluginManager();
+  final RefreshService _refreshService = RefreshService();
   final Map<String, PluginOutput> _widgetData = {};
 
   bool _initialized = false;
@@ -50,6 +59,10 @@ class WidgetService {
     }
   }
 
+  /// Update widget data for a plugin.
+  ///
+  /// This method is typically called by SchedulerService (via RefreshService listener)
+  /// to keep widgets in sync with plugin outputs.
   Future<void> updateWidget(String pluginId, PluginOutput output) async {
     if (!_initialized) return;
 
@@ -81,10 +94,18 @@ class WidgetService {
     }
   }
 
+  /// Update all widgets by running all enabled plugins.
+  ///
+  /// Uses RefreshService to ensure consistent behavior and proper
+  /// notification of all listeners.
   Future<void> updateAllWidgets() async {
     if (!_initialized) return;
 
-    final outputs = await _pluginManager.runAllEnabled();
+    // Use RefreshService - this will notify listeners including SchedulerService
+    // which will call updateWidget() for each plugin output
+    final outputs = await _refreshService.runAllEnabled();
+
+    // Also directly update widgets for outputs (belt and suspenders approach)
     for (final output in outputs) {
       await updateWidget(output.pluginId, output);
     }
@@ -146,7 +167,6 @@ class WidgetService {
 }
 
 class WidgetDataBuilder {
-
   const WidgetDataBuilder({
     required this.pluginId,
     this.icon,

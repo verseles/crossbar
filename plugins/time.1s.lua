@@ -2,10 +2,11 @@
 -- Shows the current time with an icon for the time of day.
 
 -- 1. Get current time components
--- 1. Get current time components
-local current_hour = tonumber(os.date('%H'))
-local current_time = os.date('%H:%M:%S')
-local current_date = os.date('%Y-%m-%d')
+-- Using crossbar API instead of os.date for better compatibility
+local time_hm = crossbar.time('HH:mm') -- "14:30"
+local current_hour = tonumber(string.sub(time_hm, 1, 2))
+local current_time = crossbar.time('HH:mm:ss')
+local current_date = crossbar.date('yyyy-MM-dd')
 
 -- 2. Determine icon and color based on the hour
 local icon = ""

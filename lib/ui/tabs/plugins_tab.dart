@@ -9,6 +9,8 @@ import '../../l10n/app_localizations.dart';
 import '../../models/plugin.dart';
 import '../../models/plugin_output.dart';
 import '../../services/plugin_config_service.dart';
+import '../../services/refresh_service.dart';
+import '../../services/scheduler_service.dart';
 import '../../services/tray_service.dart';
 import '../dialogs/plugin_config_dialog.dart';
 import '../dialogs/sample_plugins_dialog.dart';
@@ -18,6 +20,7 @@ import '../dialogs/sample_plugins_dialog.dart';
 /// - Sorting (enabled first, alphabetical)
 /// - Grouping options (language, configurable)
 /// - Expandable plugin cards with live output preview
+/// - Synchronized with RefreshService (single source of truth)
 class PluginsTab extends StatefulWidget {
   const PluginsTab({super.key});
 
@@ -29,15 +32,15 @@ enum PluginSortOrder { enabledFirst, alphabetical, lastRun, interval }
 enum PluginGroupBy { none, language, configurable }
 
 class _PluginsTabState extends State<PluginsTab> {
-  final PluginManager _pluginManager = PluginManager();
+  final RefreshService _refreshService = RefreshService();
   final PluginConfigService _configService = PluginConfigService();
-  
+  final SchedulerService _schedulerService = SchedulerService();
+
   bool _isLoading = true;
   String _searchQuery = '';
   PluginSortOrder _sortOrder = PluginSortOrder.enabledFirst;
   PluginGroupBy _groupBy = PluginGroupBy.none;
   String? _expandedPluginId;
-  final Map<String, PluginOutput?> _pluginOutputs = {};
   final Map<String, bool> _runningPlugins = {};
   String? _pendingDeletePluginId;
   DateTime? _pendingDeleteTime;
@@ -46,10 +49,36 @@ class _PluginsTabState extends State<PluginsTab> {
   void initState() {
     super.initState();
     _loadPlugins();
+    // Listen for refresh updates from any source (scheduler, IPC, etc.)
+    _refreshService.addOutputListener(_onPluginOutput);
+    _refreshService.addListChangedListener(_onPluginListChanged);
+  }
+
+  @override
+  void dispose() {
+    _refreshService.removeOutputListener(_onPluginOutput);
+    _refreshService.removeListChangedListener(_onPluginListChanged);
+    super.dispose();
+  }
+
+  /// Called when any plugin output is updated (from any source)
+  void _onPluginOutput(String pluginId, PluginOutput output) {
+    if (mounted) {
+      setState(() {
+        // Output is already cached in RefreshService, just trigger rebuild
+      });
+    }
+  }
+
+  /// Called when plugin list changes (enable/disable/add/remove)
+  void _onPluginListChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadPlugins() async {
-    await _pluginManager.discoverPlugins();
+    await _refreshService.discoverPlugins();
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -61,14 +90,13 @@ class _PluginsTabState extends State<PluginsTab> {
     setState(() {
       _isLoading = true;
     });
-    _pluginManager.clear();
-    _pluginOutputs.clear();
+    PluginManager().clear();
     await _loadPlugins();
   }
 
   List<Plugin> get _filteredAndSortedPlugins {
-    var plugins = _pluginManager.plugins.toList();
-    
+    var plugins = _refreshService.plugins.toList();
+
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
@@ -77,7 +105,7 @@ class _PluginsTabState extends State<PluginsTab> {
                p.interpreter.toLowerCase().contains(query);
       }).toList();
     }
-    
+
     // Apply sorting
     plugins.sort((a, b) {
       switch (_sortOrder) {
@@ -96,19 +124,19 @@ class _PluginsTabState extends State<PluginsTab> {
           return a.refreshInterval.compareTo(b.refreshInterval);
       }
     });
-    
+
     return plugins;
   }
 
   Map<String, List<Plugin>> get _groupedPlugins {
     final plugins = _filteredAndSortedPlugins;
-    
+
     if (_groupBy == PluginGroupBy.none) {
       return {'All': plugins};
     }
-    
+
     final groups = <String, List<Plugin>>{};
-    
+
     for (final plugin in plugins) {
       String groupKey;
       switch (_groupBy) {
@@ -121,7 +149,7 @@ class _PluginsTabState extends State<PluginsTab> {
       }
       groups.putIfAbsent(groupKey, () => []).add(plugin);
     }
-    
+
     return groups;
   }
 
@@ -171,19 +199,14 @@ class _PluginsTabState extends State<PluginsTab> {
     setState(() {
       _runningPlugins[plugin.id] = true;
     });
-    
+
     try {
-      final output = await _pluginManager.runPlugin(plugin.id);
+      // Use RefreshService - this will notify all listeners including Tray
+      await _refreshService.runPlugin(plugin.id);
       if (mounted) {
         setState(() {
-          _pluginOutputs[plugin.id] = output;
           _runningPlugins[plugin.id] = false;
         });
-        
-        // Update tray if available
-        if (output != null) {
-          TrayService().updatePluginOutput(plugin.id, output);
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -198,18 +221,18 @@ class _PluginsTabState extends State<PluginsTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: Column(
         children: [
           // Search and Filter Bar
           _buildSearchAndFilterBar(theme, l10n),
-          
+
           // Content
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _pluginManager.plugins.isEmpty
+                : _refreshService.plugins.isEmpty
                     ? _buildEmptyState(l10n)
                     : _buildPluginList(theme, l10n),
           ),
@@ -259,9 +282,9 @@ class _PluginsTabState extends State<PluginsTab> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Filter chips row
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -294,9 +317,9 @@ class _PluginsTabState extends State<PluginsTab> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Group by dropdown
                 PopupMenuButton<PluginGroupBy>(
                   initialValue: _groupBy,
@@ -320,9 +343,9 @@ class _PluginsTabState extends State<PluginsTab> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Quick filters
                 FilterChip(
                   label: Text(l10n.enabled),
@@ -331,9 +354,9 @@ class _PluginsTabState extends State<PluginsTab> {
                     _sortOrder = PluginSortOrder.enabledFirst;
                   }),
                 ),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Refresh button
                 ActionChip(
                   avatar: const Icon(Icons.refresh, size: 18),
@@ -374,7 +397,7 @@ class _PluginsTabState extends State<PluginsTab> {
 
   Widget _buildPluginList(ThemeData theme, AppLocalizations l10n) {
     final groups = _groupedPlugins;
-    
+
     if (_filteredAndSortedPlugins.isEmpty) {
       return Center(
         child: Column(
@@ -396,14 +419,14 @@ class _PluginsTabState extends State<PluginsTab> {
         ),
       );
     }
-    
+
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
       itemCount: groups.length,
       itemBuilder: (context, groupIndex) {
         final groupName = groups.keys.elementAt(groupIndex);
         final groupPlugins = groups[groupName]!;
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -441,7 +464,7 @@ class _PluginsTabState extends State<PluginsTab> {
                 ),
               ),
             ],
-            
+
             // Plugin cards
             ...groupPlugins.map((plugin) => _buildExpandablePluginCard(
               context,
@@ -462,9 +485,10 @@ class _PluginsTabState extends State<PluginsTab> {
     AppLocalizations l10n,
   ) {
     final isExpanded = _expandedPluginId == plugin.id;
-    final output = _pluginOutputs[plugin.id];
+    // Use RefreshService as single source of truth for output
+    final output = _refreshService.getLastOutput(plugin.id);
     final isRunning = _runningPlugins[plugin.id] ?? false;
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       clipBehavior: Clip.antiAlias,
@@ -502,9 +526,9 @@ class _PluginsTabState extends State<PluginsTab> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Plugin info
                   Expanded(
                     child: Column(
@@ -560,16 +584,13 @@ class _PluginsTabState extends State<PluginsTab> {
                       ],
                     ),
                   ),
-                  
+
                   // Toggle switch
                   Switch(
                     value: plugin.enabled,
-                    onChanged: (_) async {
-                      await _pluginManager.togglePlugin(plugin.id);
-                      setState(() {});
-                    },
+                    onChanged: (_) => _handleTogglePlugin(plugin),
                   ),
-                  
+
                   // Expand indicator
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
@@ -579,13 +600,29 @@ class _PluginsTabState extends State<PluginsTab> {
               ),
             ),
           ),
-          
+
           // Expanded content
           if (isExpanded)
             _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
         ],
       ),
     );
+  }
+
+  /// Handle plugin toggle with proper synchronization
+  Future<void> _handleTogglePlugin(Plugin plugin) async {
+    // Use RefreshService for toggle - this ensures scheduler is notified
+    await _refreshService.togglePlugin(plugin.id);
+
+    // Reschedule timer
+    _schedulerService.reschedulePlugin(plugin.id);
+
+    // Refresh tray menu
+    await TrayService().refreshMenu();
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Widget _buildInfoChip(ThemeData theme, String label, IconData icon) {
@@ -620,7 +657,7 @@ class _PluginsTabState extends State<PluginsTab> {
     bool isRunning,
     AppLocalizations l10n,
   ) {
-    
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -683,7 +720,7 @@ class _PluginsTabState extends State<PluginsTab> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Output display
                 Container(
                   width: double.infinity,
@@ -703,7 +740,7 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
             ),
           ),
-          
+
           // Details Section
           Padding(
             padding: const EdgeInsets.all(16),
@@ -755,7 +792,7 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
             ),
           ),
-          
+
           // Action buttons
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -770,12 +807,7 @@ class _PluginsTabState extends State<PluginsTab> {
                     label: Text(l10n.configure),
                   ),
                 OutlinedButton.icon(
-                  onPressed: () async {
-                    await _pluginManager.togglePlugin(plugin.id);
-                    // Update tray after toggle
-                    await TrayService().refreshMenu();
-                    setState(() {});
-                  },
+                  onPressed: () => _handleTogglePlugin(plugin),
                   icon: Icon(
                     plugin.enabled ? Icons.pause : Icons.play_arrow,
                     size: 18,
@@ -826,7 +858,7 @@ class _PluginsTabState extends State<PluginsTab> {
         ),
       );
     }
-    
+
     if (output == null) {
       return Center(
         child: Text(
@@ -838,7 +870,7 @@ class _PluginsTabState extends State<PluginsTab> {
         ),
       );
     }
-    
+
     if (output.hasError) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -868,7 +900,7 @@ class _PluginsTabState extends State<PluginsTab> {
         ],
       );
     }
-    
+
     // Successful output - show icon and text
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1030,7 +1062,7 @@ class _PluginsTabState extends State<PluginsTab> {
         schema: plugin.config,
       );
 
-      // Re-run plugin immediately
+      // Re-run plugin immediately via RefreshService
       if (!mounted) return;
       await _runPlugin(plugin);
 
@@ -1248,7 +1280,7 @@ class _PluginsTabState extends State<PluginsTab> {
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    
+
     if (diff.inSeconds < 60) {
       return 'Just now';
     } else if (diff.inMinutes < 60) {
@@ -1269,6 +1301,7 @@ class _PluginsTabState extends State<PluginsTab> {
   /// Opens the plugin file in the system's default editor
   Future<void> _editPlugin(Plugin plugin) async {
     final file = File(plugin.path);
+    // ignore: avoid_slow_async_io
     if (!await file.exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1281,7 +1314,7 @@ class _PluginsTabState extends State<PluginsTab> {
     // Use xdg-open on Linux, open on macOS, start on Windows
     final String command;
     final List<String> args;
-    
+
     if (Platform.isLinux) {
       command = 'xdg-open';
       args = [plugin.path];
@@ -1314,9 +1347,9 @@ class _PluginsTabState extends State<PluginsTab> {
   /// Handle delete button click - requires double-click to confirm
   void _handleDeleteClick(BuildContext context, Plugin plugin) {
     final now = DateTime.now();
-    
+
     // Check if this is a "second click" within 3 seconds
-    if (_pendingDeletePluginId == plugin.id && 
+    if (_pendingDeletePluginId == plugin.id &&
         _pendingDeleteTime != null &&
         now.difference(_pendingDeleteTime!).inSeconds < 3) {
       // Second click - delete the plugin
@@ -1347,21 +1380,25 @@ class _PluginsTabState extends State<PluginsTab> {
 
     try {
       final file = File(plugin.path);
+      // ignore: avoid_slow_async_io
       if (await file.exists()) {
         await file.delete();
       }
-      
+
       // Also delete schema file if exists
       final schemaFile = File('${plugin.path}.schema.json');
+      // ignore: avoid_slow_async_io
       if (await schemaFile.exists()) {
         await schemaFile.delete();
       }
 
-      // Clear plugin output from tray and refresh
-      TrayService().clearPluginOutput(plugin.id);
+      // Clear plugin output from cache
+      _refreshService.clearOutput(plugin.id);
+
+      // Refresh plugin list and tray
       await _refreshPlugins();
       await TrayService().refreshMenu();
-      
+
       if (mounted) {
         messenger.clearSnackBars();
         messenger.showSnackBar(
@@ -1384,28 +1421,28 @@ class _PluginsTabState extends State<PluginsTab> {
     final l10n = AppLocalizations.of(context)!;
 
     final buffer = StringBuffer();
-    
+
     if (output.icon.isNotEmpty) {
       buffer.write('${output.icon} ');
     }
     buffer.writeln(output.text ?? '');
-    
+
     if (output.trayTooltip != null) {
       buffer.writeln(output.trayTooltip!);
     }
-    
+
     for (final item in output.menu) {
       if (item.text != null) {
         buffer.writeln('• ${item.text}');
       }
     }
-    
+
     if (output.errorMessage != null) {
       buffer.writeln('Error: ${output.errorMessage}');
     }
 
     await FlutterClipboard.copy(buffer.toString());
-    
+
     if (mounted) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.outputCopiedToClipboard)),
