@@ -1,6 +1,33 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install uninstall \
+	install uninstall precommit \
 	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
+
+# Pre-commit verification sequence (AGENTS.md compliance)
+# Runs: analyze → coverage → linux build → android build
+precommit:
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  PRECOMMIT VERIFICATION (AGENTS.md)"
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "Step 1/4: Static Analysis"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) analyze
+	@echo ""
+	@echo "Step 2/4: Tests with Coverage (target: 35-60%)"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) coverage
+	@echo ""
+	@echo "Step 3/4: Linux Build"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) linux
+	@echo ""
+	@echo "Step 4/4: Android Build"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) android
+	@echo ""
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  ✅ PRECOMMIT PASSED - Safe to commit!"
+	@echo "══════════════════════════════════════════════════════════════"
 
 # Paths
 LINUX_BUNDLE = build/linux/x64/release/bundle
