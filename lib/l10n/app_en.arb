@@ -269,5 +269,6 @@
   "selectPluginsForWidget": "Select plugins to display",
   "selectOnePlugin": "Select one plugin",
   "selectPlugins": "Select plugins",
-  "noPluginsAvailable": "No plugins available. Install some plugins first."
+  "noPluginsAvailable": "No plugins available. Install some plugins first.",
+  "widgetUpdateNote": "Widgets update every 15 min in background. Open the app for instant updates."
 }

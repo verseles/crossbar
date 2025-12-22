@@ -225,8 +225,12 @@ void main() {
       expect(WidgetService.iOSWidgetName, equals('CrossbarWidget'));
     });
 
-    test('has correct Android widget name', () {
-      expect(WidgetService.androidWidgetName, equals('CrossbarWidgetProvider'));
+    test('has correct Android widget names', () {
+      expect(WidgetService.androidWidgetNames, containsAll([
+        'CrossbarWidgetSmall',
+        'CrossbarWidgetMedium',
+        'CrossbarWidgetLarge',
+      ]));
     });
   });
 

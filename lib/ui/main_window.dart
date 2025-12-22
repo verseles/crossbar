@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
@@ -235,6 +236,10 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 /// Screen for widget configuration - shows dialog immediately
+///
+/// IMPORTANT: Uses MethodChannel to get widget parameters from native side
+/// instead of relying on URL parameters from getInitialRoute().
+/// This ensures correct parameters even if FlutterEngine has stale state.
 class _WidgetConfigScreen extends StatefulWidget {
   const _WidgetConfigScreen({
     required this.widgetId,
@@ -249,20 +254,51 @@ class _WidgetConfigScreen extends StatefulWidget {
 }
 
 class _WidgetConfigScreenState extends State<_WidgetConfigScreen> {
+  static const _configChannel = MethodChannel('com.verseles.crossbar/widget_config');
+
+  int? _actualWidgetId;
+  String? _actualWidgetSize;
+  bool _paramsLoaded = false;
+
   @override
   void initState() {
     super.initState();
-    // Show dialog after build
+    // Load params from native side, then show dialog
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showConfigDialog();
+      _loadParamsAndShowDialog();
     });
+  }
+
+  Future<void> _loadParamsAndShowDialog() async {
+    // Try to get params from MethodChannel (most reliable source)
+    try {
+      if (Platform.isAndroid) {
+        final params = await _configChannel.invokeMethod<Map<Object?, Object?>>('getWidgetConfigParams');
+        if (params != null && mounted) {
+          _actualWidgetId = params['widgetId'] as int?;
+          _actualWidgetSize = params['size'] as String?;
+        }
+      }
+    } catch (e) {
+      // Fall back to URL parameters if MethodChannel fails
+      debugPrint('WidgetConfigScreen: MethodChannel failed, using URL params: $e');
+    }
+
+    // Use URL params as fallback
+    _actualWidgetId ??= widget.widgetId;
+    _actualWidgetSize ??= widget.widgetSize;
+
+    if (mounted) {
+      setState(() => _paramsLoaded = true);
+      await _showConfigDialog();
+    }
   }
 
   Future<void> _showConfigDialog() async {
     await WidgetConfigDialog.show(
       context: context,
-      widgetId: widget.widgetId,
-      widgetSize: widget.widgetSize,
+      widgetId: _actualWidgetId ?? widget.widgetId,
+      widgetSize: _actualWidgetSize ?? widget.widgetSize,
     );
   }
 
@@ -277,6 +313,13 @@ class _WidgetConfigScreenState extends State<_WidgetConfigScreen> {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context)?.widgetConfiguration ?? 'Widget Configuration'),
+            if (_paramsLoaded) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Widget: $_actualWidgetId (${_actualWidgetSize ?? "unknown"})',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),

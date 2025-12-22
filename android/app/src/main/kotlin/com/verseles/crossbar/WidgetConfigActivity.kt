@@ -13,50 +13,77 @@ import io.flutter.plugin.common.MethodChannel
  * Configuration activity for Crossbar widgets.
  * Launches when user adds a widget to home screen.
  * Shows plugin selection dialog via Flutter deep link.
+ *
+ * CRITICAL: Each configuration MUST use a fresh FlutterEngine to avoid
+ * the alternating success/failure pattern. This is achieved by:
+ * 1. getCachedEngineId() returning null (no engine caching)
+ * 2. shouldDestroyEngineWithHost() returning true (destroy engine on finish)
  */
 class WidgetConfigActivity : FlutterActivity() {
-    
+
     companion object {
         private const val TAG = "WidgetConfigActivity"
         private const val CHANNEL = "com.verseles.crossbar/widget_config"
         private const val PREFS_NAME = "HomeWidgetPreferences"
     }
-    
+
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var widgetSize = "small"
-    
+
+    // CRITICAL: Never use a cached engine - always create fresh
+    override fun getCachedEngineId(): String? = null
+
+    // CRITICAL: Always destroy engine when activity finishes
+    override fun shouldDestroyEngineWithHost(): Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        // Set result to CANCELED in case user backs out
-        setResult(RESULT_CANCELED)
-        
-        // Get the widget ID from the intent
+        // Get widget ID before super.onCreate
         appWidgetId = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
-        
+
+        super.onCreate(savedInstanceState)
+
+        // Set result to CANCELED in case user backs out
+        val cancelIntent = Intent().apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+        setResult(RESULT_CANCELED, cancelIntent)
+
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             android.util.Log.e(TAG, "Invalid widget ID, finishing")
             finish()
             return
         }
-        
-        // Determine widget size from caller class name
+
+        // Determine widget size using AppWidgetManager
         widgetSize = determineWidgetSize()
-        
+
         android.util.Log.d(TAG, "Configuring widget $appWidgetId, size: $widgetSize")
     }
     
     private fun determineWidgetSize(): String {
-        // Check the referrer or caller to determine widget size
-        val callerClass = intent?.component?.className ?: ""
-        return when {
-            callerClass.contains("Large") -> "large"
-            callerClass.contains("Medium") -> "medium"
-            else -> "small"
+        // Use AppWidgetManager to get the provider info for this widget ID
+        // This correctly identifies which widget class (Small/Medium/Large) was added
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val providerInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
+
+        if (providerInfo != null) {
+            val providerClassName = providerInfo.provider.className
+            android.util.Log.d(TAG, "Widget provider class: $providerClassName")
+
+            return when {
+                providerClassName.contains("Large") -> "large"
+                providerClassName.contains("Medium") -> "medium"
+                else -> "small"
+            }
         }
+
+        // Fallback: Check layout dimensions from provider info
+        // Large = 2x2, Medium = 2x1, Small = 1x1
+        android.util.Log.w(TAG, "Could not get provider info for widget $appWidgetId, defaulting to small")
+        return "small"
     }
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -73,25 +100,29 @@ class WidgetConfigActivity : FlutterActivity() {
                 "saveWidgetConfig" -> {
                     val widgetId = call.argument<Int>("widgetId") ?: appWidgetId
                     val pluginIds = call.argument<List<String>>("pluginIds") ?: emptyList()
-                    
+
                     saveWidgetConfig(widgetId, pluginIds)
-                    
+
                     // Update the widget immediately
                     updateWidget()
-                    
-                    // Return success result
+
+                    // Set success result
                     val resultValue = Intent().apply {
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                     }
                     setResult(RESULT_OK, resultValue)
-                    
+
+                    android.util.Log.d(TAG, "Widget $appWidgetId configured with plugins: $pluginIds")
+
                     result.success(true)
-                    
-                    // Finish after saving
                     finish()
                 }
                 "cancelWidgetConfig" -> {
-                    setResult(RESULT_CANCELED)
+                    val cancelIntent = Intent().apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                    }
+                    setResult(RESULT_CANCELED, cancelIntent)
+                    android.util.Log.d(TAG, "Widget $appWidgetId configuration cancelled")
                     result.success(true)
                     finish()
                 }

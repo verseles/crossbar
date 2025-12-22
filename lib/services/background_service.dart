@@ -77,11 +77,24 @@ Future<void> _updateWidgetsInBackground() async {
       jsonEncode(pluginIds),
     );
 
-    // Trigger widget update
-    await HomeWidget.updateWidget(
-      name: 'CrossbarWidgetProvider',
-      androidName: 'CrossbarWidgetProvider',
-    );
+    // Trigger widget update for ALL widget types
+    // Each widget class is a separate receiver and must be updated individually
+    const widgetNames = [
+      'CrossbarWidgetSmall',
+      'CrossbarWidgetMedium',
+      'CrossbarWidgetLarge',
+    ];
+
+    for (final widgetName in widgetNames) {
+      try {
+        await HomeWidget.updateWidget(
+          name: widgetName,
+          androidName: widgetName,
+        );
+      } catch (_) {
+        // Ignore - widget might not be on screen
+      }
+    }
   }
 }
 

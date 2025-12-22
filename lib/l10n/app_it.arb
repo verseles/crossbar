@@ -155,5 +155,12 @@
   "noConfigurationRequired": "Nessuna configurazione richiesta",
 
   "fiveMinutes": "5 minuti",
-  "licenseText": "Crossbar - Sistema Universale di Plugin\n\nCopyright (C) 2025\n\nQuesto programma è software libero: puoi ridistribuirlo e/o modificarlo secondo i termini della GNU Affero General Public License come pubblicata dalla Free Software Foundation, sia la versione 3 della Licenza, o (a tua scelta) qualsiasi versione successiva.\n\nQuesto programma è distribuito nella speranza che sia utile, ma SENZA ALCUNA GARANZIA; senza nemmeno la garanzia implicita di COMMERCIABILITÀ o IDONEITÀ PER UNO SCOPO PARTICOLARE. Vedi la GNU Affero General Public License per maggiori dettagli.\n\nDovresti aver ricevuto una copia della GNU Affero General Public License insieme a questo programma. In caso contrario, vedi <https://www.gnu.org/licenses/>."
+  "licenseText": "Crossbar - Sistema Universale di Plugin\n\nCopyright (C) 2025\n\nQuesto programma è software libero: puoi ridistribuirlo e/o modificarlo secondo i termini della GNU Affero General Public License come pubblicata dalla Free Software Foundation, sia la versione 3 della Licenza, o (a tua scelta) qualsiasi versione successiva.\n\nQuesto programma è distribuito nella speranza che sia utile, ma SENZA ALCUNA GARANZIA; senza nemmeno la garanzia implicita di COMMERCIABILITÀ o IDONEITÀ PER UNO SCOPO PARTICOLARE. Vedi la GNU Affero General Public License per maggiori dettagli.\n\nDovresti aver ricevuto una copia della GNU Affero General Public License insieme a questo programma. In caso contrario, vedi <https://www.gnu.org/licenses/>.",
+
+  "widgetConfiguration": "Configurazione Widget",
+  "selectPluginsForWidget": "Seleziona plugin da visualizzare",
+  "selectOnePlugin": "Seleziona un plugin",
+  "selectPlugins": "Seleziona plugin",
+  "noPluginsAvailable": "Nessun plugin disponibile. Installa prima alcuni plugin.",
+  "widgetUpdateNote": "I widget si aggiornano ogni 15 min in background. Apri l'app per aggiornamenti istantanei."
 }
