@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:yaml/yaml.dart';
-
-import '../bridge/crossbar_bridge.dart';
 
 /// DeclarativeRunner - Executes YAML-based plugins without code
 ///

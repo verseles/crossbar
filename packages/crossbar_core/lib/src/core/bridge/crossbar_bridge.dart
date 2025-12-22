@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:crypto/crypto.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../api/network_api.dart';
 import '../../api/system_api.dart';
 import '../../api/utils_api.dart';
+import 'android_bridge_interface.dart';
 import 'android_bridge_stub.dart'; // Default to stub
 
 /// CrossbarBridge - Unified API for plugins across all platforms
@@ -19,7 +21,11 @@ class CrossbarBridge {
   final SystemApi _systemApi = SystemApi();
   final NetworkApi _networkApi = const NetworkApi();
   final UtilsApi _utilsApi = const UtilsApi();
-  final AndroidNativeBridge _androidBridge = AndroidNativeBridge();
+  
+  AndroidBridgeInterface _androidBridge = AndroidNativeBridge(); // Default to stub
+
+  /// Inject a platform-specific implementation (e.g. from Flutter)
+  set androidBridge(AndroidBridgeInterface bridge) => _androidBridge = bridge;
 
   // Cache for Android battery status (platform channels are async)
   Map<String, dynamic>? _androidBatteryCache;
@@ -171,15 +177,24 @@ class CrossbarBridge {
         final hour = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
         final ampm = now.hour >= 12 ? 'PM' : 'AM';
         return '$hour:${_pad(now.minute)} $ampm';
+      case 'HH:mm:ss.SSS':
+        return '${_pad(now.hour)}:${_pad(now.minute)}:${_pad(now.second)}.${_pad(now.millisecond, 3)}';
       default: return now.toIso8601String();
     }
   }
   
   String date([String format = 'yyyy-MM-dd']) {
     final now = DateTime.now();
+    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    
     switch (format) {
       case 'yyyy-MM-dd': return '${now.year}-${_pad(now.month)}-${_pad(now.day)}';
       case 'dd/MM/yyyy': return '${_pad(now.day)}/${_pad(now.month)}/${now.year}';
+      case 'MM/dd/yyyy': return '${_pad(now.month)}/${_pad(now.day)}/${now.year}';
+      case 'EEEE, MMMM d, yyyy':
+        return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}, ${now.year}';
       default: return now.toIso8601String().split('T')[0];
     }
   }
@@ -223,7 +238,7 @@ class CrossbarBridge {
   }
 
   String hash(String input) => sha256.convert(utf8.encode(input)).toString();
-  String uuid() => DateTime.now().microsecondsSinceEpoch.toString(); // Simple fallback
+  String uuid() => Uuid().v4();
   String base64Encode(String input) => base64.encode(utf8.encode(input));
   String base64Decode(String input) => utf8.decode(base64.decode(input));
   int random([int max = 100]) => DateTime.now().microsecond % max;
@@ -231,7 +246,31 @@ class CrossbarBridge {
   String get platform => Platform.operatingSystem;
   bool get isMobile => Platform.isAndroid || Platform.isIOS;
   bool get isDesktop => !isMobile;
+  Future<void> notify(String title, String message, {String? icon}) async {
+    await _utilsApi.sendNotification(
+      title: title,
+      message: message,
+      icon: icon,
+    );
+  }
+
+  Future<void> openUrl(String url) async {
+    await _utilsApi.openUrl(url);
+  }
+  
+  Future<void> openFile(String path) async {
+    await _utilsApi.openFile(path);
+  }
+  
+  // ═══════════════════════════════════════════════════════════════
+  // ENVIRONMENT
+  // ═══════════════════════════════════════════════════════════════
+  
+  String? env(String name) => Platform.environment[name];
+  Map<String, String> get envAll => Platform.environment;
+  
   String get homeDir => Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '~';
+  String get tempDir => Directory.systemTemp.path;
 }
 
 final crossbar = CrossbarBridge.instance;

@@ -5,9 +5,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../models/plugin.dart';
-import '../models/plugin_config.dart';
-import '../models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import '../services/config_service.dart';
 import 'paths/platform_paths.dart'
     if (dart.library.ui) 'paths/platform_paths_flutter.dart';

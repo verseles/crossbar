@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
 
-import '../models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'refresh_service.dart';
 
 /// WidgetService - Manages mobile home screen widgets (Android/iOS).

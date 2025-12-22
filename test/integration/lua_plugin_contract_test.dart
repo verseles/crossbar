@@ -3,7 +3,7 @@ library;
 
 import 'dart:io';
 
-import 'package:crossbar/core/runners/lua_runner.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Contract tests for Lua sample plugins.

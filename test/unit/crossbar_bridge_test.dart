@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_slow_async_io
-import 'package:crossbar/core/bridge/crossbar_bridge.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

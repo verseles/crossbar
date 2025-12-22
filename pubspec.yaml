@@ -13,6 +13,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  crossbar_core:
+    path: packages/crossbar_core
+
   # System & Desktop
   window_manager: ^0.5.1
 

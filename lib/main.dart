@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:crossbar_core/crossbar_core.dart';
+import 'core/api/android_native_bridge.dart';
 import 'core/plugin_manager.dart';
 import 'services/background_service.dart';
 import 'services/hot_reload_service.dart';
@@ -38,6 +40,11 @@ void main(List<String> args) async {
 
   try {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Inject platform-specific bridge implementation
+    if (Platform.isAndroid) {
+      CrossbarBridge.instance.androidBridge = AndroidNativeBridge();
+    }
 
     // Register Android widget refresh handler EARLY
     // This catches refresh requests even before services are fully initialized

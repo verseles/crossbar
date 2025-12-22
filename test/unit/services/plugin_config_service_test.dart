@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crossbar/models/plugin_config.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:crossbar/services/plugin_config_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';

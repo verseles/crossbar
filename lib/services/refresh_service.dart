@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
-import '../models/plugin.dart';
-import '../models/plugin_output.dart';
 
 /// Callback type for plugin output updates
 typedef PluginOutputCallback = void Function(String pluginId, PluginOutput output);

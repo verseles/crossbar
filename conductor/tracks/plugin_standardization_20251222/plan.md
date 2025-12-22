@@ -14,8 +14,8 @@ Goal: Implement the showcase plugins in all 7 supported languages.
 
 - [x] Task: Standardize `plugins/battery/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`. 1f4d48d
 - [x] Task: Standardize `plugins/uptime/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`. bf49297
-- [ ] Task: Verify that all showcase scripts execute and produce valid Crossbar/BitBar output using `crossbar run <plugin_path>`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Showcase Plugins' (Protocol in workflow.md)
+- [x] Task: Verify that all showcase scripts execute and produce valid Crossbar/BitBar output using `crossbar run <plugin_path>`. 8a34532
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Showcase Plugins' (Protocol in workflow.md) 8a34532
 
 ## Phase 3: Baseline Standardization & Legacy Porting
 Goal: Ensure every plugin has at least Lua and Bash versions, and remove non-standard versions.

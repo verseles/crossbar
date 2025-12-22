@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../models/plugin.dart';
-import '../../models/plugin_config.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import '../widgets/config_fields/config_field.dart';
 
 class PluginConfigDialog extends StatefulWidget {

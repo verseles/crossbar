@@ -1,9 +1,8 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:io';
 
-import 'package:crossbar/core/output_parser.dart';
 import 'package:crossbar/core/script_runner.dart';
-import 'package:crossbar/models/plugin.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Functional tests for plugin execution.

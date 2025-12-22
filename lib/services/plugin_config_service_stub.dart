@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../models/plugin_config.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 
 /// Stub implementation of config service for pure Dart CLI.
 /// Does not support secure storage or persistent configs.

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
-import '../../models/plugin.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 
 /// Dialog for configuring which plugins to display in a widget.
 /// 

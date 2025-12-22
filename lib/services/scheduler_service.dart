@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:meta/meta.dart';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
-import '../models/plugin.dart';
-import '../models/plugin_output.dart';
 import 'notification_service.dart';
 import 'refresh_service.dart';
 import 'settings_service.dart';

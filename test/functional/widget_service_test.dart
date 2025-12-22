@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:convert';
 
-import 'package:crossbar/models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:crossbar/services/widget_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/plugin.dart';
-import '../../models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 
 class PluginCard extends StatelessWidget {
 

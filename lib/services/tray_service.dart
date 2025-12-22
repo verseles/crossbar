@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
 import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart' as plugin_model;
+import 'package:crossbar_core/crossbar_core.dart' as plugin_model;
 import 'logger_service.dart';
 import 'scheduler_service.dart';
 import 'window_service.dart';

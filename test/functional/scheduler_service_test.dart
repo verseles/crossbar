@@ -1,8 +1,7 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:async';
 
-import 'package:crossbar/models/plugin.dart';
-import 'package:crossbar/models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:crossbar/services/scheduler_service.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:flutter_test/flutter_test.dart';

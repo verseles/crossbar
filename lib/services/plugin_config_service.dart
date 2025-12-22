@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as path;
 
-import '../models/plugin_config.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'logger_service.dart';
 
 /// Service responsible for loading, saving, and securely storing plugin configuration values.

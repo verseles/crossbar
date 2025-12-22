@@ -12,6 +12,7 @@ dependencies:
   lua_dardo: ^0.0.5
   dio: ^5.7.0
   crypto: ^3.0.3
+  uuid: ^3.0.7
 
 dev_dependencies:
   lints: ^5.0.0

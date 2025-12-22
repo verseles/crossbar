@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../models/plugin.dart';
-import '../models/plugin_output.dart';
-import 'output_parser.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 
 abstract class IProcessRunner {
   Future<ProcessResult> run(

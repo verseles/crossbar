@@ -19,3 +19,4 @@ export 'src/models/plugin_output.dart';
 export 'src/core/output_parser.dart';
 export 'src/core/lua_runner.dart';
 export 'src/core/bridge/crossbar_bridge.dart';
+export 'src/core/bridge/android_bridge_interface.dart';

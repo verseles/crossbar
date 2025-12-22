@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:dart_eval/dart_eval.dart';
 import 'package:dart_eval/dart_eval_bridge.dart';
 import 'package:dart_eval/stdlib/core.dart';
-
-import '../bridge/crossbar_bridge.dart';
 
 /// DartRunner - Executes Dart plugins dynamically via dart_eval
 ///

@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:crossbar/core/plugin_manager.dart';
-import 'package:crossbar/models/plugin_output.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:crossbar/services/tray_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

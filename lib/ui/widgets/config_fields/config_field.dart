@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/plugin_config.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 
 abstract class ConfigField extends StatelessWidget {
 

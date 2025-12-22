@@ -4,10 +4,9 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
-import '../../models/plugin.dart';
-import '../../models/plugin_output.dart';
 import '../../services/plugin_config_service.dart';
 import '../../services/refresh_service.dart';
 import '../../services/scheduler_service.dart';
