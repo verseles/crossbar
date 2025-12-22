@@ -290,7 +290,7 @@ class _WidgetConfigScreenState extends State<_WidgetConfigScreen> {
 
     if (mounted) {
       setState(() => _paramsLoaded = true);
-      _showConfigDialog();
+      await _showConfigDialog();
     }
   }
 
