@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
 import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart' hide MenuItem;
+import '../models/plugin_output.dart' as plugin_model;
 import 'logger_service.dart';
 import 'scheduler_service.dart';
 import 'window_service.dart';
@@ -25,7 +25,7 @@ class TrayService with TrayListener {
   static final TrayService _instance = TrayService._internal();
 
   final PluginManager _pluginManager = PluginManager();
-  final Map<String, PluginOutput> _pluginOutputs = {};
+  final Map<String, plugin_model.PluginOutput> _pluginOutputs = {};
 
   bool _initialized = false;
   String? _iconPath;
@@ -143,14 +143,25 @@ class TrayService with TrayListener {
   Future<void> _updateMenu() async {
     final menuItems = <MenuItem>[];
 
-    // Plugin outputs - show enabled plugins
+    // Plugin outputs - show enabled plugins with their menus
     for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
       final output = _pluginOutputs[plugin.id];
       if (output != null && output.text != null && output.text!.isNotEmpty) {
-        menuItems.add(MenuItem(
-          label: '${output.icon} ${output.text}',
-          disabled: true,
-        ));
+        // Check if plugin has menu items
+        if (output.menu.isNotEmpty) {
+          // Create submenu with plugin output items
+          final submenuItems = _convertMenuItems(output.menu);
+          menuItems.add(MenuItem.submenu(
+            label: '${output.icon} ${output.text}',
+            submenu: Menu(items: submenuItems),
+          ));
+        } else {
+          // No submenu, just show the output
+          menuItems.add(MenuItem(
+            label: '${output.icon} ${output.text}',
+            disabled: true,
+          ));
+        }
       }
     }
 
@@ -182,7 +193,30 @@ class TrayService with TrayListener {
     }
   }
 
-  void updatePluginOutput(String pluginId, PluginOutput output) {
+  /// Converts plugin model MenuItems to tray_manager MenuItems recursively
+  List<MenuItem> _convertMenuItems(List<plugin_model.MenuItem> items) {
+    final result = <MenuItem>[];
+    for (final item in items) {
+      if (item.separator) {
+        result.add(MenuItem.separator());
+      } else if (item.submenu != null && item.submenu!.isNotEmpty) {
+        // Item has submenu - create a submenu
+        result.add(MenuItem.submenu(
+          label: item.text ?? '',
+          submenu: Menu(items: _convertMenuItems(item.submenu!)),
+        ));
+      } else {
+        // Regular menu item
+        result.add(MenuItem(
+          key: item.href ?? item.bash ?? item.text,
+          label: item.text ?? '',
+        ));
+      }
+    }
+    return result;
+  }
+
+  void updatePluginOutput(String pluginId, plugin_model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _updateMenu();
     _updateTitle(pluginId, output);
@@ -214,7 +248,7 @@ class TrayService with TrayListener {
     }
   }
 
-  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
+  Future<void> _updateTitle(String pluginId, plugin_model.PluginOutput output) async {
     // Find the first enabled plugin to use as the main tray title
     final firstEnabled =
         _pluginManager.plugins.where((p) => p.enabled).firstOrNull;

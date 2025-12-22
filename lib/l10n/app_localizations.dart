@@ -1061,6 +1061,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No plugins available. Install some plugins first.'**
   String get noPluginsAvailable;
+
+  /// No description provided for @widgetUpdateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Widgets update every 15 min in background. Open the app for instant updates.'**
+  String get widgetUpdateNote;
 }
 
 class _AppLocalizationsDelegate

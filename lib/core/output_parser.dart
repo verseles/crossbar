@@ -75,46 +75,65 @@ class OutputParser {
     final menu = <MenuItem>[];
     var inMenu = false;
 
+    // Stack to track parent items at each depth level
+    // Index 0 = root menu, Index 1 = first submenu level, etc.
+    final parentStack = <List<MenuItem>>[menu];
+
     for (var i = 1; i < lines.length; i++) {
       final line = lines[i];
 
+      // Check for separator (exactly ---) - but not submenu indicator (--)
       if (line.trim() == '---') {
-        inMenu = true;
+        if (!inMenu) {
+          // First --- marks the start of the menu section
+          inMenu = true;
+        } else {
+          // Subsequent --- add visual separators to current level
+          parentStack.last.add(MenuItem.separator());
+        }
         continue;
       }
 
       if (!inMenu) continue;
 
-      final trimmedLine = line.trim();
-      if (trimmedLine.isEmpty) continue;
+      // Parse indent level and get actual content
+      final indentInfo = _parseIndentedLine(line);
+      final depth = indentInfo.depth;
+      final content = indentInfo.content;
 
-      if (trimmedLine.contains('|')) {
-        final parts = trimmedLine.split('|');
-        final itemText = parts[0].trim();
-        String? bash;
-        String? href;
-        String? itemColor;
+      if (content.isEmpty) continue;
 
-        for (var k = 1; k < parts.length; k++) {
-          final attr = parts[k].trim();
-          if (attr.startsWith('bash=')) {
-            bash = attr.substring(5);
-          } else if (attr.startsWith('href=')) {
-            href = attr.substring(5);
-          } else if (attr.startsWith('color=')) {
-            itemColor = attr.substring(6);
-          }
-        }
+      // Parse menu item from content
+      final item = _parseMenuItemFromLine(content);
 
-        menu.add(MenuItem(
-          text: itemText,
-          bash: bash,
-          href: href,
-          color: itemColor,
-        ));
-      } else {
-        menu.add(MenuItem(text: trimmedLine));
+      // Adjust parent stack to correct depth
+      // depth 0 = root menu, depth 1 = submenu of last root item, etc.
+      while (parentStack.length > depth + 1) {
+        parentStack.removeLast();
       }
+
+      // If we need to go deeper, ensure parent has submenu
+      while (parentStack.length < depth + 1) {
+        final lastList = parentStack.last;
+        if (lastList.isNotEmpty) {
+          final lastItem = lastList.last;
+          // Initialize submenu if needed
+          if (lastItem.submenu == null) {
+            // Create a new item with submenu
+            final newItem = lastItem.copyWith(submenu: <MenuItem>[]);
+            lastList[lastList.length - 1] = newItem;
+            parentStack.add(newItem.submenu!);
+          } else {
+            parentStack.add(lastItem.submenu!);
+          }
+        } else {
+          // Cannot add child to empty parent, add to root
+          break;
+        }
+      }
+
+      // Add item to current level
+      parentStack.last.add(item);
     }
 
     return PluginOutput(
@@ -124,6 +143,52 @@ class OutputParser {
       color: colorStr != null ? _parseColor(colorStr) : null,
       menu: menu,
     );
+  }
+
+  /// Parses BitBar-style indented line (-- prefix indicates submenu level)
+  /// Returns the depth level and the actual content without the prefix.
+  static ({int depth, String content}) _parseIndentedLine(String line) {
+    var depth = 0;
+    var current = line;
+
+    // Count leading -- pairs (each -- is one level)
+    while (current.startsWith('--')) {
+      depth++;
+      current = current.substring(2);
+    }
+
+    return (depth: depth, content: current.trim());
+  }
+
+  /// Parses a single menu item line (already stripped of -- prefix)
+  static MenuItem _parseMenuItemFromLine(String line) {
+    if (line.contains('|')) {
+      final parts = line.split('|');
+      final itemText = parts[0].trim();
+      String? bash;
+      String? href;
+      String? itemColor;
+
+      for (var k = 1; k < parts.length; k++) {
+        final attr = parts[k].trim();
+        if (attr.startsWith('bash=')) {
+          bash = attr.substring(5);
+        } else if (attr.startsWith('href=')) {
+          href = attr.substring(5);
+        } else if (attr.startsWith('color=')) {
+          itemColor = attr.substring(6);
+        }
+      }
+
+      return MenuItem(
+        text: itemText,
+        bash: bash,
+        href: href,
+        color: itemColor,
+      );
+    } else {
+      return MenuItem(text: line);
+    }
   }
 
   static ({String icon, String? text}) _parseIconAndText(String input) {

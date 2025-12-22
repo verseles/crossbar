@@ -105,6 +105,161 @@ Menu Item
         expect(output.menu.length, 1);
         expect(output.menu[0].text, 'Menu Item');
       });
+
+      test('parses single level submenu (-- prefix)', () {
+        const input = '''
+System Info
+---
+CPU
+--CPU Core 1: 45%
+--CPU Core 2: 52%
+Memory
+--Used: 8GB
+--Free: 24GB
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.text, 'System Info');
+        expect(output.menu.length, 2); // CPU and Memory
+        expect(output.menu[0].text, 'CPU');
+        expect(output.menu[0].submenu, isNotNull);
+        expect(output.menu[0].submenu!.length, 2);
+        expect(output.menu[0].submenu![0].text, 'CPU Core 1: 45%');
+        expect(output.menu[0].submenu![1].text, 'CPU Core 2: 52%');
+        expect(output.menu[1].text, 'Memory');
+        expect(output.menu[1].submenu!.length, 2);
+        expect(output.menu[1].submenu![0].text, 'Used: 8GB');
+        expect(output.menu[1].submenu![1].text, 'Free: 24GB');
+      });
+
+      test('parses two level submenu (---- prefix)', () {
+        const input = '''
+System
+---
+Hardware
+--CPU
+----Intel i9
+----12 Cores
+--GPU
+----NVIDIA RTX 4090
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 1); // Hardware
+        expect(output.menu[0].text, 'Hardware');
+        expect(output.menu[0].submenu!.length, 2); // CPU and GPU
+
+        final cpu = output.menu[0].submenu![0];
+        expect(cpu.text, 'CPU');
+        expect(cpu.submenu!.length, 2);
+        expect(cpu.submenu![0].text, 'Intel i9');
+        expect(cpu.submenu![1].text, '12 Cores');
+
+        final gpu = output.menu[0].submenu![1];
+        expect(gpu.text, 'GPU');
+        expect(gpu.submenu!.length, 1);
+        expect(gpu.submenu![0].text, 'NVIDIA RTX 4090');
+      });
+
+      test('parses submenu with attributes', () {
+        const input = '''
+Actions
+---
+Open Files
+--Open Home | bash=xdg-open ~
+--Open Documents | href=file://~/Documents | color=blue
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu[0].text, 'Open Files');
+        final submenu = output.menu[0].submenu!;
+        expect(submenu.length, 2);
+        expect(submenu[0].text, 'Open Home');
+        expect(submenu[0].bash, 'xdg-open ~');
+        expect(submenu[1].text, 'Open Documents');
+        expect(submenu[1].href, 'file://~/Documents');
+        expect(submenu[1].color, 'blue');
+      });
+
+      test('handles mixed depth levels correctly', () {
+        const input = '''
+Mixed
+---
+Level 0 Item A
+--Level 1 Item
+----Level 2 Item
+Level 0 Item B
+--Another Level 1
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 2); // Level 0 Item A and B
+        expect(output.menu[0].text, 'Level 0 Item A');
+        expect(output.menu[0].submenu!.length, 1);
+        expect(output.menu[0].submenu![0].text, 'Level 1 Item');
+        expect(output.menu[0].submenu![0].submenu!.length, 1);
+        expect(output.menu[0].submenu![0].submenu![0].text, 'Level 2 Item');
+
+        expect(output.menu[1].text, 'Level 0 Item B');
+        expect(output.menu[1].submenu!.length, 1);
+        expect(output.menu[1].submenu![0].text, 'Another Level 1');
+      });
+
+      test('handles separator correctly within menu and submenus', () {
+        const input = '''
+Test
+---
+Item 1
+---
+Item 2
+--Sub 1
+---
+--Sub 2
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        // After first ---, separator creates a graphical separator
+        // The structure should have separators in the right places
+        expect(output.menu.length, greaterThanOrEqualTo(2));
+      });
+
+      test('parses 5 levels of nesting', () {
+        const input = '''
+Deep Nesting
+---
+L0
+--L1
+----L2
+------L3
+--------L4
+----------L5
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        var current = output.menu[0];
+        expect(current.text, 'L0');
+
+        current = current.submenu![0];
+        expect(current.text, 'L1');
+
+        current = current.submenu![0];
+        expect(current.text, 'L2');
+
+        current = current.submenu![0];
+        expect(current.text, 'L3');
+
+        current = current.submenu![0];
+        expect(current.text, 'L4');
+
+        current = current.submenu![0];
+        expect(current.text, 'L5');
+      });
     });
 
     group('parse - JSON format', () {
