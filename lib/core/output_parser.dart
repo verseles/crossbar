@@ -72,7 +72,7 @@ class OutputParser {
       displayText = parsed.text;
     }
 
-    final menu = <MenuItem>[];
+    final flatItems = <_FlatMenuItem>[];
     var inMenu = false;
 
     for (var i = 1; i < lines.length; i++) {
@@ -84,38 +84,20 @@ class OutputParser {
       }
 
       if (!inMenu) continue;
+      if (line.trim().isEmpty) continue;
 
-      final trimmedLine = line.trim();
-      if (trimmedLine.isEmpty) continue;
+      // Detect hierarchy level by counting leading "--" pairs
+      final level = _getHierarchyLevel(line);
+      final contentLine = _stripHierarchyPrefix(line);
 
-      if (trimmedLine.contains('|')) {
-        final parts = trimmedLine.split('|');
-        final itemText = parts[0].trim();
-        String? bash;
-        String? href;
-        String? itemColor;
+      if (contentLine.isEmpty) continue;
 
-        for (var k = 1; k < parts.length; k++) {
-          final attr = parts[k].trim();
-          if (attr.startsWith('bash=')) {
-            bash = attr.substring(5);
-          } else if (attr.startsWith('href=')) {
-            href = attr.substring(5);
-          } else if (attr.startsWith('color=')) {
-            itemColor = attr.substring(6);
-          }
-        }
-
-        menu.add(MenuItem(
-          text: itemText,
-          bash: bash,
-          href: href,
-          color: itemColor,
-        ));
-      } else {
-        menu.add(MenuItem(text: trimmedLine));
-      }
+      final menuItem = _parseMenuItemLine(contentLine);
+      flatItems.add(_FlatMenuItem(level: level, item: menuItem));
     }
+
+    // Build hierarchical structure from flat list
+    final menu = _buildHierarchy(flatItems);
 
     return PluginOutput(
       pluginId: pluginId,
@@ -124,6 +106,119 @@ class OutputParser {
       color: colorStr != null ? _parseColor(colorStr) : null,
       menu: menu,
     );
+  }
+
+  /// Counts the hierarchy level by detecting leading "--" pairs.
+  /// Example: "Item" = 0, "--Item" = 1, "----Item" = 2
+  static int _getHierarchyLevel(String line) {
+    var level = 0;
+    var index = 0;
+
+    while (index + 1 < line.length &&
+        line[index] == '-' &&
+        line[index + 1] == '-') {
+      level++;
+      index += 2;
+    }
+
+    return level;
+  }
+
+  /// Strips the leading "--" hierarchy prefix from a line.
+  static String _stripHierarchyPrefix(String line) {
+    var index = 0;
+
+    while (index + 1 < line.length &&
+        line[index] == '-' &&
+        line[index + 1] == '-') {
+      index += 2;
+    }
+
+    return line.substring(index).trim();
+  }
+
+  /// Parses a single menu item line (after stripping hierarchy prefix).
+  static MenuItem _parseMenuItemLine(String line) {
+    if (line.contains('|')) {
+      final parts = line.split('|');
+      final itemText = parts[0].trim();
+      String? bash;
+      String? href;
+      String? itemColor;
+
+      for (var k = 1; k < parts.length; k++) {
+        final attr = parts[k].trim();
+        if (attr.startsWith('bash=')) {
+          bash = attr.substring(5);
+        } else if (attr.startsWith('href=')) {
+          href = attr.substring(5);
+        } else if (attr.startsWith('color=')) {
+          itemColor = attr.substring(6);
+        }
+      }
+
+      return MenuItem(
+        text: itemText,
+        bash: bash,
+        href: href,
+        color: itemColor,
+      );
+    } else {
+      return MenuItem(text: line);
+    }
+  }
+
+  /// Builds a hierarchical menu structure from a flat list of items with levels.
+  /// Items at level N become children of the nearest preceding item at level N-1.
+  static List<MenuItem> _buildHierarchy(List<_FlatMenuItem> flatItems) {
+    if (flatItems.isEmpty) return [];
+
+    final result = <MenuItem>[];
+    final stack = <_StackEntry>[];
+
+    for (final flatItem in flatItems) {
+      final level = flatItem.level;
+      final item = flatItem.item;
+
+      // Pop stack until we find a parent at level-1 or stack is empty
+      while (stack.isNotEmpty && stack.last.level >= level) {
+        stack.removeLast();
+      }
+
+      if (stack.isEmpty) {
+        // This is a root-level item
+        result.add(item);
+        stack.add(_StackEntry(level: level, item: item, listRef: result));
+      } else {
+        // This item is a child of the last item in stack
+        final parent = stack.last;
+        final parentItem = parent.item;
+
+        // Get or create submenu list for parent
+        List<MenuItem> submenu;
+        if (parentItem.submenu != null) {
+          submenu = parentItem.submenu!;
+        } else {
+          submenu = <MenuItem>[];
+          // We need to update the parent in its list
+          final parentIndex = parent.listRef.indexOf(parentItem);
+          if (parentIndex >= 0) {
+            parent.listRef[parentIndex] = parentItem.copyWith(submenu: submenu);
+            // Update stack reference
+            stack[stack.length - 1] = _StackEntry(
+              level: parent.level,
+              item: parent.listRef[parentIndex],
+              listRef: parent.listRef,
+            );
+          }
+        }
+
+        submenu.add(item);
+        stack.add(_StackEntry(level: level, item: item, listRef: submenu));
+      }
+    }
+
+    return result;
   }
 
   static ({String icon, String? text}) _parseIconAndText(String input) {
@@ -278,4 +373,25 @@ class OutputParser {
 
     return null;
   }
+}
+
+/// Helper class for building hierarchical menu from flat list.
+class _FlatMenuItem {
+  const _FlatMenuItem({required this.level, required this.item});
+
+  final int level;
+  final MenuItem item;
+}
+
+/// Helper class for stack-based hierarchy building.
+class _StackEntry {
+  const _StackEntry({
+    required this.level,
+    required this.item,
+    required this.listRef,
+  });
+
+  final int level;
+  final MenuItem item;
+  final List<MenuItem> listRef;
 }

@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
 
 import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart' hide MenuItem;
+import '../models/plugin_output.dart' as plugin_model;
 import 'logger_service.dart';
 import 'scheduler_service.dart';
 import 'window_service.dart';
@@ -25,7 +25,7 @@ class TrayService with TrayListener {
   static final TrayService _instance = TrayService._internal();
 
   final PluginManager _pluginManager = PluginManager();
-  final Map<String, PluginOutput> _pluginOutputs = {};
+  final Map<String, plugin_model.PluginOutput> _pluginOutputs = {};
 
   bool _initialized = false;
   String? _iconPath;
@@ -143,14 +143,25 @@ class TrayService with TrayListener {
   Future<void> _updateMenu() async {
     final menuItems = <MenuItem>[];
 
-    // Plugin outputs - show enabled plugins
+    // Plugin outputs - show enabled plugins with their menus
     for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
       final output = _pluginOutputs[plugin.id];
       if (output != null && output.text != null && output.text!.isNotEmpty) {
-        menuItems.add(MenuItem(
-          label: '${output.icon} ${output.text}',
-          disabled: true,
-        ));
+        // Check if plugin has menu items to create submenu
+        if (output.menu.isNotEmpty) {
+          // Create submenu with plugin menu items
+          final submenuItems = _convertPluginMenuItems(output.menu, plugin.id);
+          menuItems.add(MenuItem.submenu(
+            label: '${output.icon} ${output.text}',
+            submenu: Menu(items: submenuItems),
+          ));
+        } else {
+          // No submenu, just show the label
+          menuItems.add(MenuItem(
+            label: '${output.icon} ${output.text}',
+            disabled: true,
+          ));
+        }
       }
     }
 
@@ -182,7 +193,86 @@ class TrayService with TrayListener {
     }
   }
 
-  void updatePluginOutput(String pluginId, PluginOutput output) {
+  /// Converts plugin MenuItem list to tray_manager MenuItem list recursively.
+  /// Supports nested submenus up to 10 levels deep (to prevent infinite loops).
+  List<MenuItem> _convertPluginMenuItems(
+    List<plugin_model.MenuItem> items,
+    String pluginId, [
+    int depth = 0,
+  ]) {
+    // Limit depth to prevent issues (GNOME has submenu rendering limitations)
+    const maxDepth = 10;
+    if (depth >= maxDepth) {
+      LoggerService().warning(
+        'Max submenu depth ($maxDepth) reached for plugin $pluginId',
+      );
+      return [];
+    }
+
+    final result = <MenuItem>[];
+    var itemIndex = 0;
+
+    for (final item in items) {
+      if (item.separator) {
+        result.add(MenuItem.separator());
+      } else if (item.submenu != null && item.submenu!.isNotEmpty) {
+        // Recursive submenu
+        final submenuItems = _convertPluginMenuItems(
+          item.submenu!,
+          pluginId,
+          depth + 1,
+        );
+        result.add(MenuItem.submenu(
+          label: item.text ?? '',
+          submenu: Menu(items: submenuItems),
+        ));
+      } else {
+        // Regular menu item with optional action
+        final key = 'plugin_${pluginId}_${depth}_$itemIndex';
+        result.add(MenuItem(
+          key: key,
+          label: item.text ?? '',
+        ));
+        // Store action for later execution
+        _registerMenuItemAction(key, item);
+      }
+      itemIndex++;
+    }
+
+    return result;
+  }
+
+  // Map to store menu item actions for execution
+  final Map<String, plugin_model.MenuItem> _menuItemActions = {};
+
+  /// Registers a menu item action for later execution when clicked.
+  void _registerMenuItemAction(String key, plugin_model.MenuItem item) {
+    _menuItemActions[key] = item;
+  }
+
+  /// Executes the action associated with a plugin menu item.
+  Future<void> _executeMenuItemAction(String key) async {
+    final item = _menuItemActions[key];
+    if (item == null) return;
+
+    if (item.href != null && item.href!.isNotEmpty) {
+      // Open URL
+      try {
+        await Process.run('xdg-open', [item.href!]);
+      } catch (e) {
+        LoggerService().warning('Failed to open URL: ${item.href} - $e');
+      }
+    } else if (item.bash != null && item.bash!.isNotEmpty) {
+      // Execute bash command
+      try {
+        await Process.run('bash', ['-c', item.bash!]);
+      } catch (e) {
+        LoggerService().warning('Failed to execute bash: ${item.bash} - $e');
+      }
+    }
+  }
+
+  void updatePluginOutput(String pluginId, plugin_model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _updateMenu();
     _updateTitle(pluginId, output);
@@ -214,7 +304,7 @@ class TrayService with TrayListener {
     }
   }
 
-  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
+  Future<void> _updateTitle(String pluginId, plugin_model.PluginOutput output) async {
     // Find the first enabled plugin to use as the main tray title
     final firstEnabled =
         _pluginManager.plugins.where((p) => p.enabled).firstOrNull;
@@ -254,13 +344,21 @@ class TrayService with TrayListener {
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.key) {
+    final key = menuItem.key;
+    if (key == null) return;
+
+    switch (key) {
       case 'show':
         WindowService().show();
       case 'refresh':
         SchedulerService().refreshAll();
       case 'quit':
         WindowService().quit();
+      default:
+        // Check if it's a plugin menu item action
+        if (key.startsWith('plugin_')) {
+          _executeMenuItemAction(key);
+        }
     }
   }
 

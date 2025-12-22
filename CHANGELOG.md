@@ -5,6 +5,26 @@ All notable changes to Crossbar will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - Unreleased
+
+### ✨ Features
+
+#### Hierarchical Submenu Support (BitBar/Argos Compatible)
+
+- **Parser Enhancement**: `OutputParser` now detects and parses hierarchical menu structures using the BitBar/Argos `--` prefix notation
+  - Lines without `--` are root level (0)
+  - Lines with `--` are submenu items (level 1)
+  - Lines with `----` are nested submenus (level 2), and so on
+- **TrayService Update**: Recursive menu building for platform-appropriate rendering on Linux, macOS, and Windows
+- **Action Support**: Submenu items support `bash` and `href` attributes for executing commands and opening URLs
+- **Depth Limit**: Maximum of 10 nesting levels to prevent infinite loops
+- **Example Plugin**: Added `submenu-demo.1m.lua` demonstrating hierarchical menus
+
+### 📚 Documentation
+
+- Expanded submenu documentation in `plugin-development.md` with practical examples
+- Added GNOME Shell limitations note for deep submenus
+
 ## [1.0.0] - 2025-12-01
 
 ### 🎉 Initial Release

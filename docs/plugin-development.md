@@ -180,9 +180,9 @@ Bold item | font=bold
 | `templateImage` | Template image (macOS)   | `templateImage=...`            |
 | `dropdown`      | Include in dropdown      | `dropdown=false`               |
 
-#### Nested Submenus
+#### Nested Submenus (BitBar/Argos Compatible)
 
-Use `--` prefix for submenu items:
+Use the `--` prefix notation to create hierarchical submenus. Each `--` pair adds one level of nesting:
 
 ```
 Main Title
@@ -190,9 +190,53 @@ Main Title
 Parent Item
 --Child Item 1
 --Child Item 2
-----Grandchild Item
+----Grandchild Item 1
+----Grandchild Item 2
+------Great-grandchild
 Another Item
 ```
+
+**How it works:**
+- Lines without `--` prefix are root-level items (level 0)
+- Lines with `--` prefix become children of the preceding parent (level 1)
+- Lines with `----` prefix are grandchildren (level 2)
+- And so on for deeper nesting
+
+**Submenu items can have attributes:**
+
+```
+Settings
+---
+Actions
+--Open File | bash=/usr/bin/open
+--Visit Website | href=https://example.com | color=blue
+--Delete | color=red
+----Confirm Delete | bash=rm -rf ./temp
+```
+
+**Practical example - System Monitor:**
+
+```
+System
+---
+CPU
+--Usage: 45%
+--Cores: 8
+--Temperature
+----Core 0: 65C
+----Core 1: 62C
+Memory
+--Used: 8 GB / 16 GB
+--Swap: 2 GB / 4 GB
+Disk
+--/: 120 GB / 500 GB
+--/home: 80 GB / 250 GB
+```
+
+**Limitations:**
+- Maximum depth of 10 levels (to prevent infinite loops)
+- GNOME Shell may not render deep submenus correctly (known limitation)
+- Recommended to keep depth under 3 levels for best compatibility
 
 #### Examples
 
