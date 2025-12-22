@@ -72,13 +72,13 @@ class OutputParser {
       displayText = parsed.text;
     }
 
-    final menu = <MenuItem>[];
+    final flatMenu = <_MenuItemFlat>[];
     var inMenu = false;
 
     for (var i = 1; i < lines.length; i++) {
       final line = lines[i];
 
-      if (line.trim() == '---') {
+      if (line.trim() == '---' && !inMenu) {
         inMenu = true;
         continue;
       }
@@ -88,8 +88,16 @@ class OutputParser {
       final trimmedLine = line.trim();
       if (trimmedLine.isEmpty) continue;
 
-      if (trimmedLine.contains('|')) {
-        final parts = trimmedLine.split('|');
+      if (trimmedLine == '---') {
+        flatMenu.add(_MenuItemFlat(text: '', level: 0, separator: true));
+        continue;
+      }
+
+      final level = _getMenuLevel(trimmedLine);
+      final itemTextWithAttrs = trimmedLine.substring(level * 2).trim();
+
+      if (itemTextWithAttrs.contains('|')) {
+        final parts = itemTextWithAttrs.split('|');
         final itemText = parts[0].trim();
         String? bash;
         String? href;
@@ -106,16 +114,21 @@ class OutputParser {
           }
         }
 
-        menu.add(MenuItem(
+        flatMenu.add(_MenuItemFlat(
           text: itemText,
+          level: level,
           bash: bash,
           href: href,
           color: itemColor,
         ));
       } else {
-        menu.add(MenuItem(text: trimmedLine));
+        flatMenu.add(
+          _MenuItemFlat(text: itemTextWithAttrs, level: level),
+        );
       }
     }
+
+    final menu = _buildMenuHierarchy(flatMenu);
 
     return PluginOutput(
       pluginId: pluginId,
@@ -277,5 +290,104 @@ class OutputParser {
     }
 
     return null;
+  }
+}
+
+class _MenuItemFlat {
+  _MenuItemFlat({
+    required this.text,
+    required this.level,
+    this.bash,
+    this.href,
+    this.color,
+    this.separator = false,
+  });
+
+  final String text;
+  final int level;
+  final String? bash;
+  final String? href;
+  final String? color;
+  final bool separator;
+}
+
+int _getMenuLevel(String line) {
+  var level = 0;
+  for (var i = 0; i < line.length; i++) {
+    if (line[i] == '-' && (i + 1 < line.length && line[i + 1] == '-')) {
+      level++;
+      i++; // Skip next dash
+    } else {
+      break;
+    }
+  }
+  return level;
+}
+
+List<MenuItem> _buildMenuHierarchy(List<_MenuItemFlat> flatItems) {
+  final rootItems = <MenuItem>[];
+  final lastAtLevel = <int, _MutableMenuItem>{};
+
+  for (final flat in flatItems) {
+    if (flat.separator) {
+      rootItems.add(MenuItem.separator());
+      continue;
+    }
+
+    final item = _MutableMenuItem(
+      text: flat.text,
+      bash: flat.bash,
+      href: flat.href,
+      color: flat.color,
+    );
+
+    if (flat.level == 0) {
+      rootItems.add(item.toMenuItem());
+      lastAtLevel[0] = item;
+    } else {
+      final parent = lastAtLevel[flat.level - 1];
+      if (parent != null) {
+        parent.submenu.add(item.toMenuItem());
+        lastAtLevel[flat.level] = item;
+      } else {
+        rootItems.add(item.toMenuItem());
+        lastAtLevel[flat.level] = item;
+      }
+    }
+  }
+
+  return rootItems
+      .map((e) => e.submenu == null
+          ? e
+          : e.copyWith(
+              submenu: lastAtLevel.values
+                  .firstWhere((element) => element.text == e.text)
+                  .submenu))
+      .toList();
+}
+
+class _MutableMenuItem {
+  _MutableMenuItem({
+    this.text,
+    this.bash,
+    this.href,
+    this.color,
+    List<MenuItem>? submenu,
+  }) : submenu = submenu ?? [];
+
+  final String? text;
+  final String? bash;
+  final String? href;
+  final String? color;
+  final List<MenuItem> submenu;
+
+  MenuItem toMenuItem() {
+    return MenuItem(
+      text: text,
+      bash: bash,
+      href: href,
+      color: color,
+      submenu: submenu.isEmpty ? null : submenu,
+    );
   }
 }

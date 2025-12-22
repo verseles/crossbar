@@ -105,6 +105,119 @@ Menu Item
         expect(output.menu.length, 1);
         expect(output.menu[0].text, 'Menu Item');
       });
+
+      test('parses two-level BitBar hierarchy', () {
+        const input = '''
+🖥️ CPU
+---
+Status
+--Core 1: 90%
+--Core 2: 80%
+Settings
+--Refresh
+''';
+        final output = OutputParser.parse(input, 'cpu.10s.sh');
+
+        expect(output.menu.length, 2); // Status, Settings
+        expect(output.menu[0].text, 'Status');
+        expect(output.menu[0].submenu, isNotNull);
+        expect(output.menu[0].submenu!.length, 2);
+        expect(output.menu[0].submenu![0].text, 'Core 1: 90%');
+        expect(output.menu[0].submenu![1].text, 'Core 2: 80%');
+
+        expect(output.menu[1].text, 'Settings');
+        expect(output.menu[1].submenu, isNotNull);
+        expect(output.menu[1].submenu!.length, 1);
+        expect(output.menu[1].submenu![0].text, 'Refresh');
+      });
+
+      test('parses multi-level BitBar format from issue spec', () {
+        const input = '''
+🖥️ CPU: 85%
+---
+Status
+--Core 1: 90%
+----Details
+------Temperature: 65°C
+Settings
+--Refresh Rate
+----5 seconds
+''';
+
+        final output = OutputParser.parse(input, 'cpu.10s.sh');
+
+        expect(output.menu.length, 2); // "Status", "Settings"
+
+        // Check Status branch
+        final status = output.menu[0];
+        expect(status.text, 'Status');
+        expect(status.submenu?.length, 1); // "Core 1: 90%"
+
+        final core1 = status.submenu![0];
+        expect(core1.text, 'Core 1: 90%');
+        expect(core1.submenu?.length, 1); // "Details"
+
+        final details = core1.submenu![0];
+        expect(details.text, 'Details');
+        expect(details.submenu?.length, 1); // "Temperature: 65°C"
+
+        final temp = details.submenu![0];
+        expect(temp.text, 'Temperature: 65°C');
+        expect(temp.submenu, isNull);
+
+        // Check Settings branch
+        final settings = output.menu[1];
+        expect(settings.text, 'Settings');
+        expect(settings.submenu?.length, 1); // "Refresh Rate"
+
+        final refreshRate = settings.submenu![0];
+        expect(refreshRate.text, 'Refresh Rate');
+        expect(refreshRate.submenu?.length, 1); // "5 seconds"
+
+        final fiveSeconds = refreshRate.submenu![0];
+        expect(fiveSeconds.text, '5 seconds');
+        expect(fiveSeconds.submenu, isNull);
+      });
+
+      test('handles orphaned submenus by treating them as root', () {
+        const input = '''
+Title
+---
+--Orphan 1
+Root 1
+--Child 1
+----Grandchild 1
+''';
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 2);
+        expect(output.menu[0].text, 'Orphan 1');
+        expect(output.menu[0].submenu, isNull);
+
+        expect(output.menu[1].text, 'Root 1');
+        expect(output.menu[1].submenu?.length, 1);
+        expect(output.menu[1].submenu![0].text, 'Child 1');
+        expect(output.menu[1].submenu![0].submenu?.length, 1);
+        expect(output.menu[1].submenu![0].submenu![0].text, 'Grandchild 1');
+      });
+
+      test('handles separators in BitBar menu hierarchy', () {
+        const input = '''
+Title
+---
+Item 1
+---
+Item 2
+--Sub Item 2.1
+''';
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 3);
+        expect(output.menu[0].text, 'Item 1');
+        expect(output.menu[1].separator, isTrue);
+        expect(output.menu[2].text, 'Item 2');
+        expect(output.menu[2].submenu?.length, 1);
+      });
     });
 
     group('parse - JSON format', () {

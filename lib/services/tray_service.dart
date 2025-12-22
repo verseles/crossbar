@@ -5,9 +5,10 @@ import 'dart:ui';
 import 'package:flutter/scheduler.dart';
 import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/plugin_manager.dart';
-import '../models/plugin_output.dart' hide MenuItem;
+import '../models/plugin_output.dart' as model;
 import 'logger_service.dart';
 import 'scheduler_service.dart';
 import 'window_service.dart';
@@ -25,7 +26,8 @@ class TrayService with TrayListener {
   static final TrayService _instance = TrayService._internal();
 
   final PluginManager _pluginManager = PluginManager();
-  final Map<String, PluginOutput> _pluginOutputs = {};
+  final Map<String, model.PluginOutput> _pluginOutputs = {};
+  final Map<String, model.MenuItem> _menuItemActions = {};
 
   bool _initialized = false;
   String? _iconPath;
@@ -41,14 +43,14 @@ class TrayService with TrayListener {
 
     await _resolveAndSetIcon();
     await _updateMenu();
-    
+
     // Set initial tooltip (title isn't supported on Linux)
     if (!Platform.isLinux) {
       try {
         await trayManager.setToolTip('Crossbar');
       } catch (_) {}
     }
-    
+
     // Set initial title
     try {
       await trayManager.setTitle('Crossbar');
@@ -141,16 +143,28 @@ class TrayService with TrayListener {
   }
 
   Future<void> _updateMenu() async {
+    _menuItemActions.clear();
     final menuItems = <MenuItem>[];
 
     // Plugin outputs - show enabled plugins
-    for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+    final enabledPlugins = _pluginManager.plugins.where((p) => p.enabled);
+    for (final plugin in enabledPlugins) {
       final output = _pluginOutputs[plugin.id];
-      if (output != null && output.text != null && output.text!.isNotEmpty) {
-        menuItems.add(MenuItem(
-          label: '${output.icon} ${output.text}',
-          disabled: true,
-        ));
+      if (output != null) {
+        if (menuItems.isNotEmpty) {
+          menuItems.add(MenuItem.separator());
+        }
+        // Add a disabled header item with the plugin's main text
+        if (output.text != null && output.text!.isNotEmpty) {
+          menuItems.add(MenuItem(
+            label: '${output.icon} ${output.text}',
+            disabled: true,
+          ));
+        }
+        // Add the actual menu items from the plugin
+        if (output.menu.isNotEmpty) {
+          menuItems.addAll(_buildMenuItems(output.menu, plugin.id, ''));
+        }
       }
     }
 
@@ -182,7 +196,59 @@ class TrayService with TrayListener {
     }
   }
 
-  void updatePluginOutput(String pluginId, PluginOutput output) {
+  List<MenuItem> _buildMenuItems(
+    List<model.MenuItem> modelItems,
+    String pluginId,
+    String keyPrefix,
+  ) {
+    final items = <MenuItem>[];
+    for (var i = 0; i < modelItems.length; i++) {
+      final modelItem = modelItems[i];
+      final itemKey = '$pluginId:$keyPrefix$i';
+
+      if (modelItem.separator) {
+        items.add(MenuItem.separator());
+      } else if (modelItem.submenu != null && modelItem.submenu!.isNotEmpty) {
+        final subItems =
+            _buildMenuItems(modelItem.submenu!, pluginId, '$keyPrefix$i:');
+        items.add(
+          MenuItem(
+            label: modelItem.text ?? '',
+            submenu: Menu(items: subItems),
+          ),
+        );
+      } else {
+        _menuItemActions[itemKey] = modelItem;
+        items.add(MenuItem(
+          key: itemKey,
+          label: modelItem.text ?? '',
+        ));
+      }
+    }
+    return items;
+  }
+
+  void _handlePluginItemClick(model.MenuItem item) {
+    if (item.bash != null && item.bash!.isNotEmpty) {
+      final parts = item.bash!.split(' ');
+      final executable = parts.first;
+      final args = parts.length > 1 ? parts.sublist(1) : <String>[];
+      try {
+        Process.run(executable, args);
+        LoggerService().info('Executed: ${item.bash}');
+      } catch (e) {
+        LoggerService().error('Error executing bash command: $e');
+      }
+    } else if (item.href != null && item.href!.isNotEmpty) {
+      try {
+        launchUrl(Uri.parse(item.href!));
+      } catch (e) {
+        LoggerService().error('Error opening URL: $e');
+      }
+    }
+  }
+
+  void updatePluginOutput(String pluginId, model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
     _updateMenu();
     _updateTitle(pluginId, output);
@@ -214,7 +280,7 @@ class TrayService with TrayListener {
     }
   }
 
-  Future<void> _updateTitle(String pluginId, PluginOutput output) async {
+  Future<void> _updateTitle(String pluginId, model.PluginOutput output) async {
     // Find the first enabled plugin to use as the main tray title
     final firstEnabled =
         _pluginManager.plugins.where((p) => p.enabled).firstOrNull;
@@ -257,10 +323,18 @@ class TrayService with TrayListener {
     switch (menuItem.key) {
       case 'show':
         WindowService().show();
+        return;
       case 'refresh':
         SchedulerService().refreshAll();
+        return;
       case 'quit':
         WindowService().quit();
+        return;
+    }
+
+    final modelItem = _menuItemActions[menuItem.key];
+    if (modelItem != null) {
+      _handlePluginItemClick(modelItem);
     }
   }
 
