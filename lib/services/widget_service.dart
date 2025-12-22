@@ -24,7 +24,14 @@ class WidgetService {
 
   static const String appGroupId = 'group.crossbar.widgets';
   static const String iOSWidgetName = 'CrossbarWidget';
-  static const String androidWidgetName = 'CrossbarWidgetProvider';
+
+  // Android has 3 separate widget classes - we must update ALL of them
+  // The old 'CrossbarWidgetProvider' name was WRONG and caused widgets to never update
+  static const List<String> androidWidgetNames = [
+    'CrossbarWidgetSmall',
+    'CrossbarWidgetMedium',
+    'CrossbarWidgetLarge',
+  ];
 
   final RefreshService _refreshService = RefreshService();
   final Map<String, PluginOutput> _widgetData = {};
@@ -80,12 +87,26 @@ class WidgetService {
       jsonEncode(_widgetData.keys.toList()),
     );
 
-    // Update the widget
+    // Update all widgets
+    await _triggerWidgetUpdate();
+  }
+
+  /// Trigger update for all Android widgets or iOS widget
+  Future<void> _triggerWidgetUpdate() async {
     if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
+      // Must update ALL 3 widget types - each is a separate receiver
+      for (final widgetName in androidWidgetNames) {
+        try {
+          await HomeWidget.updateWidget(
+            name: widgetName,
+            androidName: widgetName,
+          );
+        } catch (e) {
+          // Log but continue - some widgets might not be on screen
+          // ignore: avoid_print
+          print('WidgetService: Failed to update $widgetName: $e');
+        }
+      }
     } else if (Platform.isIOS) {
       await HomeWidget.updateWidget(
         name: iOSWidgetName,
@@ -126,26 +147,16 @@ class WidgetService {
       jsonEncode(_widgetData.keys.toList()),
     );
 
-    if (Platform.isAndroid) {
-      await HomeWidget.updateWidget(
-        name: androidWidgetName,
-        androidName: androidWidgetName,
-      );
-    } else if (Platform.isIOS) {
-      await HomeWidget.updateWidget(
-        name: iOSWidgetName,
-        iOSName: iOSWidgetName,
-      );
-    }
+    await _triggerWidgetUpdate();
   }
 
   Future<void> requestWidgetPin(String pluginId) async {
     if (!Platform.isAndroid) return;
 
-    // Request Android to pin the widget to home screen
+    // Request Android to pin the small widget (most common)
     await HomeWidget.requestPinWidget(
-      name: androidWidgetName,
-      androidName: androidWidgetName,
+      name: androidWidgetNames.first,
+      androidName: androidWidgetNames.first,
     );
   }
 

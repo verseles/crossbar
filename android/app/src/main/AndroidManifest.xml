@@ -28,12 +28,12 @@
         </activity>
         
         <!-- Widget Configuration Activity -->
+        <!-- Uses standard launchMode to ensure a fresh FlutterEngine for each widget config -->
+        <!-- singleInstance caused alternating success/failure pattern -->
         <activity
             android:name=".WidgetConfigActivity"
             android:exported="true"
             android:label="Configure Widget"
-            android:launchMode="singleInstance"
-            android:taskAffinity=""
             android:excludeFromRecents="true"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode">

@@ -14,8 +14,8 @@ import io.flutter.plugin.common.MethodChannel
  * Launches when user adds a widget to home screen.
  * Shows plugin selection dialog via Flutter deep link.
  *
- * Uses singleInstance launchMode to avoid FlutterEngine conflicts
- * with the main app's FlutterActivity.
+ * Uses standard launchMode to ensure a fresh FlutterEngine for each config.
+ * This avoids the alternating success/failure pattern caused by singleInstance.
  */
 class WidgetConfigActivity : FlutterActivity() {
 
@@ -27,10 +27,9 @@ class WidgetConfigActivity : FlutterActivity() {
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var widgetSize = "small"
-    private var isConfigurationComplete = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Get widget ID before super.onCreate to avoid race conditions
+        // Get widget ID before super.onCreate
         appWidgetId = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
@@ -50,35 +49,33 @@ class WidgetConfigActivity : FlutterActivity() {
             return
         }
 
-        // Determine widget size from caller class name
+        // Determine widget size using AppWidgetManager
         widgetSize = determineWidgetSize()
 
         android.util.Log.d(TAG, "Configuring widget $appWidgetId, size: $widgetSize")
     }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        // Handle new intents if activity is reused
-        val newWidgetId = intent.extras?.getInt(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID
-        ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
-
-        if (newWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            appWidgetId = newWidgetId
-            widgetSize = determineWidgetSize()
-            android.util.Log.d(TAG, "Reconfiguring widget $appWidgetId, size: $widgetSize")
-        }
-    }
     
     private fun determineWidgetSize(): String {
-        // Check the referrer or caller to determine widget size
-        val callerClass = intent?.component?.className ?: ""
-        return when {
-            callerClass.contains("Large") -> "large"
-            callerClass.contains("Medium") -> "medium"
-            else -> "small"
+        // Use AppWidgetManager to get the provider info for this widget ID
+        // This correctly identifies which widget class (Small/Medium/Large) was added
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val providerInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
+
+        if (providerInfo != null) {
+            val providerClassName = providerInfo.provider.className
+            android.util.Log.d(TAG, "Widget provider class: $providerClassName")
+
+            return when {
+                providerClassName.contains("Large") -> "large"
+                providerClassName.contains("Medium") -> "medium"
+                else -> "small"
+            }
         }
+
+        // Fallback: Check layout dimensions from provider info
+        // Large = 2x2, Medium = 2x1, Small = 1x1
+        android.util.Log.w(TAG, "Could not get provider info for widget $appWidgetId, defaulting to small")
+        return "small"
     }
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -101,18 +98,15 @@ class WidgetConfigActivity : FlutterActivity() {
                     // Update the widget immediately
                     updateWidget()
 
-                    // Mark configuration as complete and return success result
-                    isConfigurationComplete = true
+                    // Set success result
                     val resultValue = Intent().apply {
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                     }
                     setResult(RESULT_OK, resultValue)
 
-                    android.util.Log.d(TAG, "Widget $appWidgetId configured successfully with plugins: $pluginIds")
+                    android.util.Log.d(TAG, "Widget $appWidgetId configured with plugins: $pluginIds")
 
                     result.success(true)
-
-                    // Finish after saving
                     finish()
                 }
                 "cancelWidgetConfig" -> {
@@ -167,24 +161,5 @@ class WidgetConfigActivity : FlutterActivity() {
     
     override fun getInitialRoute(): String {
         return "/widget/config?id=$appWidgetId&size=$widgetSize"
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Ensure RESULT_CANCELED is set with the widget ID before finishing
-        if (!isConfigurationComplete) {
-            val cancelIntent = Intent().apply {
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            }
-            setResult(RESULT_CANCELED, cancelIntent)
-            android.util.Log.d(TAG, "Widget $appWidgetId configuration cancelled via back press")
-        }
-        super.onBackPressed()
-    }
-
-    override fun onDestroy() {
-        // Log the final state
-        android.util.Log.d(TAG, "WidgetConfigActivity destroyed. Configuration complete: $isConfigurationComplete")
-        super.onDestroy()
     }
 }
