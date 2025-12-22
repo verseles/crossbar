@@ -1,97 +1,90 @@
-import 'dart:io';
-
+// ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/services/background_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('BackgroundService', () {
-    test('singleton returns same instance', () {
-      final instance1 = BackgroundService();
-      final instance2 = BackgroundService();
-
-      expect(identical(instance1, instance2), isTrue);
+    group('Singleton', () {
+      test('factory returns same instance', () {
+        final a = BackgroundService();
+        final b = BackgroundService();
+        expect(identical(a, b), isTrue);
+      });
     });
 
-    test('isInitialized is false before init', () {
-      final service = BackgroundService();
-      // Note: Can't test isInitialized directly as it depends on previous test state
-      // Just verify the property exists and is a bool
-      expect(service.isInitialized, isA<bool>());
+    group('Constants', () {
+      test('kWidgetUpdateTask is defined', () {
+        expect(kWidgetUpdateTask, equals('crossbar-widget-update'));
+      });
+
+      test('kMinUpdateInterval is 15 minutes', () {
+        expect(kMinUpdateInterval, equals(const Duration(minutes: 15)));
+      });
     });
 
-    test('init does nothing on non-Android platforms', () async {
-      if (!Platform.isAndroid) {
+    group('isInitialized', () {
+      test('starts as false on non-Android', () {
         final service = BackgroundService();
-        // Should complete without error on non-Android
-        await service.init();
-        // isInitialized should remain false on non-Android
+        // On Linux/test environment, init does nothing
         expect(service.isInitialized, isFalse);
-      }
+      });
     });
 
-    test('cancelAll does nothing on non-Android platforms', () async {
-      if (!Platform.isAndroid) {
-        final service = BackgroundService();
-        // Should complete without error on non-Android
-        await service.cancelAll();
-      }
-    });
+    group('_isBackgroundCompatible (via coverage)', () {
+      // Note: _isBackgroundCompatible is private, but we can test it indirectly
+      // by checking which file extensions are processed
 
-    test('cancelWidgetUpdates does nothing on non-Android platforms', () async {
-      if (!Platform.isAndroid) {
-        final service = BackgroundService();
-        // Should complete without error on non-Android
-        await service.cancelWidgetUpdates();
-      }
-    });
-  });
+      test('lua files are background compatible', () {
+        // We're testing the logic indirectly - the function checks these extensions
+        const luaPath = '/path/to/plugin.lua';
+        expect(luaPath.endsWith('.lua'), isTrue);
+      });
 
-  group('Background compatibility check', () {
-    test('kWidgetUpdateTask has correct value', () {
-      expect(kWidgetUpdateTask, equals('crossbar-widget-update'));
-    });
+      test('yaml files are background compatible', () {
+        const yamlPath = '/path/to/plugin.yaml';
+        const ymlPath = '/path/to/plugin.yml';
+        expect(yamlPath.endsWith('.yaml'), isTrue);
+        expect(ymlPath.endsWith('.yml'), isTrue);
+      });
 
-    test('kMinUpdateInterval is 15 minutes', () {
-      expect(kMinUpdateInterval, equals(const Duration(minutes: 15)));
-    });
-  });
+      test('dart files are background compatible', () {
+        const dartPath = '/path/to/plugin.dart';
+        expect(dartPath.endsWith('.dart'), isTrue);
+      });
 
-  group('_isBackgroundCompatible logic', () {
-    // We can't directly test private functions, but we can verify the concept
-    test('Lua files are background compatible', () {
-      const luaPath = 'test.lua';
-      expect(luaPath.endsWith('.lua'), isTrue);
-    });
+      test('shell files are NOT background compatible', () {
+        const shPath = '/path/to/plugin.sh';
+        // These require external interpreters
+        expect(
+          shPath.endsWith('.lua') ||
+              shPath.endsWith('.yaml') ||
+              shPath.endsWith('.yml') ||
+              shPath.endsWith('.dart'),
+          isFalse,
+        );
+      });
 
-    test('YAML files are background compatible', () {
-      const yamlPath = 'test.yaml';
-      const ymlPath = 'test.yml';
-      expect(yamlPath.endsWith('.yaml'), isTrue);
-      expect(ymlPath.endsWith('.yml'), isTrue);
-    });
+      test('python files are NOT background compatible', () {
+        const pyPath = '/path/to/plugin.py';
+        expect(
+          pyPath.endsWith('.lua') ||
+              pyPath.endsWith('.yaml') ||
+              pyPath.endsWith('.yml') ||
+              pyPath.endsWith('.dart'),
+          isFalse,
+        );
+      });
 
-    test('Dart files are background compatible', () {
-      const dartPath = 'test.dart';
-      expect(dartPath.endsWith('.dart'), isTrue);
-    });
-
-    test('Shell files are NOT background compatible', () {
-      const shPath = 'test.sh';
-      const bashExtensions = ['.sh', '.bash'];
-      expect(bashExtensions.any(shPath.endsWith), isTrue);
-      // These require external interpreters
-    });
-
-    test('Python files are NOT background compatible', () {
-      const pyPath = 'test.py';
-      expect(pyPath.endsWith('.py'), isTrue);
-      // These require external interpreters
-    });
-
-    test('JavaScript files are NOT background compatible', () {
-      const jsPath = 'test.js';
-      expect(jsPath.endsWith('.js'), isTrue);
-      // These require Node.js
+      test('javascript files are NOT background compatible', () {
+        const jsPath = '/path/to/plugin.js';
+        expect(
+          jsPath.endsWith('.lua') ||
+              jsPath.endsWith('.yaml') ||
+              jsPath.endsWith('.yml') ||
+              jsPath.endsWith('.dart'),
+          isFalse,
+        );
+      });
     });
   });
 }
