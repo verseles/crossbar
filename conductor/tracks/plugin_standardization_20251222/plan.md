@@ -1,6 +1,6 @@
 # Implementation Plan: Standardize Example Plugins and GUI Consistency
 
-## Phase 1: Directory Restructuring & Discovery Logic
+## Phase 1: Directory Restructuring & Discovery Logic [checkpoint: 7c9435a]
 Goal: Organize the `plugins/` folder and update the system to discover plugins within subdirectories.
 
 - [x] Task: Create subdirectories for all existing plugins in the `plugins/` folder. ec87ea5
