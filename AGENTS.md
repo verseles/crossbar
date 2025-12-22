@@ -3,7 +3,7 @@
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
 > Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
 
-Atenção: Este projeto ainda não foi lançado, não se preocupe com breking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
+Atenção: Este projeto ainda não foi lançado, não se preocupe com breaking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
 Plano grandioso e teórico (arquivo histórico):
 @./docs/archive/original_plan.md
@@ -18,25 +18,26 @@ Roadmap de implementacao, atualizado regularmente:
 - **Leitura Inicial**: Sempre leia @./docs/archive/original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Commits recentes**: Sempre verifique os últimos 70 commits para ficar mais ciente das alterações recentes e decisões tomadas.
 - **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`make analyze`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
-- **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
+- **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores. Porém, o conteúdo da mensagem do commit deve ser descritivo e explicar o que e por que foi feito.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
 - **Verificação Local CI**: Antes de qualquer `push`, **SEMPRE** execute e confirme a aprovação das pipelines localmente usando `act` ou simplesmente execute os comandos necessários diretamente.
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
-- **Branches**: Está autorizado trabalhar diretamente na branch 'main', atualmente é apenas um desenvolvedor.
+- **Branches**: Está autorizado trabalhar diretamente na branch 'main', atualmente é apenas um desenvolvedor. Se estiver em outra branch ou solicitado, trabalhe nela mesmo e aguarde um pedido do usuário para criar um PR.
 
 # Processo antes de iniciar CADA tarefa (a cada passo a ser iniciado, repita esses passos)
 
-1. Busque na web por informações sobre a tarefa solicitada, ele deve servir para engrandecer seu conhecimento com detalhes mais recentes de cada tarefa, não deixe de realizar a pesquisa e visitar sites.
-2. Repita por texto (ou to-do) suas tarefas feitas e tarefas pendentes, assim, mesmo que seu contexto seja truncado, você tem informações claras do que deve ser feito
-3. Repita por texto suas regras importantes e a ordem a serem feitas
+1. Leia os últimos 70 commits para ficar mais ciente das alterações recentes e decisões tomadas (apenas uma vez por sessão)
+2. Busque na web por informações sobre a tarefa solicitada, ele deve servir para engrandecer seu conhecimento com detalhes mais recentes de cada tarefa, não deixe de realizar a pesquisa e visitar sites.
+3. Repita por texto (ou to-do) suas tarefas feitas e tarefas pendentes, assim, mesmo que seu contexto seja truncado, você tem informações claras do que deve ser feito
+4. Repita por texto suas regras importantes e a ordem a serem feitas
 
 # Processo após alterações (NÃO PULE ETAPAS - NÃO PULE ETAPAS - NÃO PULE ETAPAS)
 
 Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
-1. flutter analyze --no-fatal-infos
-2. make coverage (verificar meta de 60%)
+1. make analyze
+2. make coverage (verificar meta de 35-60%)
 3. make linux
 4. make android
 5. Verificar se ROADMAP.md necessita de atualização
