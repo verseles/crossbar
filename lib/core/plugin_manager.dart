@@ -93,7 +93,8 @@ class PluginManager {
 
     await for (final entity in pluginsDir.list()) {
       if (entity is File && _isValidPluginFile(entity.path)) {
-        final plugin = await _createPluginFromFile(entity);
+        final id = path.relative(entity.path, from: pluginsDirPath);
+        final plugin = await _createPluginFromFile(entity, id: id);
         if (plugin != null) {
           _plugins.add(plugin);
         }
@@ -101,7 +102,8 @@ class PluginManager {
         // Check subdirectories (git repos) but only 1 level deep
         await for (final subEntity in entity.list()) {
           if (subEntity is File && _isValidPluginFile(subEntity.path)) {
-            final plugin = await _createPluginFromFile(subEntity);
+            final id = path.relative(subEntity.path, from: pluginsDirPath);
+            final plugin = await _createPluginFromFile(subEntity, id: id);
             if (plugin != null) {
               _plugins.add(plugin);
             }
@@ -116,7 +118,7 @@ class PluginManager {
     return allowedExtensions.contains(ext);
   }
 
-  Future<Plugin?> _createPluginFromFile(File file) async {
+  Future<Plugin?> _createPluginFromFile(File file, {required String id}) async {
     final fileName = path.basename(file.path);
 
     final interpreter = _detectInterpreter(file);
@@ -151,7 +153,7 @@ class PluginManager {
     final config = await _loadPluginConfig(file.path);
 
     return Plugin(
-      id: fileName,
+      id: id,
       path: file.path,
       interpreter: interpreter,
       refreshInterval: refreshInterval,

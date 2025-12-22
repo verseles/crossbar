@@ -63,8 +63,13 @@ void main(List<String> args) async {
     await logger.init();
     logger.info('Crossbar starting...');
 
+    // Check if we are in widget config mode (Android widget configuration)
+    // This runs in a separate Flutter engine instance
+    final isWidgetConfig = PlatformDispatcher.instance.defaultRouteName.contains('/widget/config');
+
     // Initialize background service for Android widget updates
-    if (Platform.isAndroid) {
+    // Only in main app instance
+    if (Platform.isAndroid && !isWidgetConfig) {
       final backgroundService = BackgroundService();
       await backgroundService.init();
       logger.info('Background service initialized');
@@ -83,67 +88,74 @@ void main(List<String> args) async {
     logger.info('Settings initialized');
 
     // Check for existing instance EARLY - before initializing scheduler/tray
-    final ipcServer = IpcServer();
-    final ipcStarted = await ipcServer.start();
+    // UNLESS we are in widget config mode (which runs as a separate engine and shouldn't check/bind port)
+    if (!isWidgetConfig) {
+      final ipcServer = IpcServer();
+      final ipcStarted = await ipcServer.start();
 
-    if (!ipcStarted) {
-      logger.info('IPC server failed to start (port busy). Another instance is likely running.');
+      if (!ipcStarted) {
+        logger.info('IPC server failed to start (port busy). Another instance is likely running.');
 
-      if (!startMinimized) {
-        // If we wanted to start visible, try to tell the existing instance to show itself
-        logger.info('Attempting to signal existing instance to show window...');
-        try {
-          final client = HttpClient();
-          final request = await client.getUrl(Uri.parse('http://localhost:${IpcServer.defaultPort}/window/show'));
-          final response = await request.close();
-          if (response.statusCode == HttpStatus.ok) {
-            logger.info('Signal sent successfully.');
-          } else {
-            logger.info('Signal sent but received status ${response.statusCode}');
+        if (!startMinimized) {
+          // If we wanted to start visible, try to tell the existing instance to show itself
+          logger.info('Attempting to signal existing instance to show window...');
+          try {
+            final client = HttpClient();
+            final request = await client.getUrl(Uri.parse('http://localhost:${IpcServer.defaultPort}/window/show'));
+            final response = await request.close();
+            if (response.statusCode == HttpStatus.ok) {
+              logger.info('Signal sent successfully.');
+            } else {
+              logger.info('Signal sent but received status ${response.statusCode}');
+            }
+          } catch (e) {
+            logger.info('Failed to contact existing instance: $e');
           }
-        } catch (e) {
-          logger.info('Failed to contact existing instance: $e');
         }
+
+        logger.info('Exiting application.');
+        exit(0);
       }
 
-      logger.info('Exiting application.');
-      exit(0);
+      logger.info('IPC server started on port ${ipcServer.port}');
+    } else {
+      logger.info('Starting in Widget Config mode (skipping IPC check)');
     }
 
-    logger.info('IPC server started on port ${ipcServer.port}');
-
-    // Now that we know we're the primary instance, continue initialization
+    // Now that we know we're the primary instance (or config mode), continue initialization
 
     // Discover plugins
     final pluginManager = PluginManager();
     await pluginManager.discoverPlugins();
     logger.info('Discovered ${pluginManager.plugins.length} plugins');
 
-    // Initialize tray service
-    final trayService = TrayService();
-    // Do not await tray initialization to prevent blocking UI startup
-    // Also add a small delay to ensure window is ready
-    Future.delayed(const Duration(milliseconds: 500), () async {
-      try {
-        await trayService.init();
-        logger.info('Tray service initialized');
-      } catch (e, stack) {
-        logger.error('Failed to initialize tray service', e, stack);
+    if (!isWidgetConfig) {
+      // Initialize tray service
+      final trayService = TrayService();
+      // Do not await tray initialization to prevent blocking UI startup
+      // Also add a small delay to ensure window is ready
+      Future.delayed(const Duration(milliseconds: 500), () async {
+        try {
+          await trayService.init();
+          logger.info('Tray service initialized');
+        } catch (e, stack) {
+          logger.error('Failed to initialize tray service', e, stack);
+        }
+      });
+
+      // Start scheduler
+      final scheduler = SchedulerService();
+      // Connect tray to scheduler before starting, so we catch initial runs if any
+      scheduler.addListener(trayService.updatePluginOutput);
+      await scheduler.start();
+      logger.info('Scheduler started');
+
+      // Process any pending widget refresh requested before scheduler was ready
+      if (_pendingWidgetRefresh && Platform.isAndroid) {
+        _pendingWidgetRefresh = false;
+        logger.info('Processing pending widget refresh');
+        await WidgetService().updateAllWidgets();
       }
-    });
-
-    // Start scheduler
-    final scheduler = SchedulerService();
-    // Connect tray to scheduler before starting, so we catch initial runs if any
-    scheduler.addListener(trayService.updatePluginOutput);
-    await scheduler.start();
-    logger.info('Scheduler started');
-
-    // Process any pending widget refresh requested before scheduler was ready
-    if (_pendingWidgetRefresh && Platform.isAndroid) {
-      _pendingWidgetRefresh = false;
-      logger.info('Processing pending widget refresh');
-      await WidgetService().updateAllWidgets();
     }
 
     // Initialize hot reload

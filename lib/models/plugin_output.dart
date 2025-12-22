@@ -64,7 +64,10 @@ class PluginOutput {
       'pluginId': pluginId,
       'icon': icon,
       'text': text,
-      'color': color,
+      // Fix color format for Android widgets (expect hex string)
+      'color': color?.toRadixString(16).toUpperCase(),
+      // Map trayTooltip to tooltip for Android widgets
+      'tooltip': trayTooltip,
       'trayTooltip': trayTooltip,
       'menu': menu.map((m) => m.toJson()).toList(),
       'hasError': hasError,
