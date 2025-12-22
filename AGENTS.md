@@ -77,12 +77,19 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
 ---
 
-## 3. Arquitetura de Execução (Dual-Binary)
+## 3. Arquitetura de Execução (Dual-Binary + Monorepo)
 
-O projeto compila **2 binários** para resolver problemas de dependência (GTK) e UX:
+O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
+
+**Pacotes (`packages/`):**
+
+- `crossbar_core`: APIs e modelos Dart puro compartilhados
+- `crossbar_cli`: CLI executável, depende de crossbar_core
+
+**Binários:**
 
 1.  **`crossbar` (CLI + Launcher)**:
-    - Fonte: `bin/crossbar.dart` → `lib/cli/cli_handler.dart`
+    - Fonte: `packages/crossbar_cli/bin/crossbar.dart`
     - Função: CLI unificado + launcher. Sem args ou com `gui` → lança GUI. Com args CLI → executa comando.
     - Comandos: `crossbar cpu`, `crossbar --version`, `crossbar gui`
 2.  **`crossbar-gui` (Flutter App)**:
