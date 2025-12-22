@@ -61,8 +61,8 @@ linux:
 	flutter build linux --release
 	@echo "Setting up unified architecture..."
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
-	@echo "Compiling unified CLI..."
-	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar
+	@echo "Compiling unified CLI from packages/crossbar_cli..."
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
 	@echo "Copying desktop integration files..."
 	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon_linux.png $(LINUX_BUNDLE)/crossbar.png
