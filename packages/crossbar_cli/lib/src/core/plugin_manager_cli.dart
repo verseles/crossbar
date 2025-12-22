@@ -38,6 +38,11 @@ class PluginManagerCli {
   List<Plugin> get plugins => List.unmodifiable(_plugins);
 
   String get pluginsDirectory {
+    final customDir = Platform.environment['CROSSBAR_PLUGINS_DIR'];
+    if (customDir != null && customDir.isNotEmpty) {
+      return customDir;
+    }
+
     final homeDir = Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '';

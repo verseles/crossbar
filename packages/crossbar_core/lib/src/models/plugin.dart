@@ -1,10 +1,6 @@
 import 'plugin_config.dart';
 
 class PluginVariant {
-  final String path;
-  final String interpreter;
-  final bool enabled;
-
   const PluginVariant({
     required this.path,
     required this.interpreter,
@@ -18,6 +14,10 @@ class PluginVariant {
       enabled: json['enabled'] as bool? ?? true,
     );
   }
+
+  final String path;
+  final String interpreter;
+  final bool enabled;
 
   Map<String, dynamic> toJson() {
     return {

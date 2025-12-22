@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Standardize example plugins and GUI consistency
+## [~] Track: Standardize example plugins and GUI consistency
 *Link: [./conductor/tracks/plugin_standardization_20251222/](./conductor/tracks/plugin_standardization_20251222/)*

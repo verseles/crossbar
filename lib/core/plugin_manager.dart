@@ -98,7 +98,7 @@ class PluginManager {
 
     // Map to group plugins by their directory and base name
     // Key: directory_path:base_name
-    final Map<String, List<File>> groups = {};
+    final groups = <String, List<File>>{};
 
     await for (final entity in pluginsDir.list(recursive: true)) {
       if (entity is File && _isValidPluginFile(entity.path)) {
@@ -151,7 +151,6 @@ class PluginManager {
       return pA.compareTo(pB);
     });
 
-    final primaryFile = files.first;
     final variants = <PluginVariant>[];
 
     for (final file in files) {
