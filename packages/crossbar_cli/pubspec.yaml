@@ -1,0 +1,21 @@
+name: crossbar_cli
+description: Crossbar CLI - Command line interface for Crossbar
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  crossbar_core:
+    path: ../crossbar_core
+  path: ^1.9.0
+  dio: ^5.7.0
+  crypto: ^3.0.6
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.8
+
+executables:
+  crossbar: crossbar

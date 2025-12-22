@@ -1,0 +1,149 @@
+// ignore_for_file: avoid_print
+import 'dart:io';
+
+import 'base_command.dart';
+
+class FileCommand extends CliCommand {
+  @override
+  String get name => 'file';
+
+  @override
+  String get description => 'File operations (exists, read, size)';
+
+  @override
+  Future<int> execute(List<String> args) async {
+    if (args.isEmpty) {
+      stderr.writeln('Error: file command requires a subcommand (exists, read, size)');
+      return 1;
+    }
+
+    final subcommand = args[0];
+    final commandArgs = args.sublist(1);
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
+    final values = commandArgs.where((a) => !a.startsWith('--')).toList();
+
+    if (values.isEmpty) {
+      stderr.writeln('Error: file $subcommand requires a path');
+      return 1;
+    }
+    final path = values[0];
+
+    switch (subcommand) {
+      case 'exists':
+        final exists = File(path).existsSync() || Directory(path).existsSync();
+        printFormatted(
+            {'exists': exists, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => exists ? 'true' : 'false'
+        );
+        return 0;
+
+      case 'read':
+        final file = File(path);
+        if (!file.existsSync()) {
+          stderr.writeln('Error: File not found: $path');
+          return 1;
+        }
+        final content = file.readAsStringSync();
+        printFormatted(
+            {'content': content, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) => content
+        );
+        return 0;
+
+      case 'size':
+        final file = File(path);
+        if (!file.existsSync()) {
+          stderr.writeln('Error: File not found: $path');
+          return 1;
+        }
+        final size = file.lengthSync();
+        printFormatted(
+            {'size': size, 'path': path},
+            json: jsonOutput,
+            xml: xmlOutput,
+            plain: (_) {
+                if (size < 1024) {
+                    return '$size B';
+                } else if (size < 1024 * 1024) {
+                    return '${(size / 1024).toStringAsFixed(2)} KB';
+                } else if (size < 1024 * 1024 * 1024) {
+                    return '${(size / (1024 * 1024)).toStringAsFixed(2)} MB';
+                } else {
+                    return '${(size / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+                }
+            }
+        );
+        return 0;
+
+      default:
+        stderr.writeln('Error: Unknown file subcommand: $subcommand');
+        return 1;
+    }
+  }
+}
+
+class DirCommand extends CliCommand {
+  @override
+  String get name => 'dir';
+
+  @override
+  String get description => 'Directory operations (list)';
+
+  @override
+  Future<int> execute(List<String> args) async {
+    if (args.isEmpty) {
+      stderr.writeln('Error: dir command requires a subcommand (list)');
+      return 1;
+    }
+
+    final subcommand = args[0];
+    final commandArgs = args.sublist(1);
+    final jsonOutput = args.contains('--json');
+    final xmlOutput = args.contains('--xml');
+    final values = commandArgs.where((a) => !a.startsWith('--')).toList();
+    final path = values.isNotEmpty ? values[0] : '.';
+
+    if (subcommand == 'list') {
+      final dir = Directory(path);
+      if (!dir.existsSync()) {
+        stderr.writeln('Error: Directory not found: $path');
+        return 1;
+      }
+      final entries = dir.listSync();
+      final files = entries.map((e) {
+          final stat = e.statSync();
+          return {
+            'name': e.path.split(Platform.pathSeparator).last,
+            'path': e.path,
+            'type': e is File ? 'file' : 'directory',
+            'size': stat.size,
+            'modified': stat.modified.toIso8601String(),
+          };
+      }).toList();
+
+      printFormatted(
+          files,
+          json: jsonOutput,
+          xml: xmlOutput,
+          plain: (_) {
+             final buffer = StringBuffer();
+             for (final entry in entries) {
+                final name = entry.path.split(Platform.pathSeparator).last;
+                final prefix = entry is Directory ? 'd' : '-';
+                buffer.writeln('$prefix $name');
+             }
+             return buffer.toString().trimRight();
+          }
+      );
+      return 0;
+    } else {
+      stderr.writeln('Error: Unknown dir subcommand: $subcommand');
+      return 1;
+    }
+  }
+}

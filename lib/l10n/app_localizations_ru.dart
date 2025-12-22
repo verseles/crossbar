@@ -499,18 +499,22 @@ class AppLocalizationsRu extends AppLocalizations {
       'Crossbar - Универсальная Система Плагинов\n\nCopyright (C) 2025\n\nЭта программа является свободным программным обеспечением: вы можете распространять её и/или модифицировать в соответствии с условиями GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 Лицензии или (по вашему выбору) любой более поздней версии.\n\nЭта программа распространяется в надежде, что она будет полезной, но БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ; даже без подразумеваемой гарантии ТОВАРНОЙ ПРИГОДНОСТИ или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЁННОЙ ЦЕЛИ. См. GNU Affero General Public License для получения дополнительной информации.\n\nВы должны были получить копию GNU Affero General Public License вместе с этой программой. Если нет, см. <https://www.gnu.org/licenses/>.';
 
   @override
-  String get widgetConfiguration => 'Widget Configuration';
+  String get widgetConfiguration => 'Настройка Виджета';
 
   @override
-  String get selectPluginsForWidget => 'Select plugins to display';
+  String get selectPluginsForWidget => 'Выберите плагины для отображения';
 
   @override
-  String get selectOnePlugin => 'Select one plugin';
+  String get selectOnePlugin => 'Выберите один плагин';
 
   @override
-  String get selectPlugins => 'Select plugins';
+  String get selectPlugins => 'Выберите плагины';
 
   @override
   String get noPluginsAvailable =>
-      'No plugins available. Install some plugins first.';
+      'Плагины недоступны. Сначала установите плагины.';
+
+  @override
+  String get widgetUpdateNote =>
+      'Виджеты обновляются каждые 15 мин в фоне. Откройте приложение для мгновенных обновлений.';
 }

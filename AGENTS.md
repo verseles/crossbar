@@ -77,12 +77,19 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
 ---
 
-## 3. Arquitetura de Execução (Dual-Binary)
+## 3. Arquitetura de Execução (Dual-Binary + Monorepo)
 
-O projeto compila **2 binários** para resolver problemas de dependência (GTK) e UX:
+O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
+
+**Pacotes (`packages/`):**
+
+- `crossbar_core`: APIs e modelos Dart puro compartilhados
+- `crossbar_cli`: CLI executável, depende de crossbar_core
+
+**Binários:**
 
 1.  **`crossbar` (CLI + Launcher)**:
-    - Fonte: `bin/crossbar.dart` → `lib/cli/cli_handler.dart`
+    - Fonte: `packages/crossbar_cli/bin/crossbar.dart`
     - Função: CLI unificado + launcher. Sem args ou com `gui` → lança GUI. Com args CLI → executa comando.
     - Comandos: `crossbar cpu`, `crossbar --version`, `crossbar gui`
 2.  **`crossbar-gui` (Flutter App)**:
@@ -352,9 +359,9 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 
 > Decisões arquiteturais importantes que impactam todo o projeto.
 
-### ADR-001: Unified CLI Binary (2024-12-07)
+### ADR-001: Unified CLI Binary (2024-12-07) ⚠️ SUPERSEDED by ADR-011
 
-**Status**: ✅ Accepted  
+**Status**: ⚠️ Superseded  
 **Context**: Originalmente havia 3 binários: `crossbar` (launcher), `crossbar-cli` e `crossbar-gui`. Isso causava complexidade na distribuição e spawning de processos.  
 **Decision**: Unificar launcher e CLI em um único `crossbar`. O GUI permanece separado como `crossbar-gui`.  
 **Consequences**:
@@ -363,6 +370,20 @@ Se a context7 não estiver disponível no sistema, faça o seguinte:
 - CLI mais rápido (não spawna processo extra)
 - `crossbar --version` funciona diretamente
 - `crossbar gui` lança a GUI em modo detached
+
+**Superseded**: Ver ADR-011 para a arquitetura atual.
+
+### ADR-011: Monorepo com Pacotes Separados (2025-12-22)
+
+**Status**: ✅ Accepted  
+**Context**: O ADR-001 unificou CLI e launcher, mas `dart compile exe` falha com imports condicionais `if (dart.library.ui)`. O código CLI dependia transitivamente de Flutter via `plugin_manager.dart`.  
+**Decision**: Criar monorepo com 3 pacotes: `crossbar_core` (APIs Dart puro), `crossbar_cli` (CLI executável), projeto Flutter principal.  
+**Consequences**:
+
+- CLI compila isoladamente sem dependências Flutter
+- Código compartilhado em `packages/crossbar_core` evita duplicação
+- Config values do CLI lidos de JSON plaintext (`~/.crossbar/config/<plugin>.json`)
+- Makefile: `cd packages/crossbar_cli && dart compile exe bin/crossbar.dart`
 
 ### ADR-002: Embedded Lua Interpreter (2024-12-07)
 

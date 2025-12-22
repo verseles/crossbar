@@ -1,6 +1,33 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install uninstall \
+	install uninstall precommit \
 	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
+
+# Pre-commit verification sequence (AGENTS.md compliance)
+# Runs: analyze → coverage → linux build → android build
+precommit:
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  PRECOMMIT VERIFICATION (AGENTS.md)"
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "Step 1/4: Static Analysis"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) analyze
+	@echo ""
+	@echo "Step 2/4: Tests with Coverage (target: 35-60%)"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) coverage
+	@echo ""
+	@echo "Step 3/4: Linux Build"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) linux
+	@echo ""
+	@echo "Step 4/4: Android Build"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) android
+	@echo ""
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  ✅ PRECOMMIT PASSED - Safe to commit!"
+	@echo "══════════════════════════════════════════════════════════════"
 
 # Paths
 LINUX_BUNDLE = build/linux/x64/release/bundle
@@ -34,8 +61,8 @@ linux:
 	flutter build linux --release
 	@echo "Setting up unified architecture..."
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
-	@echo "Compiling unified CLI..."
-	dart compile exe bin/crossbar.dart -o $(LINUX_BUNDLE)/crossbar
+	@echo "Compiling unified CLI from packages/crossbar_cli..."
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
 	@echo "Copying desktop integration files..."
 	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon_linux.png $(LINUX_BUNDLE)/crossbar.png

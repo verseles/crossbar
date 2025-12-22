@@ -410,7 +410,7 @@ Crossbar includes **24 example plugins** in 6 languages:
 ```
 crossbar/
 ├── lib/
-│   ├── core/                   # Core plugin system
+│   ├── core/                   # Core plugin system (Flutter)
 │   │   ├── plugin_manager.dart       # Discovery & lifecycle
 │   │   ├── script_runner.dart        # Execution engine
 │   │   ├── output_parser.dart        # BitBar/JSON parser
@@ -429,8 +429,17 @@ crossbar/
 │   │   └── widget_service.dart       # Home screen widget updates
 │   ├── ui/                     # User interface
 │   └── l10n/                   # 10 languages
-├── bin/
-│   └── crossbar.dart           # CLI entry point (75+ commands)
+├── packages/                   # Monorepo packages
+│   ├── crossbar_core/                # Pure Dart shared APIs & models
+│   │   └── lib/src/
+│   │       ├── core/                 # Shared core utilities
+│   │       ├── models/               # Plugin, Config models
+│   │       └── api/                  # System, Network, Media APIs
+│   └── crossbar_cli/                 # Pure Dart CLI package
+│       ├── bin/crossbar.dart         # CLI entry point
+│       └── lib/src/
+│           ├── core/                 # CLI-specific plugin manager
+│           └── commands/             # 75+ CLI command handlers
 ├── plugins/                    # Example plugins
 ├── test/                       # 116 tests (>90% coverage)
 └── .github/workflows/          # CI/CD pipelines

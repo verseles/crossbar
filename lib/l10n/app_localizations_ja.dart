@@ -495,18 +495,21 @@ class AppLocalizationsJa extends AppLocalizations {
       'Crossbar - ユニバーサルプラグインシステム\n\nCopyright (C) 2025\n\n本プログラムはフリーソフトウェアです：Free Software Foundationが発行したGNU Affero一般公衆利用許諾書の条件の下で、ライセンスのバージョン3、または（お選びにより）それ以降のバージョンに従って再配布および/または変更することができます。\n\n本プログラムは有用であることを期待して配布されていますが、商品性や特定目的への適合性の暗黙の保証さえも含め、いかなる保証もありません。詳細についてはGNU Affero一般公衆利用許諾書をご覧ください。\n\n本プログラムと共にGNU Affero一般公衆利用許諾書のコピーを受け取っているはずです。受け取っていない場合は、<https://www.gnu.org/licenses/>をご覧ください。';
 
   @override
-  String get widgetConfiguration => 'Widget Configuration';
+  String get widgetConfiguration => 'ウィジェット設定';
 
   @override
-  String get selectPluginsForWidget => 'Select plugins to display';
+  String get selectPluginsForWidget => '表示するプラグインを選択';
 
   @override
-  String get selectOnePlugin => 'Select one plugin';
+  String get selectOnePlugin => 'プラグインを1つ選択';
 
   @override
-  String get selectPlugins => 'Select plugins';
+  String get selectPlugins => 'プラグインを選択';
 
   @override
-  String get noPluginsAvailable =>
-      'No plugins available. Install some plugins first.';
+  String get noPluginsAvailable => '利用可能なプラグインがありません。先にプラグインをインストールしてください。';
+
+  @override
+  String get widgetUpdateNote =>
+      'ウィジェットはバックグラウンドで15分ごとに更新されます。即時更新するにはアプリを開いてください。';
 }
