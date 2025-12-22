@@ -5,8 +5,9 @@
 local uptime = crossbar.uptime()
 
 if uptime then
-    print("⬆️ " .. uptime .. " | size=12")
+    print("⬆️ " .. uptime)
     print("---")
+    print("System Uptime: " .. uptime)
     print("Refresh | refresh=true")
 else
     print("⬆️ --")
