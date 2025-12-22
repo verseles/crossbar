@@ -513,8 +513,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noPluginsAvailable =>
       'No plugins available. Install some plugins first.';
-
-  @override
-  String get widgetUpdateNote =>
-      'Widgets update every 15 min in background. Open the app for instant updates.';
 }

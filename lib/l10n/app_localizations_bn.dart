@@ -499,22 +499,18 @@ class AppLocalizationsBn extends AppLocalizations {
       'Crossbar - সার্বজনীন প্লাগইন সিস্টেম\n\nকপিরাইট (C) 2025\n\nএই প্রোগ্রামটি বিনামূল্যে সফ্টওয়্যার: আপনি এটি Free Software Foundation দ্বারা প্রকাশিত GNU Affero General Public License-এর শর্তাবলীর অধীনে পুনরায় বিতরণ এবং/অথবা সংশোধন করতে পারেন, হয় লাইসেন্সের সংস্করণ 3, অথবা (আপনার পছন্দে) পরবর্তী কোন সংস্করণ।\n\nএই প্রোগ্রামটি এই আশায় বিতরণ করা হয় যে এটি উপকারী হবে, কিন্তু কোন ওয়ারেন্টি ছাড়া; এমনকি ব্যবসায়িকতা বা বিশেষ উদ্দেশ্যে মানানসই হওয়ার অন্তর্নিহিত ওয়ারেন্টিও ছাড়া। আরও বিস্তারিত জানতে GNU Affero General Public License দেখুন।\n\nআপনার এই প্রোগ্রামের সাথে GNU Affero General Public License-এর একটি কপি পাওয়া উচিত ছিল। যদি না পান, <https://www.gnu.org/licenses/> দেখুন।';
 
   @override
-  String get widgetConfiguration => 'উইজেট কনফিগারেশন';
+  String get widgetConfiguration => 'Widget Configuration';
 
   @override
-  String get selectPluginsForWidget => 'প্রদর্শনের জন্য প্লাগইন নির্বাচন করুন';
+  String get selectPluginsForWidget => 'Select plugins to display';
 
   @override
-  String get selectOnePlugin => 'একটি প্লাগইন নির্বাচন করুন';
+  String get selectOnePlugin => 'Select one plugin';
 
   @override
-  String get selectPlugins => 'প্লাগইন নির্বাচন করুন';
+  String get selectPlugins => 'Select plugins';
 
   @override
   String get noPluginsAvailable =>
-      'কোন প্লাগইন উপলব্ধ নেই। প্রথমে কিছু প্লাগইন ইনস্টল করুন।';
-
-  @override
-  String get widgetUpdateNote =>
-      'উইজেট ব্যাকগ্রাউন্ডে প্রতি ১৫ মিনিটে আপডেট হয়। তাত্ক্ষণিক আপডেটের জন্য অ্যাপ খুলুন।';
+      'No plugins available. Install some plugins first.';
 }

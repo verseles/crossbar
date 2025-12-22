@@ -325,12 +325,13 @@ int _getMenuLevel(String line) {
 }
 
 List<MenuItem> _buildMenuHierarchy(List<_MenuItemFlat> flatItems) {
-  final rootItems = <MenuItem>[];
+  final rootItems = <_MutableMenuItem>[];
   final lastAtLevel = <int, _MutableMenuItem>{};
 
   for (final flat in flatItems) {
     if (flat.separator) {
-      rootItems.add(MenuItem.separator());
+      // BitBar separators are always at the root level.
+      rootItems.add(_MutableMenuItem(isSeparator: true));
       continue;
     }
 
@@ -342,28 +343,22 @@ List<MenuItem> _buildMenuHierarchy(List<_MenuItemFlat> flatItems) {
     );
 
     if (flat.level == 0) {
-      rootItems.add(item.toMenuItem());
+      rootItems.add(item);
       lastAtLevel[0] = item;
     } else {
       final parent = lastAtLevel[flat.level - 1];
       if (parent != null) {
-        parent.submenu.add(item.toMenuItem());
+        parent.submenu.add(item);
         lastAtLevel[flat.level] = item;
       } else {
-        rootItems.add(item.toMenuItem());
+        // Orphaned item, treat as a root item.
+        rootItems.add(item);
         lastAtLevel[flat.level] = item;
       }
     }
   }
 
-  return rootItems
-      .map((e) => e.submenu == null
-          ? e
-          : e.copyWith(
-              submenu: lastAtLevel.values
-                  .firstWhere((element) => element.text == e.text)
-                  .submenu))
-      .toList();
+  return rootItems.map((item) => item.toMenuItem()).toList();
 }
 
 class _MutableMenuItem {
@@ -372,22 +367,26 @@ class _MutableMenuItem {
     this.bash,
     this.href,
     this.color,
-    List<MenuItem>? submenu,
-  }) : submenu = submenu ?? [];
-
-  final String? text;
-  final String? bash;
-  final String? href;
-  final String? color;
-  final List<MenuItem> submenu;
+    this.isSeparator = false,
+  });
+  String? text;
+  String? bash;
+  String? href;
+  String? color;
+  bool isSeparator;
+  List<_MutableMenuItem> submenu = [];
 
   MenuItem toMenuItem() {
+    if (isSeparator) {
+      return MenuItem.separator();
+    }
     return MenuItem(
       text: text,
       bash: bash,
       href: href,
       color: color,
-      submenu: submenu.isEmpty ? null : submenu,
+      submenu:
+          submenu.isNotEmpty ? submenu.map((e) => e.toMenuItem()).toList() : null,
     );
   }
 }

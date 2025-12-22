@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/home/jules/flutter"
-export "FLUTTER_APPLICATION_PATH=/app"
+export "FLUTTER_ROOT=/home/helio/flutter"
+export "FLUTTER_APPLICATION_PATH=/home/helio/Dropbox/WORK/crossbar"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

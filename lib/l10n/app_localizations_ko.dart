@@ -494,21 +494,18 @@ class AppLocalizationsKo extends AppLocalizations {
       'Crossbar - 범용 플러그인 시스템\n\nCopyright (C) 2025\n\n이 프로그램은 자유 소프트웨어입니다: Free Software Foundation에서 발행한 GNU Affero 일반 공중 라이선스의 조건에 따라 라이선스 버전 3 또는 (선택에 따라) 이후 버전에 따라 재배포 및/또는 수정할 수 있습니다.\n\n이 프로그램은 유용할 것이라는 희망으로 배포되지만, 상품성 또는 특정 목적에 대한 적합성에 대한 묵시적 보증조차 없이 어떠한 보증도 없이 배포됩니다. 자세한 내용은 GNU Affero 일반 공중 라이선스를 참조하세요.\n\n이 프로그램과 함께 GNU Affero 일반 공중 라이선스 사본을 받았어야 합니다. 받지 못한 경우 <https://www.gnu.org/licenses/>를 참조하세요.';
 
   @override
-  String get widgetConfiguration => '위젯 설정';
+  String get widgetConfiguration => 'Widget Configuration';
 
   @override
-  String get selectPluginsForWidget => '표시할 플러그인 선택';
+  String get selectPluginsForWidget => 'Select plugins to display';
 
   @override
-  String get selectOnePlugin => '플러그인 하나 선택';
+  String get selectOnePlugin => 'Select one plugin';
 
   @override
-  String get selectPlugins => '플러그인 선택';
+  String get selectPlugins => 'Select plugins';
 
   @override
-  String get noPluginsAvailable => '사용 가능한 플러그인이 없습니다. 먼저 플러그인을 설치하세요.';
-
-  @override
-  String get widgetUpdateNote =>
-      '위젯은 백그라운드에서 15분마다 업데이트됩니다. 즉시 업데이트하려면 앱을 여세요.';
+  String get noPluginsAvailable =>
+      'No plugins available. Install some plugins first.';
 }

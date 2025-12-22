@@ -500,22 +500,18 @@ class AppLocalizationsHi extends AppLocalizations {
       'Crossbar - यूनिवर्सल प्लगइन सिस्टम\n\nकॉपीराइट (C) 2025\n\nयह कार्यक्रम मुक्त सॉफ्टवेयर है: आप इसे Free Software Foundation द्वारा प्रकाशित GNU Affero सार्वजनिक लाइसेंस की शर्तों के तहत पुनर्वितरित और/या संशोधित कर सकते हैं, या तो लाइसेंस का संस्करण 3, या (आपकी पसंद के अनुसार) कोई बाद का संस्करण।\n\nयह कार्यक्रम इस उम्मीद में वितरित किया जाता है कि यह उपयोगी होगा, लेकिन किसी भी वारंटी के बिना; यहां तक कि व्यापारिकता या किसी विशेष उद्देश्य के लिए उपयुक्तता की निहित वारंटी के बिना भी। अधिक विवरण के लिए GNU Affero सार्वजनिक लाइसेंस देखें।\n\nआपको इस कार्यक्रम के साथ GNU Affero सार्वजनिक लाइसेंस की एक प्रति प्राप्त होनी चाहिए थी। यदि नहीं, तो <https://www.gnu.org/licenses/> देखें।';
 
   @override
-  String get widgetConfiguration => 'विजेट कॉन्फ़िगरेशन';
+  String get widgetConfiguration => 'Widget Configuration';
 
   @override
-  String get selectPluginsForWidget => 'प्रदर्शित करने के लिए प्लगइन चुनें';
+  String get selectPluginsForWidget => 'Select plugins to display';
 
   @override
-  String get selectOnePlugin => 'एक प्लगइन चुनें';
+  String get selectOnePlugin => 'Select one plugin';
 
   @override
-  String get selectPlugins => 'प्लगइन चुनें';
+  String get selectPlugins => 'Select plugins';
 
   @override
   String get noPluginsAvailable =>
-      'कोई प्लगइन उपलब्ध नहीं है। पहले कुछ प्लगइन इंस्टॉल करें।';
-
-  @override
-  String get widgetUpdateNote =>
-      'विजेट बैकग्राउंड में हर 15 मिनट में अपडेट होते हैं। तुरंत अपडेट के लिए ऐप खोलें।';
+      'No plugins available. Install some plugins first.';
 }

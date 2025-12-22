@@ -497,22 +497,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'Crossbar - نظام إضافات عالمي\n\nحقوق الطبع والنشر (C) 2025\n\nهذا البرنامج هو برنامج حر: يمكنك إعادة توزيعه و/أو تعديله بموجب شروط رخصة GNU Affero العمومية التي نشرتها مؤسسة البرمجيات الحرة، إما الإصدار 3 من الرخصة، أو (حسب اختيارك) أي إصدار لاحق.\n\nيتم توزيع هذا البرنامج على أمل أن يكون مفيدًا، ولكن بدون أي ضمان؛ حتى بدون الضمان الضمني للتسويق أو الملاءمة لغرض معين. راجع رخصة GNU Affero العمومية لمزيد من التفاصيل.\n\nيجب أن تكون قد تلقيت نسخة من رخصة GNU Affero العمومية مع هذا البرنامج. إن لم تفعل، انظر <https://www.gnu.org/licenses/>.';
 
   @override
-  String get widgetConfiguration => 'إعداد الأداة';
+  String get widgetConfiguration => 'Widget Configuration';
 
   @override
-  String get selectPluginsForWidget => 'اختر الإضافات للعرض';
+  String get selectPluginsForWidget => 'Select plugins to display';
 
   @override
-  String get selectOnePlugin => 'اختر إضافة واحدة';
+  String get selectOnePlugin => 'Select one plugin';
 
   @override
-  String get selectPlugins => 'اختر الإضافات';
+  String get selectPlugins => 'Select plugins';
 
   @override
   String get noPluginsAvailable =>
-      'لا توجد إضافات متاحة. قم بتثبيت بعض الإضافات أولاً.';
-
-  @override
-  String get widgetUpdateNote =>
-      'يتم تحديث الأدوات كل 15 دقيقة في الخلفية. افتح التطبيق للتحديثات الفورية.';
+      'No plugins available. Install some plugins first.';
 }
