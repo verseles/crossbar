@@ -44,6 +44,11 @@ class PluginManagerCli {
     return path.join(homeDir, '.crossbar', 'plugins');
   }
 
+  bool _isValidPluginFile(String filePath) {
+    final ext = path.extension(filePath).toLowerCase();
+    return allowedExtensions.contains(ext);
+  }
+
   Future<void> discoverPlugins() async {
     _plugins.clear();
 
@@ -52,61 +57,99 @@ class PluginManagerCli {
       return;
     }
 
-    await for (final entity in pluginsDir.list()) {
+    // Map to group plugins by their directory and base name
+    final Map<String, List<File>> groups = {};
+
+    await for (final entity in pluginsDir.list(recursive: true)) {
       if (entity is File && _isValidPluginFile(entity.path)) {
-        final plugin = await _createPluginFromFile(entity);
-        if (plugin != null) {
-          _plugins.add(plugin);
-        }
-      } else if (entity is Directory) {
-        // Check subdirectories (git repos) but only 1 level deep
-        await for (final subEntity in entity.list()) {
-          if (subEntity is File && _isValidPluginFile(subEntity.path)) {
-            final plugin = await _createPluginFromFile(subEntity);
-            if (plugin != null) {
-              _plugins.add(plugin);
-            }
-          }
-        }
+        final dir = path.dirname(entity.path);
+        final fileName = path.basename(entity.path);
+        final baseName = _extractPluginBaseName(fileName);
+        
+        final key = '$dir:$baseName';
+        groups.putIfAbsent(key, () => []).add(entity);
+      }
+    }
+
+    for (final entry in groups.entries) {
+      final files = entry.value;
+      if (files.isEmpty) continue;
+
+      final plugin = await _createPluginFromGroup(files);
+      if (plugin != null) {
+        _plugins.add(plugin);
       }
     }
   }
 
-  bool _isValidPluginFile(String filePath) {
-    final ext = path.extension(filePath).toLowerCase();
-    return allowedExtensions.contains(ext);
+  String _extractPluginBaseName(String fileName) {
+    final match = RegExp(r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.').firstMatch(fileName);
+    if (match != null) {
+      return match.group(1)!;
+    }
+    final firstDot = fileName.indexOf('.');
+    if (firstDot > 0) {
+      return fileName.substring(0, firstDot);
+    }
+    return path.withoutExtension(fileName);
   }
 
-  Future<Plugin?> _createPluginFromFile(File file) async {
-    final fileName = path.basename(file.path);
+  Future<Plugin?> _createPluginFromGroup(List<File> files) async {
+    files.sort((a, b) {
+      final extA = path.extension(a.path).toLowerCase();
+      final extB = path.extension(b.path).toLowerCase();
+      const priority = {'.lua': 0, '.sh': 1, '.py': 2, '.js': 3, '.dart': 4, '.go': 5, '.rs': 6};
+      final pA = priority[extA] ?? 100;
+      final pB = priority[extB] ?? 100;
+      return pA.compareTo(pB);
+    });
 
-    final interpreter = _detectInterpreter(file);
-    if (interpreter == null) return null;
+    final variants = <PluginVariant>[];
+    for (final file in files) {
+      final interpreter = _detectInterpreter(file);
+      if (interpreter == null) continue;
 
-    final refreshInterval = _parseRefreshInterval(fileName);
-
-    var isEnabled = true;
-    if (fileName.contains('.off.')) {
-      isEnabled = false;
-    } else if (Platform.isLinux || Platform.isMacOS) {
-      try {
-        final stat = await file.stat();
-        if ((stat.mode & 0x49) == 0) {
-          isEnabled = false;
-        }
-      } catch (_) {}
+      final isEnabled = await _checkIfEnabled(file);
+      variants.add(PluginVariant(
+        path: file.path,
+        interpreter: interpreter,
+        enabled: isEnabled,
+      ));
     }
 
-    final config = await _loadPluginConfig(file.path);
+    if (variants.isEmpty) return null;
+
+    final primaryVariant = variants.first;
+    final fileName = path.basename(primaryVariant.path);
+    final refreshInterval = _parseRefreshInterval(fileName);
+    
+    final dir = path.dirname(primaryVariant.path);
+    final isRoot = path.equals(dir, pluginsDirectory);
+    final id = isRoot ? fileName : path.basename(dir);
+
+    final config = await _loadPluginConfig(primaryVariant.path);
 
     return Plugin(
-      id: fileName,
-      path: file.path,
-      interpreter: interpreter,
+      id: id,
+      path: primaryVariant.path,
+      interpreter: primaryVariant.interpreter,
       refreshInterval: refreshInterval,
-      enabled: isEnabled,
+      enabled: primaryVariant.enabled,
       config: config,
+      variants: variants,
     );
+  }
+
+  Future<bool> _checkIfEnabled(File file) async {
+    final fileName = path.basename(file.path);
+    if (fileName.contains('.off.')) return false;
+    if (Platform.isLinux || Platform.isMacOS) {
+      try {
+        final stat = await file.stat();
+        return (stat.mode & 0x49) != 0;
+      } catch (_) { return true; }
+    }
+    return true;
   }
 
   Future<PluginConfig?> _loadPluginConfig(String pluginPath) async {

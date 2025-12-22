@@ -1,5 +1,45 @@
 import 'plugin_config.dart';
 
+class PluginVariant {
+  final String path;
+  final String interpreter;
+  final bool enabled;
+
+  const PluginVariant({
+    required this.path,
+    required this.interpreter,
+    required this.enabled,
+  });
+
+  factory PluginVariant.fromJson(Map<String, dynamic> json) {
+    return PluginVariant(
+      path: json['path'] as String,
+      interpreter: json['interpreter'] as String,
+      enabled: json['enabled'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'interpreter': interpreter,
+      'enabled': enabled,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PluginVariant &&
+        other.path == path &&
+        other.interpreter == interpreter &&
+        other.enabled == enabled;
+  }
+
+  @override
+  int get hashCode => Object.hash(path, interpreter, enabled);
+}
+
 class Plugin {
 
   const Plugin({
@@ -11,6 +51,7 @@ class Plugin {
     this.lastRun,
     this.lastError,
     this.config,
+    this.variants = const [],
   });
 
   factory Plugin.mock({
@@ -19,6 +60,7 @@ class Plugin {
     String interpreter = 'bash',
     Duration refreshInterval = const Duration(seconds: 10),
     PluginConfig? config,
+    List<PluginVariant> variants = const [],
   }) {
     return Plugin(
       id: id,
@@ -26,6 +68,7 @@ class Plugin {
       interpreter: interpreter,
       refreshInterval: refreshInterval,
       config: config,
+      variants: variants,
     );
   }
 
@@ -44,6 +87,10 @@ class Plugin {
       config: json['config'] != null
           ? PluginConfig.fromJson(json['config'] as Map<String, dynamic>)
           : null,
+      variants: (json['variants'] as List<dynamic>?)
+              ?.map((v) => PluginVariant.fromJson(v as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
   final String id;
@@ -54,6 +101,7 @@ class Plugin {
   final DateTime? lastRun;
   final String? lastError;
   final PluginConfig? config;
+  final List<PluginVariant> variants;
 
   /// Returns true if the plugin has a configuration schema defined.
   bool get hasConfig => config != null && config!.settings.isNotEmpty;
@@ -71,6 +119,7 @@ class Plugin {
       'lastRun': lastRun?.toIso8601String(),
       'lastError': lastError,
       if (config != null) 'config': config!.toJson(),
+      'variants': variants.map((v) => v.toJson()).toList(),
     };
   }
 
@@ -83,6 +132,7 @@ class Plugin {
     DateTime? lastRun,
     String? lastError,
     PluginConfig? config,
+    List<PluginVariant>? variants,
   }) {
     return Plugin(
       id: id ?? this.id,
@@ -93,12 +143,13 @@ class Plugin {
       lastRun: lastRun ?? this.lastRun,
       lastError: lastError ?? this.lastError,
       config: config ?? this.config,
+      variants: variants ?? this.variants,
     );
   }
 
   @override
   String toString() {
-    return 'Plugin(id: $id, interpreter: $interpreter, enabled: $enabled)';
+    return 'Plugin(id: $id, interpreter: $interpreter, enabled: $enabled, variants: ${variants.length})';
   }
 
   @override
@@ -110,11 +161,21 @@ class Plugin {
         other.interpreter == interpreter &&
         other.refreshInterval == refreshInterval &&
         other.enabled == enabled &&
-        other.config == config;
+        other.config == config &&
+        _listEquals(other.variants, variants);
+  }
+
+  bool _listEquals(List<dynamic> a, List<dynamic> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, path, interpreter, refreshInterval, enabled, config);
+    return Object.hash(
+        id, path, interpreter, refreshInterval, enabled, config, variants);
   }
 }

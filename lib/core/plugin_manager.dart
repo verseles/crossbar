@@ -81,6 +81,11 @@ class PluginManager {
     }
   }
 
+  bool _isValidPluginFile(String filePath) {
+    final ext = path.extension(filePath).toLowerCase();
+    return allowedExtensions.contains(ext);
+  }
+
   Future<void> discoverPlugins() async {
     _plugins.clear();
 
@@ -91,73 +96,115 @@ class PluginManager {
       return;
     }
 
-    await for (final entity in pluginsDir.list()) {
+    // Map to group plugins by their directory and base name
+    // Key: directory_path:base_name
+    final Map<String, List<File>> groups = {};
+
+    await for (final entity in pluginsDir.list(recursive: true)) {
       if (entity is File && _isValidPluginFile(entity.path)) {
-        final plugin = await _createPluginFromFile(entity);
-        if (plugin != null) {
-          _plugins.add(plugin);
-        }
-      } else if (entity is Directory) {
-        // Check subdirectories (git repos) but only 1 level deep
-        await for (final subEntity in entity.list()) {
-          if (subEntity is File && _isValidPluginFile(subEntity.path)) {
-            final plugin = await _createPluginFromFile(subEntity);
-            if (plugin != null) {
-              _plugins.add(plugin);
-            }
-          }
-        }
+        final dir = path.dirname(entity.path);
+        final fileName = path.basename(entity.path);
+        
+        // Extract base name (part before the first dot that matches interval pattern)
+        // e.g. cpu.10s.sh -> cpu
+        final baseName = _extractPluginBaseName(fileName);
+        
+        final key = '$dir:$baseName';
+        groups.putIfAbsent(key, () => []).add(entity);
+      }
+    }
+
+    for (final entry in groups.entries) {
+      final files = entry.value;
+      if (files.isEmpty) continue;
+
+      // Create a single plugin representing this group
+      final plugin = await _createPluginFromGroup(files);
+      if (plugin != null) {
+        _plugins.add(plugin);
       }
     }
   }
 
-  bool _isValidPluginFile(String filePath) {
-    final ext = path.extension(filePath).toLowerCase();
-    return allowedExtensions.contains(ext);
+  String _extractPluginBaseName(String fileName) {
+    final match = RegExp(r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.').firstMatch(fileName);
+    if (match != null) {
+      return match.group(1)!;
+    }
+    // Fallback: name before first dot
+    final firstDot = fileName.indexOf('.');
+    if (firstDot > 0) {
+      return fileName.substring(0, firstDot);
+    }
+    return path.withoutExtension(fileName);
   }
 
-  Future<Plugin?> _createPluginFromFile(File file) async {
-    final fileName = path.basename(file.path);
+  Future<Plugin?> _createPluginFromGroup(List<File> files) async {
+    // Sort files to have a deterministic primary variant (prefer .lua then .sh then others)
+    files.sort((a, b) {
+      final extA = path.extension(a.path).toLowerCase();
+      final extB = path.extension(b.path).toLowerCase();
+      
+      const priority = {'.lua': 0, '.sh': 1, '.py': 2, '.js': 3, '.dart': 4, '.go': 5, '.rs': 6};
+      final pA = priority[extA] ?? 100;
+      final pB = priority[extB] ?? 100;
+      return pA.compareTo(pB);
+    });
 
-    final interpreter = _detectInterpreter(file);
-    if (interpreter == null) return null;
+    final primaryFile = files.first;
+    final variants = <PluginVariant>[];
 
+    for (final file in files) {
+      final interpreter = _detectInterpreter(file);
+      if (interpreter == null) continue;
+
+      final isEnabled = await _checkIfEnabled(file);
+      variants.add(PluginVariant(
+        path: file.path,
+        interpreter: interpreter,
+        enabled: isEnabled,
+      ));
+    }
+
+    if (variants.isEmpty) return null;
+
+    final primaryVariant = variants.first;
+    final fileName = path.basename(primaryVariant.path);
     final refreshInterval = _parseRefreshInterval(fileName);
+    
+    // ID is the base name if in a subdirectory, otherwise filename
+    final dir = path.dirname(primaryVariant.path);
+    final pluginsDirPath = await pluginsDirectory;
+    final isRoot = path.equals(dir, pluginsDirPath);
+    
+    final id = isRoot ? fileName : path.basename(dir);
 
-    // Determine enabled state
-    var isEnabled = true;
-
-    // 1. Check filename for .off.
-    if (fileName.contains('.off.')) {
-      isEnabled = false;
-    }
-    // 2. Check permissions on Unix
-    else if (Platform.isLinux || Platform.isMacOS) {
-      try {
-        final stat = await file.stat();
-        // Check if executable bit is set for user (00100 -> 0x40)
-        // 0x49 = 0111 octal (user, group, other exec)
-        if ((stat.mode & 0x49) == 0) {
-          isEnabled = false;
-        }
-      } catch (_) {
-        // Ignore errors, default to true
-      }
-    }
-
-    // Load config schema if exists
-    // Config file naming: <pluginName>.schema.json
-    // e.g., weather.10m.py -> weather.10m.py.schema.json
-    final config = await _loadPluginConfig(file.path);
+    final config = await _loadPluginConfig(primaryVariant.path);
 
     return Plugin(
-      id: fileName,
-      path: file.path,
-      interpreter: interpreter,
+      id: id,
+      path: primaryVariant.path,
+      interpreter: primaryVariant.interpreter,
       refreshInterval: refreshInterval,
-      enabled: isEnabled,
+      enabled: primaryVariant.enabled,
       config: config,
+      variants: variants,
     );
+  }
+
+  Future<bool> _checkIfEnabled(File file) async {
+    final fileName = path.basename(file.path);
+    if (fileName.contains('.off.')) return false;
+    
+    if (Platform.isLinux || Platform.isMacOS) {
+      try {
+        final stat = await file.stat();
+        return (stat.mode & 0x49) != 0;
+      } catch (_) {
+        return true;
+      }
+    }
+    return true;
   }
 
   /// Loads plugin configuration schema from a .schema.json file.
