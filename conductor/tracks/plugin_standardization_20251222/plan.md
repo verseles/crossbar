@@ -9,7 +9,7 @@ Goal: Organize the `plugins/` folder and update the system to discover plugins w
 - [x] Task: Write tests in `plugin_manager_test.dart` to verify that plugins in subdirectories are correctly detected. 8d50254
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Directory Restructuring' (Protocol in workflow.md) ec87ea5
 
-## Phase 2: Showcase Plugins (Battery & Uptime)
+## Phase 2: Showcase Plugins (Battery & Uptime) [checkpoint: 3853b37]
 Goal: Implement the showcase plugins in all 7 supported languages.
 
 - [x] Task: Standardize `plugins/battery/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`. 1f4d48d
