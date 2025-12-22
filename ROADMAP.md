@@ -164,3 +164,36 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 2.  **Testes Unitários:** Classes de lógica (Services, ViewModels) com >90% coverage.
 3.  **Testes de Integração:** Pelo menos 1 teste end-to-end para o fluxo crítico (ex: Salvar config -> Executar Plugin -> Verificar Output).
 4.  **Multi-plataforma:** Verificar se a implementação não quebra o build em Linux/Android (CI matrix).
+
+### Status Atual de Testes
+
+**Coverage atual:** 36.6% (meta: 60%)
+
+#### Arquivos com Boa Cobertura (>70%)
+
+- [x] `output_parser.dart` - 97.5%
+- [x] `refresh_service.dart` - 96.5%
+- [x] `plugin_output.dart` - 96.6%
+- [x] `cli_handler.dart` - 95.3%
+- [x] `lua_runner.dart` - 90.1%
+- [x] `plugin_config.dart` - 85.3%
+- [x] `plugin_config_service.dart` - 87.5%
+- [x] `script_runner.dart` - 80.3%
+- [x] `plugin_manager.dart` - 77.2%
+- [x] `scheduler_service.dart` - 75.0%
+- [x] `declarative_runner.dart` - 71.0%
+- [x] `logger_service.dart` - 70.1%
+
+#### Arquivos que Precisam de Mais Testes (<50%)
+
+- [ ] `plugins_tab.dart` - 10.0%
+- [ ] `marketplace_service.dart` - 21.9%
+- [ ] `android_native_bridge.dart` - 7.3%
+- [ ] `utils_api.dart` - 2.7%
+- [ ] Comandos CLI de hardware (audio, bluetooth, screen, etc.)
+
+#### Próximas Melhorias de Testes
+
+- [ ] Refatorar `scheduler_service_test.dart` para usar classe real
+- [ ] Adicionar testes de widget/UI para `plugins_tab.dart`
+- [ ] Excluir arquivos `l10n/*` do cálculo de coverage (gerados automaticamente)
