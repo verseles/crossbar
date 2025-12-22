@@ -1,37 +1,44 @@
 #!/bin/bash
-# Battery Monitor Plugin - Uses Crossbar API for portability
+# Battery Status
+# Shows battery level and charging state
 
-battery=$(crossbar battery 2>/dev/null)
+# Use Crossbar CLI API to get battery status
+battery_info=$(crossbar battery) # Example: "87% ⚡" or "50%"
 
-# Fallback if crossbar not available
-if [ -z "$battery" ]; then
-    battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1 || echo "N/A")
+battery_level=$(echo "$battery_info" | grep -oE '[0-9]+' | head -1) # Extract percentage
+battery_status="?"
+battery_icon="" # Unknown icon
+
+if echo "$battery_info" | grep -q "⚡"; then
+    battery_status="charging"
+elif [ "$battery_level" == "100" ]; then
+    battery_status="full"
+else
+    battery_status="discharging"
 fi
 
-# Check charging status
-charging=$(crossbar battery --json 2>/dev/null | grep -o '"charging":true' || cat /sys/class/power_supply/BAT*/status 2>/dev/null | grep -qi "charging" && echo "true" || echo "false")
-
-# Icon and color based on level
 if [ "$battery" = "N/A" ]; then
-    icon="🔋"
-    color="gray"
-elif [ "$charging" = "true" ]; then
-    icon="🔌"
+    echo " N/A"
+    exit 0
+fi
+
+if [ "$charging" = "true" ]; then
+    icon=""
     color="blue"
-elif [ "$battery" -lt 20 ]; then
-    icon="🪫"
+elif [ "$battery" -le 20 ]; then
+    icon=""
     color="red"
-elif [ "$battery" -lt 50 ]; then
-    icon="🔋"
+elif [ "$battery" -le 50 ]; then
+    icon=""
     color="yellow"
 else
-    icon="🔋"
+    icon=""
     color="green"
 fi
 
 echo "$icon ${battery}% | color=$color"
 echo "---"
 echo "Battery: ${battery}%"
-[ "$charging" = "true" ] && echo "Status: Charging ⚡"
+[ "$charging" = "true" ] && echo "Status: Charging" || echo "Status: Discharging"
 echo "---"
 echo "Refresh | refresh=true"

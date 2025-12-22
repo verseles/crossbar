@@ -1,50 +1,63 @@
 #!/usr/bin/env python3
-"""Bitcoin Price Plugin - Uses Crossbar web API"""
-import subprocess
+"""Bitcoin/Crypto Price - Shows current cryptocurrency price
+
+Configure via Crossbar settings or environment variables:
+- CROSSBAR_PLUGIN_CURRENCY: Display currency (usd, eur, gbp, brl, jpy)
+- CROSSBAR_PLUGIN_CRYPTO: Coin to track (bitcoin, ethereum, solana, cardano)
+"""
 import json
+import os
+import subprocess # Add subprocess for calling crossbar CLI
 
-def crossbar_web(url):
-    """Execute crossbar web command"""
+# Configuration from Crossbar settings
+CURRENCY = os.environ.get('CROSSBAR_PLUGIN_CURRENCY', 'usd')
+CRYPTO = os.environ.get('CROSSBAR_PLUGIN_CRYPTO', 'bitcoin')
+
+# Currency symbols
+SYMBOLS = {'usd': '$', 'eur': '€', 'gbp': '£', 'brl': 'R$', 'jpy': '¥'}
+CRYPTO_NAMES = {'bitcoin': 'BTC', 'ethereum': 'ETH', 'solana': 'SOL', 'cardano': 'ADA'}
+
+def get_crypto_price():
     try:
-        result = subprocess.run(['crossbar', 'web', url], capture_output=True, text=True, timeout=10)
-        if result.returncode == 0:
-            return result.stdout.strip()
-    except Exception:
-        pass
-    return None
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={CRYPTO}&vs_currencies={CURRENCY}&include_24hr_change=true"
+        result = subprocess.run(
+            ['crossbar', 'web', url, '--json'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        data = json.loads(result.stdout)
+        price = data[CRYPTO][CURRENCY]
+        change = data[CRYPTO].get(f'{CURRENCY}_24h_change', 0)
+        return price, change
+    except subprocess.CalledProcessError as e:
+        return None, f"Crossbar web command failed: {e.stderr.strip()}"
+    except json.JSONDecodeError as e:
+        return None, f"Failed to parse JSON response: {e}"
+    except Exception as e:
+        return None, str(e)
 
-# Try Crossbar API first
-response = crossbar_web('api.coinbase.com/v2/prices/BTC-USD/spot')
+price, change = get_crypto_price()
+symbol = SYMBOLS.get(CURRENCY, '$')
+crypto_name = CRYPTO_NAMES.get(CRYPTO, CRYPTO.upper())
 
-# Fallback to urllib
-if not response:
-    import urllib.request
-    try:
-        with urllib.request.urlopen('https://api.coinbase.com/v2/prices/BTC-USD/spot', timeout=10) as r:
-            response = r.read().decode()
-    except Exception:
-        pass
-
-if response:
-    try:
-        data = json.loads(response)
-        price = data.get('data', {}).get('amount', '--')
-        
-        try:
-            formatted = f"{float(price):,.0f}"
-        except (ValueError, TypeError):
-            formatted = price
-        
-        print(f"₿ ${formatted}")
-        print("---")
-        print(f"BTC/USD: ${price}")
-        print("Source: Coinbase")
-    except json.JSONDecodeError:
-        print("₿ Parse Error")
-else:
-    print("₿ Error")
+if price is None:
+    print(f"₿ N/A | color=gray")
     print("---")
-    print("Failed to fetch price")
+    print(f"Error: {change}")
+else:
+    icon = '' if change >= 0 else ''
+    color = 'green' if change >= 0 else 'red'
+    change_str = f"+{change:.2f}" if change >= 0 else f"{change:.2f}"
+
+    print(f"₿ {symbol}{price:,.0f} | color={color}")
+    print("---")
+    print(f"{CRYPTO.title()} ({crypto_name})")
+    print(f"Price: {symbol}{price:,.2f}")
+    print(f"24h Change: {change_str}% {icon}")
+    print("---")
+    print(f"Open CoinGecko | href=https://www.coingecko.com/en/coins/{CRYPTO}")
 
 print("---")
 print("Refresh | refresh=true")
+

@@ -1,49 +1,63 @@
-//! Battery Monitor Plugin - Uses Crossbar API for portability
-
 use std::process::Command;
-use serde_json::Value;
-
-fn crossbar(args: &[&str]) -> Option<String> {
-    let output = Command::new("crossbar")
-        .args(args)
-        .output()
-        .ok()?;
-    
-    if output.status.success() {
-        Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
-    } else {
-        None
-    }
-}
+use std::str;
+use std::str::FromStr;
 
 fn main() {
-    let battery_str = crossbar(&["battery"]).unwrap_or_else(|| "N/A".to_string());
-    
-    let mut charging = false;
-    if let Some(json_str) = crossbar(&["battery", "--json"]) {
-        if let Ok(data) = serde_json::from_str::<Value>(&json_str) {
-            charging = data["charging"].as_bool().unwrap_or(false);
-        }
+    let (level, charging) = get_battery_status_crossbar();
+
+    if level < 0 {
+        println!("\u{1F50C} N/A");
+        return;
     }
 
-    let battery: i32 = battery_str.parse().unwrap_or(0);
-    
+    // Determine icon and color based on level and charging state
     let (icon, color) = if charging {
-        ("🔌", "blue")
-    } else if battery < 20 {
-        ("🪫", "red")
-    } else if battery < 50 {
-        ("🔋", "yellow")
+        ("\u{26A1}", "blue") // lightning bolt
     } else {
-        ("🔋", "green")
+        match level {
+            0..=10 => ("\u{1FAAB}", "red"), // empty battery
+            11..=25 => ("\u{1F50B}", "orange"), // battery
+            26..=50 => ("\u{1F50B}", "yellow"),
+            _ => ("\u{1F50B}", "green"),
+        }
     };
 
-    println!("{} {}% | color={}", icon, battery_str, color);
+    println!("{} {}% | color={}", icon, level, color);
     println!("---");
-    println!("Battery: {}%", battery_str);
+    println!("Battery Level: {}%", level);
     if charging {
-        println!("Status: Charging ⚡");
+        println!("Status: Charging");
+    } else {
+        println!("Status: Discharging");
     }
     println!("---");
     println!("Refresh | refresh=true");
+}
+
+fn get_battery_status_crossbar() -> (i32, bool) {
+    let output = Command::new("crossbar")
+        .arg("battery")
+        .output();
+
+    match output {
+        Ok(cmd_output) => {
+            let battery_info = str::from_utf8(&cmd_output.stdout).unwrap_or("").trim();
+            // Example: "87% ⚡" or "50%"
+
+            let mut level_str = String::new();
+            for c in battery_info.chars() {
+                if c.is_ascii_digit() {
+                    level_str.push(c);
+                } else if !level_str.is_empty() {
+                    break;
+                }
+            }
+
+            let level = i32::from_str(&level_str).unwrap_or(-1);
+            let charging = battery_info.contains("⚡");
+
+            (level, charging)
+        }
+        Err(_) => (-1, false),
+    }
 }
