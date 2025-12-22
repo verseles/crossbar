@@ -5,8 +5,8 @@ Goal: Organize the `plugins/` folder and update the system to discover plugins w
 
 - [x] Task: Create subdirectories for all existing plugins in the `plugins/` folder. ec87ea5
 - [x] Task: Move existing plugin files into their respective subdirectories. ec87ea5
-- [ ] Task: Update `PluginManager` (in `crossbar_core` or `crossbar_cli`) to support recursive discovery or specific folder-based discovery.
-- [ ] Task: Write tests in `plugin_manager_test.dart` to verify that plugins in subdirectories are correctly detected.
+- [x] Task: Update `PluginManager` (in `crossbar_core` or `crossbar_cli`) to support recursive discovery or specific folder-based discovery. 8d50254
+- [x] Task: Write tests in `plugin_manager_test.dart` to verify that plugins in subdirectories are correctly detected. 8d50254
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Directory Restructuring' (Protocol in workflow.md)
 
 ## Phase 2: Showcase Plugins (Battery & Uptime)
