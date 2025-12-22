@@ -191,7 +191,7 @@ void main() {
 
     test('open url', () async {
       await _captureOutput(() => handleCliCommand(['open', 'url', 'http://example.com']));
-    });
+    }, tags: ['hardware']);
   });
 
   group('CLI Handler - Files', () {
