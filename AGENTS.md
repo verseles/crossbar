@@ -11,12 +11,13 @@ Plano grandioso e teórico (arquivo histórico):
 Roadmap de implementacao, atualizado regularmente:
 @./ROADMAP.md
 
-## 1. Regras Operacionais (Inflexíveis)
+## 1. Regras Operacionais (Inflexíveis) para cada sessão de trabalho
 
 - **Idioma**: Português (pt-BR) para toda comunicação.
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
 - **Leitura Inicial**: Sempre leia @./docs/archive/original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
-- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`flutter analyze --no-fatal-infos`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
+- **Commits recentes**: Sempre verifique os últimos 70 commits para ficar mais ciente das alterações recentes e decisões tomadas.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`make analyze`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.

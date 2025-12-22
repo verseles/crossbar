@@ -1,4 +1,4 @@
-.PHONY: all linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
+.PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
 	install uninstall \
 	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
 
@@ -120,11 +120,11 @@ android:
 
 # Run tests
 test:
-	flutter test
+	flutter test --exclude-tags=hardware
 
 # Run tests with coverage (excludes generated code: i18n, dialogs, paths)
 coverage:
-	flutter test --coverage
+	flutter test --exclude-tags=hardware --coverage
 	@echo "Filtering generated code from coverage..."
 	lcov --remove coverage/lcov.info 'lib/l10n/*' 'lib/ui/dialogs/*' 'lib/core/paths/*' -o coverage/lcov_filtered.info 2>/dev/null
 	@echo ""
