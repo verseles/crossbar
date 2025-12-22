@@ -14,8 +14,10 @@ import io.flutter.plugin.common.MethodChannel
  * Launches when user adds a widget to home screen.
  * Shows plugin selection dialog via Flutter deep link.
  *
- * Uses standard launchMode to ensure a fresh FlutterEngine for each config.
- * This avoids the alternating success/failure pattern caused by singleInstance.
+ * CRITICAL: Each configuration MUST use a fresh FlutterEngine to avoid
+ * the alternating success/failure pattern. This is achieved by:
+ * 1. getCachedEngineId() returning null (no engine caching)
+ * 2. shouldDestroyEngineWithHost() returning true (destroy engine on finish)
  */
 class WidgetConfigActivity : FlutterActivity() {
 
@@ -27,6 +29,12 @@ class WidgetConfigActivity : FlutterActivity() {
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var widgetSize = "small"
+
+    // CRITICAL: Never use a cached engine - always create fresh
+    override fun getCachedEngineId(): String? = null
+
+    // CRITICAL: Always destroy engine when activity finishes
+    override fun shouldDestroyEngineWithHost(): Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Get widget ID before super.onCreate
