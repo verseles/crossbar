@@ -13,7 +13,7 @@ Goal: Organize the `plugins/` folder and update the system to discover plugins w
 Goal: Implement the showcase plugins in all 7 supported languages.
 
 - [x] Task: Standardize `plugins/battery/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`. 1f4d48d
-- [ ] Task: Standardize `plugins/uptime/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`.
+- [x] Task: Standardize `plugins/uptime/` to include: `.lua`, `.sh`, `.py`, `.dart`, `.js`, `.go`, `.rs`. bf49297
 - [ ] Task: Verify that all showcase scripts execute and produce valid Crossbar/BitBar output using `crossbar run <plugin_path>`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Showcase Plugins' (Protocol in workflow.md)
 
