@@ -1,63 +1,56 @@
 use std::process::Command;
 use std::str;
-use std::str::FromStr;
 
 fn main() {
-    let (level, charging) = get_battery_status_crossbar();
-
-    if level < 0 {
-        println!("\u{1F50C} N/A");
-        return;
-    }
-
-    // Determine icon and color based on level and charging state
-    let (icon, color) = if charging {
-        ("\u{26A1}", "blue") // lightning bolt
-    } else {
-        match level {
-            0..=10 => ("\u{1FAAB}", "red"), // empty battery
-            11..=25 => ("\u{1F50B}", "orange"), // battery
-            26..=50 => ("\u{1F50B}", "yellow"),
-            _ => ("\u{1F50B}", "green"),
-        }
-    };
-
-    println!("{} {}% | color={}", icon, level, color);
-    println!("---");
-    println!("Battery Level: {}%", level);
-    if charging {
-        println!("Status: Charging");
-    } else {
-        println!("Status: Discharging");
-    }
-    println!("---");
-    println!("Refresh | refresh=true");
-}
-
-fn get_battery_status_crossbar() -> (i32, bool) {
     let output = Command::new("crossbar")
-        .arg("battery")
+        .args(&["battery", "--json"])
         .output();
 
     match output {
-        Ok(cmd_output) => {
-            let battery_info = str::from_utf8(&cmd_output.stdout).unwrap_or("").trim();
-            // Example: "87% ⚡" or "50%"
+        Ok(cmd_output) if cmd_output.status.success() => {
+            let json_str = str::from_utf8(&cmd_output.stdout).unwrap_or("");
+            // Simple parsing without serde dependency for portability
+            let level = extract_int(json_str, "level");
+            let charging = json_str.contains("\"charging\":true");
 
-            let mut level_str = String::new();
-            for c in battery_info.chars() {
-                if c.is_ascii_digit() {
-                    level_str.push(c);
-                } else if !level_str.is_empty() {
-                    break;
+            match level {
+                Some(l) => {
+                    let mut icon = "🔋";
+                    let mut color = "green";
+
+                    if charging {
+                        icon = "⚡"; color = "blue";
+                    } else if l <= 20 {
+                        icon = "🪫"; color = "red";
+                    } else if l <= 50 {
+                        color = "yellow";
+                    }
+
+                    println!("{} {}% | color={}", icon, l, color);
+                    println!("---");
+                    println!("Battery Level: {}%", l);
+                    println!("Status: {}", if charging { "Charging" } else { "Discharging" });
+                    println!("---");
+                    println!("Refresh | refresh=true");
+                }
+                None => {
+                    println!("🔋 --\n---\nNo battery detected");
                 }
             }
-
-            let level = i32::from_str(&level_str).unwrap_or(-1);
-            let charging = battery_info.contains("⚡");
-
-            (level, charging)
         }
-        Err(_) => (-1, false),
+        _ => {
+            println!("🔋 --\n---
+Error fetching battery info");
+        }
     }
+}
+
+fn extract_int(json: &str, key: &str) -> Option<i32> {
+    let pattern = format!("\"{}\":", key);
+    if let Some(pos) = json.find(&pattern) {
+        let start = pos + pattern.len();
+        let end = json[start..].find(|c: char| !c.is_digit(10)).unwrap_or(json.len() - start);
+        return json[start..start+end].trim().parse().ok();
+    }
+    None
 }

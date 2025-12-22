@@ -1,44 +1,48 @@
 #!/bin/bash
-# Battery Status
-# Shows battery level and charging state
+# battery.30s.sh
+# Battery monitor using Crossbar CLI API
 
-# Use Crossbar CLI API to get battery status
-battery_info=$(crossbar battery) # Example: "87% ⚡" or "50%"
+# Get battery data in JSON format
+BAT_JSON=$(crossbar battery --json)
 
-battery_level=$(echo "$battery_info" | grep -oE '[0-9]+' | head -1) # Extract percentage
-battery_status="?"
-battery_icon="" # Unknown icon
-
-if echo "$battery_info" | grep -q "⚡"; then
-    battery_status="charging"
-elif [ "$battery_level" == "100" ]; then
-    battery_status="full"
-else
-    battery_status="discharging"
+if [ $? -ne 0 ] || [ -z "$BAT_JSON" ]; then
+    echo "🔋 --"
+    echo "---"
+    echo "Error fetching battery info"
+    exit 1
 fi
 
-if [ "$battery" = "N/A" ]; then
-    echo " N/A"
+# Extract values using simple string manipulation (portable alternative to jq)
+LEVEL=$(echo "$BAT_JSON" | grep -oP '"level":\s*\K\d+')
+CHARGING=$(echo "$BAT_JSON" | grep -oP '"charging":\s*\K\w+')
+
+if [ -z "$LEVEL" ]; then
+    echo "🔋 --"
+    echo "---"
+    echo "No battery detected"
     exit 0
 fi
 
-if [ "$charging" = "true" ]; then
-    icon=""
-    color="blue"
-elif [ "$battery" -le 20 ]; then
-    icon=""
-    color="red"
-elif [ "$battery" -le 50 ]; then
-    icon=""
-    color="yellow"
-else
-    icon=""
-    color="green"
+ICON="🔋"
+COLOR="green"
+
+if [ "$CHARGING" = "true" ]; then
+    ICON="⚡"
+    COLOR="blue"
+elif [ "$LEVEL" -le 20 ]; then
+    ICON="🪫"
+    COLOR="red"
+elif [ "$LEVEL" -le 50 ]; then
+    COLOR="yellow"
 fi
 
-echo "$icon ${battery}% | color=$color"
+echo "$ICON $LEVEL% | color=$COLOR"
 echo "---"
-echo "Battery: ${battery}%"
-[ "$charging" = "true" ] && echo "Status: Charging" || echo "Status: Discharging"
+echo "Battery Level: $LEVEL%"
+if [ "$CHARGING" = "true" ]; then
+    echo "Status: Charging"
+else
+    echo "Status: Discharging"
+fi
 echo "---"
 echo "Refresh | refresh=true"

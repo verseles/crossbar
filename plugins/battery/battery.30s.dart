@@ -1,46 +1,40 @@
 #!/usr/bin/env dart
-/// Battery Monitor Plugin - Uses Crossbar API for portability
+// battery.30s.dart
 import 'dart:convert';
 import 'dart:io';
 
-String? crossbar(List<String> args) {
-  try {
-    final result = Process.runSync('crossbar', args);
-    return result.exitCode == 0 ? (result.stdout as String).trim() : null;
-  } catch (_) {
-    return null;
-  }
-}
-
 void main() {
-  final batteryStr = crossbar(['battery']) ?? 'N/A';
-  var charging = false;
+  Map<String, dynamic>? data;
+  try {
+    final res = Process.runSync('crossbar', ['battery', '--json']);
+    if (res.exitCode == 0) {
+      data = jsonDecode(res.stdout as String);
+    }
+  } catch (_) {}
 
-  final jsonStr = crossbar(['battery', '--json']);
-  if (jsonStr != null) {
-    try {
-      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-      charging = data['charging'] as bool? ?? false;
-    } catch (_) {}
+  if (data == null || data['level'] == null) {
+    print("🔋 --");
+    print("---");
+    print("No battery detected");
+    return;
   }
 
-  final battery = int.tryParse(batteryStr) ?? 0;
-  String icon, color;
+  final int level = data['level'];
+  final bool charging = data['charging'] ?? false;
 
+  String icon = "🔋", color = "green";
   if (charging) {
-    icon = '🔌'; color = 'blue';
-  } else if (battery < 20) {
-    icon = '🪫'; color = 'red';
-  } else if (battery < 50) {
-    icon = '🔋'; color = 'yellow';
-  } else {
-    icon = '🔋'; color = 'green';
+    icon = "⚡"; color = "blue";
+  } else if (level <= 20) {
+    icon = "🪫"; color = "red";
+  } else if (level <= 50) {
+    color = "yellow";
   }
 
-  print('$icon $batteryStr% | color=$color');
-  print('---');
-  print('Battery: $batteryStr%');
-  if (charging) print('Status: Charging ⚡');
-  print('---');
-  print('Refresh | refresh=true');
+  print("$icon $level% | color=$color");
+  print("---");
+  print("Battery Level: $level%");
+  print("Status: ${charging ? 'Charging' : 'Discharging'}");
+  print("---");
+  print("Refresh | refresh=true");
 }

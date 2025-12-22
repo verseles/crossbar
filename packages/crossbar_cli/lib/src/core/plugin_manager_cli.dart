@@ -262,6 +262,12 @@ class PluginManagerCli {
   Future<ProcessResult> _executePlugin(Plugin plugin, Map<String, String> env) async {
     final ext = path.extension(plugin.path).toLowerCase();
     
+    if (ext == '.lua') {
+      final runner = LuaRunner();
+      final result = await runner.run(plugin.path);
+      return ProcessResult(0, result.success ? 0 : 1, result.output, result.error ?? '');
+    }
+
     switch (ext) {
       case '.sh':
         return Process.run('bash', [plugin.path], environment: env);
@@ -273,8 +279,6 @@ class PluginManagerCli {
         return Process.run('dart', ['run', plugin.path], environment: env);
       case '.go':
         return Process.run('go', ['run', plugin.path], environment: env);
-      case '.lua':
-        return Process.run('lua', [plugin.path], environment: env);
       default:
         return Process.run(plugin.path, [], environment: env);
     }

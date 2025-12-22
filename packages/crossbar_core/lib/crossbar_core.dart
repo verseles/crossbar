@@ -17,3 +17,5 @@ export 'src/models/plugin_output.dart';
 
 // Core
 export 'src/core/output_parser.dart';
+export 'src/core/lua_runner.dart';
+export 'src/core/bridge/crossbar_bridge.dart';
