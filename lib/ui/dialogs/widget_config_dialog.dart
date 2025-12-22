@@ -43,10 +43,11 @@ class WidgetConfigDialog extends StatefulWidget {
 
 class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
   static const _configChannel = MethodChannel('com.verseles.crossbar/widget_config');
-  
+
   final Set<String> _selectedPlugins = {};
   List<Plugin> _availablePlugins = [];
   bool _isLoading = true;
+  bool _hasLoadedOnce = false;
 
   bool get _isLarge => widget.widgetSize == 'large';
 
@@ -57,15 +58,28 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
   }
 
   Future<void> _loadPlugins() async {
+    // Prevent multiple loads
+    if (_hasLoadedOnce) return;
+    _hasLoadedOnce = true;
+
     final pluginManager = PluginManager();
-    
-    // Ensure plugins are discovered
-    if (pluginManager.plugins.isEmpty) {
-      await pluginManager.discoverPlugins();
+
+    // Always rediscover plugins to ensure fresh list
+    await pluginManager.discoverPlugins();
+
+    if (!mounted) return;
+
+    // Create a unique list based on plugin ID to avoid duplicates
+    final uniquePlugins = <String, Plugin>{};
+    for (final plugin in pluginManager.plugins.where((p) => p.enabled)) {
+      // Only add if not already present (first occurrence wins)
+      if (!uniquePlugins.containsKey(plugin.id)) {
+        uniquePlugins[plugin.id] = plugin;
+      }
     }
-    
+
     setState(() {
-      _availablePlugins = pluginManager.plugins.where((p) => p.enabled).toList();
+      _availablePlugins = uniquePlugins.values.toList();
       _isLoading = false;
     });
   }
@@ -156,33 +170,66 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
     final title = _isLarge
         ? l10n.selectPlugins
         : l10n.selectOnePlugin;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.widgets_outlined,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.widgetConfiguration,
-                  style: theme.textTheme.titleLarge,
+          Row(
+            children: [
+              Icon(
+                Icons.widgets_outlined,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.widgetConfiguration,
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    Text(
+                      title,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  title,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
+              ),
+            ],
+          ),
+          if (Platform.isAndroid) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: theme.colorScheme.primary,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.widgetUpdateNote,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -222,8 +269,9 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
       itemBuilder: (context, index) {
         final plugin = _availablePlugins[index];
         final isSelected = _selectedPlugins.contains(plugin.id);
-        
+
         return CheckboxListTile(
+          key: ValueKey(plugin.id), // Ensure unique key for each item
           value: isSelected,
           onChanged: (_) => _togglePlugin(plugin.id),
           title: Text(_formatPluginName(plugin.id)),

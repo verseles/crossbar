@@ -155,5 +155,12 @@
   "noConfigurationRequired": "Aucune configuration requise",
 
   "fiveMinutes": "5 minutes",
-  "licenseText": "Crossbar - Système Universel de Plugins\n\nCopyright (C) 2025\n\nCe programme est un logiciel libre : vous pouvez le redistribuer et/ou le modifier selon les termes de la Licence Publique Générale GNU Affero telle que publiée par la Free Software Foundation, soit la version 3 de la Licence, ou (à votre choix) toute version ultérieure.\n\nCe programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ; sans même la garantie implicite de COMMERCIALISATION ou d'ADÉQUATION À UN USAGE PARTICULIER. Voir la Licence Publique Générale GNU Affero pour plus de détails.\n\nVous devriez avoir reçu une copie de la Licence Publique Générale GNU Affero avec ce programme. Sinon, voir <https://www.gnu.org/licenses/>."
+  "licenseText": "Crossbar - Système Universel de Plugins\n\nCopyright (C) 2025\n\nCe programme est un logiciel libre : vous pouvez le redistribuer et/ou le modifier selon les termes de la Licence Publique Générale GNU Affero telle que publiée par la Free Software Foundation, soit la version 3 de la Licence, ou (à votre choix) toute version ultérieure.\n\nCe programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE ; sans même la garantie implicite de COMMERCIALISATION ou d'ADÉQUATION À UN USAGE PARTICULIER. Voir la Licence Publique Générale GNU Affero pour plus de détails.\n\nVous devriez avoir reçu une copie de la Licence Publique Générale GNU Affero avec ce programme. Sinon, voir <https://www.gnu.org/licenses/>.",
+
+  "widgetConfiguration": "Configuration du Widget",
+  "selectPluginsForWidget": "Sélectionner les plugins à afficher",
+  "selectOnePlugin": "Sélectionner un plugin",
+  "selectPlugins": "Sélectionner les plugins",
+  "noPluginsAvailable": "Aucun plugin disponible. Installez d'abord quelques plugins.",
+  "widgetUpdateNote": "Les widgets se mettent à jour toutes les 15 min en arrière-plan. Ouvrez l'app pour des mises à jour instantanées."
 }

@@ -13,40 +13,62 @@ import io.flutter.plugin.common.MethodChannel
  * Configuration activity for Crossbar widgets.
  * Launches when user adds a widget to home screen.
  * Shows plugin selection dialog via Flutter deep link.
+ *
+ * Uses singleInstance launchMode to avoid FlutterEngine conflicts
+ * with the main app's FlutterActivity.
  */
 class WidgetConfigActivity : FlutterActivity() {
-    
+
     companion object {
         private const val TAG = "WidgetConfigActivity"
         private const val CHANNEL = "com.verseles.crossbar/widget_config"
         private const val PREFS_NAME = "HomeWidgetPreferences"
     }
-    
+
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var widgetSize = "small"
-    
+    private var isConfigurationComplete = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        // Set result to CANCELED in case user backs out
-        setResult(RESULT_CANCELED)
-        
-        // Get the widget ID from the intent
+        // Get widget ID before super.onCreate to avoid race conditions
         appWidgetId = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
-        
+
+        super.onCreate(savedInstanceState)
+
+        // Set result to CANCELED in case user backs out
+        val cancelIntent = Intent().apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+        setResult(RESULT_CANCELED, cancelIntent)
+
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             android.util.Log.e(TAG, "Invalid widget ID, finishing")
             finish()
             return
         }
-        
+
         // Determine widget size from caller class name
         widgetSize = determineWidgetSize()
-        
+
         android.util.Log.d(TAG, "Configuring widget $appWidgetId, size: $widgetSize")
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Handle new intents if activity is reused
+        val newWidgetId = intent.extras?.getInt(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID
+        ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
+
+        if (newWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            appWidgetId = newWidgetId
+            widgetSize = determineWidgetSize()
+            android.util.Log.d(TAG, "Reconfiguring widget $appWidgetId, size: $widgetSize")
+        }
     }
     
     private fun determineWidgetSize(): String {
@@ -73,25 +95,32 @@ class WidgetConfigActivity : FlutterActivity() {
                 "saveWidgetConfig" -> {
                     val widgetId = call.argument<Int>("widgetId") ?: appWidgetId
                     val pluginIds = call.argument<List<String>>("pluginIds") ?: emptyList()
-                    
+
                     saveWidgetConfig(widgetId, pluginIds)
-                    
+
                     // Update the widget immediately
                     updateWidget()
-                    
-                    // Return success result
+
+                    // Mark configuration as complete and return success result
+                    isConfigurationComplete = true
                     val resultValue = Intent().apply {
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                     }
                     setResult(RESULT_OK, resultValue)
-                    
+
+                    android.util.Log.d(TAG, "Widget $appWidgetId configured successfully with plugins: $pluginIds")
+
                     result.success(true)
-                    
+
                     // Finish after saving
                     finish()
                 }
                 "cancelWidgetConfig" -> {
-                    setResult(RESULT_CANCELED)
+                    val cancelIntent = Intent().apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                    }
+                    setResult(RESULT_CANCELED, cancelIntent)
+                    android.util.Log.d(TAG, "Widget $appWidgetId configuration cancelled")
                     result.success(true)
                     finish()
                 }
@@ -138,5 +167,24 @@ class WidgetConfigActivity : FlutterActivity() {
     
     override fun getInitialRoute(): String {
         return "/widget/config?id=$appWidgetId&size=$widgetSize"
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // Ensure RESULT_CANCELED is set with the widget ID before finishing
+        if (!isConfigurationComplete) {
+            val cancelIntent = Intent().apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            }
+            setResult(RESULT_CANCELED, cancelIntent)
+            android.util.Log.d(TAG, "Widget $appWidgetId configuration cancelled via back press")
+        }
+        super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        // Log the final state
+        android.util.Log.d(TAG, "WidgetConfigActivity destroyed. Configuration complete: $isConfigurationComplete")
+        super.onDestroy()
     }
 }
