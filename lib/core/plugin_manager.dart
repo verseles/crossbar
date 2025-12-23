@@ -2,10 +2,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:crossbar_core/crossbar_core.dart';
 import '../services/config_service.dart';
 import 'paths/platform_paths.dart'
     if (dart.library.ui) 'paths/platform_paths_flutter.dart';

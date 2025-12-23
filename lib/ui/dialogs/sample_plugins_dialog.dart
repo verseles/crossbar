@@ -217,7 +217,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                   Text(
                     AppLocalizations.of(context)!.universalAndAdditionalPlugins(
                       SamplePluginsService.universalPlugins.length,
-                      SamplePluginsService.legacyPlugins.length,
+                      0,
                     ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),

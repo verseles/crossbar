@@ -1,6 +1,7 @@
 import 'dart:io';
+
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/services.dart';
-import 'package:crossbar_core/crossbar_core.dart'; // Para AndroidBridgeInterface
 
 /// AndroidNativeBridge - Provides access to Android-specific APIs via Method Channel
 class AndroidNativeBridge implements AndroidBridgeInterface {

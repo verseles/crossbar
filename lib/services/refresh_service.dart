@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:meta/meta.dart';
 
-import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
 
 /// Callback type for plugin output updates

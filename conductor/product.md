@@ -10,6 +10,7 @@ Crossbar is a revolutionary, cross-platform plugin system that allows users to "
 
 ## Core Features
 *   **Multi-Language Plugins:** Native support for Bash, Python, Node.js, Lua, Dart, Go, Rust, and declarative YAML. Plugins can have multiple language variants in the same folder, with automatic discovery and priority selection.
+*   **Dynamic Language Switching:** Users can switch between available language implementations (e.g., Lua vs Bash) directly from the GUI for any installed plugin.
 *   **Cross-Platform UI:** Renders as a system tray icon (Desktop), home screen widget (Android/iOS), or persistent notification.
 *   **Unified CLI API:** Over 75 built-in commands (`crossbar cpu`, `crossbar battery`, etc.) that abstract platform-specific details.
 *   **Secure Configuration:** Auto-generated UI for plugin settings with secure storage for secrets (Keychain/KeyStore).

@@ -73,8 +73,8 @@ enum PluginCategory {
 }
 
 /// Represents a variant of a plugin in a specific language
-class PluginVariant {
-  const PluginVariant({
+class PluginMetadataVariant {
+  const PluginMetadataVariant({
     required this.language,
     required this.filename,
     required this.assetPath,
@@ -113,7 +113,7 @@ class PluginMetadata {
   final PluginCategory category;
   
   /// Available language variants
-  final List<PluginVariant> variants;
+  final List<PluginMetadataVariant> variants;
   
   /// Tags for filtering/searching
   final List<String> tags;
@@ -129,15 +129,15 @@ class PluginMetadata {
       variants.map((v) => v.language).toList();
 
   /// Get variant by language
-  PluginVariant? getVariant(PluginLanguage language) {
-    return variants.cast<PluginVariant?>().firstWhere(
+  PluginMetadataVariant? getVariant(PluginLanguage language) {
+    return variants.cast<PluginMetadataVariant?>().firstWhere(
       (v) => v?.language == language,
       orElse: () => null,
     );
   }
 
   /// Get the default/preferred variant (Lua first for universal compatibility)
-  PluginVariant get defaultVariant {
+  PluginMetadataVariant get defaultVariant {
     // Prefer Lua for universal compatibility, then Bash for desktop
     for (final lang in [PluginLanguage.lua, PluginLanguage.bash, PluginLanguage.python, PluginLanguage.dart]) {
       final v = getVariant(lang);

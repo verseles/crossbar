@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:meta/meta.dart';
 
-import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
 import 'notification_service.dart';
 import 'refresh_service.dart';

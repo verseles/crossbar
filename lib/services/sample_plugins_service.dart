@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
 
-import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
 import '../models/plugin_metadata.dart';
 
@@ -14,10 +13,10 @@ export '../models/plugin_metadata.dart';
 /// Service for managing sample/example plugins bundled with the app.
 class SamplePluginsService {
   factory SamplePluginsService() => _instance;
-  SamplePluginsService._();
+
+  SamplePluginsService._internal();
 
   static final SamplePluginsService _instance = SamplePluginsService._internal();
-  SamplePluginsService._internal();
 
   final PluginManager _pluginManager = PluginManager();
 
@@ -34,13 +33,14 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['cpu', 'monitor', 'usage', 'hardware'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'cpu.10s.sh', assetPath: 'plugins/cpu/cpu.10s.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'cpu.10s.py', assetPath: 'plugins/cpu/cpu.10s.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'cpu.10s.js', assetPath: 'plugins/cpu/cpu.10s.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'cpu.10s.dart', assetPath: 'plugins/cpu/cpu.10s.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'cpu.10s.go', assetPath: 'plugins/cpu/cpu.10s.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'cpu.10s.rs', assetPath: 'plugins/cpu/cpu.10s.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'cpu.10s.lua', assetPath: 'plugins/cpu/cpu.10s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'cpu.10s.sh', assetPath: 'plugins/cpu/cpu.10s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.python, filename: 'cpu.10s.py', assetPath: 'plugins/cpu/cpu.10s.py'),
+        PluginMetadataVariant(language: PluginLanguage.node, filename: 'cpu.10s.js', assetPath: 'plugins/cpu/cpu.10s.js'),
+        PluginMetadataVariant(language: PluginLanguage.dart, filename: 'cpu.10s.dart', assetPath: 'plugins/cpu/cpu.10s.dart'),
+        PluginMetadataVariant(language: PluginLanguage.go, filename: 'cpu.10s.go', assetPath: 'plugins/cpu/cpu.10s.go'),
+        PluginMetadataVariant(language: PluginLanguage.rust, filename: 'cpu.10s.rs', assetPath: 'plugins/cpu/cpu.10s.rs'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'cpu.10s.lua', assetPath: 'plugins/cpu/cpu.10s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.yaml, filename: 'cpu.5s.yaml', assetPath: 'plugins/yaml/cpu.5s.yaml'),
       ],
     ),
     PluginMetadata(
@@ -51,8 +51,8 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['memory', 'ram', 'monitor', 'usage'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'memory.10s.sh', assetPath: 'plugins/memory/memory.10s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'memory.10s.lua', assetPath: 'plugins/memory/memory.10s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'memory.10s.sh', assetPath: 'plugins/memory/memory.10s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'memory.10s.lua', assetPath: 'plugins/memory/memory.10s.lua'),
       ],
     ),
     PluginMetadata(
@@ -63,13 +63,13 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['battery', 'power', 'charging'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'battery.30s.sh', assetPath: 'plugins/battery/battery.30s.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'battery.30s.py', assetPath: 'plugins/battery/battery.30s.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'battery.30s.js', assetPath: 'plugins/battery/battery.30s.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'battery.30s.dart', assetPath: 'plugins/battery/battery.30s.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'battery.30s.go', assetPath: 'plugins/battery/battery.30s.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'battery.30s.rs', assetPath: 'plugins/battery/battery.30s.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'battery.30s.lua', assetPath: 'plugins/battery/battery.30s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'battery.30s.sh', assetPath: 'plugins/battery/battery.30s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.python, filename: 'battery.30s.py', assetPath: 'plugins/battery/battery.30s.py'),
+        PluginMetadataVariant(language: PluginLanguage.node, filename: 'battery.30s.js', assetPath: 'plugins/battery/battery.30s.js'),
+        PluginMetadataVariant(language: PluginLanguage.dart, filename: 'battery.30s.dart', assetPath: 'plugins/battery/battery.30s.dart'),
+        PluginMetadataVariant(language: PluginLanguage.go, filename: 'battery.30s.go', assetPath: 'plugins/battery/battery.30s.go'),
+        PluginMetadataVariant(language: PluginLanguage.rust, filename: 'battery.30s.rs', assetPath: 'plugins/battery/battery.30s.rs'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'battery.30s.lua', assetPath: 'plugins/battery/battery.30s.lua'),
       ],
     ),
     PluginMetadata(
@@ -80,13 +80,13 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['uptime', 'boot', 'system'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'uptime.1m.py', assetPath: 'plugins/uptime/uptime.1m.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'uptime.1m.js', assetPath: 'plugins/uptime/uptime.1m.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'uptime.1m.dart', assetPath: 'plugins/uptime/uptime.1m.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'uptime.1m.go', assetPath: 'plugins/uptime/uptime.1m.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'uptime.1m.rs', assetPath: 'plugins/uptime/uptime.1m.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'uptime.1m.lua', assetPath: 'plugins/uptime/uptime.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.python, filename: 'uptime.1m.py', assetPath: 'plugins/uptime/uptime.1m.py'),
+        PluginMetadataVariant(language: PluginLanguage.node, filename: 'uptime.1m.js', assetPath: 'plugins/uptime/uptime.1m.js'),
+        PluginMetadataVariant(language: PluginLanguage.dart, filename: 'uptime.1m.dart', assetPath: 'plugins/uptime/uptime.1m.dart'),
+        PluginMetadataVariant(language: PluginLanguage.go, filename: 'uptime.1m.go', assetPath: 'plugins/uptime/uptime.1m.go'),
+        PluginMetadataVariant(language: PluginLanguage.rust, filename: 'uptime.1m.rs', assetPath: 'plugins/uptime/uptime.1m.rs'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'uptime.1m.lua', assetPath: 'plugins/uptime/uptime.1m.lua'),
       ],
     ),
     PluginMetadata(
@@ -96,8 +96,8 @@ class SamplePluginsService {
       category: PluginCategory.system,
       tags: ['system', 'os', 'kernel'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'system-info.1m.sh', assetPath: 'plugins/system-info/system-info.1m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'system-info.1m.lua', assetPath: 'plugins/system-info/system-info.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'system-info.1m.sh', assetPath: 'plugins/system-info/system-info.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'system-info.1m.lua', assetPath: 'plugins/system-info/system-info.1m.lua'),
       ],
     ),
 
@@ -112,8 +112,8 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['time', 'clock', 'date'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'clock.1s.sh', assetPath: 'plugins/clock/clock.1s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'clock.1s.lua', assetPath: 'plugins/clock/clock.1s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'clock.1s.sh', assetPath: 'plugins/clock/clock.1s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'clock.1s.lua', assetPath: 'plugins/clock/clock.1s.lua'),
       ],
     ),
     PluginMetadata(
@@ -123,8 +123,8 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['time', 'clock'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'time.1s.sh', assetPath: 'plugins/time/time.1s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'time.1s.lua', assetPath: 'plugins/time/time.1s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'time.1s.sh', assetPath: 'plugins/time/time.1s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'time.1s.lua', assetPath: 'plugins/time/time.1s.lua'),
       ],
     ),
     PluginMetadata(
@@ -134,8 +134,8 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['time', 'clock', 'emoji'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'emoji-clock.1m.sh', assetPath: 'plugins/emoji-clock/emoji-clock.1m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'emoji-clock.1m.lua', assetPath: 'plugins/emoji-clock/emoji-clock.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'emoji-clock.1m.sh', assetPath: 'plugins/emoji-clock/emoji-clock.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'emoji-clock.1m.lua', assetPath: 'plugins/emoji-clock/emoji-clock.1m.lua'),
       ],
     ),
     PluginMetadata(
@@ -145,8 +145,8 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['time', 'timezone', 'world'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'world-clock.1m.sh', assetPath: 'plugins/world-clock/world-clock.1m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'world-clock.1m.lua', assetPath: 'plugins/world-clock/world-clock.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'world-clock.1m.sh', assetPath: 'plugins/world-clock/world-clock.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'world-clock.1m.lua', assetPath: 'plugins/world-clock/world-clock.1m.lua'),
       ],
     ),
     PluginMetadata(
@@ -156,8 +156,8 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['countdown', 'timer'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'countdown.1s.sh', assetPath: 'plugins/countdown/countdown.1s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'countdown.1s.lua', assetPath: 'plugins/countdown/countdown.1s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'countdown.1s.sh', assetPath: 'plugins/countdown/countdown.1s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'countdown.1s.lua', assetPath: 'plugins/countdown/countdown.1s.lua'),
       ],
     ),
     PluginMetadata(
@@ -167,8 +167,8 @@ class SamplePluginsService {
       category: PluginCategory.productivity,
       tags: ['pomodoro', 'timer', 'focus'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'pomodoro.1s.sh', assetPath: 'plugins/pomodoro/pomodoro.1s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'pomodoro.1s.lua', assetPath: 'plugins/pomodoro/pomodoro.1s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'pomodoro.1s.sh', assetPath: 'plugins/pomodoro/pomodoro.1s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'pomodoro.1s.lua', assetPath: 'plugins/pomodoro/pomodoro.1s.lua'),
       ],
     ),
 
@@ -184,13 +184,13 @@ class SamplePluginsService {
       configRequired: true,
       tags: ['weather', 'temperature', 'forecast', 'api'],
       variants: [
-        PluginVariant(
+        PluginMetadataVariant(
           language: PluginLanguage.bash, 
           filename: 'weather.30m.sh', 
           assetPath: 'plugins/weather/weather.30m.sh',
           schemaAssetPath: 'plugins/weather/weather.schema.json',
         ),
-        PluginVariant(
+        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'weather.30m.lua',
           assetPath: 'plugins/weather/weather.30m.lua',
@@ -205,8 +205,8 @@ class SamplePluginsService {
       category: PluginCategory.network,
       tags: ['ip', 'location', 'public'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'ip-info.1h.sh', assetPath: 'plugins/ip-info/ip-info.1h.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'ip-info.1h.lua', assetPath: 'plugins/ip-info/ip-info.1h.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'ip-info.1h.sh', assetPath: 'plugins/ip-info/ip-info.1h.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'ip-info.1h.lua', assetPath: 'plugins/ip-info/ip-info.1h.lua'),
       ],
     ),
     PluginMetadata(
@@ -216,8 +216,8 @@ class SamplePluginsService {
       category: PluginCategory.network,
       tags: ['network', 'status', 'ping'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'site-check.1m.sh', assetPath: 'plugins/site-check/site-check.1m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'site-check.1m.lua', assetPath: 'plugins/site-check/site-check.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'site-check.1m.sh', assetPath: 'plugins/site-check/site-check.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'site-check.1m.lua', assetPath: 'plugins/site-check/site-check.1m.lua'),
       ],
     ),
 
@@ -232,8 +232,8 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['bitcoin', 'crypto', 'price', 'finance', 'btc'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'bitcoin.5m.sh', assetPath: 'plugins/bitcoin/bitcoin.5m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'bitcoin.5m.lua', assetPath: 'plugins/bitcoin/bitcoin.5m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'bitcoin.5m.sh', assetPath: 'plugins/bitcoin/bitcoin.5m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'bitcoin.5m.lua', assetPath: 'plugins/bitcoin/bitcoin.5m.lua'),
       ],
     ),
 
@@ -247,8 +247,8 @@ class SamplePluginsService {
       category: PluginCategory.development,
       tags: ['git', 'vcs', 'repo'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'git-status.30s.sh', assetPath: 'plugins/git-status/git-status.30s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'git-status.30s.lua', assetPath: 'plugins/git-status/git-status.30s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'git-status.30s.sh', assetPath: 'plugins/git-status/git-status.30s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'git-status.30s.lua', assetPath: 'plugins/git-status/git-status.30s.lua'),
       ],
     ),
     PluginMetadata(
@@ -258,8 +258,8 @@ class SamplePluginsService {
       category: PluginCategory.development,
       tags: ['npm', 'package', 'downloads'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'npm-downloads.1h.sh', assetPath: 'plugins/npm-downloads/npm-downloads.1h.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'npm-downloads.1h.lua', assetPath: 'plugins/npm-downloads/npm-downloads.1h.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'npm-downloads.1h.sh', assetPath: 'plugins/npm-downloads/npm-downloads.1h.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'npm-downloads.1h.lua', assetPath: 'plugins/npm-downloads/npm-downloads.1h.lua'),
       ],
     ),
     PluginMetadata(
@@ -270,13 +270,13 @@ class SamplePluginsService {
       configRequired: true,
       tags: ['github', 'notifications', 'api'],
       variants: [
-        PluginVariant(
+        PluginMetadataVariant(
           language: PluginLanguage.bash,
           filename: 'github-notifications.5m.sh',
           assetPath: 'plugins/github-notifications/github-notifications.5m.sh',
           schemaAssetPath: 'plugins/github-notifications/github-notifications.5m.py.schema.json', // Reuse existing schema
         ),
-        PluginVariant(
+        PluginMetadataVariant(
           language: PluginLanguage.lua, 
           filename: 'github-notifications.5m.lua', 
           assetPath: 'plugins/github-notifications/github-notifications.5m.lua',
@@ -291,8 +291,8 @@ class SamplePluginsService {
       category: PluginCategory.development,
       tags: ['process', 'cpu', 'monitor'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'process-monitor.10s.sh', assetPath: 'plugins/process-monitor/process-monitor.10s.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'process-monitor.10s.lua', assetPath: 'plugins/process-monitor/process-monitor.10s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'process-monitor.10s.sh', assetPath: 'plugins/process-monitor/process-monitor.10s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'process-monitor.10s.lua', assetPath: 'plugins/process-monitor/process-monitor.10s.lua'),
       ],
     ),
 
@@ -306,8 +306,8 @@ class SamplePluginsService {
       category: PluginCategory.productivity,
       tags: ['todo', 'tasks', 'list'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'todo.1m.sh', assetPath: 'plugins/todo/todo.1m.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'todo.1m.lua', assetPath: 'plugins/todo/todo.1m.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'todo.1m.sh', assetPath: 'plugins/todo/todo.1m.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'todo.1m.lua', assetPath: 'plugins/todo/todo.1m.lua'),
       ],
     ),
     PluginMetadata(
@@ -317,8 +317,8 @@ class SamplePluginsService {
       category: PluginCategory.fun,
       tags: ['quotes', 'inspiration', 'motivation'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'quotes.1h.sh', assetPath: 'plugins/quotes/quotes.1h.sh'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'quotes.1h.lua', assetPath: 'plugins/quotes/quotes.1h.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'quotes.1h.sh', assetPath: 'plugins/quotes/quotes.1h.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'quotes.1h.lua', assetPath: 'plugins/quotes/quotes.1h.lua'),
       ],
     ),
   ];
@@ -381,7 +381,7 @@ class SamplePluginsService {
   }
 
   /// Install a specific variant of a plugin
-  Future<void> installVariant(PluginVariant variant) async {
+  Future<void> installVariant(PluginMetadataVariant variant) async {
     final pluginsDir = await _pluginManager.pluginsDirectory;
     
     // Determine subdirectory based on plugin ID/filename
