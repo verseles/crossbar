@@ -3,13 +3,15 @@ import 'dart:io';
 import '../tray_backend.dart';
 import '../tray_menu_item.dart';
 import '../../logger_service.dart';
-import 'sni_multi_tray_backend.dart';
+import 'process_spawn_tray_backend.dart';
 import 'legacy_tray_backend.dart';
 
 /// Hybrid tray backend with automatic detection and fallback.
 ///
-/// This backend tries to use SNI (StatusNotifierItem) first on Linux,
-/// and falls back to the legacy tray_manager backend if SNI is not available.
+/// On Linux, this backend uses ProcessSpawnTrayBackend which spawns
+/// separate daemon processes for each tray icon (workaround for D-Bus
+/// name collision issues with SNI).
+/// On other platforms, it uses the legacy tray_manager backend.
 class HybridTrayBackend implements TrayBackend {
   TrayBackend? _activeBackend;
   bool _initialized = false;
@@ -35,19 +37,19 @@ class HybridTrayBackend implements TrayBackend {
 
     LoggerService().info('$name: Initializing with automatic backend detection');
 
-    // Try SNI first on Linux
+    // Use ProcessSpawnTrayBackend on Linux for multi-icon support
     if (Platform.isLinux) {
-      final sniBackend = SniMultiTrayBackend();
-      final sniInitialized = await sniBackend.init();
+      final spawnBackend = ProcessSpawnTrayBackend();
+      final spawnInitialized = await spawnBackend.init();
       
-      if (sniInitialized) {
-        _activeBackend = sniBackend;
+      if (spawnInitialized) {
+        _activeBackend = spawnBackend;
         _initialized = true;
-        LoggerService().info('$name: Using SNI backend (multi-icon support)');
+        LoggerService().info('$name: Using process spawn backend (multi-icon support)');
         return true;
       }
       
-      LoggerService().info('$name: SNI not available, trying legacy backend');
+      LoggerService().info('$name: Process spawn backend not available, trying legacy backend');
     }
 
     // Fall back to legacy backend

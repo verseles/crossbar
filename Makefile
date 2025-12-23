@@ -54,7 +54,7 @@ all: $(DEFAULT_TARGET)
 	@echo "Building for detected OS: $(DEFAULT_TARGET)"
 
 # Linux build with unified CLI entry point
-# Architecture: crossbar (CLI + launcher) + crossbar-gui (Flutter)
+# Architecture: crossbar (CLI + launcher) + crossbar-gui (Flutter) + crossbar_tray_daemon
 linux:
 	@echo "Building Flutter GUI..."
 	flutter build linux --release
@@ -62,13 +62,16 @@ linux:
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
 	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
+	@echo "Compiling tray daemon for multi-icon support..."
+	dart compile exe bin/crossbar_tray_daemon.dart -o $(LINUX_BUNDLE)/crossbar_tray_daemon
 	@echo "Copying desktop integration files..."
 	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon_linux.png $(LINUX_BUNDLE)/crossbar.png
 	@echo "Done! Binaries at $(LINUX_BUNDLE)/"
 	@echo ""
-	@echo "  crossbar     - CLI + launcher (runs GUI if no args)"
-	@echo "  crossbar-gui - Flutter GUI application"
+	@echo "  crossbar             - CLI + launcher (runs GUI if no args)"
+	@echo "  crossbar-gui         - Flutter GUI application"
+	@echo "  crossbar_tray_daemon - Daemon for multi-icon tray support"
 	@echo ""
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
 
