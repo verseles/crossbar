@@ -358,32 +358,36 @@ class _SettingsTabState extends State<SettingsTab> {
                 Navigator.pop(context);
               },
             ),
-            // Separate - Coming Soon (Linux only in future)
+            // Separate - Linux only (requires SNI support)
             RadioListTile<TrayDisplayMode>(
               title: Row(
                 children: [
                   Text(l10n.separate),
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      l10n.comingSoon,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  if (!Platform.isLinux)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Linux only',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               subtitle: Text(l10n.oneTrayIconPerPlugin),
               value: TrayDisplayMode.separate,
               groupValue: settings.trayDisplayMode,
-              onChanged: null, // Disabled
+              onChanged: Platform.isLinux ? (value) {
+                settings.trayDisplayMode = value!;
+                Navigator.pop(context);
+              } : null, // Only enabled on Linux
             ),
             // Smart Collapse - Coming Soon
             RadioListTile<TrayDisplayMode>(
