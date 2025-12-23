@@ -7,7 +7,8 @@ Chame a tool `play_notification` sempre que:
 
 - concluir todas as tarefas necessárias da solicitação
 - precisar da atenção do usuário
-- o usuário disser algo como "me avise", "me chame"I
+- o usuário disser algo como "me avise", "me chame"
+  IMPORTANTE: A chamada da tool `play_notification` deve ser feita após a conclusão de uma tarefa mas sempre antes do relatório final / sumário. Nunca deve ser a última coisa a ser chamada para evitar disparos seguintes. Ou seja, tarefa -> notificação -> relatório final. Nunca tarefa -> relatório final -> notificação.
 
 Atenção: Este projeto ainda não foi lançado, não se preocupe com breaking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
