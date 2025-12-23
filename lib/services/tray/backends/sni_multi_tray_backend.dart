@@ -50,25 +50,16 @@ class SniMultiTrayBackend implements TrayBackend {
   }
 
   /// Checks if SNI is available on the system.
+  /// 
+  /// Note: We assume SNI is available on Linux since most modern desktop
+  /// environments support it (GNOME with AppIndicator, KDE, etc.).
+  /// The actual connection will fail gracefully if SNI is not available.
   Future<bool> _checkSniAvailable() async {
-    try {
-      // Try to create a test client and connect
-      // This will fail if SNI is not available
-      final testClient = StatusNotifierItemClient(
-        id: 'crossbar-sni-test',
-        iconName: 'dialog-information',
-        menu: DBusMenuItem(children: []),
-      );
-      
-      await testClient.connect();
-      await testClient.close();
-      
-      LoggerService().info('$name: SNI watcher detected');
-      return true;
-    } catch (e) {
-      LoggerService().warning('$name: SNI check failed: $e');
-      return false;
-    }
+    // On Linux, assume SNI is available - the createIcon will fail gracefully
+    // if the D-Bus service is not running.
+    // This avoids creating a visible test icon that causes a "flash".
+    LoggerService().info('$name: Assuming SNI available on Linux');
+    return true;
   }
 
   @override
