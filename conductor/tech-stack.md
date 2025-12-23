@@ -16,7 +16,7 @@
     *   **Bridge:** `home_widget` for Flutter <-> Native Widget communication.
 
 ## Plugin Ecosystem
-*   **Embedded Runner:** Lua (`lua_dardo`) for universal, dependency-free plugins.
+*   **Embedded Runner:** Lua (`lua_dardo`) for universal, dependency-free plugins. Lua is the recommended language for cross-platform plugins.
 *   **External Runners:** Bash, Python, Node.js, Rust, Go (Desktop only).
 *   **Configuration:** JSON Schema + `flutter_secure_storage` for credentials.
 

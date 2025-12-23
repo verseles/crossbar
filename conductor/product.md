@@ -9,7 +9,7 @@ Crossbar is a revolutionary, cross-platform plugin system that allows users to "
 *   **System Administrators:** Who need to monitor servers or local services directly from their menu bar or mobile home screen.
 
 ## Core Features
-*   **Multi-Language Plugins:** Native support for Bash, Python, Node.js, Lua, Dart, Go, Rust, and declarative YAML.
+*   **Multi-Language Plugins:** Native support for Bash, Python, Node.js, Lua, Dart, Go, Rust, and declarative YAML. Plugins can have multiple language variants in the same folder, with automatic discovery and priority selection.
 *   **Cross-Platform UI:** Renders as a system tray icon (Desktop), home screen widget (Android/iOS), or persistent notification.
 *   **Unified CLI API:** Over 75 built-in commands (`crossbar cpu`, `crossbar battery`, etc.) that abstract platform-specific details.
 *   **Secure Configuration:** Auto-generated UI for plugin settings with secure storage for secrets (Keychain/KeyStore).

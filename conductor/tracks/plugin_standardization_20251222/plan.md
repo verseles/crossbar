@@ -20,11 +20,11 @@ Goal: Implement the showcase plugins in all 7 supported languages.
 ## Phase 3: Baseline Standardization & Legacy Porting
 Goal: Ensure every plugin has at least Lua and Bash versions, and remove non-standard versions.
 
-- [ ] Task: Identify plugins missing Lua or Bash versions.
-- [ ] Task: Port missing versions to Lua (using `crossbar` API) and Bash.
-- [ ] Task: Delete original non-standard language files (Python, Go, etc.) for plugins that are not `battery` or `uptime`.
-- [ ] Task: Verify all standardized plugins in `plugins/` directory have both `.lua` and `.sh` files.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Baseline Standardization' (Protocol in workflow.md)
+- [x] Task: Identify plugins missing Lua or Bash versions. 5660b47
+- [x] Task: Port missing versions to Lua (using `crossbar` API) and Bash. 5660b47
+- [x] Task: Delete original non-standard language files (Python, Go, etc.) for plugins that are not `battery` or `uptime`. 5660b47
+- [x] Task: Verify all standardized plugins in `plugins/` directory have both `.lua` and `.sh` files. 5660b47
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Baseline Standardization' (Protocol in workflow.md) 5660b47
 
 ## Phase 4: GUI Dynamic Language Selection
 Goal: Update the Flutter GUI to dynamically populate the language dropdown from the plugin folder.

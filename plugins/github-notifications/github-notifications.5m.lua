@@ -1,63 +1,52 @@
 -- github-notifications.5m.lua
--- GitHub Notifications in Lua using Crossbar API
--- Shows unread notification count
+-- GitHub Notifications
 
--- 1. Get token from Crossbar secure config, or fallback to env var
-local token = crossbar.env('CROSSBAR_PLUGIN_GITHUB_TOKEN')
-if token == nil or token == '' then
-    token = crossbar.env('GITHUB_TOKEN')
-end
+local token = crossbar.env('GITHUB_TOKEN')
 
--- 2. Handle missing token
-if token == nil or token == '' then
+if not token or token == '' then
     print("? | color=gray")
     print("---")
-    print("Error: Set GITHUB_TOKEN")
-    print("Configure via `crossbar settings set CROSSBAR_PLUGIN_GITHUB_TOKEN your_token`")
-    return -- Exit
+    print("Error: Set GITHUB_TOKEN env var")
+    return
 end
 
--- 3. Build curl command to fetch notifications
--- The '-s' flag makes curl silent, preventing progress meters
-local cmd = 'curl -s -H "Authorization: token ' .. token .. '" -H "Accept: application/vnd.github.v3+json" https://api.github.com/notifications'
+local result = crossbar.web('https://api.github.com/notifications', headers={
+    Authorization='token ' .. token,
+    Accept='application/vnd.github.v3+json'
+})
 
--- 4. Execute the command
-local success, result = crossbar.exec(cmd)
-
--- 5. Process the result
-if not success then
-    print("? | color=gray")
+if type(result) == 'table' and result.error then
+    print("? | color=red")
     print("---")
-    print("Error: Failed to execute curl")
-    -- The result might contain stderr, useful for debugging
-    if result and result ~= '' then
-        print(result)
-    end
-else
-    -- This is a simple way to count notifications without a full JSON parser.
-    -- Each notification in the JSON array is an object that contains an "id" field.
-    -- We count the occurrences of the string '"id":'. This is not perfect
-    -- but works for the GitHub API response format.
-    local _, count = result:gsub('"id":', '')
-
-    local color = 'blue'
-    if count == 0 then
-        color = 'gray'
-    end
-
+    print("Error: " .. result.message)
+elseif type(result) == 'table' then -- Array of notifications
+    -- LuaDardo maps JSON array to table with numeric keys
+    -- We count the elements
+    local count = 0
+    for _ in pairs(result) do count = count + 1 end
+    
+    local color = count > 0 and 'blue' or 'gray'
+    
     print(count .. " | color=" .. color)
     print("---")
-
+    
     if count > 0 then
-        -- A full JSON parser would be needed to list individual notifications.
-        -- For now, we show the total count.
         print(count .. " unread notifications")
+        for i, notif in ipairs(result) do
+            if i <= 5 and notif.subject then
+                print(notif.subject.title .. " | href=" .. (notif.url or ""))
+            end
+        end
     else
         print("No unread notifications")
     end
-
+    
     print("---")
-    print("Open GitHub Notifications | href=https://github.com/notifications")
+    print("Open GitHub | href=https://github.com/notifications")
+else
+    print("? | color=gray")
+    print("---")
+    print("Unexpected response format")
 end
 
 print("---")
