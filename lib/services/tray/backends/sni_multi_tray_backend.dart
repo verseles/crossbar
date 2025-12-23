@@ -37,28 +37,12 @@ class SniMultiTrayBackend implements TrayBackend {
       return false;
     }
 
-    // Check if SNI is available by trying to detect the SNI watcher
-    final sniAvailable = await _checkSniAvailable();
-    if (!sniAvailable) {
-      LoggerService().warning('$name: StatusNotifierItem not available on this system');
-      return false;
-    }
+    // On Linux, assume SNI is available - createIcon will fail gracefully
+    // if the D-Bus service is not running.
+    LoggerService().info('$name: Assuming SNI available on Linux');
 
     _initialized = true;
     LoggerService().info('$name: Initialized successfully');
-    return true;
-  }
-
-  /// Checks if SNI is available on the system.
-  /// 
-  /// Note: We assume SNI is available on Linux since most modern desktop
-  /// environments support it (GNOME with AppIndicator, KDE, etc.).
-  /// The actual connection will fail gracefully if SNI is not available.
-  Future<bool> _checkSniAvailable() async {
-    // On Linux, assume SNI is available - the createIcon will fail gracefully
-    // if the D-Bus service is not running.
-    // This avoids creating a visible test icon that causes a "flash".
-    LoggerService().info('$name: Assuming SNI available on Linux');
     return true;
   }
 
@@ -81,7 +65,7 @@ class SniMultiTrayBackend implements TrayBackend {
     try {
       final id = _nextId++;
       
-      // Create DBus menu with default items
+      // Create initial DBus menu
       final menu = DBusMenuItem(children: [
         DBusMenuItem(label: tooltip, enabled: false),
         DBusMenuItem.separator(),
@@ -107,8 +91,8 @@ class SniMultiTrayBackend implements TrayBackend {
 
       LoggerService().info('$name: Created icon $id for plugin $pluginId');
       return id;
-    } catch (e) {
-      LoggerService().error('$name: Failed to create icon: $e');
+    } catch (e, stack) {
+      LoggerService().error('$name: Failed to create icon: $e', e, stack);
       return null;
     }
   }
@@ -128,6 +112,53 @@ class SniMultiTrayBackend implements TrayBackend {
     return 'applications-utilities';
   }
 
+  /// Converts TrayMenuItem list to DBusMenuItem for SNI.
+  DBusMenuItem _convertToDbusMenu(List<TrayMenuItem> items, String title) {
+    final children = <DBusMenuItem>[];
+    
+    // Add title as first disabled item
+    children.add(DBusMenuItem(label: title, enabled: false));
+    children.add(DBusMenuItem.separator());
+    
+    // Convert each menu item
+    for (final item in items) {
+      children.add(_convertMenuItem(item));
+    }
+    
+    // Add standard actions at the end
+    if (items.isNotEmpty) {
+      children.add(DBusMenuItem.separator());
+    }
+    children.add(DBusMenuItem(label: 'Refresh', onClicked: () async {
+      // Will be handled by callback system
+    }));
+    
+    return DBusMenuItem(children: children);
+  }
+  
+  /// Converts a single TrayMenuItem to DBusMenuItem recursively.
+  DBusMenuItem _convertMenuItem(TrayMenuItem item) {
+    if (item.isSeparator) {
+      return DBusMenuItem.separator();
+    }
+    
+    if (item.submenu != null && item.submenu!.isNotEmpty) {
+      return DBusMenuItem(
+        label: item.label,
+        children: item.submenu!.map(_convertMenuItem).toList(),
+      );
+    }
+    
+    return DBusMenuItem(
+      label: item.label,
+      enabled: !item.disabled,
+      onClicked: item.key != null ? () async {
+        // Callback will be handled by TrayService
+        LoggerService().debug('$name: Menu item clicked: ${item.key}');
+      } : null,
+    );
+  }
+
   @override
   Future<void> updateIcon({
     required int iconId,
@@ -145,22 +176,20 @@ class SniMultiTrayBackend implements TrayBackend {
     }
 
     try {
-      // Note: xdg_status_notifier_item doesn't support updating icon/menu
-      // after creation. We need to recreate the icon for updates.
-      // This is a limitation of the package version 0.0.1
-      
+      // Update stored tooltip
       if (tooltip != null || title != null) {
         icon.tooltip = tooltip ?? title ?? icon.tooltip;
       }
       
+      // Update menu if provided
       if (menu != null) {
-        // Store for reference, but actual update requires recreate
         icon.menuItems = menu;
+        
+        // Convert and update the menu using the package's updateMenu method
+        final dbusMenu = _convertToDbusMenu(menu, icon.tooltip);
+        await icon.client.updateMenu(dbusMenu);
+        LoggerService().debug('$name: Updated menu for icon $iconId');
       }
-
-      // For now, log the update request
-      // Full implementation would recreate the icon
-      LoggerService().debug('$name: Update requested for icon $iconId');
     } catch (e) {
       LoggerService().warning('$name: Failed to update icon: $e');
     }
