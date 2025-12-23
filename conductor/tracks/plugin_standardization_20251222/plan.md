@@ -26,7 +26,7 @@ Goal: Ensure every plugin has at least Lua and Bash versions, and remove non-sta
 - [x] Task: Verify all standardized plugins in `plugins/` directory have both `.lua` and `.sh` files. 5660b47
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Baseline Standardization' (Protocol in workflow.md) 5660b47
 
-## Phase 4: GUI Dynamic Language Selection
+## Phase 4: GUI Dynamic Language Selection [checkpoint: 8ca91b3]
 Goal: Update the Flutter GUI to dynamically populate the language dropdown from the plugin folder.
 
 - [x] Task: Modify the Plugin UI model/view-model to scan the directory of a plugin for all supported file extensions. e5ed97e
