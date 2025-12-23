@@ -84,7 +84,7 @@ First public release of Crossbar - Universal Plugin System for Taskbar/Menu Bar.
   - System monitoring (CPU, memory, battery, disk, network, uptime)
   - Real-time data (weather, Bitcoin price, world clock)
   - Productivity (todo list, Pomodoro timer, countdown)
-  - DevOps (Docker status, SSH connections, process monitor, git status)
+  - DevOps (SSH connections, process monitor, git status)
   - Entertainment (Spotify now playing, random quotes)
 - **Comprehensive test suite**: 116 unit/integration tests (>90% coverage)
 - **CI/CD pipelines** with GitHub Actions

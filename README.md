@@ -378,7 +378,6 @@ Crossbar includes **24 example plugins** in 6 languages:
 - `disk.5m.sh` - Disk space monitor
 - `network.30s.sh` - Network speed (up/down)
 - `uptime.1m.sh` - System uptime
-- `docker-status.1m.sh` - Docker container count
 - `spotify.5s.sh` - Now playing on Spotify
 
 ### Python (8 plugins)

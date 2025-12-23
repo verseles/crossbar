@@ -84,7 +84,7 @@ flutter:
     - plugins/countdown/
     - plugins/cpu/
     - plugins/disk/
-    - plugins/docker-status/
+
     - plugins/emoji-clock/
     - plugins/examples/
     - plugins/git-status/

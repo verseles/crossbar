@@ -1,7 +1,13 @@
 # Crossbar - Contexto e Regras para Agentes
 
 > **Este arquivo é a ÚNICA fonte de verdade para regras operacionais e contexto técnico.**
-> Leia-o integralmente no início de cada sessão. Sempre que concluir tudo ou precisar de atenção, chame adequadamente a tool play_notification (se disponível) para notificar o usuário.
+> Leia-o integralmente no início de cada sessão.
+
+Chame a tool `play_notification` sempre que:
+
+- concluir todas as tarefas necessárias da solicitação
+- precisar da atenção do usuário
+- o usuário disser algo como "me avise", "me chame"I
 
 Atenção: Este projeto ainda não foi lançado, não se preocupe com breaking changes, a prioridade é manter ele atualizado e organizado a cada nova tarefa.
 
@@ -169,10 +175,6 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 - **Linux**: `make linux` (Gera bundle com os 3 binários).
 - **Testes**: `flutter test --coverage` (Min 43% coverage, CI falha se menor).
-- **Docker/Podman**:
-  - `make container-shell`: Entra no ambiente dev containerizado.
-  - `make container-build`: Roda build clean.
-  - **Alternativa**: Se `podman` ou `podman-compose` não forem encontrados, tente usar `docker` e `docker-compose` como fallback.
 
 ### Armadilhas Comuns
 
@@ -185,7 +187,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Validação Local CI (act)
 
 - **Ferramenta**: `act`
-- **Função**: Permite executar os workflows do GitHub Actions localmente, utilizando Docker.
+- **Função**: Permite executar os workflows do GitHub Actions localmente.
 - **Uso**: Simula o ambiente do CI/CD para testar pipelines antes de fazer `push`, prevenindo falhas remotas.
 
 ---

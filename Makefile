@@ -1,6 +1,5 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install uninstall precommit \
-	docker-build docker-shell docker-test docker-linux podman-build podman-shell podman-test podman-linux
+	install uninstall precommit
 
 # Pre-commit verification sequence (AGENTS.md compliance)
 # Runs: analyze → coverage → linux build → android build
@@ -221,57 +220,4 @@ icons:
 	dart run flutter_launcher_icons
 	@echo "Done! All icons generated."
 
-# ===============================
-# Docker/Podman Container Commands
-# ===============================
 
-# Detect compose command (prefer podman-compose on systems with podman)
-COMPOSE := $(shell command -v podman-compose 2>/dev/null || command -v docker-compose 2>/dev/null || echo "docker compose")
-
-# Docker commands
-docker-build:
-	docker compose build
-
-docker-shell:
-	docker compose run --rm flutter-linux bash
-
-docker-test:
-	docker compose run --rm flutter-test
-
-docker-linux:
-	docker compose run --rm flutter-build
-
-docker-android:
-	docker compose run --rm flutter-apk
-
-# Podman commands
-podman-build:
-	podman-compose build
-
-podman-shell:
-	podman-compose run --rm flutter-linux bash
-
-podman-test:
-	podman-compose run --rm flutter-test
-
-podman-linux:
-	podman-compose run --rm flutter-build
-
-podman-android:
-	podman-compose run --rm flutter-apk
-
-# Generic container commands (auto-detect compose)
-container-build:
-	$(COMPOSE) build
-
-container-shell:
-	$(COMPOSE) run --rm flutter-linux bash
-
-container-test:
-	$(COMPOSE) run --rm flutter-test
-
-container-linux:
-	$(COMPOSE) run --rm flutter-build
-
-container-android:
-	$(COMPOSE) run --rm flutter-apk
