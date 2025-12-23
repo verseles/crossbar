@@ -32,6 +32,9 @@ Roadmap de implementacao, atualizado regularmente:
 - **Diagnóstico CI Remoto**: Em caso de falha de pipeline no GitHub, utilize `gh run watch` ou `gh run view --web` para diagnosticar e monitorar a correção.
 - **Branches**: Está autorizado trabalhar diretamente na branch 'main', atualmente é apenas um desenvolvedor. Se estiver em outra branch ou solicitado, trabalhe nela mesmo e aguarde um pedido do usuário para criar um PR.
 
+- **Fetch**: Sempre que precisar usar fetch, webfetch, etc, use https://r.jina.ai/URL_HERE por exemplo, https://r.jina.ai/https://example.com que já mostra o resultado text-only bem mais eficiente. Como segunda opção, use a url diretamente, e em último caso (desencorajado), use playwright
+- **Throttling**: Para a busca (web search), sempre faça uma busca por segundo (após receber a resposta) para evitar throttling.
+
 # Processo antes de iniciar CADA tarefa (a cada passo a ser iniciado, repita esses passos)
 
 1. Leia os últimos 70 commits para ficar mais ciente das alterações recentes e decisões tomadas (apenas uma vez por sessão)
