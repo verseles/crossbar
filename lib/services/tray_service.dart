@@ -10,13 +10,20 @@ import '../core/plugin_manager.dart';
 import 'package:crossbar_core/crossbar_core.dart' as plugin_model;
 import 'logger_service.dart';
 import 'scheduler_service.dart';
+import 'settings_service.dart';
+import 'tray/tray_backend.dart';
+import 'tray/tray_menu_item.dart';
+import 'tray/backends/hybrid_tray_backend.dart';
 import 'window_service.dart';
 
-/// TrayService - Manages a single system tray icon using tray_manager.
+/// TrayService - Manages system tray icons using pluggable backends.
 ///
-/// Uses tray_manager for all desktop platforms (Linux, Windows, macOS).
-/// Shows plugin outputs in a unified menu under a single tray icon.
-/// On Linux, automatically switches between light/dark icons based on system theme.
+/// Supports two modes:
+/// - **Unified**: Single tray icon with menu for all plugins (default, all platforms)
+/// - **Separate**: Multiple tray icons, one per plugin (Linux with SNI support)
+///
+/// On Linux, automatically tries SNI (StatusNotifierItem) first for multi-icon
+/// support, falling back to tray_manager if SNI is not available.
 class TrayService with TrayListener {
   factory TrayService() => _instance;
 
@@ -27,9 +34,22 @@ class TrayService with TrayListener {
   final PluginManager _pluginManager = PluginManager();
   final Map<String, plugin_model.PluginOutput> _pluginOutputs = {};
 
+  // Backend for multi-icon support
+  TrayBackend? _backend;
+  final Map<String, int> _pluginIconIds = {}; // pluginId -> iconId
+
   bool _initialized = false;
   String? _iconPath;
   Brightness? _lastBrightness;
+
+  /// Returns the current tray display mode from settings.
+  TrayDisplayMode get _displayMode => SettingsService().trayDisplayMode;
+
+  /// Returns true if separate mode is active and supported.
+  bool get _useSeparateMode =>
+      _displayMode == TrayDisplayMode.separate &&
+      _backend != null &&
+      _backend!.supportsMultipleIcons;
 
   Future<void> init() async {
     if (_initialized) return;
@@ -37,6 +57,20 @@ class TrayService with TrayListener {
       return;
     }
 
+    // Initialize the hybrid backend for potential multi-icon support
+    _backend = HybridTrayBackend();
+    final backendInitialized = await _backend!.init();
+    
+    if (backendInitialized) {
+      LoggerService().info(
+        'TrayService: Backend initialized - ${(_backend as HybridTrayBackend).activeBackendName}'
+      );
+      LoggerService().info(
+        'TrayService: Multi-icon support: ${_backend!.supportsMultipleIcons}'
+      );
+    }
+
+    // Always set up tray_manager listener for unified mode and click handling
     trayManager.addListener(this);
 
     await _resolveAndSetIcon();
@@ -216,16 +250,108 @@ class TrayService with TrayListener {
     return result;
   }
 
+  /// Converts plugin model MenuItems to TrayMenuItem for backend
+  List<TrayMenuItem> _convertToTrayMenuItems(List<plugin_model.MenuItem> items) {
+    final result = <TrayMenuItem>[];
+    for (final item in items) {
+      if (item.separator) {
+        result.add(const TrayMenuItem.separator());
+      } else if (item.submenu != null && item.submenu!.isNotEmpty) {
+        result.add(TrayMenuItem(
+          label: item.text ?? '',
+          submenu: _convertToTrayMenuItems(item.submenu!),
+        ));
+      } else {
+        result.add(TrayMenuItem(
+          label: item.text ?? '',
+          key: item.href ?? item.bash ?? item.text,
+        ));
+      }
+    }
+    return result;
+  }
+
   void updatePluginOutput(String pluginId, plugin_model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
-    _updateMenu();
-    _updateTitle(pluginId, output);
+
+    if (_useSeparateMode) {
+      _updateSeparateIcon(pluginId, output);
+    } else {
+      _updateMenu();
+      _updateTitle(pluginId, output);
+    }
+    
     _updateTooltip();
+  }
+
+  /// Updates or creates a separate icon for a plugin in separate mode.
+  Future<void> _updateSeparateIcon(
+    String pluginId,
+    plugin_model.PluginOutput output,
+  ) async {
+    if (_backend == null) return;
+
+    final existingIconId = _pluginIconIds[pluginId];
+    
+    if (existingIconId != null) {
+      // Update existing icon
+      await _backend!.updateIcon(
+        iconId: existingIconId,
+        title: '${output.icon} ${output.text ?? ''}',
+        tooltip: output.text ?? pluginId,
+        menu: output.menu.isNotEmpty 
+            ? _convertToTrayMenuItems(output.menu)
+            : null,
+      );
+    } else {
+      // Create new icon
+      final iconPath = _iconPath ?? 'applications-utilities';
+      final iconId = await _backend!.createIcon(
+        pluginId: pluginId,
+        iconPath: iconPath,
+        tooltip: '${output.icon} ${output.text ?? pluginId}',
+      );
+      
+      if (iconId != null) {
+        _pluginIconIds[pluginId] = iconId;
+        LoggerService().info('Created separate tray icon for plugin $pluginId');
+      }
+    }
   }
 
   /// Public method to refresh the tray menu (e.g., after plugin toggle/delete)
   Future<void> refreshMenu() async {
     await _updateMenu();
+    
+    // In separate mode, remove icons for disabled/deleted plugins
+    if (_useSeparateMode) {
+      await _cleanupSeparateIcons();
+    }
+  }
+
+  /// Removes separate icons for plugins that are no longer enabled.
+  Future<void> _cleanupSeparateIcons() async {
+    if (_backend == null) return;
+
+    final enabledPluginIds = _pluginManager.plugins
+        .where((p) => p.enabled)
+        .map((p) => p.id)
+        .toSet();
+
+    final iconsToRemove = <String>[];
+    for (final pluginId in _pluginIconIds.keys) {
+      if (!enabledPluginIds.contains(pluginId)) {
+        iconsToRemove.add(pluginId);
+      }
+    }
+
+    for (final pluginId in iconsToRemove) {
+      final iconId = _pluginIconIds.remove(pluginId);
+      if (iconId != null) {
+        await _backend!.destroyIcon(iconId);
+        LoggerService().info('Removed separate tray icon for plugin $pluginId');
+      }
+    }
   }
 
   void _updateTooltip() {
@@ -274,6 +400,14 @@ class TrayService with TrayListener {
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
     _updateMenu();
+    
+    // In separate mode, remove the icon for this plugin
+    if (_useSeparateMode) {
+      final iconId = _pluginIconIds.remove(pluginId);
+      if (iconId != null) {
+        _backend?.destroyIcon(iconId);
+      }
+    }
   }
 
   @override
@@ -300,6 +434,13 @@ class TrayService with TrayListener {
 
   Future<void> dispose() async {
     if (!_initialized) return;
+
+    // Dispose backend and all separate icons
+    if (_backend != null) {
+      await _backend!.dispose();
+      _backend = null;
+    }
+    _pluginIconIds.clear();
 
     trayManager.removeListener(this);
     try {
