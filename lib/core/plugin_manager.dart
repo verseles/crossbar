@@ -436,6 +436,17 @@ class PluginManager {
     return _plugins.where((p) => p.id == pluginId).firstOrNull;
   }
 
+  Future<void> switchPluginVariant(String pluginId, PluginVariant variant) async {
+    final index = _plugins.indexWhere((p) => p.id == pluginId);
+    if (index >= 0) {
+      _plugins[index] = _plugins[index].copyWith(
+        path: variant.path,
+        interpreter: variant.interpreter,
+        enabled: variant.enabled,
+      );
+    }
+  }
+
   void clear() {
     _plugins.clear();
   }

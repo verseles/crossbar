@@ -78,13 +78,33 @@ flutter:
     - assets/icons/
     - plugins/
     # Universal plugins (multi-language)
-    - plugins/cpu/
-    - plugins/memory/
     - plugins/battery/
-    - plugins/clock/
-    - plugins/weather/
     - plugins/bitcoin/
+    - plugins/clock/
+    - plugins/countdown/
+    - plugins/cpu/
+    - plugins/disk/
+    - plugins/docker-status/
+    - plugins/emoji-clock/
+    - plugins/examples/
+    - plugins/git-status/
+    - plugins/github-notifications/
+    - plugins/ip-info/
+    - plugins/memory/
+    - plugins/network/
+    - plugins/npm-downloads/
+    - plugins/pomodoro/
+    - plugins/process-monitor/
+    - plugins/quotes/
+    - plugins/site-check/
+    - plugins/spotify/
+    - plugins/ssh-connections/
+    - plugins/system-info/
+    - plugins/time/
+    - plugins/todo/
     - plugins/uptime/
+    - plugins/weather/
+    - plugins/world-clock/
     - plugins/yaml/
 
 flutter_launcher_icons:

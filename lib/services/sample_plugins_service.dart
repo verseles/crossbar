@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as path;
 
+import 'package:crossbar_core/crossbar_core.dart';
 import '../core/plugin_manager.dart';
 import '../models/plugin_metadata.dart';
 
@@ -15,7 +16,8 @@ class SamplePluginsService {
   factory SamplePluginsService() => _instance;
   SamplePluginsService._();
 
-  static final SamplePluginsService _instance = SamplePluginsService._();
+  static final SamplePluginsService _instance = SamplePluginsService._internal();
+  SamplePluginsService._internal();
 
   final PluginManager _pluginManager = PluginManager();
 
@@ -39,7 +41,6 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.go, filename: 'cpu.10s.go', assetPath: 'plugins/cpu/cpu.10s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'cpu.10s.rs', assetPath: 'plugins/cpu/cpu.10s.rs'),
         PluginVariant(language: PluginLanguage.lua, filename: 'cpu.10s.lua', assetPath: 'plugins/cpu/cpu.10s.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'cpu.5s.yaml', assetPath: 'plugins/yaml/cpu.5s.yaml'),
       ],
     ),
     PluginMetadata(
@@ -51,13 +52,7 @@ class SamplePluginsService {
       tags: ['memory', 'ram', 'monitor', 'usage'],
       variants: [
         PluginVariant(language: PluginLanguage.bash, filename: 'memory.10s.sh', assetPath: 'plugins/memory/memory.10s.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'memory.10s.py', assetPath: 'plugins/memory/memory.10s.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'memory.10s.js', assetPath: 'plugins/memory/memory.10s.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'memory.10s.dart', assetPath: 'plugins/memory/memory.10s.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'memory.10s.go', assetPath: 'plugins/memory/memory.10s.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'memory.10s.rs', assetPath: 'plugins/memory/memory.10s.rs'),
         PluginVariant(language: PluginLanguage.lua, filename: 'memory.10s.lua', assetPath: 'plugins/memory/memory.10s.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'memory.10s.yaml', assetPath: 'plugins/yaml/memory.10s.yaml'),
       ],
     ),
     PluginMetadata(
@@ -74,8 +69,35 @@ class SamplePluginsService {
         PluginVariant(language: PluginLanguage.dart, filename: 'battery.30s.dart', assetPath: 'plugins/battery/battery.30s.dart'),
         PluginVariant(language: PluginLanguage.go, filename: 'battery.30s.go', assetPath: 'plugins/battery/battery.30s.go'),
         PluginVariant(language: PluginLanguage.rust, filename: 'battery.30s.rs', assetPath: 'plugins/battery/battery.30s.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'battery.1m.lua', assetPath: 'plugins/battery/battery.1m.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'battery.1m.yaml', assetPath: 'plugins/yaml/battery.1m.yaml'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'battery.30s.lua', assetPath: 'plugins/battery/battery.30s.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'uptime',
+      name: 'System Uptime',
+      description: 'Shows how long the system has been running',
+      category: PluginCategory.system,
+      mobileCompatible: true,
+      tags: ['uptime', 'boot', 'system'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
+        PluginVariant(language: PluginLanguage.python, filename: 'uptime.1m.py', assetPath: 'plugins/uptime/uptime.1m.py'),
+        PluginVariant(language: PluginLanguage.node, filename: 'uptime.1m.js', assetPath: 'plugins/uptime/uptime.1m.js'),
+        PluginVariant(language: PluginLanguage.dart, filename: 'uptime.1m.dart', assetPath: 'plugins/uptime/uptime.1m.dart'),
+        PluginVariant(language: PluginLanguage.go, filename: 'uptime.1m.go', assetPath: 'plugins/uptime/uptime.1m.go'),
+        PluginVariant(language: PluginLanguage.rust, filename: 'uptime.1m.rs', assetPath: 'plugins/uptime/uptime.1m.rs'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'uptime.1m.lua', assetPath: 'plugins/uptime/uptime.1m.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'system-info',
+      name: 'System Info',
+      description: 'Comprehensive system information',
+      category: PluginCategory.system,
+      tags: ['system', 'os', 'kernel'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'system-info.1m.sh', assetPath: 'plugins/system-info/system-info.1m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'system-info.1m.lua', assetPath: 'plugins/system-info/system-info.1m.lua'),
       ],
     ),
 
@@ -91,13 +113,62 @@ class SamplePluginsService {
       tags: ['time', 'clock', 'date'],
       variants: [
         PluginVariant(language: PluginLanguage.bash, filename: 'clock.1s.sh', assetPath: 'plugins/clock/clock.1s.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'clock.1s.py', assetPath: 'plugins/clock/clock.1s.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'clock.1s.js', assetPath: 'plugins/clock/clock.1s.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'clock.1s.dart', assetPath: 'plugins/clock/clock.1s.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'clock.1s.go', assetPath: 'plugins/clock/clock.1s.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'clock.1s.rs', assetPath: 'plugins/clock/clock.1s.rs'),
         PluginVariant(language: PluginLanguage.lua, filename: 'clock.1s.lua', assetPath: 'plugins/clock/clock.1s.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'clock.1s.yaml', assetPath: 'plugins/yaml/clock.1s.yaml'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'time',
+      name: 'Simple Clock',
+      description: 'Shows current time with day phase icon',
+      category: PluginCategory.time,
+      tags: ['time', 'clock'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'time.1s.sh', assetPath: 'plugins/time/time.1s.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'time.1s.lua', assetPath: 'plugins/time/time.1s.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'emoji-clock',
+      name: 'Emoji Clock',
+      description: 'Shows time with emoji clock faces',
+      category: PluginCategory.time,
+      tags: ['time', 'clock', 'emoji'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'emoji-clock.1m.sh', assetPath: 'plugins/emoji-clock/emoji-clock.1m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'emoji-clock.1m.lua', assetPath: 'plugins/emoji-clock/emoji-clock.1m.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'world-clock',
+      name: 'World Clock',
+      description: 'Shows time in multiple timezones',
+      category: PluginCategory.time,
+      tags: ['time', 'timezone', 'world'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'world-clock.1m.sh', assetPath: 'plugins/world-clock/world-clock.1m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'world-clock.1m.lua', assetPath: 'plugins/world-clock/world-clock.1m.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'countdown',
+      name: 'Countdown Timer',
+      description: 'Countdown timer to a target date',
+      category: PluginCategory.time,
+      tags: ['countdown', 'timer'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'countdown.1s.sh', assetPath: 'plugins/countdown/countdown.1s.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'countdown.1s.lua', assetPath: 'plugins/countdown/countdown.1s.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'pomodoro',
+      name: 'Pomodoro Timer',
+      description: 'Pomodoro technique timer',
+      category: PluginCategory.productivity,
+      tags: ['pomodoro', 'timer', 'focus'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'pomodoro.1s.sh', assetPath: 'plugins/pomodoro/pomodoro.1s.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'pomodoro.1s.lua', assetPath: 'plugins/pomodoro/pomodoro.1s.lua'),
       ],
     ),
 
@@ -120,171 +191,11 @@ class SamplePluginsService {
           schemaAssetPath: 'plugins/weather/weather.schema.json',
         ),
         PluginVariant(
-          language: PluginLanguage.python, 
-          filename: 'weather.30m.py', 
-          assetPath: 'plugins/weather/weather.30m.py',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginVariant(
-          language: PluginLanguage.node, 
-          filename: 'weather.30m.js', 
-          assetPath: 'plugins/weather/weather.30m.js',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginVariant(
-          language: PluginLanguage.dart, 
-          filename: 'weather.30m.dart', 
-          assetPath: 'plugins/weather/weather.30m.dart',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginVariant(
-          language: PluginLanguage.go, 
-          filename: 'weather.30m.go', 
-          assetPath: 'plugins/weather/weather.30m.go',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginVariant(
-          language: PluginLanguage.rust, 
-          filename: 'weather.30m.rs', 
-          assetPath: 'plugins/weather/weather.30m.rs',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginVariant(
           language: PluginLanguage.lua,
           filename: 'weather.30m.lua',
           assetPath: 'plugins/weather/weather.30m.lua',
           schemaAssetPath: 'plugins/weather/weather.schema.json',
         ),
-      ],
-    ),
-
-    // ─────────────────────────────────────────────────────────────
-    // FINANCE
-    // ─────────────────────────────────────────────────────────────
-    PluginMetadata(
-      id: 'bitcoin',
-      name: 'Bitcoin Price',
-      description: 'Shows current Bitcoin price from Coinbase',
-      category: PluginCategory.finance,
-      mobileCompatible: true,
-      tags: ['bitcoin', 'crypto', 'price', 'finance', 'btc'],
-      variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'bitcoin.5m.sh', assetPath: 'plugins/bitcoin/bitcoin.5m.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'bitcoin.5m.py', assetPath: 'plugins/bitcoin/bitcoin.5m.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'bitcoin.5m.js', assetPath: 'plugins/bitcoin/bitcoin.5m.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'bitcoin.5m.dart', assetPath: 'plugins/bitcoin/bitcoin.5m.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'bitcoin.5m.go', assetPath: 'plugins/bitcoin/bitcoin.5m.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'bitcoin.5m.rs', assetPath: 'plugins/bitcoin/bitcoin.5m.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'bitcoin.5m.lua', assetPath: 'plugins/bitcoin/bitcoin.5m.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'bitcoin.5m.yaml', assetPath: 'plugins/yaml/bitcoin.5m.yaml'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'uptime',
-      name: 'System Uptime',
-      description: 'Shows how long the system has been running',
-      category: PluginCategory.system,
-      mobileCompatible: true,
-      tags: ['uptime', 'boot', 'system'],
-      variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'uptime.1m.sh', assetPath: 'plugins/uptime/uptime.1m.sh'),
-        PluginVariant(language: PluginLanguage.python, filename: 'uptime.1m.py', assetPath: 'plugins/uptime/uptime.1m.py'),
-        PluginVariant(language: PluginLanguage.node, filename: 'uptime.1m.js', assetPath: 'plugins/uptime/uptime.1m.js'),
-        PluginVariant(language: PluginLanguage.dart, filename: 'uptime.1m.dart', assetPath: 'plugins/uptime/uptime.1m.dart'),
-        PluginVariant(language: PluginLanguage.go, filename: 'uptime.1m.go', assetPath: 'plugins/uptime/uptime.1m.go'),
-        PluginVariant(language: PluginLanguage.rust, filename: 'uptime.1m.rs', assetPath: 'plugins/uptime/uptime.1m.rs'),
-        PluginVariant(language: PluginLanguage.lua, filename: 'uptime.1m.lua', assetPath: 'plugins/uptime/uptime.1m.lua'),
-        PluginVariant(language: PluginLanguage.yaml, filename: 'uptime.1m.yaml', assetPath: 'plugins/yaml/uptime.1m.yaml'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'network-status',
-      name: 'Network Status',
-      description: 'Shows network interface status (YAML no-code)',
-      category: PluginCategory.network,
-      mobileCompatible: true,
-      tags: ['network', 'status', 'ip', 'connection'],
-      variants: [
-        PluginVariant(language: PluginLanguage.yaml, filename: 'network.30s.yaml', assetPath: 'plugins/yaml/network.30s.yaml'),
-      ],
-    ),
-  ];
-
-  /// Legacy plugins (single language, for backward compatibility)
-  static const List<PluginMetadata> legacyPlugins = [
-    // System
-    PluginMetadata(
-      id: 'disk',
-      name: 'Disk Usage',
-      description: 'Shows disk space usage',
-      category: PluginCategory.system,
-      tags: ['disk', 'storage', 'space'],
-      variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'disk.5m.sh', assetPath: 'plugins/disk.5m.sh'),
-      ],
-    ),
-
-    // Time
-    PluginMetadata(
-      id: 'time',
-      name: 'Simple Clock (Python)',
-      description: 'Shows current time',
-      category: PluginCategory.time,
-      tags: ['time', 'clock'],
-      variants: [
-        PluginVariant(language: PluginLanguage.python, filename: 'time.1s.py', assetPath: 'plugins/time.1s.py'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'emoji-clock',
-      name: 'Emoji Clock',
-      description: 'Shows time with emoji clock faces',
-      category: PluginCategory.time,
-      tags: ['time', 'clock', 'emoji'],
-      variants: [
-        PluginVariant(language: PluginLanguage.node, filename: 'emoji-clock.1m.js', assetPath: 'plugins/emoji-clock.1m.js'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'world-clock',
-      name: 'World Clock',
-      description: 'Shows time in multiple timezones',
-      category: PluginCategory.time,
-      tags: ['time', 'timezone', 'world'],
-      variants: [
-        PluginVariant(language: PluginLanguage.node, filename: 'world-clock.1m.js', assetPath: 'plugins/world-clock.1m.js'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'countdown',
-      name: 'Countdown Timer',
-      description: 'Countdown timer to a target date',
-      category: PluginCategory.time,
-      tags: ['countdown', 'timer'],
-      variants: [
-        PluginVariant(language: PluginLanguage.python, filename: 'countdown.1s.py', assetPath: 'plugins/countdown.1s.py'),
-      ],
-    ),
-    PluginMetadata(
-      id: 'pomodoro',
-      name: 'Pomodoro Timer',
-      description: 'Pomodoro technique timer',
-      category: PluginCategory.productivity,
-      tags: ['pomodoro', 'timer', 'focus'],
-      variants: [
-        PluginVariant(language: PluginLanguage.node, filename: 'pomodoro.1s.js', assetPath: 'plugins/pomodoro.1s.js'),
-      ],
-    ),
-
-    // Network
-    PluginMetadata(
-      id: 'network',
-      name: 'Network Status',
-      description: 'Shows network interface info',
-      category: PluginCategory.network,
-      tags: ['network', 'ip', 'interface'],
-      variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'network.30s.sh', assetPath: 'plugins/network.30s.sh'),
       ],
     ),
     PluginMetadata(
@@ -294,11 +205,41 @@ class SamplePluginsService {
       category: PluginCategory.network,
       tags: ['ip', 'location', 'public'],
       variants: [
-        PluginVariant(language: PluginLanguage.node, filename: 'ip-info.1h.js', assetPath: 'plugins/ip-info.1h.js'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'ip-info.1h.sh', assetPath: 'plugins/ip-info/ip-info.1h.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'ip-info.1h.lua', assetPath: 'plugins/ip-info/ip-info.1h.lua'),
+      ],
+    ),
+    PluginMetadata(
+      id: 'site-check',
+      name: 'Site Check',
+      description: 'Checks if a website is up',
+      category: PluginCategory.network,
+      tags: ['network', 'status', 'ping'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'site-check.1m.sh', assetPath: 'plugins/site-check/site-check.1m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'site-check.1m.lua', assetPath: 'plugins/site-check/site-check.1m.lua'),
       ],
     ),
 
-    // Development
+    // ─────────────────────────────────────────────────────────────
+    // FINANCE
+    // ─────────────────────────────────────────────────────────────
+    PluginMetadata(
+      id: 'bitcoin',
+      name: 'Bitcoin Price',
+      description: 'Shows current Bitcoin price',
+      category: PluginCategory.finance,
+      mobileCompatible: true,
+      tags: ['bitcoin', 'crypto', 'price', 'finance', 'btc'],
+      variants: [
+        PluginVariant(language: PluginLanguage.bash, filename: 'bitcoin.5m.sh', assetPath: 'plugins/bitcoin/bitcoin.5m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'bitcoin.5m.lua', assetPath: 'plugins/bitcoin/bitcoin.5m.lua'),
+      ],
+    ),
+
+    // ─────────────────────────────────────────────────────────────
+    // DEVELOPMENT
+    // ─────────────────────────────────────────────────────────────
     PluginMetadata(
       id: 'git-status',
       name: 'Git Status',
@@ -306,17 +247,19 @@ class SamplePluginsService {
       category: PluginCategory.development,
       tags: ['git', 'vcs', 'repo'],
       variants: [
-        PluginVariant(language: PluginLanguage.dart, filename: 'git-status.30s.dart', assetPath: 'plugins/git-status.30s.dart'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'git-status.30s.sh', assetPath: 'plugins/git-status/git-status.30s.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'git-status.30s.lua', assetPath: 'plugins/git-status/git-status.30s.lua'),
       ],
     ),
     PluginMetadata(
-      id: 'docker-status',
-      name: 'Docker Status',
-      description: 'Shows running Docker containers',
+      id: 'npm-downloads',
+      name: 'NPM Downloads',
+      description: 'Shows download count for a package',
       category: PluginCategory.development,
-      tags: ['docker', 'containers', 'devops'],
+      tags: ['npm', 'package', 'downloads'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'docker-status.1m.sh', assetPath: 'plugins/docker-status.1m.sh'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'npm-downloads.1h.sh', assetPath: 'plugins/npm-downloads/npm-downloads.1h.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'npm-downloads.1h.lua', assetPath: 'plugins/npm-downloads/npm-downloads.1h.lua'),
       ],
     ),
     PluginMetadata(
@@ -328,25 +271,34 @@ class SamplePluginsService {
       tags: ['github', 'notifications', 'api'],
       variants: [
         PluginVariant(
-          language: PluginLanguage.python, 
-          filename: 'github-notifications.5m.py', 
-          assetPath: 'plugins/github-notifications.5m.py',
-          schemaAssetPath: 'plugins/github-notifications.5m.py.schema.json',
+          language: PluginLanguage.bash,
+          filename: 'github-notifications.5m.sh',
+          assetPath: 'plugins/github-notifications/github-notifications.5m.sh',
+          schemaAssetPath: 'plugins/github-notifications/github-notifications.5m.py.schema.json', // Reuse existing schema
+        ),
+        PluginVariant(
+          language: PluginLanguage.lua, 
+          filename: 'github-notifications.5m.lua', 
+          assetPath: 'plugins/github-notifications/github-notifications.5m.lua',
+          schemaAssetPath: 'plugins/github-notifications/github-notifications.5m.py.schema.json',
         ),
       ],
     ),
     PluginMetadata(
-      id: 'ssh-connections',
-      name: 'SSH Connections',
-      description: 'Shows active SSH connections',
+      id: 'process-monitor',
+      name: 'Process Monitor',
+      description: 'Shows top CPU processes',
       category: PluginCategory.development,
-      tags: ['ssh', 'connections', 'server'],
+      tags: ['process', 'cpu', 'monitor'],
       variants: [
-        PluginVariant(language: PluginLanguage.bash, filename: 'ssh-connections.30s.sh', assetPath: 'plugins/ssh-connections.30s.sh'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'process-monitor.10s.sh', assetPath: 'plugins/process-monitor/process-monitor.10s.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'process-monitor.10s.lua', assetPath: 'plugins/process-monitor/process-monitor.10s.lua'),
       ],
     ),
 
-    // Productivity
+    // ─────────────────────────────────────────────────────────────
+    // PRODUCTIVITY & FUN
+    // ─────────────────────────────────────────────────────────────
     PluginMetadata(
       id: 'todo',
       name: 'Todo List',
@@ -354,11 +306,10 @@ class SamplePluginsService {
       category: PluginCategory.productivity,
       tags: ['todo', 'tasks', 'list'],
       variants: [
-        PluginVariant(language: PluginLanguage.python, filename: 'todo.1m.py', assetPath: 'plugins/todo.1m.py'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'todo.1m.sh', assetPath: 'plugins/todo/todo.1m.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'todo.1m.lua', assetPath: 'plugins/todo/todo.1m.lua'),
       ],
     ),
-
-    // Fun
     PluginMetadata(
       id: 'quotes',
       name: 'Inspirational Quotes',
@@ -366,13 +317,14 @@ class SamplePluginsService {
       category: PluginCategory.fun,
       tags: ['quotes', 'inspiration', 'motivation'],
       variants: [
-        PluginVariant(language: PluginLanguage.python, filename: 'quotes.1h.py', assetPath: 'plugins/quotes.1h.py'),
+        PluginVariant(language: PluginLanguage.bash, filename: 'quotes.1h.sh', assetPath: 'plugins/quotes/quotes.1h.sh'),
+        PluginVariant(language: PluginLanguage.lua, filename: 'quotes.1h.lua', assetPath: 'plugins/quotes/quotes.1h.lua'),
       ],
     ),
   ];
 
-  /// All available plugins (universal + legacy)
-  static List<PluginMetadata> get allPlugins => [...universalPlugins, ...legacyPlugins];
+  /// All available plugins
+  static List<PluginMetadata> get allPlugins => universalPlugins;
 
   /// Get plugins grouped by category
   Map<PluginCategory, List<PluginMetadata>> get pluginsByCategory {
@@ -412,21 +364,32 @@ class SamplePluginsService {
   /// Check if a plugin variant is already installed
   Future<bool> isInstalled(String filename) async {
     final pluginsDir = await _pluginManager.pluginsDirectory;
-    final pluginPath = path.join(pluginsDir, filename);
-    final pluginPathOff = path.join(
-      pluginsDir, 
-      filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1'),
-    );
+    // Check in the subdirectory
+    final baseName = filename.split('.').first;
+    final pluginPath = path.join(pluginsDir, baseName, filename);
     
-    return File(pluginPath).existsSync() || File(pluginPathOff).existsSync();
+    // Also check root for legacy installations
+    final legacyPath = path.join(pluginsDir, filename);
+    
+    // Check off versions
+    final offName = filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1');
+    final pluginPathOff = path.join(pluginsDir, baseName, offName);
+    final legacyPathOff = path.join(pluginsDir, offName);
+    
+    return File(pluginPath).existsSync() || File(pluginPathOff).existsSync() ||
+           File(legacyPath).existsSync() || File(legacyPathOff).existsSync();
   }
 
   /// Install a specific variant of a plugin
   Future<void> installVariant(PluginVariant variant) async {
     final pluginsDir = await _pluginManager.pluginsDirectory;
     
+    // Determine subdirectory based on plugin ID/filename
+    final baseName = variant.filename.split('.').first;
+    final targetDir = path.join(pluginsDir, baseName);
+    
     // Ensure plugins directory exists
-    final dir = Directory(pluginsDir);
+    final dir = Directory(targetDir);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
@@ -435,7 +398,7 @@ class SamplePluginsService {
     final content = await rootBundle.loadString(variant.assetPath);
     
     // Write to plugins directory
-    final targetPath = path.join(pluginsDir, variant.filename);
+    final targetPath = path.join(targetDir, variant.filename);
     final targetFile = File(targetPath);
     await targetFile.writeAsString(content);
 
@@ -448,6 +411,7 @@ class SamplePluginsService {
     if (variant.schemaAssetPath != null) {
       try {
         final schemaContent = await rootBundle.loadString(variant.schemaAssetPath!);
+        // Schema goes next to the plugin file
         final schemaPath = '$targetPath.schema.json';
         await File(schemaPath).writeAsString(schemaContent);
       } catch (_) {
@@ -474,9 +438,14 @@ class SamplePluginsService {
   /// Uninstall a plugin variant
   Future<void> uninstallVariant(String filename) async {
     final pluginsDir = await _pluginManager.pluginsDirectory;
+    final baseName = filename.split('.').first;
+    final targetDir = path.join(pluginsDir, baseName);
     
-    // Try both enabled and disabled versions
+    // Try both enabled and disabled versions in subdirectory
     final paths = [
+      path.join(targetDir, filename),
+      path.join(targetDir, filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1')),
+      // Also legacy root paths
       path.join(pluginsDir, filename),
       path.join(pluginsDir, filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1')),
     ];
@@ -493,45 +462,11 @@ class SamplePluginsService {
         await schemaFile.delete();
       }
     }
+    
+    // Clean up empty directory
+    final dir = Directory(targetDir);
+    if (await dir.exists() && await dir.list().isEmpty) {
+      await dir.delete();
+    }
   }
-
-  // ═══════════════════════════════════════════════════════════════
-  // BACKWARD COMPATIBILITY (deprecated, will be removed in v2.0)
-  // ═══════════════════════════════════════════════════════════════
-  
-  /// @deprecated Use [allPlugins] instead
-  @Deprecated('Use allPlugins instead')
-  static List<LegacySamplePlugin> get samplePlugins {
-    return allPlugins.expand((p) => p.variants.map((v) => LegacySamplePlugin(
-      id: v.filename,
-      name: '${p.name} (${v.language.displayName})',
-      description: p.description,
-      category: p.category.id,
-      language: v.language.id,
-      assetPath: v.assetPath,
-      schemaAssetPath: v.schemaAssetPath,
-    ))).toList();
-  }
-}
-
-/// @deprecated Legacy class for backward compatibility
-@Deprecated('Use PluginMetadata instead')
-class LegacySamplePlugin {
-  const LegacySamplePlugin({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.category,
-    required this.language,
-    required this.assetPath,
-    this.schemaAssetPath,
-  });
-
-  final String id;
-  final String name;
-  final String description;
-  final String category;
-  final String language;
-  final String assetPath;
-  final String? schemaAssetPath;
 }

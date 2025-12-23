@@ -570,6 +570,10 @@ class _PluginsTabState extends State<PluginsTab> {
                               plugin.interpreter,
                               Icons.code,
                             ),
+                            if (plugin.variants.length > 1) ...[
+                              const SizedBox(width: 8),
+                              _buildLanguageDropdown(theme, plugin),
+                            ],
                             if (plugin.lastRun != null) ...[
                               const SizedBox(width: 8),
                               _buildInfoChip(
@@ -604,6 +608,38 @@ class _PluginsTabState extends State<PluginsTab> {
           if (isExpanded)
             _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageDropdown(ThemeData theme, Plugin plugin) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+      height: 20,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: DropdownButton<PluginVariant>(
+        value: plugin.variants.firstWhere((v) => v.path == plugin.path),
+        underline: const SizedBox(),
+        icon: Icon(Icons.arrow_drop_down, size: 14, color: theme.colorScheme.primary),
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.primary,
+        ),
+        onChanged: (variant) {
+          if (variant != null) {
+            _refreshService.switchPluginVariant(plugin.id, variant);
+          }
+        },
+        items: plugin.variants.map((v) {
+          return DropdownMenuItem(
+            value: v,
+            child: Text(v.interpreter.toUpperCase()),
+          );
+        }).toList(),
       ),
     );
   }

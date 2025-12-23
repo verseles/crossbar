@@ -199,6 +199,16 @@ class RefreshService {
     _notifyListChangedListeners();
   }
 
+  /// Switch active language variant for a plugin
+  Future<void> switchPluginVariant(String pluginId, PluginVariant variant) async {
+    await _pluginManager.switchPluginVariant(pluginId, variant);
+    _notifyListChangedListeners();
+    
+    // Clear old output and run new variant
+    _lastOutputs.remove(pluginId);
+    await runPlugin(pluginId);
+  }
+
   /// Discover plugins and refresh the list
   Future<void> discoverPlugins() async {
     await _pluginManager.discoverPlugins();
