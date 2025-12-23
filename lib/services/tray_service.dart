@@ -9,6 +9,7 @@ import 'package:tray_manager/tray_manager.dart';
 import '../core/plugin_manager.dart';
 import 'package:crossbar_core/crossbar_core.dart' as plugin_model;
 import 'logger_service.dart';
+import 'refresh_service.dart';
 import 'scheduler_service.dart';
 import 'settings_service.dart';
 import 'tray/tray_backend.dart';
@@ -76,11 +77,13 @@ class TrayService with TrayListener {
 
     // Set up tray based on mode
     if (_useSeparateMode) {
-      // SEPARATE MODE: Use only SNI backend, no unified tray_manager
-      LoggerService().info('TrayService: Using separate mode (SNI)');
-      // Icons will be created when plugins output is received
+      // SEPARATE MODE: Use BOTH tray_manager (crossbar control) + SNI daemons (plugins)
+      LoggerService().info('TrayService: Using separate mode (mixed)');
+      // Initialize tray_manager for crossbar control icon (Show/Quit)
+      await _initUnifiedTray();
+      // Plugin icons will be created via daemons when plugins output is received
     } else {
-      // UNIFIED MODE: Use tray_manager for single icon
+      // UNIFIED MODE: Use tray_manager for single icon with all plugins
       LoggerService().info('TrayService: Using unified mode (tray_manager)');
       await _initUnifiedTray();
     }
@@ -208,39 +211,53 @@ class TrayService with TrayListener {
 
     final menuItems = <MenuItem>[];
 
-    // Plugin outputs
-    for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
-      final output = _pluginOutputs[plugin.id];
-      if (output != null && output.text != null && output.text!.isNotEmpty) {
-        if (output.menu.isNotEmpty) {
-          final submenuItems = _convertMenuItems(output.menu);
-          menuItems.add(MenuItem.submenu(
-            label: '${output.icon} ${output.text}',
-            submenu: Menu(items: submenuItems),
-          ));
-        } else {
-          menuItems.add(MenuItem(
-            label: '${output.icon} ${output.text}',
-            disabled: true,
-          ));
+    // Plugin outputs - only show in unified mode (in separate mode they have their own icons)
+    if (!_useSeparateMode) {
+      for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+        final output = _pluginOutputs[plugin.id];
+        if (output != null && output.text != null && output.text!.isNotEmpty) {
+          if (output.menu.isNotEmpty) {
+            final submenuItems = _convertMenuItems(output.menu);
+            menuItems.add(MenuItem.submenu(
+              label: '${output.icon} ${output.text}',
+              submenu: Menu(items: submenuItems),
+            ));
+          } else {
+            menuItems.add(MenuItem(
+              label: '${output.icon} ${output.text}',
+              disabled: true,
+            ));
+          }
         }
+      }
+
+      if (menuItems.isNotEmpty) {
+        menuItems.add(MenuItem.separator());
       }
     }
 
-    if (menuItems.isNotEmpty) {
-      menuItems.add(MenuItem.separator());
+    // Standard menu items
+    if (_useSeparateMode) {
+      // In separate mode, only Show and Quit (no Refresh All since plugins have their own)
+      menuItems.addAll([
+        MenuItem(key: 'show', label: 'Show'),
+        MenuItem.separator(),
+        MenuItem(key: 'quit', label: 'Quit'),
+      ]);
+    } else {
+      menuItems.addAll([
+        MenuItem(key: 'show', label: 'Show Crossbar'),
+        MenuItem(key: 'refresh', label: 'Refresh All Plugins'),
+        MenuItem.separator(),
+        MenuItem(key: 'quit', label: 'Quit'),
+      ]);
     }
 
-    // Standard menu items
-    menuItems.addAll([
-      MenuItem(key: 'show', label: 'Show Crossbar'),
-      MenuItem(key: 'refresh', label: 'Refresh All Plugins'),
-      MenuItem.separator(),
-      MenuItem(key: 'quit', label: 'Quit'),
-    ]);
+    LoggerService().info('TrayService: Setting menu with ${menuItems.length} items, separateMode=$_useSeparateMode');
 
     try {
       await trayManager.setContextMenu(Menu(items: menuItems));
+      LoggerService().info('TrayService: Menu set successfully');
     } catch (e) {
       LoggerService().warning('Failed to set tray context menu: $e');
     }
@@ -370,9 +387,9 @@ class TrayService with TrayListener {
     // Standard actions
     items.addAll([
       TrayMenuItem(label: 'Refresh', key: 'refresh_$pluginId'),
+      TrayMenuItem(label: 'Disable', key: 'disable_$pluginId'),
       const TrayMenuItem.separator(),
       const TrayMenuItem(label: 'Show Crossbar', key: 'show'),
-      const TrayMenuItem(label: 'Quit', key: 'quit'),
     ]);
     
     return items;
@@ -487,7 +504,23 @@ class TrayService with TrayListener {
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.key) {
+    final key = menuItem.key ?? '';
+    
+    // Handle disable_pluginId actions
+    if (key.startsWith('disable_')) {
+      final pluginId = key.substring(8);
+      _disablePlugin(pluginId);
+      return;
+    }
+    
+    // Handle refresh_pluginId actions
+    if (key.startsWith('refresh_')) {
+      final pluginId = key.substring(8);
+      SchedulerService().runPluginNow(pluginId);
+      return;
+    }
+    
+    switch (key) {
       case 'show':
         WindowService().show();
       case 'refresh':
@@ -495,6 +528,23 @@ class TrayService with TrayListener {
       case 'quit':
         WindowService().quit();
     }
+  }
+
+  /// Disables a plugin and removes its tray icon.
+  Future<void> _disablePlugin(String pluginId) async {
+    // Disable the plugin via RefreshService (handles outputs and notifications)
+    await RefreshService().disablePlugin(pluginId);
+    
+    // Remove the tray icon
+    final iconId = _pluginIconIds.remove(pluginId);
+    if (iconId != null && _backend != null) {
+      await _backend!.destroyIcon(iconId);
+    }
+    
+    // Clear output
+    _pluginOutputs.remove(pluginId);
+    
+    LoggerService().info('TrayService: Disabled plugin $pluginId');
   }
 
   Future<void> dispose() async {

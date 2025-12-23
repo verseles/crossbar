@@ -58,18 +58,13 @@ class SamplePluginsService {
     PluginMetadata(
       id: 'battery',
       name: 'Battery Status',
-      description: 'Shows battery level and charging status',
+      description: 'Shows battery level and charging status with dynamic icons',
       category: PluginCategory.system,
       mobileCompatible: true,
       tags: ['battery', 'power', 'charging'],
       variants: [
-        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'battery.30s.sh', assetPath: 'plugins/battery/battery.30s.sh'),
-        PluginMetadataVariant(language: PluginLanguage.python, filename: 'battery.30s.py', assetPath: 'plugins/battery/battery.30s.py'),
-        PluginMetadataVariant(language: PluginLanguage.node, filename: 'battery.30s.js', assetPath: 'plugins/battery/battery.30s.js'),
-        PluginMetadataVariant(language: PluginLanguage.dart, filename: 'battery.30s.dart', assetPath: 'plugins/battery/battery.30s.dart'),
-        PluginMetadataVariant(language: PluginLanguage.go, filename: 'battery.30s.go', assetPath: 'plugins/battery/battery.30s.go'),
-        PluginMetadataVariant(language: PluginLanguage.rust, filename: 'battery.30s.rs', assetPath: 'plugins/battery/battery.30s.rs'),
-        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'battery.30s.lua', assetPath: 'plugins/battery/battery.30s.lua'),
+        PluginMetadataVariant(language: PluginLanguage.bash, filename: 'battery.2s.sh', assetPath: 'plugins/battery/battery.2s.sh'),
+        PluginMetadataVariant(language: PluginLanguage.lua, filename: 'battery.2s.lua', assetPath: 'plugins/battery/battery.2s.lua'),
       ],
     ),
     PluginMetadata(
