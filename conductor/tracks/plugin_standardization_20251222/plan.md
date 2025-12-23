@@ -29,8 +29,8 @@ Goal: Ensure every plugin has at least Lua and Bash versions, and remove non-sta
 ## Phase 4: GUI Dynamic Language Selection
 Goal: Update the Flutter GUI to dynamically populate the language dropdown from the plugin folder.
 
-- [ ] Task: Modify the Plugin UI model/view-model to scan the directory of a plugin for all supported file extensions.
-- [ ] Task: Update the "Language" dropdown in `lib/ui/tabs/plugins_tab.dart` (or relevant widget) to use this dynamic list.
-- [ ] Task: Implement/Verify that the `RefreshService` trigger updates the available language list for the selected plugin.
-- [ ] Task: Add a widget test to verify the dropdown updates when the file system changes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: GUI Dynamic Selection' (Protocol in workflow.md)
+- [x] Task: Modify the Plugin UI model/view-model to scan the directory of a plugin for all supported file extensions. e5ed97e
+- [x] Task: Update the "Language" dropdown in `lib/ui/tabs/plugins_tab.dart` (or relevant widget) to use this dynamic list. e5ed97e
+- [x] Task: Implement/Verify that the `RefreshService` trigger updates the available language list for the selected plugin. e5ed97e
+- [x] Task: Add a widget test to verify the dropdown updates when the file system changes. e5ed97e
+- [x] Task: Conductor - User Manual Verification 'Phase 4: GUI Dynamic Selection' (Protocol in workflow.md) 4903ec1
