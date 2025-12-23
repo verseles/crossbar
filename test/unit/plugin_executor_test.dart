@@ -108,5 +108,52 @@ void main() {
       // Embedded (work everywhere)
       expect(extensions, contains('lua'));
     });
+
+    test('includes shell variants', () {
+      final extensions = executor.supportedExtensions;
+      
+      expect(extensions, contains('bash'));
+      expect(extensions, contains('zsh'));
+    });
+
+    test('includes python alias', () {
+      final extensions = executor.supportedExtensions;
+      
+      expect(extensions, contains('python'));
+    });
+  });
+
+  group('PluginExecutor - Extension Edge Cases', () {
+    test('handles plugins with interval in name', () {
+      // Pattern: name.interval.extension
+      expect(executor.getRunnerType('cpu.5s.lua'), RunnerType.lua);
+      expect(executor.getRunnerType('weather.30m.py'), RunnerType.script);
+      expect(executor.getRunnerType('clock.1h.yaml'), RunnerType.declarative);
+    });
+
+    test('handles deeply nested paths', () {
+      expect(
+        executor.getRunnerType('/home/user/.crossbar/plugins/system/cpu.lua'),
+        RunnerType.lua,
+      );
+      expect(
+        executor.getRunnerType('/very/deep/nested/path/plugin.sh'),
+        RunnerType.script,
+      );
+    });
+
+    test('handles python extension alias', () {
+      expect(executor.getRunnerType('script.python'), RunnerType.script);
+    });
+
+    test('handles node extension alias', () {
+      expect(executor.getRunnerType('script.node'), RunnerType.script);
+    });
+
+    test('extension detection is case insensitive', () {
+      expect(executor.getRunnerType('plugin.LUA'), RunnerType.lua);
+      expect(executor.getRunnerType('plugin.YAML'), RunnerType.declarative);
+      expect(executor.getRunnerType('plugin.SH'), RunnerType.script);
+    });
   });
 }

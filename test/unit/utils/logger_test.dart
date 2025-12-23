@@ -49,4 +49,59 @@ void main() {
       expect(LogLevel.values.length, 4);
     });
   });
+
+  group('Logger logging methods', () {
+    late Logger logger;
+
+    setUp(() {
+      logger = Logger();
+      // Reset to default level
+      logger.minLevel = LogLevel.info;
+    });
+
+    test('debug method does not throw', () {
+      logger.minLevel = LogLevel.debug;
+      expect(() => logger.debug('debug message'), returnsNormally);
+    });
+
+    test('info method does not throw', () {
+      expect(() => logger.info('info message'), returnsNormally);
+    });
+
+    test('warning method does not throw', () {
+      expect(() => logger.warning('warning message'), returnsNormally);
+    });
+
+    test('error method does not throw', () {
+      expect(() => logger.error('error message'), returnsNormally);
+    });
+
+    test('error method with error object does not throw', () {
+      expect(
+        () => logger.error('error message', Exception('test error')),
+        returnsNormally,
+      );
+    });
+
+    test('error method with error and stackTrace does not throw', () {
+      expect(
+        () => logger.error(
+          'error message',
+          Exception('test error'),
+          StackTrace.current,
+        ),
+        returnsNormally,
+      );
+    });
+
+    test('logs below minLevel are filtered', () {
+      logger.minLevel = LogLevel.error;
+      // These should not throw and should be silently filtered
+      expect(() => logger.debug('debug'), returnsNormally);
+      expect(() => logger.info('info'), returnsNormally);
+      expect(() => logger.warning('warning'), returnsNormally);
+      // This should still log
+      expect(() => logger.error('error'), returnsNormally);
+    });
+  });
 }
