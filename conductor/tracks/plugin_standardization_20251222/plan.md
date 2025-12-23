@@ -17,7 +17,7 @@ Goal: Implement the showcase plugins in all 7 supported languages.
 - [x] Task: Verify that all showcase scripts execute and produce valid Crossbar/BitBar output using `crossbar run <plugin_path>`. 8a34532
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Showcase Plugins' (Protocol in workflow.md) 8a34532
 
-## Phase 3: Baseline Standardization & Legacy Porting
+## Phase 3: Baseline Standardization & Legacy Porting [checkpoint: 96ae9cd]
 Goal: Ensure every plugin has at least Lua and Bash versions, and remove non-standard versions.
 
 - [x] Task: Identify plugins missing Lua or Bash versions. 5660b47
