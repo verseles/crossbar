@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dbus/dbus.dart';
 import 'package:xdg_status_notifier_item/xdg_status_notifier_item.dart';
 
 import '../tray_backend.dart';
@@ -74,11 +75,17 @@ class SniMultiTrayBackend implements TrayBackend {
         }),
       ]);
 
+      // WORKAROUND: Each icon needs its own DBus bus connection
+      // because the package uses a fixed suffix '-1' for all icons.
+      // By providing a separate bus, each icon gets registered independently.
+      final bus = DBusClient.session();
+
       final client = StatusNotifierItemClient(
         id: 'crossbar-$pluginId-$id',
         title: tooltip,
         iconName: _resolveIconName(iconPath),
         menu: menu,
+        bus: bus,
       );
 
       await client.connect();
