@@ -291,6 +291,8 @@ class TrayService with TrayListener {
   void updatePluginOutput(String pluginId, plugin_model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
 
+    LoggerService().info('TrayService: updatePluginOutput for $pluginId, mode separate: $_useSeparateMode');
+
     if (_useSeparateMode) {
       _updateSeparateIcon(pluginId, output);
     } else {
@@ -306,13 +308,19 @@ class TrayService with TrayListener {
     String pluginId,
     plugin_model.PluginOutput output,
   ) async {
-    if (_backend == null) return;
+    if (_backend == null) {
+      LoggerService().warning('TrayService._updateSeparateIcon: backend is null');
+      return;
+    }
 
     final existingIconId = _pluginIconIds[pluginId];
     final title = '${output.icon} ${output.text ?? ''}';
     
+    LoggerService().info('TrayService._updateSeparateIcon: pluginId=$pluginId, existingIconId=$existingIconId, totalIcons=${_pluginIconIds.length}');
+    
     if (existingIconId != null) {
       // Update existing icon
+      LoggerService().info('TrayService._updateSeparateIcon: updating existing icon $existingIconId');
       await _backend!.updateIcon(
         iconId: existingIconId,
         title: title,
@@ -321,6 +329,7 @@ class TrayService with TrayListener {
       );
     } else {
       // Create new icon for this plugin
+      LoggerService().info('TrayService._updateSeparateIcon: creating new icon for $pluginId');
       final iconId = await _backend!.createIcon(
         pluginId: pluginId,
         iconPath: _iconPath ?? 'applications-utilities',
@@ -329,7 +338,7 @@ class TrayService with TrayListener {
       
       if (iconId != null) {
         _pluginIconIds[pluginId] = iconId;
-        LoggerService().info('Created separate tray icon for plugin $pluginId (id: $iconId)');
+        LoggerService().info('TrayService._updateSeparateIcon: created icon $iconId for $pluginId, totalIcons now=${_pluginIconIds.length}');
         
         // Update with full menu immediately
         await _backend!.updateIcon(
