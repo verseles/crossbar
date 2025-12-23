@@ -9,11 +9,21 @@ import '../../logger_service.dart';
 class SniTrayBackend implements TrayBackend {
   bool _initialized = false;
 
+  // Temporary flag: set to true once real SNI implementation is complete
+  static const bool _enableSniBackend = false;
+
   @override
   Future<bool> init() async {
     if (_initialized) return true;
     if (!Platform.isLinux) {
       _log('SNI is Linux-only', isError: true);
+      return false;
+    }
+
+    // Return false if not fully implemented yet
+    if (!_enableSniBackend) {
+      _log('SNI backend is not yet fully implemented, using fallback',
+          isError: true);
       return false;
     }
 
