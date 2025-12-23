@@ -30,6 +30,49 @@ StatusNotifierItemClient? _client;
 DBusClient? _bus;
 String _currentTitle = 'Crossbar';
 
+/// Maps plugin IDs to Freedesktop icon names.
+/// Plugins can also provide their own icon name via the 'freedesktopIcon' field.
+String _resolveIconName(String? pluginId, String? customIcon) {
+  // If plugin provides a custom icon name, use it
+  if (customIcon != null && customIcon.isNotEmpty && customIcon != 'applications-utilities') {
+    return customIcon;
+  }
+
+  // Map common plugin IDs to Freedesktop icon names
+  final iconMap = <String, String>{
+    'battery': 'battery-full-symbolic',
+    'cpu': 'utilities-system-monitor-symbolic',
+    'memory': 'drive-harddisk-symbolic',
+    'disk': 'drive-harddisk-symbolic',
+    'network': 'network-wired-symbolic',
+    'wifi': 'network-wireless-symbolic',
+    'bluetooth': 'bluetooth-symbolic',
+    'volume': 'audio-volume-high-symbolic',
+    'brightness': 'display-brightness-symbolic',
+    'emoji-clock': 'preferences-system-time-symbolic',
+    'clock': 'preferences-system-time-symbolic',
+    'weather': 'weather-clear-symbolic',
+    'temperature': 'sensors-temperature-symbolic',
+  };
+
+  // Try exact match first
+  if (pluginId != null && iconMap.containsKey(pluginId)) {
+    return iconMap[pluginId]!;
+  }
+
+  // Try partial match (e.g., 'battery-monitor' matches 'battery')
+  if (pluginId != null) {
+    for (final entry in iconMap.entries) {
+      if (pluginId.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+  }
+
+  // Fallback to generic application icon
+  return 'applications-utilities-symbolic';
+}
+
 Future<void> main(List<String> args) async {
   // Set up signal handlers for graceful shutdown
   ProcessSignal.sigterm.watch().listen((_) => _shutdown());
@@ -54,7 +97,7 @@ Future<void> main(List<String> args) async {
 Future<void> _processMessage(Map<String, dynamic> data) async {
   final pluginId = data['pluginId'] as String?;
   final title = data['title'] as String? ?? 'Crossbar';
-  final iconName = data['iconName'] as String? ?? 'applications-utilities';
+  final iconName = _resolveIconName(pluginId, data['iconName'] as String?);
   final menuData = data['menu'] as List<dynamic>? ?? [];
 
   _currentTitle = title;
