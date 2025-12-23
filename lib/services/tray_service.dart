@@ -34,11 +34,12 @@ class TrayService with TrayListener {
   final PluginManager _pluginManager = PluginManager();
   final Map<String, plugin_model.PluginOutput> _pluginOutputs = {};
 
-  // Backend for multi-icon support
+  // Backend for multi-icon support (SNI)
   TrayBackend? _backend;
   final Map<String, int> _pluginIconIds = {}; // pluginId -> iconId
 
   bool _initialized = false;
+  bool _unifiedTrayActive = false; // Tracks if unified tray_manager is active
   String? _iconPath;
   Brightness? _lastBrightness;
 
@@ -57,6 +58,9 @@ class TrayService with TrayListener {
       return;
     }
 
+    // Resolve icon path first
+    await _resolveIconPath();
+
     // Initialize the hybrid backend for potential multi-icon support
     _backend = HybridTrayBackend();
     final backendInitialized = await _backend!.init();
@@ -70,23 +74,16 @@ class TrayService with TrayListener {
       );
     }
 
-    // Always set up tray_manager listener for unified mode and click handling
-    trayManager.addListener(this);
-
-    await _resolveAndSetIcon();
-    await _updateMenu();
-    
-    // Set initial tooltip (title isn't supported on Linux)
-    if (!Platform.isLinux) {
-      try {
-        await trayManager.setToolTip('Crossbar');
-      } catch (_) {}
+    // Set up tray based on mode
+    if (_useSeparateMode) {
+      // SEPARATE MODE: Use only SNI backend, no unified tray_manager
+      LoggerService().info('TrayService: Using separate mode (SNI)');
+      // Icons will be created when plugins output is received
+    } else {
+      // UNIFIED MODE: Use tray_manager for single icon
+      LoggerService().info('TrayService: Using unified mode (tray_manager)');
+      await _initUnifiedTray();
     }
-    
-    // Set initial title
-    try {
-      await trayManager.setTitle('Crossbar');
-    } catch (_) {}
 
     // Listen for theme changes on Linux
     if (Platform.isLinux) {
@@ -97,9 +94,50 @@ class TrayService with TrayListener {
     LoggerService().info('Tray service initialized');
   }
 
+  /// Initializes the unified tray using tray_manager.
+  Future<void> _initUnifiedTray() async {
+    if (_unifiedTrayActive) return;
+
+    trayManager.addListener(this);
+    
+    if (_iconPath != null) {
+      try {
+        await trayManager.setIcon(_iconPath!);
+      } catch (e) {
+        LoggerService().warning('Failed to set tray icon: $e');
+      }
+    }
+    
+    await _updateUnifiedMenu();
+    
+    // Set initial tooltip and title
+    if (!Platform.isLinux) {
+      try {
+        await trayManager.setToolTip('Crossbar');
+      } catch (_) {}
+    }
+    
+    try {
+      await trayManager.setTitle('Crossbar');
+    } catch (_) {}
+
+    _unifiedTrayActive = true;
+  }
+
+  /// Destroys the unified tray.
+  Future<void> _destroyUnifiedTray() async {
+    if (!_unifiedTrayActive) return;
+
+    trayManager.removeListener(this);
+    try {
+      await trayManager.destroy();
+    } catch (e) {
+      LoggerService().warning('Failed to destroy unified tray: $e');
+    }
+    _unifiedTrayActive = false;
+  }
+
   void _setupThemeListener() {
-    // Check for theme changes periodically since platformDispatcher
-    // callbacks may not work reliably for tray services
     final dispatcher = SchedulerBinding.instance.platformDispatcher;
     dispatcher.onPlatformBrightnessChanged = _onThemeChanged;
   }
@@ -113,24 +151,22 @@ class TrayService with TrayListener {
     if (_lastBrightness != currentBrightness) {
       _lastBrightness = currentBrightness;
       LoggerService().info('Theme changed to: $currentBrightness');
-      _resolveAndSetIcon();
+      _resolveIconPath();
     }
   }
 
-  Future<void> _resolveAndSetIcon() async {
+  /// Resolves the icon path based on platform and theme.
+  Future<void> _resolveIconPath() async {
     String candidate;
 
     if (Platform.isLinux) {
-      // Detect system theme and use appropriate icon
       final brightness =
           SchedulerBinding.instance.platformDispatcher.platformBrightness;
       _lastBrightness = brightness;
 
       if (brightness == Brightness.dark) {
-        // Dark theme: use light (white) icon for visibility
         candidate = 'assets/icons/tray_icon_light.png';
       } else {
-        // Light theme: use dark (black) icon for visibility
         candidate = 'assets/icons/tray_icon_dark.png';
       }
       LoggerService().info('Linux theme: $brightness, using icon: $candidate');
@@ -153,44 +189,36 @@ class TrayService with TrayListener {
           if (await File(bundlePath).exists()) {
             _iconPath = bundlePath;
           }
-        } catch (_) {
-          // Ignore resolution errors
-        }
+        } catch (_) {}
       }
     }
 
     if (_iconPath == null) {
       LoggerService().warning(
           'Tray icon not found at $candidate. Tray icon may not display.');
-      _iconPath = candidate; // Use anyway as fallback
+      _iconPath = candidate;
     } else {
       LoggerService().info('Tray icon resolved to: $_iconPath');
     }
-
-    try {
-      await trayManager.setIcon(_iconPath!);
-    } catch (e) {
-      LoggerService().warning('Failed to set tray icon: $e');
-    }
   }
 
-  Future<void> _updateMenu() async {
+  /// Updates the unified menu (for tray_manager).
+  Future<void> _updateUnifiedMenu() async {
+    if (!_unifiedTrayActive) return;
+
     final menuItems = <MenuItem>[];
 
-    // Plugin outputs - show enabled plugins with their menus
+    // Plugin outputs
     for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
       final output = _pluginOutputs[plugin.id];
       if (output != null && output.text != null && output.text!.isNotEmpty) {
-        // Check if plugin has menu items
         if (output.menu.isNotEmpty) {
-          // Create submenu with plugin output items
           final submenuItems = _convertMenuItems(output.menu);
           menuItems.add(MenuItem.submenu(
             label: '${output.icon} ${output.text}',
             submenu: Menu(items: submenuItems),
           ));
         } else {
-          // No submenu, just show the output
           menuItems.add(MenuItem(
             label: '${output.icon} ${output.text}',
             disabled: true,
@@ -205,19 +233,10 @@ class TrayService with TrayListener {
 
     // Standard menu items
     menuItems.addAll([
-      MenuItem(
-        key: 'show',
-        label: 'Show Crossbar',
-      ),
-      MenuItem(
-        key: 'refresh',
-        label: 'Refresh All Plugins',
-      ),
+      MenuItem(key: 'show', label: 'Show Crossbar'),
+      MenuItem(key: 'refresh', label: 'Refresh All Plugins'),
       MenuItem.separator(),
-      MenuItem(
-        key: 'quit',
-        label: 'Quit',
-      ),
+      MenuItem(key: 'quit', label: 'Quit'),
     ]);
 
     try {
@@ -227,20 +246,18 @@ class TrayService with TrayListener {
     }
   }
 
-  /// Converts plugin model MenuItems to tray_manager MenuItems recursively
+  /// Converts plugin model MenuItems to tray_manager MenuItems recursively.
   List<MenuItem> _convertMenuItems(List<plugin_model.MenuItem> items) {
     final result = <MenuItem>[];
     for (final item in items) {
       if (item.separator) {
         result.add(MenuItem.separator());
       } else if (item.submenu != null && item.submenu!.isNotEmpty) {
-        // Item has submenu - create a submenu
         result.add(MenuItem.submenu(
           label: item.text ?? '',
           submenu: Menu(items: _convertMenuItems(item.submenu!)),
         ));
       } else {
-        // Regular menu item
         result.add(MenuItem(
           key: item.href ?? item.bash ?? item.text,
           label: item.text ?? '',
@@ -250,7 +267,7 @@ class TrayService with TrayListener {
     return result;
   }
 
-  /// Converts plugin model MenuItems to TrayMenuItem for backend
+  /// Converts plugin model MenuItems to TrayMenuItem for backend.
   List<TrayMenuItem> _convertToTrayMenuItems(List<plugin_model.MenuItem> items) {
     final result = <TrayMenuItem>[];
     for (final item in items) {
@@ -277,14 +294,14 @@ class TrayService with TrayListener {
     if (_useSeparateMode) {
       _updateSeparateIcon(pluginId, output);
     } else {
-      _updateMenu();
-      _updateTitle(pluginId, output);
+      _updateUnifiedMenu();
+      _updateUnifiedTitle(pluginId, output);
     }
     
     _updateTooltip();
   }
 
-  /// Updates or creates a separate icon for a plugin in separate mode.
+  /// Updates or creates a separate icon for a plugin (SNI mode).
   Future<void> _updateSeparateIcon(
     String pluginId,
     plugin_model.PluginOutput output,
@@ -292,40 +309,75 @@ class TrayService with TrayListener {
     if (_backend == null) return;
 
     final existingIconId = _pluginIconIds[pluginId];
+    final title = '${output.icon} ${output.text ?? ''}';
     
     if (existingIconId != null) {
       // Update existing icon
       await _backend!.updateIcon(
         iconId: existingIconId,
-        title: '${output.icon} ${output.text ?? ''}',
+        title: title,
         tooltip: output.text ?? pluginId,
-        menu: output.menu.isNotEmpty 
-            ? _convertToTrayMenuItems(output.menu)
-            : null,
+        menu: _buildPluginMenu(pluginId, output),
       );
     } else {
-      // Create new icon
-      final iconPath = _iconPath ?? 'applications-utilities';
+      // Create new icon for this plugin
       final iconId = await _backend!.createIcon(
         pluginId: pluginId,
-        iconPath: iconPath,
-        tooltip: '${output.icon} ${output.text ?? pluginId}',
+        iconPath: _iconPath ?? 'applications-utilities',
+        tooltip: title,
       );
       
       if (iconId != null) {
         _pluginIconIds[pluginId] = iconId;
-        LoggerService().info('Created separate tray icon for plugin $pluginId');
+        LoggerService().info('Created separate tray icon for plugin $pluginId (id: $iconId)');
+        
+        // Update with full menu immediately
+        await _backend!.updateIcon(
+          iconId: iconId,
+          title: title,
+          menu: _buildPluginMenu(pluginId, output),
+        );
       }
     }
   }
 
-  /// Public method to refresh the tray menu (e.g., after plugin toggle/delete)
-  Future<void> refreshMenu() async {
-    await _updateMenu();
+  /// Builds a complete menu for a plugin icon.
+  List<TrayMenuItem> _buildPluginMenu(
+    String pluginId,
+    plugin_model.PluginOutput output,
+  ) {
+    final items = <TrayMenuItem>[];
     
-    // In separate mode, remove icons for disabled/deleted plugins
+    // Plugin menu items from output
+    if (output.menu.isNotEmpty) {
+      items.addAll(_convertToTrayMenuItems(output.menu));
+      items.add(const TrayMenuItem.separator());
+    }
+    
+    // Standard actions
+    items.addAll([
+      TrayMenuItem(label: 'Refresh', key: 'refresh_$pluginId'),
+      const TrayMenuItem.separator(),
+      const TrayMenuItem(label: 'Show Crossbar', key: 'show'),
+      const TrayMenuItem(label: 'Quit', key: 'quit'),
+    ]);
+    
+    return items;
+  }
+
+  /// Public method to refresh the tray menu.
+  Future<void> refreshMenu() async {
     if (_useSeparateMode) {
       await _cleanupSeparateIcons();
+      // Recreate icons for all enabled plugins with output
+      for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+        final output = _pluginOutputs[plugin.id];
+        if (output != null) {
+          await _updateSeparateIcon(plugin.id, output);
+        }
+      }
+    } else {
+      await _updateUnifiedMenu();
     }
   }
 
@@ -355,9 +407,9 @@ class TrayService with TrayListener {
   }
 
   void _updateTooltip() {
-    // setToolTip is not supported on Linux by tray_manager
     if (Platform.isLinux) return;
     if (_pluginOutputs.isEmpty) return;
+    if (!_unifiedTrayActive) return;
 
     final tooltipParts = <String>[];
     for (final entry in _pluginOutputs.entries.take(3)) {
@@ -374,14 +426,14 @@ class TrayService with TrayListener {
     }
   }
 
-  Future<void> _updateTitle(String pluginId, plugin_model.PluginOutput output) async {
-    // Find the first enabled plugin to use as the main tray title
+  Future<void> _updateUnifiedTitle(String pluginId, plugin_model.PluginOutput output) async {
+    if (!_unifiedTrayActive) return;
+
     final firstEnabled =
         _pluginManager.plugins.where((p) => p.enabled).firstOrNull;
 
     if (firstEnabled?.id == pluginId) {
       var title = '';
-      // Use emoji icon from plugin output if available
       if (output.icon.isNotEmpty && output.icon != '⚙️') {
         title += '${output.icon} ';
       }
@@ -399,14 +451,14 @@ class TrayService with TrayListener {
 
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
-    _updateMenu();
     
-    // In separate mode, remove the icon for this plugin
     if (_useSeparateMode) {
       final iconId = _pluginIconIds.remove(pluginId);
       if (iconId != null) {
         _backend?.destroyIcon(iconId);
       }
+    } else {
+      _updateUnifiedMenu();
     }
   }
 
@@ -435,19 +487,16 @@ class TrayService with TrayListener {
   Future<void> dispose() async {
     if (!_initialized) return;
 
-    // Dispose backend and all separate icons
+    // Dispose SNI backend and all separate icons
     if (_backend != null) {
       await _backend!.dispose();
       _backend = null;
     }
     _pluginIconIds.clear();
 
-    trayManager.removeListener(this);
-    try {
-      await trayManager.destroy();
-    } catch (e) {
-      LoggerService().warning('Failed to destroy tray: $e');
-    }
+    // Dispose unified tray
+    await _destroyUnifiedTray();
+
     _initialized = false;
   }
 }
