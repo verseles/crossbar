@@ -518,15 +518,46 @@ Plugin Lua → CrossbarBridge.batterySync()
                                    MainActivity.kt → BatteryManager (API oficial)
              ↓ (Desktop)
              SystemApi → /sys/class/power_supply (acesso direto)
+---
+
+### ADR-012: Multi-Icon Tray Architecture for Linux (2025-12-23)
+
+**Status**: ✅ Accepted
+**Context**: Linux limita 1 ícone de tray por aplicação via libappindicator/SNI. O package `xdg_status_notifier_item` usa sufixo D-Bus fixo (`-1`), causando sobrescrita quando múltiplos ícones são criados.
+
+**Decision**: Implementar arquitetura de **processos separados** onde cada plugin spawna um daemon (`crossbar_tray_daemon`) independente que cria seu próprio ícone SNI.
+
+**Architecture**:
 ```
+
+Crossbar Main ──stdin/JSON──> Daemon (CPU) ──> SNI Icon 1
+──stdin/JSON──> Daemon (Battery) ──> SNI Icon 2
+──stdin/JSON──> Daemon (Memory) ──> SNI Icon 3
+
+````
+
+**Components**:
+- `bin/crossbar_tray_daemon.dart`: Daemon standalone que cria 1 ícone SNI
+- `lib/services/tray/backends/process_spawn_tray_backend.dart`: Gerencia spawn de daemons
+- `PluginOutput.trayIcon`: Campo para ícones Freedesktop dinâmicos (ex: `battery-level-50-symbolic`)
+
+**Known Limitations**:
+- Menus só atualizam visualmente ao clicar no ícone (limitação do protocolo SNI)
+- Ícones não mudam dinamicamente sem recriar (falta `NewIcon` signal no package)
+
+**Consequences**:
+- ✅ Múltiplos ícones funcionam no Linux GNOME/KDE
+- ✅ Cada plugin pode ter seu próprio ícone de tema Freedesktop
+- ⚠️ Processos adicionais (limitado a 10 ícones)
+- ⚠️ Atualização visual requer interação do usuário
 
 ### Template para Novas ADRs
 
 ```markdown
 ### ADR-XXX: Título (YYYY-MM-DD)
 
-**Status**: 🟡 Proposed | ✅ Accepted | ❌ Rejected | ⚠️ Deprecated  
-**Context**: Qual problema estamos resolvendo?  
-**Decision**: O que decidimos fazer?  
+**Status**: 🟡 Proposed | ✅ Accepted | ❌ Rejected | ⚠️ Deprecated
+**Context**: Qual problema estamos resolvendo?
+**Decision**: O que decidimos fazer?
 **Consequences**: Quais são os trade-offs e impactos?
-```
+````
