@@ -125,20 +125,8 @@ Future<void> _processMessage(Map<String, dynamic> data) async {
     }
   }
 
-  // Add standard actions
-  menuItems.add(DBusMenuItem.separator());
-  menuItems.add(DBusMenuItem(
-    label: 'Show Crossbar',
-    onClicked: () async {
-      stdout.writeln(jsonEncode({'action': 'show'}));
-    },
-  ));
-  menuItems.add(DBusMenuItem(
-    label: 'Quit',
-    onClicked: () async {
-      stdout.writeln(jsonEncode({'action': 'quit'}));
-    },
-  ));
+  // Note: Standard actions (Refresh, Show, Quit) are added by TrayService's
+  // _buildPluginMenu, so we don't add them here to avoid duplicates.
 
   final menu = DBusMenuItem(children: menuItems);
 

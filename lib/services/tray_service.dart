@@ -315,14 +315,17 @@ class TrayService with TrayListener {
 
     final existingIconId = _pluginIconIds[pluginId];
     final title = '${output.icon} ${output.text ?? ''}';
+    // Use plugin's trayIcon if provided, otherwise null (daemon will use mapping)
+    final iconName = output.trayIcon;
     
-    LoggerService().info('TrayService._updateSeparateIcon: pluginId=$pluginId, existingIconId=$existingIconId, totalIcons=${_pluginIconIds.length}');
+    LoggerService().info('TrayService._updateSeparateIcon: pluginId=$pluginId, existingIconId=$existingIconId, trayIcon=$iconName');
     
     if (existingIconId != null) {
       // Update existing icon
       LoggerService().info('TrayService._updateSeparateIcon: updating existing icon $existingIconId');
       await _backend!.updateIcon(
         iconId: existingIconId,
+        iconPath: iconName,
         title: title,
         tooltip: output.text ?? pluginId,
         menu: _buildPluginMenu(pluginId, output),
@@ -332,7 +335,7 @@ class TrayService with TrayListener {
       LoggerService().info('TrayService._updateSeparateIcon: creating new icon for $pluginId');
       final iconId = await _backend!.createIcon(
         pluginId: pluginId,
-        iconPath: _iconPath ?? 'applications-utilities',
+        iconPath: iconName ?? 'applications-utilities',
         tooltip: title,
       );
       
@@ -343,6 +346,7 @@ class TrayService with TrayListener {
         // Update with full menu immediately
         await _backend!.updateIcon(
           iconId: iconId,
+          iconPath: iconName,
           title: title,
           menu: _buildPluginMenu(pluginId, output),
         );

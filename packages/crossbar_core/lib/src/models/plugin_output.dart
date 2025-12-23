@@ -6,6 +6,7 @@ class PluginOutput {
     this.text,
     this.color,
     this.trayTooltip,
+    this.trayIcon,
     this.menu = const [],
     this.hasError = false,
     this.errorMessage,
@@ -33,6 +34,9 @@ class PluginOutput {
   final String? text;
   final int? color;
   final String? trayTooltip;
+  /// Freedesktop icon name for tray (e.g., 'battery-level-50-symbolic').
+  /// If null, falls back to icon name mapping based on pluginId.
+  final String? trayIcon;
   final List<MenuItem> menu;
   final bool hasError;
   final String? errorMessage;
@@ -43,6 +47,7 @@ class PluginOutput {
     String? text,
     int? color,
     String? trayTooltip,
+    String? trayIcon,
     List<MenuItem>? menu,
     bool? hasError,
     String? errorMessage,
@@ -53,6 +58,7 @@ class PluginOutput {
       text: text ?? this.text,
       color: color ?? this.color,
       trayTooltip: trayTooltip ?? this.trayTooltip,
+      trayIcon: trayIcon ?? this.trayIcon,
       menu: menu ?? this.menu,
       hasError: hasError ?? this.hasError,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -66,6 +72,7 @@ class PluginOutput {
       'text': text,
       'color': color,
       'trayTooltip': trayTooltip,
+      'trayIcon': trayIcon,
       'menu': menu.map((m) => m.toJson()).toList(),
       'hasError': hasError,
       'errorMessage': errorMessage,
