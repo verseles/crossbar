@@ -210,6 +210,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 | Testes (sem hardware)   | `flutter test --exclude-tags=hardware` (evita glitches locais)            |
 | Verificar Coverage      | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info)     |
 | Build Release (Linux)   | `make linux`                                                              |
+| Build Release (Android) | `make android` ou `make android CAPTION="- Feature 1\n- Fix 2"`           |
 | Analisar Código         | `flutter analyze --no-fatal-infos`                                        |
 | Monitorar CI            | `gh run watch`                                                            |
 | **Matar GUI + Reabrir** | `pkill -9 -f crossbar-gui; ./build/linux/x64/release/bundle/crossbar gui` |
@@ -234,6 +235,48 @@ Ou use o comando combinado:
 
 ```bash
 pkill -9 -f crossbar-gui; pkill -9 -f crossbar; flutter build linux --release && ./build/linux/x64/release/bundle/crossbar gui
+```
+
+### 📱 Build Android com Upload para Telegram
+
+O comando `make android` gera `crossbar.apk` e faz upload via `tdl` (se instalado).
+
+**Uso básico** (sem legenda):
+```bash
+make android
+```
+
+**Com release notes** (use `\n` para quebras de linha):
+```bash
+make android CAPTION="- Corrigido bug X\n- Adicionada feature Y"
+```
+
+**⚠️ Regras importantes para CAPTION:**
+1. **Use `\n` para quebras de linha** - Não use quebras de linha reais no terminal
+2. **Evite caracteres especiais** - `•`, `→`, emojis podem causar erros de parsing
+3. **Use hífen `-` para listas** - Funciona melhor que bullets
+4. **Aspas simples dentro do texto** - Escape com `\'` ou evite
+
+**Exemplos corretos:**
+```bash
+# Lista simples
+make android CAPTION="- Feature 1\n- Feature 2\n- Bug fix"
+
+# Com descrição
+make android CAPTION="Release v1.5.0\n\n- Nova UI\n- Performance melhorada"
+```
+
+**Exemplos que causam erro:**
+```bash
+# ❌ Quebra de linha real (erro de sintaxe)
+make android CAPTION="- Feature 1
+- Feature 2"
+
+# ❌ Bullet point unicode (erro de parsing)
+make android CAPTION="• Feature 1"
+
+# ❌ Aspas não escapadas
+make android CAPTION="Versão "beta""
 ```
 
 ---

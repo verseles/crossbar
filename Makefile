@@ -141,11 +141,25 @@ windows:
 	dart compile exe bin/crossbar.dart -o $(WINDOWS_BUNDLE)/crossbar.exe
 	@echo "Done! Binaries at $(WINDOWS_BUNDLE)/"
 
-# Android build
+# Android build (APK name configured in android/app/build.gradle.kts)
+# Usage: make android CAPTION="Release notes here"
+# Caption supports HTML: <b>bold</b>, <i>italic</i>, <code>code</code>
+# Use \n for newlines in CAPTION
+CAPTION ?=
 android:
 	flutter build apk --release --target-platform android-arm64
-	@if command -v tdl >/dev/null 2>&1; then tdl up -t 6 --path=./build/app/outputs/flutter-apk/app-release.apk; fi
-	@echo "Done! APK at build/app/outputs/flutter-apk/app-release.apk"
+	@if command -v tdl >/dev/null 2>&1; then \
+		VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
+		if [ -n "$(CAPTION)" ]; then \
+			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
+				--caption "\"<b>Crossbar v$$VERSION</b>\n\n$(CAPTION)\""; \
+		else \
+			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
+				--caption "\"<b>Crossbar v$$VERSION</b>\""; \
+		fi; \
+	fi
+	@echo "Done! APK at build/app/outputs/apk/release/crossbar.apk"
+	@echo "Done! APK at build/app/outputs/apk/release/crossbar.apk"
 
 # Run tests
 test:
@@ -222,5 +236,3 @@ icons:
 	@echo "Generating launcher icons (Android, Windows, macOS)..."
 	dart run flutter_launcher_icons
 	@echo "Done! All icons generated."
-
-
