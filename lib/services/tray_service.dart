@@ -111,6 +111,7 @@ class TrayService with TrayListener {
       }
     }
     
+    _unifiedTrayActive = true;
     await _updateUnifiedMenu();
     
     // Set initial tooltip and title
@@ -123,8 +124,6 @@ class TrayService with TrayListener {
     try {
       await trayManager.setTitle('Crossbar');
     } catch (_) {}
-
-    _unifiedTrayActive = true;
   }
 
   /// Destroys the unified tray.
