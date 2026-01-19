@@ -14,10 +14,11 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 ### ✅ O que está Sólido
 
 - **Core Architecture:** `PluginManager` e `ScriptRunner` funcionam bem.
+- **Documentation:** `CODEBASE.md` provides a comprehensive architectural guide.
 - **Refresh Engine:** `RefreshService` unificado gerencia atualizações periódicas, manuais e background de forma consistente.
 - **CLI Foundation:** Estrutura de comandos e parser de argumentos robustos.
 - **UI Desktop:** Janela principal e abas implementadas.
-- **Tray Básico:** Ícone único e menu funcionam via `tray_manager`.
+- **Tray:** Fixes for initialization race conditions and support for multi-icon SNI.
 - **Configuration Engine:** Persistência, UI e injeção de variáveis implementados.
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
 

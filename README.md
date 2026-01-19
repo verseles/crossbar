@@ -170,6 +170,7 @@ void main() {
 
 📖 **Detailed Guides:**
 
+- [Codebase Architecture Guide](CODEBASE.md) - **Start here for developers!**
 - [Plugin Types Overview](docs/plugin-types.md)
 - [YAML Plugins](docs/yaml-plugins.md)
 - [Dart Plugins](docs/dart-plugins.md)
