@@ -34,7 +34,7 @@ print(json.dumps({
 - **⚡ Hot Reload**: Automatic plugin detection and reload (<1s)
 - **🎨 Adaptive Rendering**: Same plugin renders as tray icon, notification, or widget
 - **🔒 Secure Storage**: Passwords stored in system Keychain/KeyStore
-- **🌐 75+ CLI Commands**: Unified API for system info, network, media, clipboard, and more
+- **🌐 76+ CLI Commands**: Unified API for system info, network, media, clipboard, QR codes, and more
 
 ### 🎯 Revolutionary Advantages Over BitBar/Argos
 
@@ -43,7 +43,7 @@ print(json.dumps({
 | Platforms      | macOS/Linux only                    | Linux + Windows + macOS + Android + iOS                                          |
 | Output Formats | Text only                           | Text + JSON + Structured Data                                                    |
 | UI Targets     | Menu bar only                       | Tray + Notifications + Widgets + Menu bar                                        |
-| CLI API        | None (scripts call system commands) | 75+ unified commands (`crossbar cpu`)                                            |
+| CLI API        | None (scripts call system commands) | 76+ unified commands (`crossbar cpu`)                                            |
 | Configuration  | Manual scripting                    | Declarative JSON with auto-generated UI                                          |
 | Mobile Support | ❌ None                             | ✅ Widgets + Persistent Notifications (Android) + Home/Lock Screen Widgets (iOS) |
 | Controls       | Read-only                           | Bidirectional (volume, media, system)                                            |
@@ -220,7 +220,7 @@ print(json.dumps({
 
 ### CLI API Reference
 
-Crossbar provides 75+ unified commands accessible via `crossbar [command]`.
+Crossbar provides 76+ unified commands accessible via `crossbar [command]`.
 
 #### System Information
 
@@ -439,7 +439,7 @@ crossbar/
 │       ├── bin/crossbar.dart         # CLI entry point
 │       └── lib/src/
 │           ├── core/                 # CLI-specific plugin manager
-│           └── commands/             # 75+ CLI command handlers
+│           └── commands/             # 76+ CLI command handlers
 ├── plugins/                    # Example plugins
 ├── test/                       # 116 tests (>90% coverage)
 └── .github/workflows/          # CI/CD pipelines
@@ -592,7 +592,7 @@ Built with:
 - **Mobile Widgets**: Native Android (XML) and iOS (WidgetKit) home screen widgets.
 - **Refresh Engine**: Unified behavior across UI, Tray and Background.
 - **Core**: Plugin Manager, Script Runner, Output Parser.
-- **CLI**: 75+ commands.
+- **CLI**: 76+ commands.
 - **Platforms**: Linux, macOS, Windows, Android, iOS.
 
 ### 🎯 v1.5.0 (Next)

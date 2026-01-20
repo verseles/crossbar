@@ -2,8 +2,8 @@
 
 Complete documentation for all Crossbar CLI commands.
 
-**Version**: 1.4.0
-**Last Updated**: December 2025
+**Version**: 1.7.2
+**Last Updated**: January 2026
 
 ## Table of Contents
 
@@ -1284,6 +1284,45 @@ crossbar base64 decode "SGVsbG8gV29ybGQ="
 ```
 
 **Platforms**: Linux, macOS, Windows
+
+---
+
+### `qr <text>`
+
+Generate a QR code from text.
+
+**Arguments**:
+
+- `text` - Text or URL to encode in the QR code
+
+**Options**:
+
+- `--image` - Output as Base64 encoded PNG image (default: ASCII)
+- `--size <px>` - Image size in pixels (default: 200, only with --image)
+
+```bash
+crossbar qr "Hello World"
+# Output: (ASCII QR code using Unicode blocks)
+#   ██████████████    ██  ████  ██████████████
+#   ██          ██  ████████    ██          ██
+#   ...
+
+crossbar qr "https://crossbar.dev" --json
+# Output: {"data":"https://crossbar.dev","qr":"..."}
+
+crossbar qr "https://example.com" --image
+# Output: iVBORw0KGgoAAAANSUhEUgAAAMYA... (Base64 PNG)
+
+crossbar qr "data" --image --size 300
+# Output: (Base64 PNG with 300x300 pixels)
+```
+
+**Use Cases**:
+- Share URLs quickly in terminal
+- Generate QR codes in plugins for mobile scanning
+- Create QR code images for notifications or widgets
+
+**Platforms**: Linux, macOS, Windows, Android, iOS
 
 ---
 
