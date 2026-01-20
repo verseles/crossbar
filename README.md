@@ -93,6 +93,7 @@ flutter pub get
 
 # Build and Run (Desktop)
 # Using Makefile (Recommended - builds full architecture)
+make help    # List all available commands
 make linux   # or make macos, make windows
 
 # Or using Flutter directly (GUI only)

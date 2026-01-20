@@ -1,9 +1,38 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install uninstall precommit
+	install uninstall precommit help
 
-# Pre-commit verification sequence (AGENTS.md compliance)
-# Runs: analyze → coverage → linux build → android build
-precommit:
+.DEFAULT_GOAL := help
+
+# Paths
+LINUX_BUNDLE = build/linux/x64/release/bundle
+MACOS_BUNDLE = build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
+WINDOWS_BUNDLE = build/windows/x64/runner/Release
+
+# Detect OS and set default target
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+    DEFAULT_TARGET = macos
+else ifneq (,$(findstring MINGW,$(UNAME_S)))
+    DEFAULT_TARGET = windows
+else ifneq (,$(findstring CYGWIN,$(UNAME_S)))
+    DEFAULT_TARGET = windows
+else ifeq ($(OS),Windows_NT)
+    DEFAULT_TARGET = windows
+else
+    DEFAULT_TARGET = linux
+endif
+
+help: ## Show this help
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+all: $(DEFAULT_TARGET) ## Build for detected OS (alias for linux/macos/windows)
+	@echo "Building for detected OS: $(DEFAULT_TARGET)"
+
+precommit: ## Run full pre-commit sequence (analyze, coverage, linux, android)
 	@echo "══════════════════════════════════════════════════════════════"
 	@echo "  PRECOMMIT VERIFICATION (AGENTS.md)"
 	@echo "══════════════════════════════════════════════════════════════"
@@ -28,34 +57,7 @@ precommit:
 	@echo "  ✅ PRECOMMIT PASSED - Safe to commit!"
 	@echo "══════════════════════════════════════════════════════════════"
 
-# Paths
-LINUX_BUNDLE = build/linux/x64/release/bundle
-MACOS_BUNDLE = build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
-WINDOWS_BUNDLE = build/windows/x64/runner/Release
-
-# Default target
-# Detect OS and set default target
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S),Darwin)
-    DEFAULT_TARGET = macos
-else ifneq (,$(findstring MINGW,$(UNAME_S)))
-    DEFAULT_TARGET = windows
-else ifneq (,$(findstring CYGWIN,$(UNAME_S)))
-    DEFAULT_TARGET = windows
-else ifeq ($(OS),Windows_NT)
-    DEFAULT_TARGET = windows
-else
-    DEFAULT_TARGET = linux
-endif
-
-# Default target
-all: $(DEFAULT_TARGET)
-	@echo "Building for detected OS: $(DEFAULT_TARGET)"
-
-# Linux build with unified CLI entry point
-# Architecture: crossbar (CLI + launcher) + crossbar-gui (Flutter) + crossbar_tray_daemon
-linux:
+linux: ## Build for Linux (Flutter GUI + CLI + Tray Daemon)
 	@echo "Building Flutter GUI..."
 	flutter build linux --release
 	@echo "Setting up unified architecture..."
@@ -75,11 +77,7 @@ linux:
 	@echo ""
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
 
-
-# Install Crossbar on Linux (after build)
-# Installs to ~/.local/ for user-level installation
-INSTALL_DIR = $(HOME)/.local
-install:
+install: ## Install Crossbar to ~/.local/ (Linux only)
 	@echo "Installing Crossbar to $(INSTALL_DIR)..."
 	@mkdir -p $(INSTALL_DIR)/bin
 	@mkdir -p $(INSTALL_DIR)/share/crossbar
@@ -104,13 +102,14 @@ install:
 	@echo "✅ Crossbar installed successfully!"
 	@echo ""
 	@echo "Make sure $(INSTALL_DIR)/bin is in your PATH:"
-	@echo "  export PATH=\"\$$HOME/.local/bin:\$$PATH\""
+	@echo "  export PATH=\"$$HOME/.local/bin:$$PATH\""
 	@echo ""
 	@echo "You can now run 'crossbar' from anywhere."
 	@echo "A desktop entry has been created - search for 'Crossbar' in your app menu."
 
-# Uninstall Crossbar
-uninstall:
+INSTALL_DIR = $(HOME)/.local
+
+uninstall: ## Uninstall Crossbar from ~/.local/
 	@echo "Uninstalling Crossbar..."
 	@rm -f $(INSTALL_DIR)/bin/crossbar
 	@rm -rf $(INSTALL_DIR)/share/crossbar
@@ -122,9 +121,7 @@ uninstall:
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
-
-# macOS build with unified CLI entry point
-macos:
+macos: ## Build for macOS
 	@echo "Building Flutter GUI..."
 	flutter build macos --release
 	@echo "Setting up unified architecture..."
@@ -132,8 +129,7 @@ macos:
 	dart compile exe bin/crossbar.dart -o $(MACOS_BUNDLE)/crossbar
 	@echo "Done! Binaries at $(MACOS_BUNDLE)/"
 
-# Windows build with unified CLI entry point
-windows:
+windows: ## Build for Windows
 	@echo "Building Flutter GUI..."
 	flutter build windows --release
 	@echo "Setting up unified architecture..."
@@ -141,32 +137,25 @@ windows:
 	dart compile exe bin/crossbar.dart -o $(WINDOWS_BUNDLE)/crossbar.exe
 	@echo "Done! Binaries at $(WINDOWS_BUNDLE)/"
 
-# Android build (APK name configured in android/app/build.gradle.kts)
-# Usage: make android CAPTION="Release notes here"
-# Caption supports HTML: <b>bold</b>, <i>italic</i>, <code>code</code>
-# Use \n for newlines in CAPTION
 CAPTION ?=
-android:
+android: ## Build Android APK (and upload if configured)
 	flutter build apk --release --target-platform android-arm64
 	@if command -v tdl >/dev/null 2>&1; then \
 		VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
 		if [ -n "$(CAPTION)" ]; then \
 			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
-				--caption "\"<b>Crossbar v$$VERSION</b>\n\n$(CAPTION)\""; \
+				--caption "\"<b>Crossbar v$$VERSION</b>\\n\\n$(CAPTION)\"" ; \
 		else \
 			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
-				--caption "\"<b>Crossbar v$$VERSION</b>\""; \
+				--caption "\"<b>Crossbar v$$VERSION</b>\"" ; \
 		fi; \
 	fi
 	@echo "Done! APK at build/app/outputs/apk/release/crossbar.apk"
-	@echo "Done! APK at build/app/outputs/apk/release/crossbar.apk"
 
-# Run tests
-test:
+test: ## Run unit/widget tests (excluding hardware)
 	flutter test --exclude-tags=hardware
 
-# Run tests with coverage (excludes generated code: i18n, dialogs, paths)
-coverage:
+coverage: ## Run tests with coverage report
 	flutter test --exclude-tags=hardware --coverage
 	@echo "Filtering generated code from coverage..."
 	lcov --remove coverage/lcov.info 'lib/l10n/*' 'lib/ui/dialogs/*' 'lib/core/paths/*' -o coverage/lcov_filtered.info 2>/dev/null
@@ -176,41 +165,32 @@ coverage:
 	@echo ""
 	@echo "Target: 60% (see AGENTS.md for rationale)"
 
-# Analyze code
-analyze:
+analyze: ## Run static analysis
 	flutter analyze --no-fatal-infos
 
-# Clean build artifacts
-clean:
+clean: ## Clean build artifacts
 	flutter clean
 	rm -rf build/
 
-# Install dependencies
-deps:
+deps: ## Get dependencies
 	flutter pub get
 
-# Quick test of CLI (after linux build)
-test-cli:
+test-cli: ## Test CLI binary (requires linux build)
 	@echo "Testing CLI mode:"
 	$(LINUX_BUNDLE)/crossbar --cpu
 	@echo ""
 	@echo "Testing --version:"
 	$(LINUX_BUNDLE)/crossbar --version
 
-# Run GUI (after linux build)
-run-gui:
+run-gui: ## Run GUI (requires linux build)
 	$(LINUX_BUNDLE)/crossbar
 
-# Full rebuild
-rebuild: clean linux
+rebuild: clean linux ## Clean and rebuild Linux
 
-# Mix (update repomix if exists)
-mix:
+mix: ## Update repomix (if exists)
 	@if [ -f repomix-output.xml ]; then npx repomix --truncate-base64 --include-logs --top-files-len 20; fi
 
-# Generate all icons from source files (requires imagemagick)
-# Source: assets/icons/icon.png (transparent) and icon_opaque.png (with background)
-icons:
+icons: ## Generate icons from assets
 	@echo "Generating tray icons..."
 	@cd assets/icons && \
 	magick icon.png -resize 48x48 -alpha extract mask.png && \
