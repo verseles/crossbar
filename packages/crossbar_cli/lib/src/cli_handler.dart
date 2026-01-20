@@ -11,6 +11,7 @@ import 'commands/media_command.dart';
 import 'commands/network_command.dart';
 import 'commands/plugin_commands.dart';
 import 'commands/power_command.dart';
+import 'commands/qr_command.dart';
 import 'commands/screen_command.dart';
 import 'commands/system_info_commands.dart';
 import 'commands/utility_commands.dart';
@@ -19,7 +20,7 @@ import 'commands/wallpaper_command.dart';
 import 'commands/web_command.dart';
 import 'commands/wifi_command.dart';
 
-const String version = '1.4.1';
+const String version = '1.7.2';
 
 final Map<String, CliCommand> _commands = {};
 
@@ -50,6 +51,7 @@ void _registerCommands() {
   _register(ExecCommand());
   _register(NotifyCommand());
   _register(OpenCommand());
+  _register(QrCommand());
 
   // Misc
   _register(TimeCommand());
@@ -213,6 +215,7 @@ Utilities:
   open url <url>            Open URL
   open file <path>          Open file
   open app <name>           Launch application
+  qr <text>                 Generate QR Code
 
   time                      Current time
   date                      Current date

@@ -12,6 +12,8 @@ dependencies:
   path: ^1.9.0
   dio: ^5.7.0
   crypto: ^3.0.6
+  qr: ^3.0.2
+  image: ^4.2.0
 
 dev_dependencies:
   lints: ^5.0.0
