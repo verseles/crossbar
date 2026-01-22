@@ -111,9 +111,9 @@ O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
 ## 4. Estrutura de Arquivos Chave
 
 ```text
-crossbar/
 ├── bin/
-│   └── crossbar.dart           # Entrypoint unificado (CLI + Launcher)
+│   ├── crossbar.dart           # Unified Entrypoint (CLI + Launcher)
+│   └── crossbar_tray_daemon.dart # Linux Multi-Icon Tray Daemon
 ├── lib/
 │   ├── main.dart               # Entrypoint da GUI Flutter
 │   ├── cli/
@@ -124,11 +124,8 @@ crossbar/
 │   │   ├── plugin_executor.dart # Roteador de runners
 │   │   ├── script_runner.dart  # Execução de scripts nativos (bash, python...)
 │   │   ├── output_parser.dart  # BitBar Text parser & JSON parser
-│   │   └── runners/
-│   │       ├── lua_runner.dart      # Executa .lua via lua_dardo (embarcado)
-│   │       ├── dart_runner.dart     # Executa .dart via dart_eval
-│   │       └── declarative_runner.dart # Executa .yaml plugins
-│   ├── services/               # Singleton Services
+│   │   └── runners/            # Declarative and Dart Runners
+│   ├── services/               # Singleton Services (Tray, Refresh, Config, Marketplace)
 │   └── ui/                     # Widgets Flutter (Material 3)
 ├── plugins/                    # Exemplos de plugins (Lua, Bash, Python, JS, Dart...)
 ├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
@@ -149,9 +146,10 @@ crossbar/
 
 - **Executor**: `lib/core/plugin_executor.dart` (roteador de runners)
 - **Runners**:
-  - `LuaRunner`: Plugins `.lua` via lua_dardo (Dart puro, funciona em TODAS as plataformas) ⭐ Recomendado
-  - `ScriptRunner`: Plugins bash, python, node, go, rust (desktop only)
-  - `DeclarativeRunner`: Plugins `.yaml` (DSL declarativa)
+  - `LuaRunner`: Plugins `.lua` via lua_dardo (em `crossbar_core`, funciona em TODAS as plataformas) ⭐ Recomendado
+  - `ScriptRunner`: Plugins bash, python, node, go, rust (desktop only, em `lib/core/`)
+  - `DeclarativeRunner`: Plugins `.yaml` (DSL declarativa, em `lib/core/runners/`)
+  - `DartRunner`: Plugins `.dart` (via dart_eval, em `lib/core/runners/`)
 - **Interpreters Nativos**: Bash, Python3, Node, Dart, Go (`go run`), Rust (`rustc` temp build).
 - **Output**: Suporta formato texto legado (BitBar) OU JSON estruturado (Crossbar).
 - **Nota**: QuickJS foi rejeitado (ADR-003) por depender de `dart:ui`.

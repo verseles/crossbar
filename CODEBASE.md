@@ -16,7 +16,7 @@ The project is divided into specialized packages under the `packages/` directory
     -   **Pure Dart**: No dependency on `dart:ui` or Flutter widgets.
     -   **Models**: Defines `Plugin`, `PluginOutput`, `PluginConfig`, and `PluginAction`.
     -   **Engine**: Contains `PluginManager` (discovery), `PluginExecutor` (routing), and `RefreshService` (lifecycle).
-    -   **Runners**: Implements embedded interpreters like `LuaRunner` (via `lua_dardo`) and `DeclarativeRunner` (YAML).
+    -   **Runners**: Implements embedded interpreters like `LuaRunner` (via `lua_dardo`). Other runners (YAML, Dart) reside in the main application's `lib/core/runners/`.
 2.  **`crossbar_cli`**: The command-line interface.
     -   Compiles to a standalone native binary (`crossbar`).
     -   Handles CLI commands (e.g., `crossbar cpu`, `crossbar list`).
@@ -60,7 +60,7 @@ Plugins are discovered in `~/.crossbar/plugins/` (Linux/macOS/Windows) or intern
 -   **Native Bridges**: `AndroidNativeBridge` provides access to system info (Battery, Uptime) when standard files are restricted by SELinux (ADR-010).
 
 ### Linux (Desktop)
--   **Multi-Icon Tray (ADR-012)**: Uses a daemon-based approach (`crossbar_tray_daemon`) to spawn multiple independent tray icons on GNOME/KDE, bypassing `libappindicator` limitations.
+-   **Multi-Icon Tray (ADR-012)**: Uses a daemon-based approach (`bin/crossbar_tray_daemon.dart`) to spawn multiple independent tray icons on GNOME/KDE, bypassing `libappindicator` limitations. Each plugin can have its own dedicated icon in the system tray.
 
 ---
 
@@ -71,6 +71,8 @@ Plugins are discovered in `~/.crossbar/plugins/` (Linux/macOS/Windows) or intern
     -   **Schemas**: Uses `.schema.json` to generate dynamic configuration UIs.
     -   **Security**: Stores passwords/secrets in the system keyring/secure storage.
 -   **`SchedulerService`**: Manages background task scheduling for different platforms.
+-   **`MarketplaceService`**: Handles searching and installing plugins from the GitHub-based marketplace.
+-   **`SamplePluginsService`**: Provides a set of built-in example plugins for users to explore and install.
 
 ---
 
@@ -78,16 +80,20 @@ Plugins are discovered in `~/.crossbar/plugins/` (Linux/macOS/Windows) or intern
 
 ```text
 crossbar/
-├── bin/                    # Unified Entrypoints (CLI + Launcher)
+├── bin/                    # Unified Entrypoints
+│   ├── crossbar.dart       # CLI + Launcher
+│   └── crossbar_tray_daemon.dart # Linux Multi-Icon Tray Daemon
 ├── packages/
-│   ├── crossbar_core/      # Shared Business Logic & Runners (Pure Dart)
+│   ├── crossbar_core/      # Shared Business Logic & Lua Runner (Pure Dart)
 │   ├── crossbar_cli/       # Standalone CLI Executable
 │   └── crossbar_api/       # Developer SDK for Dart Plugins
 ├── lib/
 │   ├── main.dart           # Flutter GUI Entrypoint
-│   ├── services/           # Singleton Services (Tray, Refresh, Config)
+│   ├── services/           # Singleton Services (Tray, Refresh, Config, Marketplace)
 │   ├── ui/                 # Flutter Widgets & Tabs
-│   └── core/               # App-specific core logic (Widget Service, Bridge)
+│   └── core/               # App-specific core logic
+│       ├── runners/        # Declarative and Dart Runners
+│       └── bridge/         # Native bridges (Android)
 ├── android/                # Native Android Kotlin/XML (Widgets)
 ├── ios/                    # Native iOS Swift (WidgetKit)
 ├── linux/                  # GTK/Runner C++ logic

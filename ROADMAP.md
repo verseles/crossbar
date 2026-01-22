@@ -21,12 +21,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **Tray:** Fixes for initialization race conditions and support for multi-icon SNI.
 - **Configuration Engine:** Persistência, UI e injeção de variáveis implementados.
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
+- **Marketplace:** Sistema de busca e instalação via GitHub implementado (`MarketplaceService`).
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
 
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
 - **API Gaps:** Comandos como `--location` (geocoding) e `--qr` não têm lógica implementada.
-- **Marketplace:** Ainda não integrado com a API do GitHub.
 
 ---
 
@@ -146,14 +146,14 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ### Fase 2: Marketplace Engine
 
-- [ ] **GitHub API:** Em `lib/services/marketplace_service.dart`:
-  - [ ] Implementar busca real usando `api.github.com/search/code?q=crossbar+extension:sh`.
-  - [ ] Implementar cache de resultados para evitar rate limiting.
-- [ ] **Instalação:** Melhorar `InstallCommand`:
-  - [ ] Clonar repositório temporariamente.
-  - [ ] Validar integridade do arquivo.
-  - [ ] Copiar para `~/.crossbar/plugins`.
-  - [ ] Executar `chmod +x` automaticamente.
+- [x] **GitHub API:** Em `lib/services/marketplace_service.dart`:
+  - [x] Implementar busca real usando `api.github.com/repos/{owner}/{repo}/contents/plugins`.
+  - [x] Implementar cache de resultados para evitar rate limiting.
+- [x] **Instalação:** Melhorar `InstallCommand`:
+  - [x] Clonar/Baixar plugin.
+  - [x] Validar integridade do arquivo.
+  - [x] Copiar para `~/.crossbar/plugins`.
+  - [x] Executar `chmod +x` automaticamente.
 
 ---
 
@@ -168,7 +168,7 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 
 ### Status Atual de Testes
 
-**Coverage atual:** 36.6% (meta: 60%)
+**Coverage atual:** 40.7% (meta: 60%)
 
 #### Arquivos com Boa Cobertura (>70%)
 

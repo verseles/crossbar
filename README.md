@@ -463,8 +463,8 @@ flutter analyze
 
 **Current stats**:
 
-- 116 tests (114 passing, 2 skipped)
-- > 90% code coverage
+- 116 tests passing (individual test cases)
+- ~41% code coverage (Target: 60%)
 - 0 analysis errors
 
 ## 🔧 Development
