@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../services/refresh_service.dart';
 import '../../services/sample_plugins_service.dart';
 
 /// Dialog to browse and install sample/example plugins.
@@ -21,8 +22,10 @@ class SamplePluginsDialog extends StatefulWidget {
 
 class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   final SamplePluginsService _service = SamplePluginsService();
-  final Map<String, bool> _installedStatus = {}; // variant.filename -> installed
-  final Map<String, PluginLanguage> _selectedLanguages = {}; // plugin.id -> language
+  final Map<String, bool> _installedStatus =
+      {}; // variant.filename -> installed
+  final Map<String, PluginLanguage> _selectedLanguages =
+      {}; // plugin.id -> language
   final Set<String> _installingPlugins = {}; // plugin.id being installed
   final List<String> _installedFilenames = []; // track what we installed
   PluginCategory? _selectedCategory;
@@ -40,9 +43,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       _selectedLanguages[plugin.id] = plugin.hasLanguage(PluginLanguage.lua)
           ? PluginLanguage.lua
           : plugin.variants.first.language;
-      
+
       for (final variant in plugin.variants) {
-        _installedStatus[variant.filename] = await _service.isInstalled(variant.filename);
+        _installedStatus[variant.filename] = await _service.isInstalled(
+          variant.filename,
+        );
       }
     }
     if (mounted) {
@@ -54,12 +59,12 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   List<PluginMetadata> get _filteredPlugins {
     var plugins = SamplePluginsService.allPlugins;
-    
+
     // Filter by category
     if (_selectedCategory != null) {
       plugins = plugins.where((p) => p.category == _selectedCategory).toList();
     }
-    
+
     return plugins;
   }
 
@@ -70,25 +75,29 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   /// Check if the currently selected variant is installed
   bool _isVariantInstalled(PluginMetadata plugin) {
-    final language = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+    final language =
+        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
     final variant = plugin.getVariant(language);
     if (variant == null) return false;
     return _installedStatus[variant.filename] ?? false;
   }
 
   Future<void> _installPlugin(PluginMetadata plugin) async {
-    final language = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+    final language =
+        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
     final variant = plugin.getVariant(language) ?? plugin.defaultVariant;
-    
+
     setState(() {
       _installingPlugins.add(plugin.id);
     });
-    
+
     try {
       await _service.installVariant(variant);
       _installedStatus[variant.filename] = true;
       _installedFilenames.add(variant.filename);
-      
+
+      await RefreshService().discoverPlugins();
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -131,7 +140,9 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
           title: Text(AppLocalizations.of(context)!.samplePlugins),
           leading: IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
           ),
         ),
         body: Column(
@@ -193,42 +204,41 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.primaryContainer,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.extension,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
+          Icon(Icons.extension, color: theme.colorScheme.onPrimaryContainer),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                  Text(
-                    AppLocalizations.of(context)!.samplePlugins,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
+                Text(
+                  AppLocalizations.of(context)!.samplePlugins,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                Text(
+                  AppLocalizations.of(context)!.universalAndAdditionalPlugins(
+                    SamplePluginsService.universalPlugins.length,
+                    0,
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer.withValues(
+                      alpha: 0.7,
                     ),
                   ),
-                  Text(
-                    AppLocalizations.of(context)!.universalAndAdditionalPlugins(
-                      SamplePluginsService.universalPlugins.length,
-                      0,
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
-                    ),
-                  ),
+                ),
               ],
             ),
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ],
@@ -277,7 +287,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     final plugins = _filteredPlugins;
     final screenWidth = MediaQuery.of(context).size.width;
     final useGrid = screenWidth > 700;
-    
+
     if (plugins.isEmpty) {
       return Center(
         child: Column(
@@ -307,7 +317,8 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
           childAspectRatio: 2.4,
         ),
         itemCount: plugins.length,
-        itemBuilder: (context, index) => _buildPluginCard(theme, plugins[index]),
+        itemBuilder: (context, index) =>
+            _buildPluginCard(theme, plugins[index]),
       );
     }
 
@@ -323,13 +334,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     final hasInstalledVariant = _isPluginInstalled(plugin);
     final isVariantInstalled = _isVariantInstalled(plugin);
     final isInstalling = _installingPlugins.contains(plugin.id);
-    final selectedLang = _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
+    final selectedLang =
+        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
 
     return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 4,
-        vertical: 4,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -363,7 +372,9 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                           if (plugin.mobileCompatible) ...[
                             const SizedBox(width: 4),
                             Tooltip(
-                              message: AppLocalizations.of(context)!.mobileCompatible,
+                              message: AppLocalizations.of(
+                                context,
+                              )!.mobileCompatible,
                               child: Icon(
                                 Icons.smartphone,
                                 size: 14,
@@ -374,7 +385,10 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                           if (hasInstalledVariant) ...[
                             const SizedBox(width: 4),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 1,
+                              ),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.tertiary,
                                 borderRadius: BorderRadius.circular(4),
@@ -413,7 +427,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
-                        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -423,7 +441,10 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                           isExpanded: true,
                           items: plugin.availableLanguages.map((lang) {
                             final langVariant = plugin.getVariant(lang);
-                            final langInstalled = langVariant != null && (_installedStatus[langVariant.filename] ?? false);
+                            final langInstalled =
+                                langVariant != null &&
+                                (_installedStatus[langVariant.filename] ??
+                                    false);
                             return DropdownMenuItem(
                               value: lang,
                               child: Row(
@@ -434,7 +455,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                                   ),
                                   if (langInstalled) ...[
                                     const SizedBox(width: 4),
-                                    Icon(Icons.check, size: 12, color: theme.colorScheme.primary),
+                                    Icon(
+                                      Icons.check,
+                                      size: 12,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                   ],
                                 ],
                               ),
@@ -455,7 +480,10 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                 ] else ...[
                   // Single language - just show a chip
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
@@ -484,7 +512,10 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                   )
                 else
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(20),
@@ -492,7 +523,11 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                        Icon(
+                          Icons.check,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           AppLocalizations.of(context)!.installed,
@@ -519,7 +554,9 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
         children: [
           if (_installedFilenames.isNotEmpty)
             Text(
-              AppLocalizations.of(context)!.installedThisSession(_installedFilenames.length),
+              AppLocalizations.of(
+                context,
+              )!.installedThisSession(_installedFilenames.length),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -527,8 +564,14 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
             ),
           const Spacer(),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
-            child: Text(_installedFilenames.isNotEmpty ? AppLocalizations.of(context)!.done : AppLocalizations.of(context)!.close),
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(_installedFilenames.isNotEmpty ? _installedFilenames : null),
+            child: Text(
+              _installedFilenames.isNotEmpty
+                  ? AppLocalizations.of(context)!.done
+                  : AppLocalizations.of(context)!.close,
+            ),
           ),
         ],
       ),
