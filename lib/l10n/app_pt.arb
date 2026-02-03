@@ -42,6 +42,15 @@
   "pluginsDirectory": "Diretório de Plugins",
   "openPluginsDirectory": "Abrir Diretório de Plugins",
   "about": "Sobre",
+  "debugLogsTitle": "Debug Logs",
+  "debugLogsCopy": "Copy logs",
+  "debugLogsClear": "Clear logs",
+  "debugLogsEmpty": "No logs yet",
+  "debugLogsCopied": "Logs copied to clipboard",
+  "debugLogsWidgetTitle": "Widget native logs",
+  "debugLogsWidgetEmpty": "No widget logs yet",
+  "debugLogsRange": "Range",
+  "debugLogsCategory": "Category",
   "version": "Versão",
   "checkForUpdates": "Verificar Atualizações",
   "noUpdatesAvailable": "Nenhuma atualização disponível",
@@ -164,4 +173,3 @@
   "noPluginsAvailable": "Nenhum plugin disponível. Instale alguns plugins primeiro.",
   "widgetUpdateNote": "Widgets atualizam a cada 15 min em segundo plano. Abra o app para atualizações instantâneas."
 }
-

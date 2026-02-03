@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.view.View
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
 import org.json.JSONArray
 import org.json.JSONObject
@@ -43,6 +44,24 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        val prefs = HomeWidgetPlugin.getData(context)
+        val editor = prefs.edit()
+        for (appWidgetId in appWidgetIds) {
+            val key = "widget_${appWidgetId}_plugins"
+            editor.remove(key)
+            WidgetLogStore.append(
+                context,
+                "INFO",
+                TAG,
+                "Config cleared on delete",
+                appWidgetId,
+            )
+        }
+        editor.commit()
+    }
+
     private fun updateWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -50,15 +69,25 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         widgetData: SharedPreferences
     ) {
         try {
+            val resolvedData = HomeWidgetPlugin.getData(context)
             val layoutId = getLayoutId()
             val views = RemoteViews(context.packageName, layoutId)
 
             // Get plugin IDs - first try per-widget config, then fallback to global
             val perWidgetKey = "widget_${appWidgetId}_plugins"
-            val perWidgetJson = widgetData.getString(perWidgetKey, null)
-            val globalJson = widgetData.getString("plugin_ids", null)
+            val perWidgetJson = resolvedData.getString(perWidgetKey, null)
+            val globalJson = resolvedData.getString("plugin_ids", null)
             
             val pluginIdsJson = perWidgetJson ?: globalJson
+
+            WidgetLogStore.append(
+                context,
+                "INFO",
+                TAG,
+                "Update start",
+                appWidgetId,
+                "perWidget=${perWidgetJson != null} global=${globalJson != null}",
+            )
             
             val pluginIds = try {
                 if (pluginIdsJson != null) {
@@ -69,19 +98,75 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                 }
             } catch (e: Exception) {
                 android.util.Log.e(TAG, "Error parsing plugin IDs for widget $appWidgetId", e)
+                WidgetLogStore.append(
+                    context,
+                    "ERROR",
+                    TAG,
+                    "Plugin IDs parse error",
+                    appWidgetId,
+                    "error=${e.message}",
+                )
                 emptyList()
             }
 
-            if (pluginIds.isEmpty()) {
+            var resolvedPluginIds = pluginIds
+
+            if (globalJson != null) {
+                val globalIds = try {
+                    val globalArray = JSONArray(globalJson)
+                    (0 until globalArray.length()).map { globalArray.getString(it) }
+                } catch (_: Exception) {
+                    emptyList()
+                }
+
+                if (globalIds.isNotEmpty()) {
+                    val hasOnlyMissing = resolvedPluginIds.isNotEmpty() &&
+                        resolvedPluginIds.all { id -> !globalIds.contains(id) }
+
+                    if (hasOnlyMissing) {
+                        resolvedPluginIds = globalIds
+                        resolvedData.edit().putString(perWidgetKey, globalJson).commit()
+                        WidgetLogStore.append(
+                            context,
+                            "INFO",
+                            TAG,
+                            "Config migrated to global",
+                            appWidgetId,
+                        )
+                    }
+                }
+            }
+
+            if (resolvedPluginIds.isEmpty()) {
+                WidgetLogStore.append(
+                    context,
+                    "WARN",
+                    TAG,
+                    "No plugin IDs",
+                    appWidgetId,
+                )
                 setNoDataState(views, layoutId)
             } else {
                 when (layoutId) {
                     R.layout.crossbar_widget_large -> {
-                        updateLargeWidget(views, widgetData, pluginIds.take(4))
+                        updateLargeWidget(
+                            context,
+                            views,
+                            resolvedData,
+                            resolvedPluginIds.take(4),
+                            appWidgetId,
+                        )
                     }
                     else -> {
-                        val firstPluginId = pluginIds.first()
-                        updateSinglePluginWidget(views, widgetData, firstPluginId, layoutId)
+                        val firstPluginId = resolvedPluginIds.first()
+                        updateSinglePluginWidget(
+                            context,
+                            views,
+                            resolvedData,
+                            firstPluginId,
+                            layoutId,
+                            appWidgetId,
+                        )
                     }
                 }
             }
@@ -122,14 +207,24 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
     }
 
     private fun updateSinglePluginWidget(
+        context: Context,
         views: RemoteViews,
         widgetData: SharedPreferences,
         pluginId: String,
-        layoutId: Int
+        layoutId: Int,
+        appWidgetId: Int
     ) {
-        val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
+        val pluginDataJson = getPluginData(widgetData, pluginId, appWidgetId, context)
         
         if (pluginDataJson == null) {
+            WidgetLogStore.append(
+                context,
+                "WARN",
+                TAG,
+                "Missing plugin data",
+                appWidgetId,
+                "pluginId=$pluginId",
+            )
             setNoDataState(views, layoutId)
             return
         }
@@ -168,14 +263,24 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
         } catch (e: Exception) {
             android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
+            WidgetLogStore.append(
+                context,
+                "ERROR",
+                TAG,
+                "Plugin data parse error",
+                appWidgetId,
+                "pluginId=$pluginId error=${e.message}",
+            )
             setNoDataState(views, layoutId)
         }
     }
 
     private fun updateLargeWidget(
+        context: Context,
         views: RemoteViews,
         widgetData: SharedPreferences,
-        pluginIds: List<String>
+        pluginIds: List<String>,
+        appWidgetId: Int
     ) {
         val itemContainerIds = listOf(
             R.id.plugin_item_1, R.id.plugin_item_2, R.id.plugin_item_3, R.id.plugin_item_4
@@ -195,7 +300,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         pluginIds.forEachIndexed { index, pluginId ->
             if (index >= 4) return@forEachIndexed
 
-            val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
+            val pluginDataJson = getPluginData(widgetData, pluginId, appWidgetId, context)
             if (pluginDataJson != null) {
                 try {
                     val pluginData = JSONObject(pluginDataJson)
@@ -211,7 +316,24 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
                 } catch (e: Exception) {
                     android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
+                    WidgetLogStore.append(
+                        context,
+                        "ERROR",
+                        TAG,
+                        "Large widget parse error",
+                        appWidgetId,
+                        "pluginId=$pluginId error=${e.message}",
+                    )
                 }
+            } else {
+                WidgetLogStore.append(
+                    context,
+                    "WARN",
+                    TAG,
+                    "Large widget missing data",
+                    appWidgetId,
+                    "pluginId=$pluginId",
+                )
             }
         }
 
@@ -241,6 +363,40 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                 views.setTextViewText(R.id.widget_value, "Open app")
             }
         }
+    }
+
+    private fun getPluginData(
+        widgetData: SharedPreferences,
+        pluginId: String,
+        appWidgetId: Int,
+        context: Context
+    ): String? {
+        val direct = widgetData.getString("plugin_$pluginId", null)
+        if (direct != null) return direct
+
+        val canonicalId = canonicalPluginId(pluginId)
+        if (canonicalId != pluginId) {
+            val fallback = widgetData.getString("plugin_$canonicalId", null)
+            if (fallback != null) {
+                WidgetLogStore.append(
+                    context,
+                    "INFO",
+                    TAG,
+                    "Fallback plugin data",
+                    appWidgetId,
+                    "pluginId=$pluginId canonical=$canonicalId",
+                )
+            }
+            return fallback
+        }
+
+        return null
+    }
+
+    private fun canonicalPluginId(pluginId: String): String {
+        val withoutOff = pluginId.replace(".off.", ".")
+        val match = Regex("^(.+?)\\.(?:\\d+(?:\\.\\d+)?)[smh]\\.").find(withoutOff)
+        return match?.groupValues?.get(1) ?: withoutOff
     }
 
     private fun setupClickHandlers(

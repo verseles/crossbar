@@ -139,6 +139,33 @@ class AppLocalizationsHi extends AppLocalizations {
   String get about => 'के बारे में';
 
   @override
+  String get debugLogsTitle => 'Debug Logs';
+
+  @override
+  String get debugLogsCopy => 'Copy logs';
+
+  @override
+  String get debugLogsClear => 'Clear logs';
+
+  @override
+  String get debugLogsEmpty => 'No logs yet';
+
+  @override
+  String get debugLogsCopied => 'Logs copied to clipboard';
+
+  @override
+  String get debugLogsWidgetTitle => 'Widget native logs';
+
+  @override
+  String get debugLogsWidgetEmpty => 'No widget logs yet';
+
+  @override
+  String get debugLogsRange => 'Range';
+
+  @override
+  String get debugLogsCategory => 'Category';
+
+  @override
   String get version => 'वर्शन';
 
   @override

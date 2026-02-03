@@ -378,6 +378,60 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
+  /// No description provided for @debugLogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug Logs'**
+  String get debugLogsTitle;
+
+  /// No description provided for @debugLogsCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy logs'**
+  String get debugLogsCopy;
+
+  /// No description provided for @debugLogsClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs'**
+  String get debugLogsClear;
+
+  /// No description provided for @debugLogsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet'**
+  String get debugLogsEmpty;
+
+  /// No description provided for @debugLogsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs copied to clipboard'**
+  String get debugLogsCopied;
+
+  /// No description provided for @debugLogsWidgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget native logs'**
+  String get debugLogsWidgetTitle;
+
+  /// No description provided for @debugLogsWidgetEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No widget logs yet'**
+  String get debugLogsWidgetEmpty;
+
+  /// No description provided for @debugLogsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get debugLogsRange;
+
+  /// No description provided for @debugLogsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get debugLogsCategory;
+
   /// No description provided for @version.
   ///
   /// In en, this message translates to:

@@ -1474,10 +1474,14 @@ List<Plugin> filterAndSortPlugins({
 }) {
   var filtered = plugins;
 
+  String normalizedPluginId(Plugin plugin) {
+    return plugin.id.replaceFirst('.off.', '.');
+  }
+
   if (searchQuery.isNotEmpty) {
     final query = searchQuery.toLowerCase();
     filtered = filtered.where((p) {
-      return p.id.toLowerCase().contains(query) ||
+      return normalizedPluginId(p).toLowerCase().contains(query) ||
           p.interpreter.toLowerCase().contains(query);
     }).toList();
   }
@@ -1492,9 +1496,13 @@ List<Plugin> filterAndSortPlugins({
         if (a.enabled != b.enabled) {
           return a.enabled ? -1 : 1;
         }
-        return a.id.toLowerCase().compareTo(b.id.toLowerCase());
+        return normalizedPluginId(
+          a,
+        ).toLowerCase().compareTo(normalizedPluginId(b).toLowerCase());
       case PluginSortOrder.alphabetical:
-        return a.id.toLowerCase().compareTo(b.id.toLowerCase());
+        return normalizedPluginId(
+          a,
+        ).toLowerCase().compareTo(normalizedPluginId(b).toLowerCase());
       case PluginSortOrder.lastRun:
         final aRun = a.lastRun ?? DateTime(1970);
         final bRun = b.lastRun ?? DateTime(1970);

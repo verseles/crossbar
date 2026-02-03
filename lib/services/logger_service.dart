@@ -1,17 +1,74 @@
 // ignore_for_file: avoid_print
+import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
+enum LogLevel { debug, info, warning, error }
+
+enum LogCategory {
+  all('All'),
+  api('API'),
+  debug('Debug'),
+  errors('Errors'),
+  state('State'),
+  widgets('Widgets');
+
+  const LogCategory(this.label);
+
+  final String label;
+}
+
+class LogEntry {
+  LogEntry({
+    required this.level,
+    required this.message,
+    this.details,
+    this.category = LogCategory.debug,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
+
+  final DateTime timestamp;
+  final LogLevel level;
+  final String message;
+  final String? details;
+  final LogCategory category;
+
+  String get formattedTime {
+    return '${timestamp.hour.toString().padLeft(2, '0')}:'
+        '${timestamp.minute.toString().padLeft(2, '0')}:'
+        '${timestamp.second.toString().padLeft(2, '0')}';
+  }
+
+  String get formattedTimestamp => timestamp.toIso8601String();
+
+  String toDisplayString() {
+    final buffer = StringBuffer();
+    buffer.write('[${formattedTime}] [${level.name.toUpperCase()}] $message');
+    if (details != null && details!.isNotEmpty) {
+      buffer.write('\n  -> ${details!}');
+    }
+    return buffer.toString();
+  }
+
+  String toExportString() {
+    final buffer = StringBuffer();
+    buffer.write(
+      '[${formattedTimestamp}] [${level.name.toUpperCase()}] $message',
+    );
+    if (details != null && details!.isNotEmpty) {
+      final indented = details!.split('\n').join('\n  ');
+      buffer.write('\n  -> $indented');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  String toString() => toDisplayString();
 }
 
 class LoggerService {
-
   factory LoggerService() => _instance;
 
   LoggerService._internal();
@@ -20,17 +77,28 @@ class LoggerService {
   static const int _maxFileSize = 5 * 1024 * 1024; // 5MB
   static const int _maxFiles = 5;
   static const String _logFileName = 'crossbar.log';
+  static const int _maxLogsInMemory = 1000;
 
   String? _logDirectory;
   File? _currentLogFile;
   LogLevel minLevel = LogLevel.info;
   bool consoleOutput = false;
   bool _initialized = false;
+  DateTime? _sessionStartTime;
+
+  final Queue<LogEntry> _logs = Queue<LogEntry>();
+  final StreamController<LogEntry> _logController =
+      StreamController<LogEntry>.broadcast();
+
+  Stream<LogEntry> get logStream => _logController.stream;
+  List<LogEntry> get logs => List.unmodifiable(_logs.toList());
+  DateTime get sessionStartTime => _sessionStartTime ?? DateTime.now();
 
   Future<void> init({String? logDirectory}) async {
     if (_initialized) return;
 
     _logDirectory = logDirectory ?? _getDefaultLogDirectory();
+    _sessionStartTime = DateTime.now();
 
     final dir = Directory(_logDirectory!);
     if (!dir.existsSync()) {
@@ -40,7 +108,7 @@ class LoggerService {
     _currentLogFile = File(path.join(_logDirectory!, _logFileName));
     _initialized = true;
 
-    info('Logger initialized');
+    info('Logger initialized', category: LogCategory.debug);
   }
 
   String _getDefaultLogDirectory() {
@@ -58,34 +126,64 @@ class LoggerService {
     }
   }
 
-  void debug(String message, [Object? error, StackTrace? stackTrace]) {
-    _log(LogLevel.debug, message, error, stackTrace);
+  void debug(
+    String message, {
+    String? details,
+    LogCategory category = LogCategory.debug,
+  }) {
+    _log(LogLevel.debug, message, details: details, category: category);
   }
 
-  void info(String message, [Object? error, StackTrace? stackTrace]) {
-    _log(LogLevel.info, message, error, stackTrace);
+  void info(
+    String message, {
+    String? details,
+    LogCategory category = LogCategory.state,
+  }) {
+    _log(LogLevel.info, message, details: details, category: category);
   }
 
-  void warning(String message, [Object? error, StackTrace? stackTrace]) {
-    _log(LogLevel.warning, message, error, stackTrace);
+  void warning(
+    String message, {
+    String? details,
+    LogCategory category = LogCategory.state,
+  }) {
+    _log(LogLevel.warning, message, details: details, category: category);
   }
 
-  void error(String message, [Object? error, StackTrace? stackTrace]) {
-    _log(LogLevel.error, message, error, stackTrace);
+  void error(
+    String message, [
+    Object? error,
+    StackTrace? stackTrace,
+    String? details,
+    LogCategory category = LogCategory.errors,
+  ]) {
+    _log(
+      LogLevel.error,
+      message,
+      error: error,
+      stackTrace: stackTrace,
+      details: details,
+      category: category,
+    );
   }
 
   void _log(
     LogLevel level,
-    String message, [
+    String message, {
     Object? error,
     StackTrace? stackTrace,
-  ]) {
+    String? details,
+    LogCategory category = LogCategory.debug,
+  }) {
     if (level.index < minLevel.index) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final levelStr = level.name.toUpperCase().padRight(7);
     var logLine = '[$timestamp] $levelStr $message';
 
+    if (details != null && details.isNotEmpty) {
+      logLine += '\n  Details: ${_indentDetails(details)}';
+    }
     if (error != null) {
       logLine += '\n  Error: $error';
     }
@@ -93,11 +191,28 @@ class LoggerService {
       logLine += '\n  StackTrace:\n${_indentStackTrace(stackTrace)}';
     }
 
+    _addEntry(
+      LogEntry(
+        level: level,
+        message: message,
+        details: _combineDetails(details, error, stackTrace),
+        category: category,
+      ),
+    );
+
     if (consoleOutput) {
       _printToConsole(level, logLine);
     }
 
     _writeToFile(logLine);
+  }
+
+  void _addEntry(LogEntry entry) {
+    _logs.addLast(entry);
+    while (_logs.length > _maxLogsInMemory) {
+      _logs.removeFirst();
+    }
+    _logController.add(entry);
   }
 
   void _printToConsole(LogLevel level, String message) {
@@ -122,15 +237,37 @@ class LoggerService {
         .join('\n');
   }
 
+  String _indentDetails(String details) {
+    return details.split('\n').map((line) => '    $line').join('\n');
+  }
+
+  String? _combineDetails(
+    String? details,
+    Object? error,
+    StackTrace? stackTrace,
+  ) {
+    final buffer = StringBuffer();
+    if (details != null && details.isNotEmpty) {
+      buffer.writeln(details);
+    }
+    if (error != null) {
+      buffer.writeln('Error: $error');
+    }
+    if (stackTrace != null) {
+      buffer.writeln('StackTrace:');
+      buffer.writeln(_indentStackTrace(stackTrace));
+    }
+
+    final result = buffer.toString().trimRight();
+    return result.isEmpty ? null : result;
+  }
+
   void _writeToFile(String message) {
     if (!_initialized || _currentLogFile == null) return;
 
     try {
       _rotateIfNeeded();
-      _currentLogFile!.writeAsStringSync(
-        '$message\n',
-        mode: FileMode.append,
-      );
+      _currentLogFile!.writeAsStringSync('$message\n', mode: FileMode.append);
     } catch (_) {
       // Silently fail if logging fails
     }
@@ -144,10 +281,8 @@ class LoggerService {
 
     // Rotate logs
     for (var i = _maxFiles - 1; i >= 1; i--) {
-      final oldFile =
-          File(path.join(_logDirectory!, '$_logFileName.$i'));
-      final newFile =
-          File(path.join(_logDirectory!, '$_logFileName.${i + 1}'));
+      final oldFile = File(path.join(_logDirectory!, '$_logFileName.$i'));
+      final newFile = File(path.join(_logDirectory!, '$_logFileName.${i + 1}'));
 
       if (oldFile.existsSync()) {
         if (i == _maxFiles - 1) {
@@ -159,8 +294,7 @@ class LoggerService {
     }
 
     // Rename current log to .1
-    final rotatedFile =
-        File(path.join(_logDirectory!, '$_logFileName.1'));
+    final rotatedFile = File(path.join(_logDirectory!, '$_logFileName.1'));
     _currentLogFile!.renameSync(rotatedFile.path);
 
     // Create new log file
@@ -209,8 +343,8 @@ class LoggerService {
           if (line.isEmpty) continue;
 
           final matchesQuery = line.toLowerCase().contains(queryLower);
-          final matchesLevel = level == null ||
-              line.contains(level.name.toUpperCase());
+          final matchesLevel =
+              level == null || line.contains(level.name.toUpperCase());
 
           if (matchesQuery && matchesLevel) {
             results.add(line);
@@ -239,10 +373,59 @@ class LoggerService {
 
       // Create fresh log file
       _currentLogFile = File(path.join(_logDirectory!, _logFileName));
-      info('Logs cleared');
+      _logs.clear();
+      info('Logs cleared', category: LogCategory.debug);
     } catch (_) {
       // Ignore errors
     }
+  }
+
+  List<LogEntry> getFilteredLogs({
+    Duration? timeRange,
+    LogCategory category = LogCategory.all,
+  }) {
+    var filtered = _logs.toList();
+
+    if (timeRange != null) {
+      final cutoff = DateTime.now().subtract(timeRange);
+      filtered = filtered
+          .where((log) => log.timestamp.isAfter(cutoff))
+          .toList();
+    }
+
+    if (category != LogCategory.all) {
+      filtered = filtered.where((log) => log.category == category).toList();
+    }
+
+    return filtered;
+  }
+
+  String formatLogsForExport(List<LogEntry> entries, {String? timeRangeLabel}) {
+    final buffer = StringBuffer();
+    buffer.writeln(
+      '=== Debug Logs${timeRangeLabel != null ? ' (last $timeRangeLabel)' : ''} ===',
+    );
+    buffer.writeln('Session: ${sessionStartTime.toIso8601String()}');
+    buffer.writeln('Platform: ${_getPlatformName()}');
+    buffer.writeln('Exported: ${DateTime.now().toIso8601String()}');
+    buffer.writeln('Total entries: ${entries.length}');
+    buffer.writeln('');
+
+    for (final entry in entries) {
+      buffer.writeln(entry.toExportString());
+      buffer.writeln('');
+    }
+
+    return buffer.toString();
+  }
+
+  String _getPlatformName() {
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isLinux) return 'linux';
+    if (Platform.isMacOS) return 'macos';
+    if (Platform.isWindows) return 'windows';
+    return 'unknown';
   }
 
   Map<String, dynamic> getLogStats() {
@@ -292,14 +475,30 @@ class LoggerService {
   void dispose() {
     _initialized = false;
     _currentLogFile = null;
+    _logs.clear();
   }
 }
 
 /// Extension to make logging easier from anywhere
 extension LoggerExtension on Object {
-  void logDebug(String message) => LoggerService().debug('[$runtimeType] $message');
-  void logInfo(String message) => LoggerService().info('[$runtimeType] $message');
-  void logWarning(String message) => LoggerService().warning('[$runtimeType] $message');
+  void logDebug(String message, {String? details, LogCategory? category}) =>
+      LoggerService().debug(
+        '[$runtimeType] $message',
+        details: details,
+        category: category ?? LogCategory.debug,
+      );
+  void logInfo(String message, {String? details, LogCategory? category}) =>
+      LoggerService().info(
+        '[$runtimeType] $message',
+        details: details,
+        category: category ?? LogCategory.state,
+      );
+  void logWarning(String message, {String? details, LogCategory? category}) =>
+      LoggerService().warning(
+        '[$runtimeType] $message',
+        details: details,
+        category: category ?? LogCategory.state,
+      );
   void logError(String message, [Object? error, StackTrace? stackTrace]) =>
       LoggerService().error('[$runtimeType] $message', error, stackTrace);
 }

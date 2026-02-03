@@ -3,8 +3,8 @@ package com.verseles.crossbar
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
+import es.antonborri.home_widget.HomeWidgetPlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -24,7 +24,6 @@ class WidgetConfigActivity : FlutterActivity() {
     companion object {
         private const val TAG = "WidgetConfigActivity"
         private const val CHANNEL = "com.verseles.crossbar/widget_config"
-        private const val PREFS_NAME = "HomeWidgetPreferences"
     }
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
@@ -53,6 +52,13 @@ class WidgetConfigActivity : FlutterActivity() {
 
         if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             android.util.Log.e(TAG, "Invalid widget ID, finishing")
+            WidgetLogStore.append(
+                this,
+                "ERROR",
+                TAG,
+                "Invalid widget ID",
+                appWidgetId,
+            )
             finish()
             return
         }
@@ -61,6 +67,14 @@ class WidgetConfigActivity : FlutterActivity() {
         widgetSize = determineWidgetSize()
 
         android.util.Log.d(TAG, "Configuring widget $appWidgetId, size: $widgetSize")
+        WidgetLogStore.append(
+            this,
+            "INFO",
+            TAG,
+            "Config started",
+            appWidgetId,
+            "size=$widgetSize",
+        )
     }
     
     private fun determineWidgetSize(): String {
@@ -102,8 +116,12 @@ class WidgetConfigActivity : FlutterActivity() {
                     val pluginIds = call.argument<List<String>>("pluginIds") ?: emptyList()
 
                     saveWidgetConfig(widgetId, pluginIds)
+                    result.success(true)
+                }
+                "completeWidgetConfig" -> {
+                    val pluginIds = call.argument<List<String>>("pluginIds") ?: emptyList()
 
-                    // Update the widget immediately
+                    // Update the widget after Flutter primes the data
                     updateWidget()
 
                     // Set success result
@@ -112,7 +130,15 @@ class WidgetConfigActivity : FlutterActivity() {
                     }
                     setResult(RESULT_OK, resultValue)
 
-                    android.util.Log.d(TAG, "Widget $appWidgetId configured with plugins: $pluginIds")
+                    android.util.Log.d(TAG, "Widget $appWidgetId configuration completed")
+                    WidgetLogStore.append(
+                        this,
+                        "INFO",
+                        TAG,
+                        "Config completed",
+                        appWidgetId,
+                        "plugins=${pluginIds.joinToString(",")}",
+                    )
 
                     result.success(true)
                     finish()
@@ -123,12 +149,19 @@ class WidgetConfigActivity : FlutterActivity() {
                     }
                     setResult(RESULT_CANCELED, cancelIntent)
                     android.util.Log.d(TAG, "Widget $appWidgetId configuration cancelled")
+                    WidgetLogStore.append(
+                        this,
+                        "INFO",
+                        TAG,
+                        "Config cancelled",
+                        appWidgetId,
+                    )
                     result.success(true)
                     finish()
                 }
                 "getAvailablePlugins" -> {
-                    // Get stored plugin data from SharedPreferences
-                    val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    // Get stored plugin data from HomeWidget SharedPreferences
+                    val prefs = HomeWidgetPlugin.getData(this)
                     val pluginIdsJson = prefs.getString("plugin_ids", null)
                     result.success(pluginIdsJson)
                 }
@@ -138,15 +171,33 @@ class WidgetConfigActivity : FlutterActivity() {
     }
     
     private fun saveWidgetConfig(widgetId: Int, pluginIds: List<String>) {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val prefs = HomeWidgetPlugin.getData(this)
         val editor = prefs.edit()
         
         // Save per-widget config
         val jsonArray = org.json.JSONArray(pluginIds)
         editor.putString("widget_${widgetId}_plugins", jsonArray.toString())
-        editor.apply()
-        
+        val committed = editor.commit()
+        if (!committed) {
+            android.util.Log.w(TAG, "Failed to commit config for widget $widgetId")
+            WidgetLogStore.append(
+                this,
+                "WARN",
+                TAG,
+                "Commit failed",
+                widgetId,
+            )
+        }
+
         android.util.Log.d(TAG, "Saved config for widget $widgetId: $pluginIds")
+        WidgetLogStore.append(
+            this,
+            "INFO",
+            TAG,
+            "Config saved",
+            widgetId,
+            "plugins=${pluginIds.joinToString(",")}",
+        )
     }
     
     private fun updateWidget() {
@@ -158,6 +209,15 @@ class WidgetConfigActivity : FlutterActivity() {
             "medium" -> CrossbarWidgetMedium::class.java
             else -> CrossbarWidgetSmall::class.java
         }
+
+        WidgetLogStore.append(
+            this,
+            "INFO",
+            TAG,
+            "Trigger update",
+            appWidgetId,
+            "provider=${widgetProvider.simpleName}",
+        )
         
         // Trigger widget update
         val intent = Intent(this, widgetProvider).apply {

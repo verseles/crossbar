@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/logger_service.dart';
+import '../../services/refresh_service.dart';
 import 'package:crossbar_core/crossbar_core.dart';
 
 /// Dialog for configuring which plugins to display in a widget.
-/// 
+///
 /// - Small/Medium widgets: single plugin selection (radio behavior)
 /// - Large widgets: multi-plugin selection with scrolling
 class WidgetConfigDialog extends StatefulWidget {
@@ -30,10 +34,8 @@ class WidgetConfigDialog extends StatefulWidget {
     return showDialog<List<String>>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WidgetConfigDialog(
-        widgetId: widgetId,
-        widgetSize: widgetSize,
-      ),
+      builder: (context) =>
+          WidgetConfigDialog(widgetId: widgetId, widgetSize: widgetSize),
     );
   }
 
@@ -42,7 +44,9 @@ class WidgetConfigDialog extends StatefulWidget {
 }
 
 class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
-  static const _configChannel = MethodChannel('com.verseles.crossbar/widget_config');
+  static const _configChannel = MethodChannel(
+    'com.verseles.crossbar/widget_config',
+  );
 
   final Set<String> _selectedPlugins = {};
   List<Plugin> _availablePlugins = [];
@@ -61,6 +65,12 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
     // Prevent multiple loads
     if (_hasLoadedOnce) return;
     _hasLoadedOnce = true;
+
+    LoggerService().info(
+      'WidgetConfig: loading plugins',
+      details: 'widgetId=${widget.widgetId} size=${widget.widgetSize}',
+      category: LogCategory.widgets,
+    );
 
     final pluginManager = PluginManager();
 
@@ -82,6 +92,12 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
       _availablePlugins = uniquePlugins.values.toList();
       _isLoading = false;
     });
+
+    LoggerService().info(
+      'WidgetConfig: plugins loaded',
+      details: 'count=${_availablePlugins.length}',
+      category: LogCategory.widgets,
+    );
   }
 
   void _togglePlugin(String pluginId) {
@@ -105,34 +121,104 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
     if (_selectedPlugins.isEmpty) return;
 
     try {
+      LoggerService().info(
+        'WidgetConfig: saving selection',
+        details:
+            'widgetId=${widget.widgetId} plugins=${_selectedPlugins.join(',')}',
+        category: LogCategory.widgets,
+      );
       if (Platform.isAndroid) {
         await _configChannel.invokeMethod('saveWidgetConfig', {
           'widgetId': widget.widgetId,
           'pluginIds': _selectedPlugins.toList(),
         });
+
+        await _primeWidgetOutputs();
+
+        await _configChannel.invokeMethod('completeWidgetConfig', {
+          'pluginIds': _selectedPlugins.toList(),
+        });
       }
-      
+
       if (mounted) {
         Navigator.of(context).pop(_selectedPlugins.toList());
       }
     } catch (e) {
+      LoggerService().error(
+        'WidgetConfig: save failed',
+        e,
+        null,
+        'widgetId=${widget.widgetId}',
+        LogCategory.widgets,
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving config: $e')),
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving config: $e')));
+      }
+    }
+  }
+
+  Future<void> _primeWidgetOutputs() async {
+    LoggerService().info(
+      'WidgetConfig: priming widget outputs',
+      details: 'count=${_selectedPlugins.length}',
+      category: LogCategory.widgets,
+    );
+
+    final refreshService = RefreshService();
+
+    for (final pluginId in _selectedPlugins) {
+      try {
+        final output = await refreshService.runPlugin(pluginId);
+        if (output != null) {
+          final payload = jsonEncode(output.toJson());
+          await HomeWidget.saveWidgetData<String>('plugin_$pluginId', payload);
+          final aliasId = _canonicalPluginId(pluginId);
+          if (aliasId != pluginId) {
+            await HomeWidget.saveWidgetData<String>('plugin_$aliasId', payload);
+          }
+        } else {
+          LoggerService().warning(
+            'WidgetConfig: no output for plugin',
+            details: 'pluginId=$pluginId',
+            category: LogCategory.widgets,
+          );
+        }
+      } catch (e) {
+        LoggerService().error(
+          'WidgetConfig: prime failed',
+          e,
+          null,
+          'pluginId=$pluginId',
+          LogCategory.widgets,
         );
       }
     }
   }
 
+  String _canonicalPluginId(String pluginId) {
+    final withoutOff = pluginId.replaceFirst('.off.', '.');
+    final match = RegExp(
+      r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.',
+    ).firstMatch(withoutOff);
+    return match?.group(1) ?? withoutOff;
+  }
+
   Future<void> _cancelConfig() async {
     try {
+      LoggerService().info(
+        'WidgetConfig: cancelled',
+        details: 'widgetId=${widget.widgetId}',
+        category: LogCategory.widgets,
+      );
       if (Platform.isAndroid) {
         await _configChannel.invokeMethod('cancelWidgetConfig');
       }
     } catch (_) {
       // Ignore errors on cancel
     }
-    
+
     if (mounted) {
       Navigator.of(context).pop(null);
     }
@@ -155,8 +241,8 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _availablePlugins.isEmpty
-                      ? _buildEmptyState(theme, l10n)
-                      : _buildPluginList(theme),
+                  ? _buildEmptyState(theme, l10n)
+                  : _buildPluginList(theme),
             ),
             const Divider(height: 1),
             _buildActions(l10n),
@@ -167,9 +253,7 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
   }
 
   Widget _buildHeader(ThemeData theme, AppLocalizations l10n) {
-    final title = _isLarge
-        ? l10n.selectPlugins
-        : l10n.selectOnePlugin;
+    final title = _isLarge ? l10n.selectPlugins : l10n.selectOnePlugin;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -178,10 +262,7 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.widgets_outlined,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.widgets_outlined, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -207,7 +288,9 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -295,10 +378,7 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          TextButton(
-            onPressed: _cancelConfig,
-            child: Text(l10n.cancel),
-          ),
+          TextButton(onPressed: _cancelConfig, child: Text(l10n.cancel)),
           const SizedBox(width: 8),
           FilledButton(
             onPressed: _selectedPlugins.isNotEmpty ? _saveConfig : null,

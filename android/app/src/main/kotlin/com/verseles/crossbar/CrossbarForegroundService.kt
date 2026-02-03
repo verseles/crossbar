@@ -7,7 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
+import es.antonborri.home_widget.HomeWidgetPlugin
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -34,7 +34,6 @@ class CrossbarForegroundService : Service() {
         private const val ACTION_REFRESH = "com.verseles.crossbar.ACTION_REFRESH"
         private const val ACTION_STOP = "com.verseles.crossbar.ACTION_STOP"
         
-        private const val HOME_WIDGET_PREFS = "HomeWidgetPreferences"
     }
 
     private lateinit var notificationManager: NotificationManager
@@ -161,7 +160,7 @@ class CrossbarForegroundService : Service() {
 
     private fun getActivePluginCount(): Int {
         return try {
-            val prefs = getSharedPreferences(HOME_WIDGET_PREFS, Context.MODE_PRIVATE)
+            val prefs = HomeWidgetPlugin.getData(this)
             val pluginIdsJson = prefs.getString("plugin_ids", null)
             if (pluginIdsJson != null) {
                 val jsonArray = JSONArray(pluginIdsJson)

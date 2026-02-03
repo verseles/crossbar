@@ -116,6 +116,7 @@ Entry: `lib/main.dart`
 - `NotificationService`: system notifications + Android foreground service channel
 - `WindowService`: desktop window lifecycle
 - `LoggerService`: rotating log files under `~/.crossbar/logs`
+- `DebugLogsPage`: in-app log viewer with widget-native log section
 
 ---
 
@@ -136,6 +137,7 @@ Entry: `lib/main.dart`
 - MethodChannel bridge: `lib/core/api/android_native_bridge.dart`
 - Native implementations in `android/app/src/main/kotlin/com/verseles/crossbar`
 - Widgets: `CrossbarWidgetSmall/Medium/Large` + XML layouts
+- Widget logs: `WidgetLogStore` stored in HomeWidget preferences
 - Background updates: `WorkManager` via `BackgroundService`
 
 ### iOS

@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
+import '../pages/debug_logs_page.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -47,9 +48,7 @@ class _SettingsTabState extends State<SettingsTab> {
         final languages = _getLanguages(l10n);
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.settingsTab),
-          ),
+          appBar: AppBar(title: Text(l10n.settingsTab)),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -59,16 +58,20 @@ class _SettingsTabState extends State<SettingsTab> {
                 children: [
                   ListTile(
                     title: Text(l10n.darkTheme),
-                    subtitle: Text(_getThemeModeLabel(settings.themeMode, l10n)),
+                    subtitle: Text(
+                      _getThemeModeLabel(settings.themeMode, l10n),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showThemeModeDialog(settings, l10n),
                   ),
                   ListTile(
                     title: Text(l10n.language),
-                    subtitle: Text(languages.firstWhere(
-                      (l) => l['code'] == settings.language,
-                      orElse: () => languages.first,
-                    )['name']!),
+                    subtitle: Text(
+                      languages.firstWhere(
+                        (l) => l['code'] == settings.language,
+                        orElse: () => languages.first,
+                      )['name']!,
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showLanguageDialog(l10n),
                   ),
@@ -88,12 +91,16 @@ class _SettingsTabState extends State<SettingsTab> {
                     },
                   ),
                   SwitchListTile(
-                    title: Text(Platform.isAndroid 
-                        ? l10n.keepOnBackground 
-                        : l10n.minimizeToTray),
-                    subtitle: Text(Platform.isAndroid 
-                        ? l10n.showPersistentNotification 
-                        : l10n.keepInTray),
+                    title: Text(
+                      Platform.isAndroid
+                          ? l10n.keepOnBackground
+                          : l10n.minimizeToTray,
+                    ),
+                    subtitle: Text(
+                      Platform.isAndroid
+                          ? l10n.showPersistentNotification
+                          : l10n.keepInTray,
+                    ),
                     value: settings.showInTray,
                     onChanged: (value) {
                       settings.showInTray = value;
@@ -108,7 +115,9 @@ class _SettingsTabState extends State<SettingsTab> {
                 children: [
                   ListTile(
                     title: Text(l10n.displayMode),
-                    subtitle: Text(_getTrayModeLabel(settings.trayDisplayMode, l10n)),
+                    subtitle: Text(
+                      _getTrayModeLabel(settings.trayDisplayMode, l10n),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showTrayModeDialog(settings, l10n),
                   ),
@@ -144,6 +153,17 @@ class _SettingsTabState extends State<SettingsTab> {
                 title: l10n.about,
                 icon: Icons.info,
                 children: [
+                  ListTile(
+                    title: Text(l10n.debugLogsTitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const DebugLogsPage(),
+                        ),
+                      );
+                    },
+                  ),
                   FutureBuilder<PackageInfo>(
                     future: PackageInfo.fromPlatform(),
                     builder: (context, snapshot) {
@@ -151,7 +171,9 @@ class _SettingsTabState extends State<SettingsTab> {
                       final buildNumber = snapshot.data?.buildNumber ?? '';
                       return ListTile(
                         title: Text(l10n.version),
-                        subtitle: Text('$version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}'),
+                        subtitle: Text(
+                          '$version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}',
+                        ),
                       );
                     },
                   ),
@@ -166,9 +188,14 @@ class _SettingsTabState extends State<SettingsTab> {
                     subtitle: const Text('verseles/crossbar'),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () async {
-                      final uri = Uri.parse('https://github.com/verseles/crossbar');
+                      final uri = Uri.parse(
+                        'https://github.com/verseles/crossbar',
+                      );
                       if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                     },
                   ),
@@ -196,10 +223,7 @@ class _SettingsTabState extends State<SettingsTab> {
               children: [
                 Icon(icon, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
           ),
@@ -252,11 +276,7 @@ class _SettingsTabState extends State<SettingsTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.license),
-        content: SingleChildScrollView(
-          child: Text(
-            l10n.licenseText,
-          ),
-        ),
+        content: SingleChildScrollView(child: Text(l10n.licenseText)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -366,7 +386,10 @@ class _SettingsTabState extends State<SettingsTab> {
                   const SizedBox(width: 8),
                   if (!Platform.isLinux)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(4),
@@ -375,7 +398,9 @@ class _SettingsTabState extends State<SettingsTab> {
                         'Linux only',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondaryContainer,
                         ),
                       ),
                     ),
@@ -384,10 +409,12 @@ class _SettingsTabState extends State<SettingsTab> {
               subtitle: Text(l10n.oneTrayIconPerPlugin),
               value: TrayDisplayMode.separate,
               groupValue: settings.trayDisplayMode,
-              onChanged: Platform.isLinux ? (value) {
-                settings.trayDisplayMode = value!;
-                Navigator.pop(context);
-              } : null, // Only enabled on Linux
+              onChanged: Platform.isLinux
+                  ? (value) {
+                      settings.trayDisplayMode = value!;
+                      Navigator.pop(context);
+                    }
+                  : null, // Only enabled on Linux
             ),
             // Smart Collapse - Coming Soon
             RadioListTile<TrayDisplayMode>(
@@ -396,7 +423,10 @@ class _SettingsTabState extends State<SettingsTab> {
                   Text(l10n.smartCollapse),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: BorderRadius.circular(4),
@@ -405,7 +435,9 @@ class _SettingsTabState extends State<SettingsTab> {
                       l10n.comingSoon,
                       style: TextStyle(
                         fontSize: 10,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ),
@@ -423,7 +455,10 @@ class _SettingsTabState extends State<SettingsTab> {
                   Text(l10n.smartOverflow),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: BorderRadius.circular(4),
@@ -432,7 +467,9 @@ class _SettingsTabState extends State<SettingsTab> {
                       l10n.comingSoon,
                       style: TextStyle(
                         fontSize: 10,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ),

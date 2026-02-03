@@ -12,7 +12,6 @@ import 'paths/platform_paths.dart'
 import 'plugin_executor.dart';
 
 class PluginManager {
-
   factory PluginManager() => _instance;
 
   PluginManager._internal();
@@ -30,7 +29,7 @@ class PluginManager {
     'dart',
     'go',
     'rust',
-    'lua',  // Embedded - works everywhere
+    'lua', // Embedded - works everywhere
   ];
 
   static const Map<String, String> extensionToInterpreter = {
@@ -40,7 +39,7 @@ class PluginManager {
     '.dart': 'dart',
     '.go': 'go',
     '.rs': 'rust',
-    '.lua': 'lua',  // Embedded lua_dardo interpreter
+    '.lua': 'lua', // Embedded lua_dardo interpreter
     '.yaml': 'yaml',
     '.yml': 'yaml',
   };
@@ -52,7 +51,7 @@ class PluginManager {
     '.dart',
     '.go',
     '.rs',
-    '.lua',  // Embedded - works everywhere
+    '.lua', // Embedded - works everywhere
     '.yaml',
     '.yml',
   ];
@@ -72,7 +71,8 @@ class PluginManager {
       return getMobilePluginsDirectory();
     } else {
       // Desktop: use $HOME/.crossbar/plugins
-      final homeDir = Platform.environment['HOME'] ??
+      final homeDir =
+          Platform.environment['HOME'] ??
           Platform.environment['USERPROFILE'] ??
           '';
       return path.join(homeDir, '.crossbar', 'plugins');
@@ -102,11 +102,11 @@ class PluginManager {
       if (entity is File && _isValidPluginFile(entity.path)) {
         final dir = path.dirname(entity.path);
         final fileName = path.basename(entity.path);
-        
+
         // Extract base name (part before the first dot that matches interval pattern)
         // e.g. cpu.10s.sh -> cpu
         final baseName = _extractPluginBaseName(fileName);
-        
+
         final key = '$dir:$baseName';
         groups.putIfAbsent(key, () => []).add(entity);
       }
@@ -125,7 +125,9 @@ class PluginManager {
   }
 
   String _extractPluginBaseName(String fileName) {
-    final match = RegExp(r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.').firstMatch(fileName);
+    final match = RegExp(
+      r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.',
+    ).firstMatch(fileName);
     if (match != null) {
       return match.group(1)!;
     }
@@ -142,8 +144,16 @@ class PluginManager {
     files.sort((a, b) {
       final extA = path.extension(a.path).toLowerCase();
       final extB = path.extension(b.path).toLowerCase();
-      
-      const priority = {'.lua': 0, '.sh': 1, '.py': 2, '.js': 3, '.dart': 4, '.go': 5, '.rs': 6};
+
+      const priority = {
+        '.lua': 0,
+        '.sh': 1,
+        '.py': 2,
+        '.js': 3,
+        '.dart': 4,
+        '.go': 5,
+        '.rs': 6,
+      };
       final pA = priority[extA] ?? 100;
       final pB = priority[extB] ?? 100;
       return pA.compareTo(pB);
@@ -156,11 +166,13 @@ class PluginManager {
       if (interpreter == null) continue;
 
       final isEnabled = await _checkIfEnabled(file);
-      variants.add(PluginVariant(
-        path: file.path,
-        interpreter: interpreter,
-        enabled: isEnabled,
-      ));
+      variants.add(
+        PluginVariant(
+          path: file.path,
+          interpreter: interpreter,
+          enabled: isEnabled,
+        ),
+      );
     }
 
     if (variants.isEmpty) return null;
@@ -168,12 +180,12 @@ class PluginManager {
     final primaryVariant = variants.first;
     final fileName = path.basename(primaryVariant.path);
     final refreshInterval = _parseRefreshInterval(fileName);
-    
+
     // ID is the base name if in a subdirectory, otherwise filename
     final dir = path.dirname(primaryVariant.path);
     final pluginsDirPath = await pluginsDirectory;
     final isRoot = path.equals(dir, pluginsDirPath);
-    
+
     final id = isRoot ? fileName : path.basename(dir);
 
     final config = await _loadPluginConfig(primaryVariant.path);
@@ -192,7 +204,7 @@ class PluginManager {
   Future<bool> _checkIfEnabled(File file) async {
     final fileName = path.basename(file.path);
     if (fileName.contains('.off.')) return false;
-    
+
     if (Platform.isLinux || Platform.isMacOS) {
       try {
         final stat = await file.stat();
@@ -284,9 +296,7 @@ class PluginManager {
 
     for (var i = 0; i < enabledPlugins.length; i += maxConcurrent) {
       final batch = enabledPlugins.skip(i).take(maxConcurrent);
-      final batchOutputs = await Future.wait(
-        batch.map(_runPlugin),
-      );
+      final batchOutputs = await Future.wait(batch.map(_runPlugin));
       outputs.addAll(batchOutputs.whereType<PluginOutput>());
     }
 
@@ -351,14 +361,20 @@ class PluginManager {
     final plugin = getPlugin(pluginId);
     if (plugin == null) return;
 
+    final fileName = path.basename(plugin.path);
+    final dir = path.dirname(plugin.path);
+
     var newPath = plugin.path;
     var newId = plugin.id;
 
-    // 1. Rename if contains .off.
-    if (plugin.id.contains('.off.')) {
-      newId = plugin.id.replaceFirst('.off.', '.');
-      final dir = path.dirname(plugin.path);
-      newPath = path.join(dir, newId);
+    // 1. Rename file if contains .off.
+    if (fileName.contains('.off.')) {
+      final newFileName = fileName.replaceFirst('.off.', '.');
+      newPath = path.join(dir, newFileName);
+
+      if (plugin.id == fileName) {
+        newId = newFileName;
+      }
 
       try {
         await File(plugin.path).rename(newPath);
@@ -387,16 +403,22 @@ class PluginManager {
     final plugin = getPlugin(pluginId);
     if (plugin == null) return;
 
+    final fileName = path.basename(plugin.path);
+    final dir = path.dirname(plugin.path);
+
     var newPath = plugin.path;
     var newId = plugin.id;
 
     // 1. Rename to add .off. if not present
-    if (!plugin.id.contains('.off.')) {
-      final ext = path.extension(plugin.id);
-      final base = path.withoutExtension(plugin.id);
-      newId = '$base.off$ext';
-      final dir = path.dirname(plugin.path);
-      newPath = path.join(dir, newId);
+    if (!fileName.contains('.off.')) {
+      final ext = path.extension(fileName);
+      final base = path.withoutExtension(fileName);
+      final newFileName = '$base.off$ext';
+      newPath = path.join(dir, newFileName);
+
+      if (plugin.id == fileName) {
+        newId = newFileName;
+      }
 
       try {
         await File(plugin.path).rename(newPath);
@@ -421,7 +443,12 @@ class PluginManager {
     _updatePluginInList(pluginId, newId, newPath, false);
   }
 
-  void _updatePluginInList(String oldId, String newId, String newPath, bool enabled) {
+  void _updatePluginInList(
+    String oldId,
+    String newId,
+    String newPath,
+    bool enabled,
+  ) {
     final index = _plugins.indexWhere((p) => p.id == oldId);
     if (index >= 0) {
       _plugins[index] = _plugins[index].copyWith(
@@ -436,7 +463,10 @@ class PluginManager {
     return _plugins.where((p) => p.id == pluginId).firstOrNull;
   }
 
-  Future<void> switchPluginVariant(String pluginId, PluginVariant variant) async {
+  Future<void> switchPluginVariant(
+    String pluginId,
+    PluginVariant variant,
+  ) async {
     final index = _plugins.indexWhere((p) => p.id == pluginId);
     if (index >= 0) {
       _plugins[index] = _plugins[index].copyWith(

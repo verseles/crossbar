@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:home_widget/home_widget.dart';
 
 import 'package:crossbar_core/crossbar_core.dart';
+import 'logger_service.dart';
 import 'refresh_service.dart';
 
 /// WidgetService - Manages mobile home screen widgets (Android/iOS).
@@ -45,7 +46,9 @@ class WidgetService {
     if (_initialized) return;
     if (!Platform.isAndroid && !Platform.isIOS) return;
 
-    await HomeWidget.setAppGroupId(appGroupId);
+    if (Platform.isIOS) {
+      await HomeWidget.setAppGroupId(appGroupId);
+    }
 
     // Register callback for when widget is clicked
     HomeWidget.widgetClicked.listen(_handleWidgetClick);
@@ -75,11 +78,14 @@ class WidgetService {
 
     _widgetData[pluginId] = output;
 
-    // Store data for the widget
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_$pluginId',
-      jsonEncode(output.toJson()),
+    LoggerService().info(
+      'WidgetService: update widget',
+      details: 'pluginId=$pluginId',
+      category: LogCategory.widgets,
     );
+
+    // Store data for the widget
+    await _saveWidgetOutput(pluginId, output);
 
     // Update all widgets
     await _triggerWidgetUpdate();
@@ -91,6 +97,11 @@ class WidgetService {
       // Must update ALL 3 widget types - each is a separate receiver
       for (final widgetName in androidWidgetNames) {
         try {
+          LoggerService().debug(
+            'WidgetService: trigger update',
+            details: 'widgetName=$widgetName',
+            category: LogCategory.widgets,
+          );
           await HomeWidget.updateWidget(
             name: widgetName,
             androidName: widgetName,
@@ -116,6 +127,11 @@ class WidgetService {
   Future<void> updateAllWidgets() async {
     if (!_initialized) return;
 
+    LoggerService().info(
+      'WidgetService: update all widgets',
+      category: LogCategory.widgets,
+    );
+
     // Use RefreshService - this will notify listeners including SchedulerService
     // which will call updateWidget() for each plugin output
     final outputs = await _refreshService.runAllEnabled();
@@ -136,6 +152,12 @@ class WidgetService {
   ) async {
     if (!_initialized) return;
 
+    LoggerService().info(
+      'WidgetService: sync outputs',
+      details: 'plugins=${plugins.length} outputs=${outputs.length}',
+      category: LogCategory.widgets,
+    );
+
     final enabledIds = plugins
         .where((p) => p.enabled)
         .map((p) => p.id)
@@ -146,7 +168,7 @@ class WidgetService {
 
     for (final removedId in removedIds) {
       _widgetData.remove(removedId);
-      await HomeWidget.saveWidgetData<String?>('plugin_$removedId', null);
+      await _removeWidgetOutput(removedId);
     }
 
     for (final pluginId in enabledIds) {
@@ -154,10 +176,7 @@ class WidgetService {
       if (output == null) continue;
 
       _widgetData[pluginId] = output;
-      await HomeWidget.saveWidgetData<String>(
-        'plugin_$pluginId',
-        jsonEncode(output.toJson()),
-      );
+      await _saveWidgetOutput(pluginId, output);
     }
 
     await HomeWidget.saveWidgetData<String>(
@@ -171,9 +190,15 @@ class WidgetService {
   Future<void> clearWidget(String pluginId) async {
     if (!_initialized) return;
 
+    LoggerService().info(
+      'WidgetService: clear widget',
+      details: 'pluginId=$pluginId',
+      category: LogCategory.widgets,
+    );
+
     _widgetData.remove(pluginId);
 
-    await HomeWidget.saveWidgetData<String?>('plugin_$pluginId', null);
+    await _removeWidgetOutput(pluginId);
 
     await _triggerWidgetUpdate();
   }
@@ -202,6 +227,33 @@ class WidgetService {
   void dispose() {
     _initialized = false;
     _widgetData.clear();
+  }
+
+  Future<void> _saveWidgetOutput(String pluginId, PluginOutput output) async {
+    final payload = jsonEncode(output.toJson());
+    await HomeWidget.saveWidgetData<String>('plugin_$pluginId', payload);
+
+    final aliasId = _canonicalPluginId(pluginId);
+    if (aliasId != pluginId) {
+      await HomeWidget.saveWidgetData<String>('plugin_$aliasId', payload);
+    }
+  }
+
+  Future<void> _removeWidgetOutput(String pluginId) async {
+    await HomeWidget.saveWidgetData<String?>('plugin_$pluginId', null);
+
+    final aliasId = _canonicalPluginId(pluginId);
+    if (aliasId != pluginId) {
+      await HomeWidget.saveWidgetData<String?>('plugin_$aliasId', null);
+    }
+  }
+
+  String _canonicalPluginId(String pluginId) {
+    final withoutOff = pluginId.replaceFirst('.off.', '.');
+    final match = RegExp(
+      r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.',
+    ).firstMatch(withoutOff);
+    return match?.group(1) ?? withoutOff;
   }
 }
 
