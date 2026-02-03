@@ -1,21 +1,30 @@
 -- countdown.1s.lua
 -- Countdown Timer in Lua
 
--- 1. Get target date from environment variable, with a default
-local target_str = crossbar.env('CROSSBAR_COUNTDOWN_TARGET')
-if target_str == nil or target_str == '' then
-    target_str = '2025-12-31 23:59:59'
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
 end
+
+local target_str = env('COUNTDOWN_TARGET', '')
+if target_str == '' then
+    target_str = env('CROSSBAR_COUNTDOWN_TARGET', '2025-12-31 23:59:59')
+end
+local label = env('COUNTDOWN_LABEL', 'Countdown')
+local done_text = env('COUNTDOWN_DONE_TEXT', 'Countdown complete!')
 
 -- 2. Parse the date string "YYYY-MM-DD HH:MM:SS"
 local year, month, day, hour, min, sec = target_str:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
 
 if not year then
-    print("! | color=red")
-    print("---")
-    print("Error: Invalid date format")
-    print("Set CROSSBAR_COUNTDOWN_TARGET")
-    print("Format: YYYY-MM-DD HH:MM:SS")
+    print('! | color=red')
+    print('---')
+    print('Error: Invalid date format')
+    print('Set COUNTDOWN_TARGET')
+    print('Format: YYYY-MM-DD HH:MM:SS')
     return
 end
 
@@ -31,9 +40,9 @@ local diff_seconds = target_time - now
 
 -- 5. Format the output based on the difference
 if diff_seconds <= 0 then
-    print("Done!")
-    print("---")
-    print("Countdown complete!")
+    print('Done!')
+    print('---')
+    print(done_text)
 else
     local days = math.floor(diff_seconds / 86400)
     local remainder = diff_seconds % 86400
@@ -51,10 +60,10 @@ else
         display = string.format("%dm %ds", minutes, seconds)
     end
 
-    print("⏳ " .. display)
-    print("---")
-    print("Target: " .. target_str)
+    print('⏳ ' .. display)
+    print('---')
+    print(label .. ': ' .. target_str)
 end
 
-print("---")
-print("Refresh | refresh=true")
+print('---')
+print('Refresh | refresh=true')

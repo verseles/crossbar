@@ -1,0 +1,26 @@
+{
+  "name": "Pomodoro (Lua)",
+  "description": "Pomodoro timer with work/break cycles.",
+  "icon": "POMO",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "POMODORO_WORK_MINS",
+      "label": "Work minutes",
+      "type": "number",
+      "default": "25"
+    },
+    {
+      "key": "POMODORO_BREAK_MINS",
+      "label": "Break minutes",
+      "type": "number",
+      "default": "5"
+    },
+    {
+      "key": "POMODORO_STATE_FILE",
+      "label": "State file",
+      "type": "text",
+      "default": "~/.crossbar/pomodoro.state"
+    }
+  ]
+}

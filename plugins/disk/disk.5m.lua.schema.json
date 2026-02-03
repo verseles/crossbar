@@ -1,0 +1,27 @@
+{
+  "name": "Disk Usage (Lua)",
+  "description": "Shows disk usage for a path.",
+  "icon": "DISK",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "DISK_PATH",
+      "label": "Path",
+      "type": "text",
+      "default": "/",
+      "help": "Use C:\\ on Windows"
+    },
+    {
+      "key": "DISK_WARN",
+      "label": "Warning threshold (%)",
+      "type": "number",
+      "default": "75"
+    },
+    {
+      "key": "DISK_CRIT",
+      "label": "Critical threshold (%)",
+      "type": "number",
+      "default": "90"
+    }
+  ]
+}

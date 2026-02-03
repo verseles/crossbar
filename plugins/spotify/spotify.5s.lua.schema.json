@@ -1,0 +1,14 @@
+{
+  "name": "Media Now Playing (Lua)",
+  "description": "Shows currently playing media.",
+  "icon": "MEDIA",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "MEDIA_MAX_LEN",
+      "label": "Max title length",
+      "type": "number",
+      "default": "40"
+    }
+  ]
+}

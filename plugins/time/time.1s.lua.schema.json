@@ -1,0 +1,26 @@
+{
+  "name": "Time (Lua)",
+  "description": "Shows current time with day/night icon.",
+  "icon": "TIME",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "TIME_FORMAT",
+      "label": "Time format",
+      "type": "text",
+      "default": "HH:mm:ss"
+    },
+    {
+      "key": "DATE_FORMAT",
+      "label": "Date format",
+      "type": "text",
+      "default": "yyyy-MM-dd"
+    },
+    {
+      "key": "TIME_SHOW_DATE",
+      "label": "Show date",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

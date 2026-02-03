@@ -1,0 +1,14 @@
+{
+  "name": "NPM Downloads (Lua)",
+  "description": "Shows weekly downloads for a package.",
+  "icon": "NPM",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "NPM_PACKAGE",
+      "label": "Package name",
+      "type": "text",
+      "default": "lodash"
+    }
+  ]
+}

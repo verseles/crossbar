@@ -1,0 +1,44 @@
+{
+  "name": "System Info (Lua)",
+  "description": "Shows basic system information.",
+  "icon": "SYS",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "SYS_SHOW_PLATFORM",
+      "label": "Show platform",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SYS_SHOW_HOME",
+      "label": "Show home dir",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SYS_SHOW_UPTIME",
+      "label": "Show uptime",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SYS_SHOW_CPU",
+      "label": "Show CPU",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SYS_SHOW_MEMORY",
+      "label": "Show memory",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SYS_SHOW_ENV",
+      "label": "Show Crossbar env",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

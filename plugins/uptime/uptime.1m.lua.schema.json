@@ -1,0 +1,14 @@
+{
+  "name": "Uptime (Lua)",
+  "description": "Shows system uptime.",
+  "icon": "UP",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "UPTIME_LABEL",
+      "label": "Label",
+      "type": "text",
+      "default": "Uptime"
+    }
+  ]
+}

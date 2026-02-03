@@ -1,0 +1,20 @@
+{
+  "name": "Site Check (Lua)",
+  "description": "Checks if a website responds.",
+  "icon": "WEB",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "SITE_URL",
+      "label": "URL",
+      "type": "text",
+      "default": "https://www.google.com"
+    },
+    {
+      "key": "SITE_TIMEOUT",
+      "label": "Timeout (seconds)",
+      "type": "number",
+      "default": "5"
+    }
+  ]
+}

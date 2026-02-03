@@ -1,0 +1,44 @@
+{
+  "name": "Battery Monitor (Lua)",
+  "description": "Shows battery status with configurable thresholds and colors.",
+  "icon": "BAT",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "BATTERY_LOW",
+      "label": "Low battery threshold (%)",
+      "type": "number",
+      "default": "20"
+    },
+    {
+      "key": "BATTERY_SHOW_PERCENT",
+      "label": "Show percent in title",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "BATTERY_SHOW_STATE",
+      "label": "Show charging state",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "BATTERY_COLOR_LOW",
+      "label": "Low battery color",
+      "type": "color",
+      "default": "#ff5555"
+    },
+    {
+      "key": "BATTERY_COLOR_NORMAL",
+      "label": "Normal color",
+      "type": "color",
+      "default": "#f8f8f2"
+    },
+    {
+      "key": "BATTERY_COLOR_CHARGING",
+      "label": "Charging color",
+      "type": "color",
+      "default": "#8be9fd"
+    }
+  ]
+}

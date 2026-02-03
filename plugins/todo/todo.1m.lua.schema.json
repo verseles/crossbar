@@ -1,0 +1,14 @@
+{
+  "name": "Todo List (Lua)",
+  "description": "Simple todo list stored in a text file.",
+  "icon": "TODO",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "TODO_FILE",
+      "label": "Todo file path",
+      "type": "text",
+      "default": "~/.crossbar/todo.txt"
+    }
+  ]
+}

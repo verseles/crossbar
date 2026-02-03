@@ -1,0 +1,34 @@
+{
+  "name": "CPU Monitor (Lua)",
+  "description": "Shows CPU usage with thresholds and optional details.",
+  "icon": "CPU",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "CPU_WARN",
+      "label": "Warning threshold (%)",
+      "type": "number",
+      "default": "60",
+      "help": "Usage >= warn uses yellow"
+    },
+    {
+      "key": "CPU_CRIT",
+      "label": "Critical threshold (%)",
+      "type": "number",
+      "default": "80",
+      "help": "Usage >= crit uses red"
+    },
+    {
+      "key": "CPU_SHOW_PLATFORM",
+      "label": "Show platform",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "CPU_SHOW_RAW",
+      "label": "Show 1-decimal value",
+      "type": "checkbox",
+      "default": "false"
+    }
+  ]
+}

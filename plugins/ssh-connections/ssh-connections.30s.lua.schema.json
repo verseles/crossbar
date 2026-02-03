@@ -1,0 +1,14 @@
+{
+  "name": "SSH Connections (Lua)",
+  "description": "Shows active SSH sessions.",
+  "icon": "SSH",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "SSH_SHOW_LIST",
+      "label": "Show session list",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

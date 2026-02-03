@@ -1,35 +1,111 @@
 -- ip-info.1h.lua
--- IP Info using Crossbar API web function
+-- Public IP and location info (desktop via CLI)
 
--- Use Crossbar bridge to make HTTPS request (returns a Lua table if JSON)
-local result = crossbar.web('https://ipinfo.io/json')
-
--- Check if result is a table (JSON parsed) or string (error/raw)
-if type(result) == 'table' and not result.error then
-    local ip = result.ip or 'N/A'
-    print("🌐 " .. ip)
-    print("---")
-    print("IP: " .. ip)
-    print("City: " .. (result.city or 'N/A'))
-    print("Region: " .. (result.region or 'N/A'))
-    print("Country: " .. (result.country or 'N/A'))
-    print("ISP: " .. (result.org or 'N/A'))
-    print("Timezone: " .. (result.timezone or 'N/A'))
-    
-    print("---")
-    -- Using bash for clipboard copy as Lua clipboard API is basic
-    if crossbar.isDesktop() then
-        print("Copy IP | bash='echo -n " .. ip .. " | pbcopy' terminal=false") -- macOS
-        -- Ideally we should detect OS and use xclip/powershell, but pbcopy is a common alias
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
     end
-else
-    local msg = "Error"
-    if type(result) == 'table' then msg = result.message or "Unknown" end
-    
-    print("🌐 N/A | color=gray")
-    print("---")
-    print("Error: " .. msg)
+    return value
 end
 
-print("---")
-print("Refresh | refresh=true")
+local function env_bool(name, default)
+    local value = env(name, default and 'true' or 'false')
+    if value == nil then
+        return default
+    end
+    value = tostring(value):lower()
+    return value == 'true' or value == '1' or value == 'yes' or value == 'on'
+end
+
+local is_mobile = crossbar.isMobile()
+local show_region = env_bool('IPINFO_SHOW_REGION', true)
+local show_country = env_bool('IPINFO_SHOW_COUNTRY', true)
+local show_isp = env_bool('IPINFO_SHOW_ISP', true)
+local show_timezone = env_bool('IPINFO_SHOW_TIMEZONE', false)
+local show_map = env_bool('IPINFO_SHOW_MAP', true)
+local enable_copy = env_bool('IPINFO_ENABLE_COPY', true)
+
+if is_mobile then
+    print('🌐 N/A | color=gray')
+    print('---')
+    print('IP info via CLI is limited on mobile')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+local response, err = crossbar.web('https://ipinfo.io/json')
+if response == nil then
+    print('🌐 N/A | color=gray')
+    print('---')
+    print(err or 'Failed to fetch IP info')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+if response.error or (response.status and response.status >= 400) then
+    print('🌐 N/A | color=gray')
+    print('---')
+    print(response.message or ('HTTP ' .. tostring(response.status)))
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+local data = response.data
+if type(data) ~= 'table' then
+    print('🌐 N/A | color=gray')
+    print('---')
+    print('Invalid response')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+local ip = data.ip
+local city = data.city
+local region = data.region
+local country = data.country
+local org = data.org
+local timezone = data.timezone
+local loc = data.loc
+
+if ip == nil or ip == '' then
+    print('🌐 N/A | color=gray')
+    print('---')
+    print('Failed to fetch IP info')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+print('🌐 ' .. ip)
+print('---')
+print('IP: ' .. ip)
+if city and city ~= '' then
+    print('City: ' .. city)
+end
+if show_region and region and region ~= '' then
+    print('Region: ' .. region)
+end
+if show_country and country and country ~= '' then
+    print('Country: ' .. country)
+end
+if show_isp and org and org ~= '' then
+    print('ISP: ' .. org)
+end
+if show_timezone and timezone and timezone ~= '' then
+    print('Timezone: ' .. timezone)
+end
+print('---')
+if enable_copy then
+    print('Copy IP | bash="crossbar clipboard ' .. ip .. '" terminal=false refresh=true')
+end
+if show_map and loc and loc ~= '' then
+    print('Open Map | href=https://www.google.com/maps?q=' .. loc)
+end
+print('Open ipinfo | href=https://ipinfo.io/' .. ip)
+print('---')
+print('Refresh | refresh=true')

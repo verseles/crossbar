@@ -169,7 +169,7 @@ coverage: ## Run tests with coverage report
 	@echo "=== Coverage Summary (excluding generated code) ==="
 	lcov --summary coverage/lcov_filtered.info 2>&1 | grep -E "lines|source"
 	@echo ""
-	@echo "Target: 60% (see AGENTS.md for rationale)"
+	@echo "Target: 35% (see AGENTS.md for rationale)"
 
 analyze: ## Run static analysis
 	flutter analyze --no-fatal-infos

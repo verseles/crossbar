@@ -169,7 +169,7 @@ void main() {
         expect(result.output.trim(), isNotEmpty);
       });
 
-      test('crossbar.isDesktop() returns boolean as int', () async {
+      test('crossbar.isDesktop() returns boolean', () async {
         const source = '''
           local d = crossbar.isDesktop()
           print(d)
@@ -177,10 +177,10 @@ void main() {
         final result = await runner.runSource(source);
 
         expect(result.success, isTrue);
-        expect(result.output.trim(), anyOf(equals('0'), equals('1')));
+        expect(result.output.trim(), anyOf(equals('true'), equals('false')));
       });
 
-      test('crossbar.isMobile() returns boolean as int', () async {
+      test('crossbar.isMobile() returns boolean', () async {
         const source = '''
           local m = crossbar.isMobile()
           print(m)
@@ -188,7 +188,7 @@ void main() {
         final result = await runner.runSource(source);
 
         expect(result.success, isTrue);
-        expect(result.output.trim(), anyOf(equals('0'), equals('1')));
+        expect(result.output.trim(), anyOf(equals('true'), equals('false')));
       });
     });
 

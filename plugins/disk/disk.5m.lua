@@ -1,53 +1,75 @@
 -- disk.5m.lua
--- Disk Usage Monitor for the root partition in Lua
+-- Disk Usage Monitor (desktop via CLI)
 
--- 1. Get disk usage from Crossbar CLI
--- crossbar.exec returns the stdout string or "Error: ..."
-local result = crossbar.exec('crossbar disk /')
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
+end
 
--- Check for execution error
-if string.sub(result, 1, 6) == "Error:" or result == "" then
-    print("? | color=gray")
-    print("---")
-    print("Error: Could not get disk info")
-    print(result) -- Show error message
+local function env_num(name, default)
+    local value = env(name, tostring(default))
+    local num = tonumber(value)
+    if num == nil then
+        return default
+    end
+    return num
+end
+
+local is_mobile = crossbar.isMobile()
+if is_mobile then
+    print('DISK N/A | color=gray')
+    print('---')
+    print('Disk info via CLI is limited on mobile')
+    print('---')
+    print('Refresh | refresh=true')
     return
 end
 
--- 2. Parse the output (e.g., "8.2/16.0 GB")
--- The gmatch iterator finds all numbers in the string
+local platform = crossbar.platform()
+local default_path = platform == 'windows' and 'C:\\' or '/'
+local path = env('DISK_PATH', default_path)
+local warn = env_num('DISK_WARN', 75)
+local crit = env_num('DISK_CRIT', 90)
+
+local result = crossbar.exec('crossbar disk ' .. path)
+
+if result == nil or result == '' then
+    print('DISK -- | color=gray')
+    print('---')
+    print('Error: Could not get disk info')
+    return
+end
+
 local numbers = {}
-for num in result:gmatch("([%d%.]+)") do
+for num in result:gmatch('([%d%.]+)') do
     table.insert(numbers, tonumber(num))
 end
 
 if #numbers < 2 then
-    print("? | color=gray")
-    print("---")
-    print("Error: Unexpected disk info format")
-    print("Received: " .. result)
+    print('DISK -- | color=gray')
+    print('---')
+    print('Error: Unexpected disk info format')
+    print('Received: ' .. result)
     return
 end
 
 local used_size = numbers[1]
 local total_size = numbers[2]
+local usage_percent = total_size > 0 and math.floor((used_size / total_size) * 100) or 0
 
--- 3. Calculate percentage and determine color
-local usage_percent = 0
-if total_size > 0 then
-    usage_percent = math.floor((used_size / total_size) * 100)
+local color = 'green'
+if usage_percent >= crit then
+    color = 'red'
+elseif usage_percent >= warn then
+    color = 'orange'
 end
 
-local color = "green"
-if usage_percent > 90 then
-    color = "red"
-elseif usage_percent > 75 then
-    color = "orange"
-end
-
--- 4. Format the output
-print(string.format("%d%% | color=%s", usage_percent, color))
-print("---")
-print(string.format("Used: %.1fG / %.1fG", used_size, total_size))
-print("---")
-print("Refresh | refresh=true")
+print(string.format('DISK %d%% | color=%s', usage_percent, color))
+print('---')
+print(string.format('Path: %s', path))
+print(string.format('Used: %.1fG / %.1fG', used_size, total_size))
+print('---')
+print('Refresh | refresh=true')

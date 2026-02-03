@@ -1,0 +1,14 @@
+{
+  "name": "Process Monitor (Lua)",
+  "description": "Shows top CPU processes.",
+  "icon": "PROC",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "PROC_MAX_ITEMS",
+      "label": "Max items",
+      "type": "number",
+      "default": "5"
+    }
+  ]
+}

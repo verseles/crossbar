@@ -1,0 +1,14 @@
+{
+  "name": "Clock (Lua)",
+  "description": "Simple clock output.",
+  "icon": "CLOCK",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "CLOCK_FORMAT",
+      "label": "Time format",
+      "type": "text",
+      "default": "HH:mm:ss"
+    }
+  ]
+}

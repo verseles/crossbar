@@ -1,0 +1,14 @@
+{
+  "name": "Emoji Clock (Lua)",
+  "description": "Shows time as an emoji clock face.",
+  "icon": "CLOCK",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "EMOJI_CLOCK_SHOW_DATE",
+      "label": "Show date",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

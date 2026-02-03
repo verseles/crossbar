@@ -1,0 +1,44 @@
+{
+  "name": "IP Info (Lua)",
+  "description": "Shows your public IP and location fields.",
+  "icon": "IP",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "IPINFO_SHOW_REGION",
+      "label": "Show region",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "IPINFO_SHOW_COUNTRY",
+      "label": "Show country",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "IPINFO_SHOW_ISP",
+      "label": "Show ISP",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "IPINFO_SHOW_TIMEZONE",
+      "label": "Show timezone",
+      "type": "checkbox",
+      "default": "false"
+    },
+    {
+      "key": "IPINFO_SHOW_MAP",
+      "label": "Show map link",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "IPINFO_ENABLE_COPY",
+      "label": "Enable copy action",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

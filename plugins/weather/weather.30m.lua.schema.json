@@ -1,0 +1,33 @@
+{
+  "name": "Weather (Lua)",
+  "description": "Shows current weather using OpenWeather.",
+  "icon": "WX",
+  "config_required": "first_run",
+  "settings": [
+    {
+      "key": "WEATHER_API_KEY",
+      "label": "OpenWeather API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your API key",
+      "help": "Get a free key at openweathermap.org/appid"
+    },
+    {
+      "key": "WEATHER_CITY",
+      "label": "City",
+      "type": "text",
+      "default": "London",
+      "required": true
+    },
+    {
+      "key": "WEATHER_UNITS",
+      "label": "Units",
+      "type": "select",
+      "default": "metric",
+      "options": [
+        {"value": "metric", "label": "Celsius"},
+        {"value": "imperial", "label": "Fahrenheit"}
+      ]
+    }
+  ]
+}

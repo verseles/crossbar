@@ -1,0 +1,15 @@
+{
+  "name": "World Clock (Lua)",
+  "description": "Shows multiple timezones.",
+  "icon": "WORLD",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "WORLD_CLOCK_ZONES",
+      "label": "Zones",
+      "type": "text",
+      "default": "New York|-5|US,London|0|UK,Tokyo|9|JP",
+      "help": "Format: Name|Offset|Flag,Name|Offset|Flag"
+    }
+  ]
+}

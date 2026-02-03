@@ -1,0 +1,22 @@
+{
+  "name": "GitHub Notifications (Lua)",
+  "description": "Shows your unread GitHub notifications count.",
+  "icon": "GH",
+  "config_required": "required",
+  "settings": [
+    {
+      "key": "GITHUB_TOKEN",
+      "label": "GitHub Token",
+      "type": "password",
+      "required": true,
+      "placeholder": "ghp_xxxxxxxxxxxxxxxxxxxx",
+      "help": "Needs notifications scope"
+    },
+    {
+      "key": "GITHUB_MAX_ITEMS",
+      "label": "Max items",
+      "type": "number",
+      "default": "5"
+    }
+  ]
+}

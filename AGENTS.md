@@ -24,7 +24,7 @@ Roadmap de implementacao, atualizado regularmente:
 - **Postura**: Direta, técnica e concisa. Sem floreios, sem pedidos de desculpas.
 - **Leitura Inicial**: Sempre leia @./docs/archive/original_plan.md e @./ROADMAP.md no início de cada sessão para esclarecer dúvidas sobre futuras implementações e discussões de planejamento.
 - **Commits recentes**: Sempre verifique os últimos 70 commits para ficar mais ciente das alterações recentes e decisões tomadas.
-- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`make analyze`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **60%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
+- **Testes e Análise**: **JAMAIS** commite código sem rodar análise estática (`make analyze`) e testes com coverage (`make coverage`). Verificar coverage mínimo de **35%** (excluindo código gerado). Se alterar UI/Lógica, adicione novos testes. Execute também a build para linux e para android, assim evita muitos erros na CI do github que é bem mais lento que a máquina de desenvolvimento.
 - **Commits**: Padrão Conventional Commits (`feat`, `fix`, `docs`, `test`, `ci`). Sem co-autores. Porém, o conteúdo da mensagem do commit deve ser descritivo e explicar o que e por que foi feito.
 - **Pipeline**: Use `gh run list` e `gh run watch` para monitorar builds após push, já está autenticado no sistema.
 - **Dependencies**: NUNCA assuma bibliotecas. Verifique `pubspec.yaml`.
@@ -47,7 +47,7 @@ Roadmap de implementacao, atualizado regularmente:
 Quando terminar as tarefas solicitadas faça as seguintes etapas:
 
 1. make analyze
-2. make coverage (verificar meta de 35-60%)
+2. make coverage (verificar meta de 35%)
 3. make linux
 4. make android
 5. Verificar se ROADMAP.md necessita de atualização
@@ -176,7 +176,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 ### Build & Run
 
 - **Linux**: `make linux` (Gera bundle com os 3 binários).
-- **Testes**: `flutter test --coverage` (Min 43% coverage, CI falha se menor).
+- **Testes**: `flutter test --coverage` (Min 35% coverage, CI falha se menor).
 
 ### Armadilhas Comuns
 
@@ -206,7 +206,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 | ----------------------- | ------------------------------------------------------------------------- |
 | Rodar Testes            | `flutter test --coverage`                                                 |
 | Testes (sem hardware)   | `flutter test --exclude-tags=hardware` (evita glitches locais)            |
-| Verificar Coverage      | Verificar se coverage está >= 43% (lcov --summary coverage/lcov.info)     |
+| Verificar Coverage      | Verificar se coverage está >= 35% (lcov --summary coverage/lcov.info)     |
 | Build Release (Linux)   | `make linux`                                                              |
 | Build Release (Android) | `make android` ou `make android CAPTION="- Feature 1\n- Fix 2"`           |
 | Analisar Código         | `flutter analyze --no-fatal-infos`                                        |

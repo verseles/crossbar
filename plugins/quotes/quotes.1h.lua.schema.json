@@ -1,0 +1,14 @@
+{
+  "name": "Quotes (Lua)",
+  "description": "Shows a random quote.",
+  "icon": "QUOTE",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "QUOTE_MAX_LEN",
+      "label": "Max length",
+      "type": "number",
+      "default": "40"
+    }
+  ]
+}

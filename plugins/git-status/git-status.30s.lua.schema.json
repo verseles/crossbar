@@ -1,0 +1,20 @@
+{
+  "name": "Git Status (Lua)",
+  "description": "Shows current repository status.",
+  "icon": "GIT",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "GIT_SHOW_FILES",
+      "label": "Show changed files",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "GIT_MAX_FILES",
+      "label": "Max files",
+      "type": "number",
+      "default": "10"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Network Status (Lua)",
+  "description": "Shows connectivity and IP information.",
+  "icon": "NET",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "NET_SHOW_PUBLIC_IP",
+      "label": "Show public IP",
+      "type": "checkbox",
+      "default": "false"
+    },
+    {
+      "key": "NET_SHOW_PING",
+      "label": "Show ping",
+      "type": "checkbox",
+      "default": "false"
+    },
+    {
+      "key": "NET_PING_HOST",
+      "label": "Ping host",
+      "type": "text",
+      "default": "1.1.1.1"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Crypto Price (Lua)",
+  "description": "Shows crypto price and 24h change.",
+  "icon": "CRYPTO",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "CRYPTO_ID",
+      "label": "Asset",
+      "type": "select",
+      "default": "bitcoin",
+      "options": [
+        {"value": "bitcoin", "label": "Bitcoin (BTC)"},
+        {"value": "ethereum", "label": "Ethereum (ETH)"},
+        {"value": "solana", "label": "Solana (SOL)"},
+        {"value": "cardano", "label": "Cardano (ADA)"}
+      ]
+    },
+    {
+      "key": "CRYPTO_CURRENCY",
+      "label": "Currency",
+      "type": "select",
+      "default": "usd",
+      "options": [
+        {"value": "usd", "label": "US Dollar (USD)"},
+        {"value": "eur", "label": "Euro (EUR)"},
+        {"value": "gbp", "label": "British Pound (GBP)"},
+        {"value": "brl", "label": "Brazilian Real (BRL)"},
+        {"value": "jpy", "label": "Japanese Yen (JPY)"}
+      ]
+    }
+  ]
+}

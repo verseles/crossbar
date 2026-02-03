@@ -1,6 +1,25 @@
 -- emoji-clock.1m.lua
 -- Shows time as an emoji clock face
 
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
+end
+
+local function env_bool(name, default)
+    local value = env(name, default and 'true' or 'false')
+    if value == nil then
+        return default
+    end
+    value = tostring(value):lower()
+    return value == 'true' or value == '1' or value == 'yes' or value == 'on'
+end
+
+local show_date = env_bool('EMOJI_CLOCK_SHOW_DATE', true)
+
 -- 1. Emoji mapping table
 local clock_emojis = {
   ['12'] = '🕛', ['12:30'] = '🕧',
@@ -42,7 +61,9 @@ local time_str = os.date('%I:%M %p')
 -- 6. Print the output
 print(emoji .. " " .. time_str)
 print("---")
-print("Time: " .. time_str)
-print("Date: " .. os.date('%Y-%m-%d'))
+print('Time: ' .. time_str)
+if show_date then
+    print('Date: ' .. os.date('%Y-%m-%d'))
+end
 print("---")
 print("Refresh | refresh=true")

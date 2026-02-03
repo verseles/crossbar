@@ -1,35 +1,54 @@
 -- time.1s.lua
 -- Shows the current time with an icon for the time of day.
 
--- 1. Get current time components
--- Using crossbar API instead of os.date for better compatibility
-local time_hm = crossbar.time('HH:mm') -- "14:30"
-local current_hour = tonumber(string.sub(time_hm, 1, 2))
-local current_time = crossbar.time('HH:mm:ss')
-local current_date = crossbar.date('yyyy-MM-dd')
-
--- 2. Determine icon and color based on the hour
-local icon = ""
-local color = "white"
-
-if current_hour >= 6 and current_hour < 12 then
-    icon = "☀️" -- Morning
-    color = "lightblue"
-elseif current_hour >= 12 and current_hour < 18 then
-    icon = "🏙️" -- Afternoon
-    color = "lightgreen"
-elseif current_hour >= 18 and current_hour < 22 then
-    icon = "🌆" -- Evening
-    color = "orange"
-else
-    icon = "🌙" -- Night
-    color = "purple"
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
 end
 
--- 3. Print the formatted output
-print(string.format("%s %s | color=%s", icon, current_time, color))
-print("---")
-print("Time: " .. current_time)
-print("Date: " .. current_date)
-print("---")
-print("Refresh | refresh=true")
+local function env_bool(name, default)
+    local value = env(name, default and 'true' or 'false')
+    if value == nil then
+        return default
+    end
+    value = tostring(value):lower()
+    return value == 'true' or value == '1' or value == 'yes' or value == 'on'
+end
+
+local time_format = env('TIME_FORMAT', 'HH:mm:ss')
+local date_format = env('DATE_FORMAT', 'yyyy-MM-dd')
+local show_date = env_bool('TIME_SHOW_DATE', true)
+
+local time_hm = crossbar.time('HH:mm')
+local current_hour = tonumber(string.sub(time_hm, 1, 2)) or 0
+local current_time = crossbar.time(time_format)
+local current_date = crossbar.date(date_format)
+
+local icon = ''
+local color = 'white'
+
+if current_hour >= 6 and current_hour < 12 then
+    icon = '☀️'
+    color = 'blue'
+elseif current_hour >= 12 and current_hour < 18 then
+    icon = '🏙️'
+    color = 'green'
+elseif current_hour >= 18 and current_hour < 22 then
+    icon = '🌆'
+    color = 'orange'
+else
+    icon = '🌙'
+    color = 'purple'
+end
+
+print(string.format('%s %s | color=%s', icon, current_time, color))
+print('---')
+print('Time: ' .. current_time)
+if show_date then
+    print('Date: ' .. current_date)
+end
+print('---')
+print('Refresh | refresh=true')

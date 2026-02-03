@@ -1,0 +1,26 @@
+{
+  "name": "Countdown (Lua)",
+  "description": "Counts down to a target date/time.",
+  "icon": "COUNT",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "COUNTDOWN_TARGET",
+      "label": "Target (YYYY-MM-DD HH:MM:SS)",
+      "type": "text",
+      "default": "2025-12-31 23:59:59"
+    },
+    {
+      "key": "COUNTDOWN_LABEL",
+      "label": "Label",
+      "type": "text",
+      "default": "Countdown"
+    },
+    {
+      "key": "COUNTDOWN_DONE_TEXT",
+      "label": "Done message",
+      "type": "text",
+      "default": "Countdown complete!"
+    }
+  ]
+}

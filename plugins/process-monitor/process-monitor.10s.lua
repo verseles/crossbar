@@ -1,58 +1,86 @@
 -- process-monitor.10s.lua
--- Process Monitor
+-- Process Monitor (desktop only)
 
-local is_mac = crossbar.platform() == 'macos'
-local cmd = ""
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
+end
 
-if is_mac then
-    cmd = "ps aux | sort -nrk 3 | head -6 | tail -5"
+local function env_num(name, default)
+    local value = env(name, tostring(default))
+    local num = tonumber(value)
+    if num == nil then
+        return default
+    end
+    return num
+end
+
+local is_mobile = crossbar.isMobile()
+local max_items = env_num('PROC_MAX_ITEMS', 5)
+if is_mobile then
+    print('PROC N/A | color=gray')
+    print('---')
+    print('Process monitoring is desktop-only')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
+local platform = crossbar.platform()
+local cmd = ''
+if platform == 'macos' then
+    cmd = 'ps aux | sort -nrk 3 | head -6'
 else
-    -- Linux
-    cmd = "ps aux --sort=-%cpu | head -6 | tail -5"
+    cmd = 'ps aux --sort=-%cpu | head -6'
 end
 
 local output = crossbar.exec(cmd)
-local total_proc = crossbar.exec("ps aux | wc -l")
-local count = tonumber(total_proc) or 0
-if count > 0 then count = count - 1 end -- Remove header
+local total_proc_raw = crossbar.exec('ps aux | wc -l')
+local total_proc = tonumber((total_proc_raw or ''):match('%d+')) or 0
+if total_proc > 0 then total_proc = total_proc - 1 end
 
-print(" " .. count)
-print("---")
-print("Running Processes: " .. count)
-print("---")
-print("Top by CPU:")
+print('PROC ' .. tostring(total_proc))
+print('---')
+print('Running Processes: ' .. tostring(total_proc))
+print('---')
+print('Top by CPU:')
 
-if output then
-    for line in output:gmatch("[^
-]+") do
-        -- Extract CPU and Command. 
-        -- ps aux format: USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
-        -- We'll use pattern matching
+local shown = 0
+for line in (output or ''):gmatch('[^\n]+') do
+    if not line:match('^USER') then
         local parts = {}
-        for part in line:gmatch("%S+") do
+        for part in line:gmatch('%S+') do
             table.insert(parts, part)
         end
-        
+
         if #parts >= 11 then
             local cpu = tonumber(parts[3]) or 0
-            local mem = parts[4]
-            
-            -- Reconstruct command (parts 11 onwards)
-            local proc_cmd = ""
-            for i=11, #parts do
-                proc_cmd = proc_cmd .. parts[i] .. " "
+            local proc_cmd = ''
+            for i = 11, #parts do
+                proc_cmd = proc_cmd .. parts[i] .. ' '
             end
-            proc_cmd = proc_cmd:sub(1, 30) -- Truncate
-            
-            local color = "green"
-            if cpu > 50 then color = "red"
-            elseif cpu > 20 then color = "yellow"
+            proc_cmd = proc_cmd:sub(1, 30)
+
+            local color = 'green'
+            if cpu > 50 then color = 'red'
+            elseif cpu > 20 then color = 'yellow'
             end
-            
-            print(string.format("  %.1f%% %s | color=%s", cpu, proc_cmd, color))
+
+            print(string.format('  %.1f%% %s | color=%s', cpu, proc_cmd, color))
+            shown = shown + 1
+            if shown >= max_items then
+                break
+            end
         end
     end
 end
 
-print("---")
-print("Refresh | refresh=true")
+if shown == 0 then
+    print('No process data available')
+end
+
+print('---')
+print('Refresh | refresh=true')

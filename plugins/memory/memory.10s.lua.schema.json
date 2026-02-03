@@ -1,0 +1,34 @@
+{
+  "name": "Memory Monitor (Lua)",
+  "description": "Shows memory usage with thresholds and optional details.",
+  "icon": "MEM",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "MEM_WARN",
+      "label": "Warning threshold (%)",
+      "type": "number",
+      "default": "70",
+      "help": "Usage >= warn uses yellow"
+    },
+    {
+      "key": "MEM_CRIT",
+      "label": "Critical threshold (%)",
+      "type": "number",
+      "default": "85",
+      "help": "Usage >= crit uses red"
+    },
+    {
+      "key": "MEM_SHOW_RAW",
+      "label": "Show raw string",
+      "type": "checkbox",
+      "default": "false"
+    },
+    {
+      "key": "MEM_SHOW_TOTAL",
+      "label": "Show total memory",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}
