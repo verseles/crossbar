@@ -1,5 +1,5 @@
 -- bitcoin.5m.lua
--- Crypto price tracker using Crossbar CLI (CoinGecko)
+-- Crypto price tracker via Crossbar web (CoinGecko)
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -7,16 +7,6 @@ local function env(name, default)
         return default
     end
     return value
-end
-
-local is_mobile = crossbar.isMobile()
-if is_mobile then
-    print('₿ N/A | color=gray')
-    print('---')
-    print('Crypto prices via CLI are limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
 end
 
 local crypto = env('CRYPTO_ID', 'bitcoin')

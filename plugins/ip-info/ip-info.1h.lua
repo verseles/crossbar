@@ -1,5 +1,5 @@
 -- ip-info.1h.lua
--- Public IP and location info (desktop via CLI)
+-- Public IP and location info via Crossbar web
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -18,22 +18,12 @@ local function env_bool(name, default)
     return value == 'true' or value == '1' or value == 'yes' or value == 'on'
 end
 
-local is_mobile = crossbar.isMobile()
 local show_region = env_bool('IPINFO_SHOW_REGION', true)
 local show_country = env_bool('IPINFO_SHOW_COUNTRY', true)
 local show_isp = env_bool('IPINFO_SHOW_ISP', true)
 local show_timezone = env_bool('IPINFO_SHOW_TIMEZONE', false)
 local show_map = env_bool('IPINFO_SHOW_MAP', true)
 local enable_copy = env_bool('IPINFO_ENABLE_COPY', true)
-
-if is_mobile then
-    print('🌐 N/A | color=gray')
-    print('---')
-    print('IP info via CLI is limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
-end
 
 local response, err = crossbar.web('https://ipinfo.io/json')
 if response == nil then

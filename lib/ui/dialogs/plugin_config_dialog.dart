@@ -5,13 +5,16 @@ import 'package:crossbar_core/crossbar_core.dart';
 import '../widgets/config_fields/config_field.dart';
 
 class PluginConfigDialog extends StatefulWidget {
-
   const PluginConfigDialog({
-    required this.plugin, required this.config, super.key,
+    required this.plugin,
+    required this.config,
+    required this.fullscreen,
+    super.key,
     this.initialValues = const {},
   });
   final Plugin plugin;
   final PluginConfig config;
+  final bool fullscreen;
   final Map<String, String> initialValues;
 
   static Future<Map<String, String>?> show({
@@ -20,11 +23,15 @@ class PluginConfigDialog extends StatefulWidget {
     required PluginConfig config,
     Map<String, String> initialValues = const {},
   }) {
+    final platform = Theme.of(context).platform;
+    final isMobile =
+        platform == TargetPlatform.android || platform == TargetPlatform.iOS;
     return showDialog<Map<String, String>>(
       context: context,
       builder: (context) => PluginConfigDialog(
         plugin: plugin,
         config: config,
+        fullscreen: isMobile,
         initialValues: initialValues,
       ),
     );
@@ -66,27 +73,42 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(context),
-            const Divider(height: 1),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
-                  child: _buildForm(context),
-                ),
-              ),
+      insetPadding: widget.fullscreen ? EdgeInsets.zero : null,
+      child: widget.fullscreen
+          ? SafeArea(child: _buildBody(context, fullscreen: true))
+          : Container(
+              constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+              child: _buildBody(context, fullscreen: false),
             ),
-            const Divider(height: 1),
-            _buildActions(context),
-          ],
-        ),
-      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, {required bool fullscreen}) {
+    final content = Column(
+      mainAxisSize: fullscreen ? MainAxisSize.max : MainAxisSize.min,
+      children: [
+        _buildHeader(context),
+        const Divider(height: 1),
+        if (fullscreen)
+          Expanded(child: _buildFormScroller(context))
+        else
+          Flexible(child: _buildFormScroller(context)),
+        const Divider(height: 1),
+        _buildActions(context),
+      ],
+    );
+
+    if (!fullscreen) {
+      return content;
+    }
+
+    return SizedBox.expand(child: content);
+  }
+
+  Widget _buildFormScroller(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Form(key: _formKey, child: _buildForm(context)),
     );
   }
 
@@ -96,10 +118,7 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
       child: Row(
         children: [
           if (widget.config.icon.isNotEmpty) ...[
-            Text(
-              widget.config.icon,
-              style: const TextStyle(fontSize: 32),
-            ),
+            Text(widget.config.icon, style: const TextStyle(fontSize: 32)),
             const SizedBox(width: 16),
           ],
           Expanded(
@@ -116,8 +135,8 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
                   Text(
                     widget.config.description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
               ],
             ),
@@ -146,8 +165,8 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
             Text(
               AppLocalizations.of(context)!.noConfigurationRequired,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ],
         ),
@@ -177,7 +196,9 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
           ),
           const SizedBox(width: 8),
           FilledButton(
-            onPressed: _isValid ? () => Navigator.of(context).pop(_values) : null,
+            onPressed: _isValid
+                ? () => Navigator.of(context).pop(_values)
+                : null,
             child: Text(AppLocalizations.of(context)!.save),
           ),
         ],
@@ -187,9 +208,9 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
 }
 
 class PluginInfoDialog extends StatelessWidget {
-
   const PluginInfoDialog({
-    required this.plugin, super.key,
+    required this.plugin,
+    super.key,
     this.onConfigure,
     this.onToggle,
     this.onRun,
@@ -256,15 +277,12 @@ class PluginInfoDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                plugin.id,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text(plugin.id, style: Theme.of(context).textTheme.titleLarge),
               Text(
                 '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
             ],
           ),
@@ -334,7 +352,10 @@ class PluginInfoDialog extends StatelessWidget {
               Navigator.pop(context);
               onDelete!();
             },
-            icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+            icon: Icon(
+              Icons.delete,
+              color: Theme.of(context).colorScheme.error,
+            ),
             label: Text(
               AppLocalizations.of(context)!.remove,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -362,7 +383,6 @@ class PluginInfoDialog extends StatelessWidget {
 }
 
 class _DetailItem extends StatelessWidget {
-
   const _DetailItem({
     required this.label,
     required this.value,
@@ -384,8 +404,8 @@ class _DetailItem extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ),
           Expanded(

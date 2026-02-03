@@ -1,5 +1,5 @@
 -- quotes.1h.lua
--- Daily Quote using Crossbar CLI
+-- Daily Quote via Crossbar web
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -16,16 +16,6 @@ local function env_num(name, default)
         return default
     end
     return num
-end
-
-local is_mobile = crossbar.isMobile()
-if is_mobile then
-    print('QUOTE N/A | color=gray')
-    print('---')
-    print('Quotes via CLI are limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
 end
 
 local max_len = env_num('QUOTE_MAX_LEN', 40)

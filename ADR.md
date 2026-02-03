@@ -16,6 +16,7 @@ This file consolidates the architectural decisions for Crossbar. Operational rul
 - ADR-010: Android Native APIs via Method Channel (2025-12-21)
 - ADR-011: Monorepo with Separate Packages (2025-12-22)
 - ADR-012: Multi-Icon Tray Architecture for Linux (2025-12-23)
+- ADR-013: Full-Screen Plugin Config Dialogs on Mobile (2026-02-03)
 
 ---
 
@@ -219,3 +220,21 @@ Consequences:
 - Multiple tray icons work on Linux (GNOME/KDE).
 - Additional processes are required and capped (default 10).
 - Some visual updates depend on user interaction due to SNI limitations.
+
+---
+
+## ADR-013: Full-Screen Plugin Config Dialogs on Mobile (2026-02-03)
+
+Status: Accepted
+
+Context:
+- Plugin configuration forms were cramped on mobile due to dialog constraints.
+- Users need more vertical space for multi-field schemas and validation feedback.
+
+Decision:
+- Present plugin configuration dialogs as full-screen on Android/iOS.
+- Keep desktop behavior as a constrained dialog.
+
+Consequences:
+- Better usability for plugin configuration on mobile devices.
+- Dialog layout must account for full-screen scroll and safe areas.

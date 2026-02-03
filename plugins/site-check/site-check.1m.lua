@@ -1,5 +1,5 @@
 -- site-check.1m.lua
--- Site Check using Crossbar CLI
+-- Site Check via Crossbar web
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -18,19 +18,8 @@ local function env_num(name, default)
     return num
 end
 
-local is_mobile = crossbar.isMobile()
 local url = env('SITE_URL', 'https://www.google.com')
 local timeout = env_num('SITE_TIMEOUT', 5)
-
-if is_mobile then
-    print('✅ Up | color=gray')
-    print('---')
-    print('Site check via CLI is limited on mobile')
-    print('Site: ' .. url)
-    print('---')
-    print('Refresh | refresh=true')
-    return
-end
 
 local response, err = crossbar.web(url, { timeout = timeout })
 local status_code = nil

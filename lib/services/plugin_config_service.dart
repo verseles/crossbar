@@ -5,13 +5,16 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:crossbar_core/crossbar_core.dart';
 import 'logger_service.dart';
 
 /// Service responsible for loading, saving, and securely storing plugin configuration values.
 ///
-/// Configuration values are stored in `~/.crossbar/configs/<pluginId>.json`.
+/// Configuration values are stored in:
+/// - Desktop: `~/.crossbar/configs/<pluginId>.json`
+/// - Mobile: `<app-documents>/configs/<pluginId>.json`
 /// Sensitive values (type: password) are stored separately using flutter_secure_storage.
 class PluginConfigService extends ChangeNotifier {
   factory PluginConfigService() => _instance;
@@ -40,13 +43,22 @@ class PluginConfigService extends ChangeNotifier {
 
   /// Gets the configs directory path.
   /// Desktop: `~/.crossbar/configs/`
+  /// Mobile: `<app-documents>/configs/`
   Future<String> get configsDirectory async {
     if (_configsDirectory != null) return _configsDirectory!;
 
-    final homeDir = Platform.environment['HOME'] ??
+    if (Platform.isAndroid || Platform.isIOS) {
+      final appDir = await getApplicationDocumentsDirectory();
+      _configsDirectory = path.join(appDir.path, 'configs');
+      return _configsDirectory!;
+    }
+
+    final homeDir =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '';
-    return path.join(homeDir, '.crossbar', 'configs');
+    _configsDirectory = path.join(homeDir, '.crossbar', 'configs');
+    return _configsDirectory!;
   }
 
   /// Initializes the service.
@@ -58,7 +70,9 @@ class PluginConfigService extends ChangeNotifier {
       if (!_secureStorageInjected) {
         _secureStorage = const FlutterSecureStorage(
           aOptions: AndroidOptions(encryptedSharedPreferences: true),
-          iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+          iOptions: IOSOptions(
+            accessibility: KeychainAccessibility.first_unlock,
+          ),
         );
       }
 
@@ -71,8 +85,11 @@ class PluginConfigService extends ChangeNotifier {
       _initialized = true;
       LoggerService().info('PluginConfigService initialized');
     } catch (e, stackTrace) {
-      LoggerService()
-          .error('Failed to initialize PluginConfigService', e, stackTrace);
+      LoggerService().error(
+        'Failed to initialize PluginConfigService',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -121,8 +138,11 @@ class PluginConfigService extends ChangeNotifier {
       // Cache the loaded values
       _cache[pluginId] = Map.from(values);
     } catch (e, stackTrace) {
-      LoggerService()
-          .error('Failed to load config for plugin: $pluginId', e, stackTrace);
+      LoggerService().error(
+        'Failed to load config for plugin: $pluginId',
+        e,
+        stackTrace,
+      );
     }
 
     return values;
@@ -176,8 +196,11 @@ class PluginConfigService extends ChangeNotifier {
       LoggerService().info('Saved config for plugin: $pluginId');
       notifyListeners();
     } catch (e, stackTrace) {
-      LoggerService()
-          .error('Failed to save config for plugin: $pluginId', e, stackTrace);
+      LoggerService().error(
+        'Failed to save config for plugin: $pluginId',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -210,7 +233,10 @@ class PluginConfigService extends ChangeNotifier {
       notifyListeners();
     } catch (e, stackTrace) {
       LoggerService().error(
-          'Failed to delete config for plugin: $pluginId', e, stackTrace);
+        'Failed to delete config for plugin: $pluginId',
+        e,
+        stackTrace,
+      );
     }
   }
 

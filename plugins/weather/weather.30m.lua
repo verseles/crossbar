@@ -1,5 +1,5 @@
 -- weather.30m.lua
--- Weather plugin in Lua using Crossbar CLI (OpenWeather)
+-- Weather plugin in Lua using Crossbar web (OpenWeather)
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -7,16 +7,6 @@ local function env(name, default)
         return default
     end
     return value
-end
-
-local is_mobile = crossbar.isMobile()
-if is_mobile then
-    print('WX N/A | color=gray')
-    print('---')
-    print('Weather via CLI is limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
 end
 
 local api_key = env('WEATHER_API_KEY', '')

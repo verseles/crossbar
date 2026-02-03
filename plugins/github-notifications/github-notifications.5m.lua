@@ -1,5 +1,5 @@
 -- github-notifications.5m.lua
--- GitHub Notifications (desktop via CLI)
+-- GitHub Notifications via Crossbar web
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -16,16 +16,6 @@ local function env_num(name, default)
         return default
     end
     return num
-end
-
-local is_mobile = crossbar.isMobile()
-if is_mobile then
-    print('GH N/A | color=gray')
-    print('---')
-    print('GitHub notifications via CLI are limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
 end
 
 local token = env('GITHUB_TOKEN', '')

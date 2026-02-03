@@ -1,5 +1,5 @@
 -- npm-downloads.1h.lua
--- NPM Downloads using Crossbar CLI
+-- NPM Downloads via Crossbar web
 
 local function env(name, default)
     local value = crossbar.env(name, default)
@@ -7,16 +7,6 @@ local function env(name, default)
         return default
     end
     return value
-end
-
-local is_mobile = crossbar.isMobile()
-if is_mobile then
-    print('📦 N/A | color=gray')
-    print('---')
-    print('NPM stats via CLI are limited on mobile')
-    print('---')
-    print('Refresh | refresh=true')
-    return
 end
 
 local package_name = env('NPM_PACKAGE', 'lodash')
