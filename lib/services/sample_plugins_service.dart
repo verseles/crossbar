@@ -566,6 +566,64 @@ class SamplePluginsService {
     return allPlugins.where((p) => p.mobileCompatible).toList();
   }
 
+  /// Sync installed sample plugins with bundled assets (mobile only).
+  ///
+  /// When force is true, overwrites any installed sample plugin variant
+  /// that exists on disk.
+  Future<void> syncInstalledSamples({bool force = false}) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+
+    final pluginsDir = await _pluginManager.pluginsDirectory;
+
+    for (final plugin in allPlugins) {
+      for (final variant in plugin.variants) {
+        final baseName = variant.filename.split('.').first;
+        final targetDir = path.join(pluginsDir, baseName);
+
+        final enabledPath = path.join(targetDir, variant.filename);
+        final disabledPath = path.join(
+          targetDir,
+          variant.filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1'),
+        );
+
+        final enabledFile = File(enabledPath);
+        final disabledFile = File(disabledPath);
+
+        final targetFile = await enabledFile.exists()
+            ? enabledFile
+            : await disabledFile.exists()
+            ? disabledFile
+            : null;
+
+        if (targetFile == null) continue;
+
+        final assetContent = await rootBundle.loadString(variant.assetPath);
+        final currentContent = await targetFile.readAsString();
+
+        if (!force && currentContent != assetContent) {
+          continue;
+        }
+
+        if (currentContent != assetContent) {
+          await targetFile.writeAsString(assetContent);
+        }
+
+        if (variant.schemaAssetPath != null) {
+          try {
+            final schemaContent = await rootBundle.loadString(
+              variant.schemaAssetPath!,
+            );
+            await File(
+              '${targetFile.path}.schema.json',
+            ).writeAsString(schemaContent);
+          } catch (_) {
+            // Schema file is optional
+          }
+        }
+      }
+    }
+  }
+
   /// Search plugins by name, description, or tags
   List<PluginMetadata> search(String query) {
     final q = query.toLowerCase();
