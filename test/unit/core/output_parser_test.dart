@@ -44,6 +44,16 @@ void main() {
         expect(output.text, '45%');
       });
 
+      test('parses color with multiple attributes', () {
+        final output = OutputParser.parse(
+          '45% | iconName=utilities-system-monitor-symbolic color=green',
+          'test.sh',
+        );
+
+        expect(output.text, '45%');
+        expect(output.color, 0xFF00FF00);
+      });
+
       test('parses menu items after separator', () {
         const input = '''
 45%
@@ -74,6 +84,21 @@ Error | color=red
         expect(output.menu.length, 1);
         expect(output.menu[0].text, 'Error');
         expect(output.menu[0].color, 'red');
+      });
+
+      test('parses menu item with quoted bash', () {
+        const input = '''
+Test
+---
+Open File | bash="xdg-open /home/helio/My File" color=blue
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 1);
+        expect(output.menu[0].text, 'Open File');
+        expect(output.menu[0].bash, 'xdg-open /home/helio/My File');
+        expect(output.menu[0].color, 'blue');
       });
 
       test('handles empty output', () {

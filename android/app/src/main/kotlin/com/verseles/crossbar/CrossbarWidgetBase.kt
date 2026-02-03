@@ -275,6 +275,18 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             )
             views.setOnClickPendingIntent(R.id.widget_refresh, refreshPendingIntent)
         }
+
+        val editIntent = Intent(context, WidgetConfigActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+        val editPendingIntent = PendingIntent.getActivity(
+            context,
+            appWidgetId + 2000,
+            editIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(R.id.widget_edit, editPendingIntent)
     }
 
     private fun formatPluginTitle(pluginId: String): String {

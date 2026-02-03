@@ -1,37 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Small Widget Layout (1x1): Icon + Short Value -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:gravity="center"
-    android:orientation="vertical"
     android:padding="12dp"
     tools:ignore="Overdraw">
 
-    <!-- Icon/Emoji -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- Icon/Emoji -->
+        <TextView
+            android:id="@+id/widget_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="📊"
+            android:textSize="32sp" />
+
+        <!-- Main Value -->
+        <TextView
+            android:id="@+id/widget_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="--"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Edit button -->
     <TextView
-        android:id="@+id/widget_icon"
+        android:id="@+id/widget_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="📊"
-        android:textSize="32sp" />
+        android:layout_gravity="end|top"
+        android:contentDescription="@string/action_edit_widget"
+        android:padding="4dp"
+        android:text="✏️"
+        android:textSize="12sp" />
 
-    <!-- Main Value -->
-    <TextView
-        android:id="@+id/widget_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:text="--"
-        android:textColor="@color/widget_text_primary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginTop="4dp" />
-
-</LinearLayout>
+</FrameLayout>

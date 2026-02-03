@@ -42,14 +42,18 @@ Future<void> _updateWidgetsInBackground() async {
   await pluginManager.discoverPlugins();
 
   // Get enabled plugins
-  final enabledPlugins =
-      pluginManager.plugins.where((p) => p.enabled).toList();
+  final enabledPlugins = pluginManager.plugins.where((p) => p.enabled).toList();
 
   if (enabledPlugins.isEmpty) return;
 
+  final enabledPluginIds = enabledPlugins.map((p) => p.id).toList();
+  await HomeWidget.saveWidgetData<String>(
+    'plugin_ids',
+    jsonEncode(enabledPluginIds),
+  );
+
   // Execute compatible plugins and save data
   final executor = PluginExecutor();
-  final pluginIds = <String>[];
 
   for (final plugin in enabledPlugins) {
     // Only run plugins compatible with background execution
@@ -63,37 +67,25 @@ Future<void> _updateWidgetsInBackground() async {
         'plugin_${plugin.id}',
         jsonEncode(output.toJson()),
       );
-      pluginIds.add(plugin.id);
     } catch (e) {
       // Skip failing plugins in background
       continue;
     }
   }
 
-  // Update plugin IDs list
-  if (pluginIds.isNotEmpty) {
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_ids',
-      jsonEncode(pluginIds),
-    );
+  // Trigger widget update for ALL widget types
+  // Each widget class is a separate receiver and must be updated individually
+  const widgetNames = [
+    'CrossbarWidgetSmall',
+    'CrossbarWidgetMedium',
+    'CrossbarWidgetLarge',
+  ];
 
-    // Trigger widget update for ALL widget types
-    // Each widget class is a separate receiver and must be updated individually
-    const widgetNames = [
-      'CrossbarWidgetSmall',
-      'CrossbarWidgetMedium',
-      'CrossbarWidgetLarge',
-    ];
-
-    for (final widgetName in widgetNames) {
-      try {
-        await HomeWidget.updateWidget(
-          name: widgetName,
-          androidName: widgetName,
-        );
-      } catch (_) {
-        // Ignore - widget might not be on screen
-      }
+  for (final widgetName in widgetNames) {
+    try {
+      await HomeWidget.updateWidget(name: widgetName, androidName: widgetName);
+    } catch (_) {
+      // Ignore - widget might not be on screen
     }
   }
 }
@@ -117,6 +109,7 @@ class BackgroundService {
   static final BackgroundService _instance = BackgroundService._internal();
 
   bool _initialized = false;
+  Duration? _scheduledInterval;
 
   /// Check if service has been initialized
   bool get isInitialized => _initialized;
@@ -127,22 +120,51 @@ class BackgroundService {
     if (_initialized) return;
     if (!Platform.isAndroid) return;
 
-    await Workmanager().initialize(
-      callbackDispatcher,
-    );
+    await Workmanager().initialize(callbackDispatcher);
 
-    // Register periodic task
+    _initialized = true;
+    await syncScheduleWithPlugins();
+  }
+
+  Future<void> syncScheduleWithPlugins() async {
+    if (!Platform.isAndroid) return;
+    if (!_initialized) return;
+
+    final interval = await _resolveWidgetUpdateInterval();
+    if (_scheduledInterval == interval) return;
+
     await Workmanager().registerPeriodicTask(
       kWidgetUpdateTask,
       kWidgetUpdateTask,
-      frequency: kMinUpdateInterval,
-      constraints: Constraints(
-        networkType: NetworkType.notRequired,
-      ),
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      frequency: interval,
+      constraints: Constraints(networkType: NetworkType.notRequired),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
     );
 
-    _initialized = true;
+    _scheduledInterval = interval;
+  }
+
+  Future<Duration> _resolveWidgetUpdateInterval() async {
+    final pluginManager = PluginManager();
+    await pluginManager.discoverPlugins();
+
+    final enabledPlugins = pluginManager.plugins
+        .where((p) => p.enabled)
+        .toList();
+    if (enabledPlugins.isEmpty) return kMinUpdateInterval;
+
+    var minInterval = enabledPlugins.first.refreshInterval;
+    for (final plugin in enabledPlugins.skip(1)) {
+      if (plugin.refreshInterval < minInterval) {
+        minInterval = plugin.refreshInterval;
+      }
+    }
+
+    if (minInterval < kMinUpdateInterval) {
+      return kMinUpdateInterval;
+    }
+
+    return minInterval;
   }
 
   /// Cancel all background tasks
@@ -150,11 +172,13 @@ class BackgroundService {
     if (!Platform.isAndroid) return;
     await Workmanager().cancelAll();
     _initialized = false;
+    _scheduledInterval = null;
   }
 
   /// Cancel specific widget update task
   Future<void> cancelWidgetUpdates() async {
     if (!Platform.isAndroid) return;
     await Workmanager().cancelByUniqueName(kWidgetUpdateTask);
+    _scheduledInterval = null;
   }
 }

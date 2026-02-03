@@ -28,6 +28,7 @@ class PluginsTab extends StatefulWidget {
 }
 
 enum PluginSortOrder { enabledFirst, alphabetical, lastRun, interval }
+
 enum PluginGroupBy { none, language, configurable }
 
 class _PluginsTabState extends State<PluginsTab> {
@@ -38,6 +39,7 @@ class _PluginsTabState extends State<PluginsTab> {
   bool _isLoading = true;
   String _searchQuery = '';
   PluginSortOrder _sortOrder = PluginSortOrder.enabledFirst;
+  bool _showEnabledOnly = false;
   PluginGroupBy _groupBy = PluginGroupBy.none;
   String? _expandedPluginId;
   final Map<String, bool> _runningPlugins = {};
@@ -94,37 +96,12 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   List<Plugin> get _filteredAndSortedPlugins {
-    var plugins = _refreshService.plugins.toList();
-
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      plugins = plugins.where((p) {
-        return p.id.toLowerCase().contains(query) ||
-               p.interpreter.toLowerCase().contains(query);
-      }).toList();
-    }
-
-    // Apply sorting
-    plugins.sort((a, b) {
-      switch (_sortOrder) {
-        case PluginSortOrder.enabledFirst:
-          if (a.enabled != b.enabled) {
-            return a.enabled ? -1 : 1;
-          }
-          return a.id.toLowerCase().compareTo(b.id.toLowerCase());
-        case PluginSortOrder.alphabetical:
-          return a.id.toLowerCase().compareTo(b.id.toLowerCase());
-        case PluginSortOrder.lastRun:
-          final aRun = a.lastRun ?? DateTime(1970);
-          final bRun = b.lastRun ?? DateTime(1970);
-          return bRun.compareTo(aRun);
-        case PluginSortOrder.interval:
-          return a.refreshInterval.compareTo(b.refreshInterval);
-      }
-    });
-
-    return plugins;
+    return filterAndSortPlugins(
+      plugins: _refreshService.plugins.toList(),
+      searchQuery: _searchQuery,
+      enabledOnly: _showEnabledOnly,
+      sortOrder: _sortOrder,
+    );
   }
 
   Map<String, List<Plugin>> get _groupedPlugins {
@@ -232,8 +209,8 @@ class _PluginsTabState extends State<PluginsTab> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _refreshService.plugins.isEmpty
-                    ? _buildEmptyState(l10n)
-                    : _buildPluginList(theme, l10n),
+                ? _buildEmptyState(l10n)
+                : _buildPluginList(theme, l10n),
           ),
         ],
       ),
@@ -348,9 +325,9 @@ class _PluginsTabState extends State<PluginsTab> {
                 // Quick filters
                 FilterChip(
                   label: Text(l10n.enabled),
-                  selected: _sortOrder == PluginSortOrder.enabledFirst,
-                  onSelected: (_) => setState(() {
-                    _sortOrder = PluginSortOrder.enabledFirst;
+                  selected: _showEnabledOnly,
+                  onSelected: (value) => setState(() {
+                    _showEnabledOnly = value;
                   }),
                 ),
 
@@ -402,11 +379,7 @@ class _PluginsTabState extends State<PluginsTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
+            Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               l10n.noPluginsMatch(_searchQuery),
@@ -465,12 +438,10 @@ class _PluginsTabState extends State<PluginsTab> {
             ],
 
             // Plugin cards
-            ...groupPlugins.map((plugin) => _buildExpandablePluginCard(
-              context,
-              plugin,
-              theme,
-              l10n,
-            )),
+            ...groupPlugins.map(
+              (plugin) =>
+                  _buildExpandablePluginCard(context, plugin, theme, l10n),
+            ),
           ],
         );
       },
@@ -606,7 +577,14 @@ class _PluginsTabState extends State<PluginsTab> {
 
           // Expanded content
           if (isExpanded)
-            _buildExpandedContent(context, plugin, theme, output, isRunning, l10n),
+            _buildExpandedContent(
+              context,
+              plugin,
+              theme,
+              output,
+              isRunning,
+              l10n,
+            ),
         ],
       ),
     );
@@ -623,7 +601,11 @@ class _PluginsTabState extends State<PluginsTab> {
       child: DropdownButton<PluginVariant>(
         value: plugin.variants.firstWhere((v) => v.path == plugin.path),
         underline: const SizedBox(),
-        icon: Icon(Icons.arrow_drop_down, size: 14, color: theme.colorScheme.primary),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          size: 14,
+          color: theme.colorScheme.primary,
+        ),
         style: theme.textTheme.bodySmall?.copyWith(
           fontSize: 10,
           fontWeight: FontWeight.bold,
@@ -674,10 +656,7 @@ class _PluginsTabState extends State<PluginsTab> {
           const SizedBox(width: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.colorScheme.outline,
-            ),
+            style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
           ),
         ],
       ),
@@ -692,16 +671,12 @@ class _PluginsTabState extends State<PluginsTab> {
     bool isRunning,
     AppLocalizations l10n,
   ) {
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
         border: Border(
-          top: BorderSide(
-            color: theme.colorScheme.outlineVariant,
-            width: 1,
-          ),
+          top: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
         ),
       ),
       child: Column(
@@ -711,9 +686,7 @@ class _PluginsTabState extends State<PluginsTab> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.surface),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -766,9 +739,7 @@ class _PluginsTabState extends State<PluginsTab> {
                         ? Colors.black
                         : Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.colorScheme.outlineVariant,
-                    ),
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
                   ),
                   child: _buildOutputContent(theme, output, isRunning),
                 ),
@@ -852,12 +823,21 @@ class _PluginsTabState extends State<PluginsTab> {
                 OutlinedButton.icon(
                   onPressed: () => _editPlugin(plugin),
                   icon: const Icon(Icons.edit, size: 18),
-                    label: Text(l10n.edit),
+                  label: Text(l10n.edit),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _handleDeleteClick(context, plugin),
-                  icon: Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
-                    label: Text(l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  icon: Icon(
+                    Icons.delete,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  label: Text(
+                    l10n.delete,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -884,10 +864,7 @@ class _PluginsTabState extends State<PluginsTab> {
             const SizedBox(height: 8),
             Text(
               'Executing plugin...',
-              style: TextStyle(
-                color: theme.colorScheme.outline,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: theme.colorScheme.outline, fontSize: 12),
             ),
           ],
         ),
@@ -941,10 +918,7 @@ class _PluginsTabState extends State<PluginsTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (output.icon.isNotEmpty) ...[
-          Text(
-            output.icon,
-            style: const TextStyle(fontSize: 32),
-          ),
+          Text(output.icon, style: const TextStyle(fontSize: 32)),
           const SizedBox(width: 12),
         ],
         Expanded(
@@ -974,16 +948,20 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
               if (output.menu.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                ...output.menu.take(5).map((item) => Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '• ${item.text ?? ''}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurfaceVariant,
+                ...output.menu
+                    .take(5)
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '• ${item.text ?? ''}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                )),
                 if (output.menu.length > 5)
                   Text(
                     '... and ${output.menu.length - 5} more',
@@ -1054,8 +1032,8 @@ class _PluginsTabState extends State<PluginsTab> {
           Text(
             l10n.noPluginsDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -1141,7 +1119,9 @@ class _PluginsTabState extends State<PluginsTab> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            AppLocalizations.of(context)!.pluginsInstalledSuccess(installed.length),
+                            AppLocalizations.of(
+                              context,
+                            )!.pluginsInstalledSuccess(installed.length),
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -1219,16 +1199,10 @@ class _PluginsTabState extends State<PluginsTab> {
               const SizedBox(height: 16),
 
               // Manual creation instructions
-              Text(
-                l10n.createYourOwnPlugin,
-                style: theme.textTheme.titleSmall,
-              ),
+              Text(l10n.createYourOwnPlugin, style: theme.textTheme.titleSmall),
               const SizedBox(height: 12),
 
-              Text(
-                l10n.createScriptStep,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(l10n.createScriptStep, style: theme.textTheme.bodySmall),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -1244,10 +1218,7 @@ class _PluginsTabState extends State<PluginsTab> {
               ),
               const SizedBox(height: 12),
 
-              Text(
-                l10n.nameWithIntervalStep,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(l10n.nameWithIntervalStep, style: theme.textTheme.bodySmall),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -1264,10 +1235,7 @@ class _PluginsTabState extends State<PluginsTab> {
               ),
               const SizedBox(height: 12),
 
-              Text(
-                l10n.placeInPluginsStep,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(l10n.placeInPluginsStep, style: theme.textTheme.bodySmall),
             ],
           ),
         ),
@@ -1296,9 +1264,11 @@ class _PluginsTabState extends State<PluginsTab> {
         .replaceAll('-', ' ')
         .replaceAll('_', ' ')
         .split(' ')
-        .map((word) => word.isNotEmpty
-            ? '${word[0].toUpperCase()}${word.substring(1)}'
-            : '')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
         .join(' ');
   }
 
@@ -1340,7 +1310,9 @@ class _PluginsTabState extends State<PluginsTab> {
     if (!await file.exists()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.pluginFileNotFound)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.pluginFileNotFound),
+          ),
         );
       }
       return;
@@ -1373,7 +1345,11 @@ class _PluginsTabState extends State<PluginsTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.failedToOpenEditor(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.failedToOpenEditor(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1398,7 +1374,11 @@ class _PluginsTabState extends State<PluginsTab> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.clickDeleteAgain(_formatPluginName(plugin.id))),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.clickDeleteAgain(_formatPluginName(plugin.id)),
+          ),
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -1484,4 +1464,45 @@ class _PluginsTabState extends State<PluginsTab> {
       );
     }
   }
+}
+
+List<Plugin> filterAndSortPlugins({
+  required List<Plugin> plugins,
+  required String searchQuery,
+  required bool enabledOnly,
+  required PluginSortOrder sortOrder,
+}) {
+  var filtered = plugins;
+
+  if (searchQuery.isNotEmpty) {
+    final query = searchQuery.toLowerCase();
+    filtered = filtered.where((p) {
+      return p.id.toLowerCase().contains(query) ||
+          p.interpreter.toLowerCase().contains(query);
+    }).toList();
+  }
+
+  if (enabledOnly) {
+    filtered = filtered.where((p) => p.enabled).toList();
+  }
+
+  filtered.sort((a, b) {
+    switch (sortOrder) {
+      case PluginSortOrder.enabledFirst:
+        if (a.enabled != b.enabled) {
+          return a.enabled ? -1 : 1;
+        }
+        return a.id.toLowerCase().compareTo(b.id.toLowerCase());
+      case PluginSortOrder.alphabetical:
+        return a.id.toLowerCase().compareTo(b.id.toLowerCase());
+      case PluginSortOrder.lastRun:
+        final aRun = a.lastRun ?? DateTime(1970);
+        final bRun = b.lastRun ?? DateTime(1970);
+        return bRun.compareTo(aRun);
+      case PluginSortOrder.interval:
+        return a.refreshInterval.compareTo(b.refreshInterval);
+    }
+  });
+
+  return filtered;
 }

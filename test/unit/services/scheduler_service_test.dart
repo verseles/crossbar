@@ -38,15 +38,11 @@ void main() {
 
     test('shouldRunNow validates day of week', () {
       final now = DateTime.now();
-      final config = PluginScheduleConfig(
-        daysOfWeek: [now.weekday],
-      );
+      final config = PluginScheduleConfig(daysOfWeek: [now.weekday]);
       expect(config.shouldRunNow(), true);
 
       final otherDay = now.weekday == 1 ? 2 : 1;
-      final configBadDay = PluginScheduleConfig(
-        daysOfWeek: [otherDay],
-      );
+      final configBadDay = PluginScheduleConfig(daysOfWeek: [otherDay]);
       expect(configBadDay.shouldRunNow(), false);
     });
   });
@@ -102,6 +98,14 @@ void main() {
 
       await scheduler.stop();
       expect(scheduler.isRunning, false);
+    });
+
+    test('canonicalId normalizes off suffixes', () {
+      final scheduler = SchedulerService();
+
+      expect(scheduler.canonicalIdForTesting('cpu.off.sh'), 'cpu.sh');
+      expect(scheduler.canonicalIdForTesting('plugin.off'), 'plugin');
+      expect(scheduler.canonicalIdForTesting('disk.10s.lua'), 'disk.10s.lua');
     });
   });
 }

@@ -81,12 +81,6 @@ class WidgetService {
       jsonEncode(output.toJson()),
     );
 
-    // Store list of all plugin IDs
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_ids',
-      jsonEncode(_widgetData.keys.toList()),
-    );
-
     // Update all widgets
     await _triggerWidgetUpdate();
   }
@@ -132,20 +126,54 @@ class WidgetService {
     }
   }
 
+  /// Sync widget data with the current plugin list and cached outputs.
+  ///
+  /// This is used to keep widgets consistent after enable/disable or
+  /// plugin discovery without waiting for the next scheduled run.
+  Future<void> syncWithOutputs(
+    List<Plugin> plugins,
+    Map<String, PluginOutput> outputs,
+  ) async {
+    if (!_initialized) return;
+
+    final enabledIds = plugins
+        .where((p) => p.enabled)
+        .map((p) => p.id)
+        .toList();
+    final removedIds = _widgetData.keys
+        .where((id) => !enabledIds.contains(id))
+        .toList();
+
+    for (final removedId in removedIds) {
+      _widgetData.remove(removedId);
+      await HomeWidget.saveWidgetData<String?>('plugin_$removedId', null);
+    }
+
+    for (final pluginId in enabledIds) {
+      final output = outputs[pluginId];
+      if (output == null) continue;
+
+      _widgetData[pluginId] = output;
+      await HomeWidget.saveWidgetData<String>(
+        'plugin_$pluginId',
+        jsonEncode(output.toJson()),
+      );
+    }
+
+    await HomeWidget.saveWidgetData<String>(
+      'plugin_ids',
+      jsonEncode(enabledIds),
+    );
+
+    await _triggerWidgetUpdate();
+  }
+
   Future<void> clearWidget(String pluginId) async {
     if (!_initialized) return;
 
     _widgetData.remove(pluginId);
 
-    await HomeWidget.saveWidgetData<String?>(
-      'plugin_$pluginId',
-      null,
-    );
-
-    await HomeWidget.saveWidgetData<String>(
-      'plugin_ids',
-      jsonEncode(_widgetData.keys.toList()),
-    );
+    await HomeWidget.saveWidgetData<String?>('plugin_$pluginId', null);
 
     await _triggerWidgetUpdate();
   }

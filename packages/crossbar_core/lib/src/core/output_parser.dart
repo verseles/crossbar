@@ -32,9 +32,8 @@ class OutputParser {
       pluginId: pluginId,
       icon: data['icon'] as String? ?? '',
       text: data['text'] as String?,
-      color: data['color'] != null
-          ? _parseColor(data['color'] as String)
-          : null,
+      color:
+          data['color'] != null ? _parseColor(data['color'] as String) : null,
       trayTooltip: data['tray_tooltip'] as String?,
       menu: _parseMenuItems(data['menu'] as List<dynamic>? ?? []),
     );
@@ -53,19 +52,14 @@ class OutputParser {
     String? colorStr;
 
     if (firstLine.contains('|')) {
-      final parts = firstLine.split('|');
-      final mainText = parts[0].trim();
+      final parsedLine = _splitBitbarLine(firstLine);
+      final mainText = parsedLine.text.trim();
 
       final parsed = _parseIconAndText(mainText);
       icon = parsed.icon;
       displayText = parsed.text;
 
-      for (var i = 1; i < parts.length; i++) {
-        final attr = parts[i].trim();
-        if (attr.startsWith('color=')) {
-          colorStr = attr.substring(6);
-        }
-      }
+      colorStr = parsedLine.attributes['color'];
     } else {
       final parsed = _parseIconAndText(firstLine);
       icon = parsed.icon;
@@ -162,33 +156,19 @@ class OutputParser {
 
   /// Parses a single menu item line (already stripped of -- prefix)
   static MenuItem _parseMenuItemFromLine(String line) {
-    if (line.contains('|')) {
-      final parts = line.split('|');
-      final itemText = parts[0].trim();
-      String? bash;
-      String? href;
-      String? itemColor;
-
-      for (var k = 1; k < parts.length; k++) {
-        final attr = parts[k].trim();
-        if (attr.startsWith('bash=')) {
-          bash = attr.substring(5);
-        } else if (attr.startsWith('href=')) {
-          href = attr.substring(5);
-        } else if (attr.startsWith('color=')) {
-          itemColor = attr.substring(6);
-        }
-      }
-
-      return MenuItem(
-        text: itemText,
-        bash: bash,
-        href: href,
-        color: itemColor,
-      );
-    } else {
+    if (!line.contains('|')) {
       return MenuItem(text: line);
     }
+
+    final parsedLine = _splitBitbarLine(line);
+    final itemText = parsedLine.text.trim();
+
+    return MenuItem(
+      text: itemText,
+      bash: parsedLine.attributes['bash'],
+      href: parsedLine.attributes['href'],
+      color: parsedLine.attributes['color'],
+    );
   }
 
   static ({String icon, String? text}) _parseIconAndText(String input) {
@@ -342,5 +322,109 @@ class OutputParser {
     }
 
     return null;
+  }
+
+  static ({String text, Map<String, String> attributes}) _splitBitbarLine(
+    String line,
+  ) {
+    final pipeIndex = line.indexOf('|');
+    if (pipeIndex == -1) {
+      return (text: line, attributes: const {});
+    }
+
+    final textPart = line.substring(0, pipeIndex).trimRight();
+    final attributesPart = line.substring(pipeIndex + 1).trim();
+    final attributes = _parseAttributes(attributesPart);
+
+    return (text: textPart, attributes: attributes);
+  }
+
+  static Map<String, String> _parseAttributes(String input) {
+    if (input.isEmpty) return {};
+
+    final normalized = input.replaceAll('|', ' ');
+    final tokens = _tokenizeAttributes(normalized);
+    final attributes = <String, String>{};
+
+    String? currentKey;
+
+    for (final token in tokens) {
+      final equalsIndex = token.indexOf('=');
+      if (equalsIndex > 0) {
+        final key = token.substring(0, equalsIndex);
+        var value = token.substring(equalsIndex + 1);
+        value = _stripQuotes(value);
+        attributes[key] = value;
+        currentKey = key;
+      } else if (currentKey != null) {
+        final existing = attributes[currentKey] ?? '';
+        attributes[currentKey!] = existing.isEmpty ? token : '$existing $token';
+      }
+    }
+
+    return attributes;
+  }
+
+  static List<String> _tokenizeAttributes(String input) {
+    final tokens = <String>[];
+    final buffer = StringBuffer();
+    String? quote;
+    var escaping = false;
+
+    void flush() {
+      if (buffer.isNotEmpty) {
+        tokens.add(buffer.toString());
+        buffer.clear();
+      }
+    }
+
+    for (var i = 0; i < input.length; i++) {
+      final ch = input[i];
+
+      if (escaping) {
+        buffer.write(ch);
+        escaping = false;
+        continue;
+      }
+
+      if (ch == '\\') {
+        escaping = true;
+        continue;
+      }
+
+      if (quote != null) {
+        if (ch == quote) {
+          quote = null;
+        } else {
+          buffer.write(ch);
+        }
+        continue;
+      }
+
+      if (ch == '"' || ch == '\'') {
+        quote = ch;
+        continue;
+      }
+
+      if (ch.trim().isEmpty) {
+        flush();
+        continue;
+      }
+
+      buffer.write(ch);
+    }
+
+    flush();
+    return tokens;
+  }
+
+  static String _stripQuotes(String value) {
+    if (value.length < 2) return value;
+    final first = value[0];
+    final last = value[value.length - 1];
+    if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+      return value.substring(1, value.length - 1);
+    }
+    return value;
   }
 }

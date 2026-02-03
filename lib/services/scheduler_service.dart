@@ -5,13 +5,15 @@ import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:meta/meta.dart';
 
 import '../core/plugin_manager.dart';
+import 'background_service.dart';
 import 'notification_service.dart';
 import 'refresh_service.dart';
 import 'settings_service.dart';
 import 'widget_service.dart';
 
 /// Callback type for plugin output updates (legacy - use RefreshService.addOutputListener)
-typedef PluginOutputCallback = void Function(String pluginId, PluginOutput output);
+typedef PluginOutputCallback =
+    void Function(String pluginId, PluginOutput output);
 
 /// SchedulerService - Manages plugin refresh timers.
 ///
@@ -32,8 +34,10 @@ class SchedulerService {
   final RefreshService _refreshService = RefreshService();
   final NotificationService _notificationService = NotificationService();
   final WidgetService _widgetService = WidgetService();
+  final BackgroundService _backgroundService = BackgroundService();
 
   final Map<String, Timer> _timers = {};
+  final Map<String, Duration> _timerIntervals = {};
 
   bool _running = false;
 
@@ -69,23 +73,22 @@ class SchedulerService {
 
     // Register widget update listener
     _refreshService.addOutputListener(_onPluginOutput);
+    _refreshService.addListChangedListener(_onPluginListChanged);
 
-    for (final plugin in _pluginManager.plugins) {
-      if (plugin.enabled) {
-        _schedulePlugin(plugin);
-      }
-    }
+    await _handlePluginListChanged();
   }
 
   Future<void> stop() async {
     _running = false;
     SettingsService().removeListener(_onSettingsChanged);
     _refreshService.removeOutputListener(_onPluginOutput);
+    _refreshService.removeListChangedListener(_onPluginListChanged);
 
     for (final timer in _timers.values) {
       timer.cancel();
     }
     _timers.clear();
+    _timerIntervals.clear();
 
     // Hide persistent notification
     await _notificationService.hidePersistentNotification();
@@ -97,7 +100,9 @@ class SchedulerService {
 
   Future<void> _updatePersistentNotification() async {
     if (SettingsService().showInTray) {
-      final enabledCount = _pluginManager.plugins.where((p) => p.enabled).length;
+      final enabledCount = _pluginManager.plugins
+          .where((p) => p.enabled)
+          .length;
       await _notificationService.showPersistentNotification(
         enabledPlugins: enabledCount,
       );
@@ -113,7 +118,8 @@ class SchedulerService {
 
     // Update persistent notification with latest time
     final now = DateTime.now();
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     await _notificationService.updatePersistentNotification(
       enabledPlugins: _pluginManager.plugins.where((p) => p.enabled).length,
       lastUpdate: timeStr,
@@ -128,36 +134,71 @@ class SchedulerService {
     }
   }
 
+  void _onPluginListChanged() {
+    unawaited(_handlePluginListChanged());
+  }
+
+  Future<void> _handlePluginListChanged() async {
+    _syncTimers();
+    await _widgetService.syncWithOutputs(
+      _pluginManager.plugins,
+      _refreshService.lastOutputs,
+    );
+    await _backgroundService.syncScheduleWithPlugins();
+    await _updatePersistentNotification();
+  }
+
   void _schedulePlugin(Plugin plugin) {
-    _timers[plugin.id]?.cancel();
+    final canonicalId = _canonicalId(plugin.id);
+    final currentInterval = _timerIntervals[canonicalId];
+    final needsReschedule =
+        currentInterval == null || currentInterval != plugin.refreshInterval;
+
+    if (!needsReschedule && _timers.containsKey(canonicalId)) {
+      return;
+    }
+
+    _timers[canonicalId]?.cancel();
+
+    if (!plugin.enabled) {
+      _timers.remove(canonicalId);
+      _timerIntervals.remove(canonicalId);
+      return;
+    }
 
     // Run immediately first via RefreshService
     _refreshService.runPlugin(plugin.id);
 
     // Then schedule periodic runs
-    _timers[plugin.id] = Timer.periodic(
+    _timers[canonicalId] = Timer.periodic(
       plugin.refreshInterval,
-      (_) => _runScheduledPlugin(plugin),
+      (_) => _runScheduledPlugin(canonicalId),
     );
+    _timerIntervals[canonicalId] = plugin.refreshInterval;
   }
 
-  Future<void> _runScheduledPlugin(Plugin plugin) async {
+  Future<void> _runScheduledPlugin(String canonicalId) async {
     if (!_running) return;
-    if (!plugin.enabled) return;
+    final plugin = _findPluginByCanonicalId(canonicalId);
+    if (plugin == null || !plugin.enabled) return;
 
     await _refreshService.runPlugin(plugin.id);
   }
 
   /// Reschedule a plugin (e.g., after enable/disable or interval change)
   void reschedulePlugin(String pluginId) {
-    final plugin = _pluginManager.getPlugin(pluginId);
-    if (plugin == null) return;
+    final plugin = _findPluginByCanonicalId(pluginId);
+    final canonicalId = _canonicalId(pluginId);
+
+    if (plugin == null) {
+      _cancelTimer(canonicalId);
+      return;
+    }
 
     if (plugin.enabled) {
       _schedulePlugin(plugin);
     } else {
-      _timers[pluginId]?.cancel();
-      _timers.remove(pluginId);
+      _cancelTimer(canonicalId);
     }
   }
 
@@ -181,9 +222,55 @@ class SchedulerService {
     _refreshService.clearOutput(pluginId);
   }
 
+  void _syncTimers() {
+    final enabledPlugins = _pluginManager.plugins
+        .where((p) => p.enabled)
+        .toList();
+    final enabledIds = enabledPlugins.map((p) => _canonicalId(p.id)).toSet();
+
+    for (final timerId in _timers.keys.toList()) {
+      if (!enabledIds.contains(timerId)) {
+        _cancelTimer(timerId);
+      }
+    }
+
+    for (final plugin in enabledPlugins) {
+      _schedulePlugin(plugin);
+    }
+  }
+
+  void _cancelTimer(String canonicalId) {
+    _timers[canonicalId]?.cancel();
+    _timers.remove(canonicalId);
+    _timerIntervals.remove(canonicalId);
+  }
+
+  Plugin? _findPluginByCanonicalId(String pluginId) {
+    final canonicalId = _canonicalId(pluginId);
+    for (final plugin in _pluginManager.plugins) {
+      if (_canonicalId(plugin.id) == canonicalId) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  String _canonicalId(String pluginId) {
+    if (pluginId.contains('.off.')) {
+      return pluginId.replaceFirst('.off.', '.');
+    }
+    if (pluginId.endsWith('.off')) {
+      return pluginId.substring(0, pluginId.length - 4);
+    }
+    return pluginId;
+  }
+
   void dispose() {
     stop();
   }
+
+  @visibleForTesting
+  String canonicalIdForTesting(String pluginId) => _canonicalId(pluginId);
 
   @visibleForTesting
   void resetForTesting() {
@@ -220,7 +307,8 @@ class PluginScheduleConfig {
               minute: json['endTime']['minute'] as int,
             )
           : null,
-      daysOfWeek: (json['daysOfWeek'] as List<dynamic>?)
+      daysOfWeek:
+          (json['daysOfWeek'] as List<dynamic>?)
               ?.map((d) => d as int)
               .toList() ??
           [1, 2, 3, 4, 5, 6, 7],

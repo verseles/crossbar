@@ -1,5 +1,5 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install uninstall precommit help
+	install install-linux uninstall precommit help
 
 .DEFAULT_GOAL := help
 
@@ -77,7 +77,13 @@ linux: ## Build for Linux (Flutter GUI + CLI + Tray Daemon)
 	@echo ""
 	@ls -lh $(LINUX_BUNDLE)/crossbar*
 
-install: ## Install Crossbar to ~/.local/ (Linux only)
+install: install-linux ## Install Crossbar to ~/.local/ (Linux only)
+
+install-linux: ## Run checks/builds and install Crossbar to ~/.local/ (Linux only)
+	@echo "Running checks and build before install..."
+	$(MAKE) analyze
+	$(MAKE) coverage
+	$(MAKE) linux
 	@echo "Installing Crossbar to $(INSTALL_DIR)..."
 	@mkdir -p $(INSTALL_DIR)/bin
 	@mkdir -p $(INSTALL_DIR)/share/crossbar
@@ -143,10 +149,10 @@ android: ## Build Android APK (and upload if configured)
 	@if command -v tdl >/dev/null 2>&1; then \
 		VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
 		if [ -n "$(CAPTION)" ]; then \
-			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
+			tdl up -t 6 -c 5891714407 --path=./build/app/outputs/apk/release/crossbar.apk \
 				--caption "\"<b>Crossbar v$$VERSION</b>\\n\\n$(CAPTION)\"" ; \
 		else \
-			tdl up -t 6 -c 3305021517 --path=./build/app/outputs/apk/release/crossbar.apk \
+			tdl up -t 6 -c 5891714407 --path=./build/app/outputs/apk/release/crossbar.apk \
 				--caption "\"<b>Crossbar v$$VERSION</b>\"" ; \
 		fi; \
 	fi

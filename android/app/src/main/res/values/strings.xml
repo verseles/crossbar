@@ -19,4 +19,5 @@
     </plurals>
     <string name="action_refresh">Refresh</string>
     <string name="action_stop">Stop</string>
+    <string name="action_edit_widget">Edit widget</string>
 </resources>
