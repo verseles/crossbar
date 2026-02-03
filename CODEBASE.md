@@ -1,120 +1,196 @@
 # Crossbar Codebase Guide
 
-Welcome to the **Crossbar** codebase. This document provides a high-level architectural overview, mapping the project's structure, core components, and design patterns to help developers navigate and contribute effectively.
+Welcome to the Crossbar codebase. This document provides a high-level architectural overview to help you navigate the monorepo and understand how the CLI, GUI, and plugin engine fit together.
 
 ---
 
-## 🏗 Architecture Overview
+## Architecture Overview
 
-Crossbar is built as a **Monorepo** using Flutter and Dart. It follows a modular architecture designed for maximum portability ("Write Once, Run Everywhere") across Linux, Windows, macOS, Android, and iOS.
+Crossbar is a monorepo with a Flutter application and multiple pure Dart packages. The build produces three binaries:
 
-### Core Modules (Packages)
+- `crossbar`: unified CLI + launcher
+- `crossbar-gui`: Flutter GUI application
+- `crossbar_tray_daemon`: Linux tray daemon for multi-icon mode
 
-The project is divided into specialized packages under the `packages/` directory:
+### Binaries and Entrypoints
 
-1.  **`crossbar_core`**: The "brain" of the system.
-    -   **Pure Dart**: No dependency on `dart:ui` or Flutter widgets.
-    -   **Models**: Defines `Plugin`, `PluginOutput`, `PluginConfig`, and `PluginAction`.
-    -   **Engine**: Contains `PluginManager` (discovery), `PluginExecutor` (routing), and `RefreshService` (lifecycle).
-    -   **Runners**: Implements embedded interpreters like `LuaRunner` (via `lua_dardo`). Other runners (YAML, Dart) reside in the main application's `lib/core/runners/`.
-2.  **`crossbar_cli`**: The command-line interface.
-    -   Compiles to a standalone native binary (`crossbar`).
-    -   Handles CLI commands (e.g., `crossbar cpu`, `crossbar list`).
-    -   Acts as a launcher for the GUI version.
-3.  **`crossbar_api`**: Helper library for plugin authors.
-    -   Provides type-safe wrappers and utilities for creating high-quality plugins in Dart.
+- `crossbar` (CLI + launcher)
+  - Build target: `packages/crossbar_cli/bin/crossbar.dart`
+  - Repository mirror: `bin/crossbar.dart` (same launcher logic)
+  - Behavior: no args launches GUI (minimized), `gui` launches visible GUI, other args run CLI commands
+- `crossbar-gui` (Flutter GUI)
+  - Entry: `lib/main.dart`
+- `crossbar_tray_daemon` (Linux only)
+  - Entry: `bin/crossbar_tray_daemon.dart`
+  - Spawns one daemon per plugin to create independent tray icons
+
+### Packages
+
+1. `crossbar_core`
+   - Pure Dart (no `dart:ui`)
+   - Shared models: `Plugin`, `PluginOutput`, `PluginConfig`
+   - Output parsing: `OutputParser` (JSON or BitBar)
+   - Embedded Lua runner: `LuaRunner` (via `lua_dardo`)
+   - Plugin API bridge: `CrossbarBridge` + `AndroidBridgeInterface`
+   - Core APIs: `SystemApi`, `NetworkApi`, `MediaApi`, `UtilsApi`
+
+2. `crossbar_cli`
+   - CLI package compiled into the `crossbar` binary
+   - Command registry in `packages/crossbar_cli/lib/src/commands`
+   - CLI handler: `packages/crossbar_cli/lib/src/cli_handler.dart`
+   - CLI-only plugin discovery: `PluginManagerCli`
+   - JSON/XML output helpers in `packages/crossbar_cli/lib/src/cli_utils.dart`
+
+3. `crossbar_api`
+   - SDK for authors of compiled Dart plugins
+   - Type-safe API surface for system/network/utility access
+   - See `packages/crossbar_api/README.md`
 
 ### Main Application (Flutter)
 
-The root project is a Flutter application that provides:
--   **GUI**: Material 3 interface for managing plugins and settings.
--   **Tray System**: Advanced tray management, including the **Multi-Icon SNI architecture** for Linux (ADR-012).
--   **Mobile Integration**: Native bridges for Android and iOS home screen widgets.
+The root Flutter app provides the GUI, tray integration, widget updates, and background services. It depends on `crossbar_core` for models and shared APIs.
 
 ---
 
-## 🚀 Plugin System & Runners
+## Plugin System and Runners
 
-Crossbar supports multiple types of plugins, each handled by a specialized `Runner`:
+### Discovery and IDs
 
-| Runner | Language | Platform | Portability | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **LuaRunner** | `.lua` | All | ⭐⭐⭐⭐⭐ | Embedded (zero dependencies). Recommended for universal plugins. |
-| **Declarative** | `.yaml` | All | ⭐⭐⭐⭐⭐ | DSL-based. Great for simple status/menu plugins. |
-| **ScriptRunner** | `.sh`, `.py`, `.js` | Desktop | ⭐⭐⭐ | Uses host interpreters. Doesn't work on Mobile. |
-| **DartRunner** | `.dart` | Desktop/AOT | ⭐⭐⭐⭐ | High performance. |
+- Manager: `lib/core/plugin_manager.dart`
+- Desktop path: `~/.crossbar/plugins`
+- Mobile path: app documents directory + `/plugins` (see `lib/core/paths/platform_paths_flutter.dart`)
+- Discovery is recursive and groups files by directory + base name
+- Refresh interval parsed from filename suffix (e.g. `cpu.10s.sh`)
+- Plugin ID rules:
+  - Root files: filename (e.g. `cpu.10s.sh`)
+  - Subdirectory groups: directory name (e.g. `plugins/battery/battery.30s.lua` -> `battery`)
 
-### Plugin Discovery
-Plugins are discovered in `~/.crossbar/plugins/` (Linux/macOS/Windows) or internal storage (Android/iOS). The discovery logic supports:
--   **Recursive scanning**: Plugins can be grouped in subdirectories.
--   **Shebang detection**: Identifies interpreters for script-based plugins.
--   **Versioning**: Handles update cycles (e.g., `cpu.10s.sh`).
+### Execution and Runners
 
----
+- Router: `lib/core/plugin_executor.dart`
+- Runners:
+  - `LuaRunner` (embedded, all platforms) in `crossbar_core`
+  - `DeclarativeRunner` (YAML) in `lib/core/runners/declarative_runner.dart`
+  - `ScriptRunner` (bash/python/node/go/rust/dart run) in `lib/core/script_runner.dart`
+  - `DartRunner` (dart_eval) exists in `lib/core/runners/dart_runner.dart`, but the executor currently routes `.dart` to `ScriptRunner` for full `dart:io` support
 
-## 📱 Platform Specifics
+### Output Parsing
 
-### Mobile (Android & iOS)
--   **Widgets**: Integration via `home_widget` package.
--   **Background**: Periodic execution via `WorkManager` (Android) and `WidgetKit` (iOS).
--   **Native Bridges**: `AndroidNativeBridge` provides access to system info (Battery, Uptime) when standard files are restricted by SELinux (ADR-010).
+- `OutputParser` in `crossbar_core` accepts JSON or BitBar/Argos text
+- Nested menus are supported via indented `--` prefixes
+- `PluginOutput` includes `trayIcon` for Freedesktop theme icons (Linux)
 
-### Linux (Desktop)
--   **Multi-Icon Tray (ADR-012)**: Uses a daemon-based approach (`bin/crossbar_tray_daemon.dart`) to spawn multiple independent tray icons on GNOME/KDE, bypassing `libappindicator` limitations. Each plugin can have its own dedicated icon in the system tray.
+### Configuration
 
----
-
-## 🛠 Key Services
-
--   **`RefreshService`**: The unified engine that triggers plugin executions based on timers, manual refreshes, or system events.
--   **`PluginConfigService`**: Manages plugin settings.
-    -   **Schemas**: Uses `.schema.json` to generate dynamic configuration UIs.
-    -   **Security**: Stores passwords/secrets in the system keyring/secure storage.
--   **`SchedulerService`**: Manages background task scheduling for different platforms.
--   **`MarketplaceService`**: Handles searching and installing plugins from the GitHub-based marketplace.
--   **`SamplePluginsService`**: Provides a set of built-in example plugins for users to explore and install.
+- Schema: `<plugin>.schema.json` next to the plugin file
+- GUI values: `~/.crossbar/configs/<pluginId>.json` + secure storage for passwords
+- CLI values: `~/.crossbar/config/<pluginId>.json` (plain JSON, no secure storage)
 
 ---
 
-## 📂 Directory Structure
+## Services and Runtime Flow
+
+### Startup (GUI)
+
+Entry: `lib/main.dart`
+
+1. Initialize Flutter and inject `AndroidNativeBridge` into `CrossbarBridge`
+2. Initialize `LoggerService`, `WindowService`, `SettingsService`
+3. Start `IpcServer` on `localhost:48291`
+4. Discover plugins via `PluginManager`
+5. Initialize `TrayService`
+6. Start `SchedulerService` (which uses `RefreshService`)
+7. Initialize `HotReloadService`
+
+### Key Services
+
+- `RefreshService`: single source of truth for plugin execution + output cache
+- `SchedulerService`: schedules periodic runs and delegates execution to `RefreshService`
+- `TrayService`: unified and separate tray modes
+- `WidgetService`: HomeWidget sync for Android/iOS widgets
+- `BackgroundService`: WorkManager-based background updates on Android
+- `PluginConfigService`: schema-based config persistence and secure storage
+- `MarketplaceService`: plugin discovery/installation via GitHub
+- `IpcServer`: local HTTP control surface for UI and external tools
+- `HotReloadService`: file watcher for plugins/config changes
+- `NotificationService`: system notifications + Android foreground service channel
+- `WindowService`: desktop window lifecycle
+- `LoggerService`: rotating log files under `~/.crossbar/logs`
+
+---
+
+## Tray Architecture
+
+- `TrayService` selects the backend via `HybridTrayBackend`
+- On Linux, the active backend is `ProcessSpawnTrayBackend` (daemon-per-icon)
+- Fallback for other platforms: `LegacyTrayBackend` (single icon via `tray_manager`)
+- `SniMultiTrayBackend` exists for StatusNotifierItem support but is not active in the hybrid selection
+- Linux daemon: `crossbar_tray_daemon` communicates via stdin/stdout JSON
+
+---
+
+## Platform Notes
+
+### Android
+
+- MethodChannel bridge: `lib/core/api/android_native_bridge.dart`
+- Native implementations in `android/app/src/main/kotlin/com/verseles/crossbar`
+- Widgets: `CrossbarWidgetSmall/Medium/Large` + XML layouts
+- Background updates: `WorkManager` via `BackgroundService`
+
+### iOS
+
+- Widget extension: `ios/CrossbarWidget/CrossbarWidget.swift`
+- HomeWidget app group: `group.crossbar.widgets`
+
+### Desktop
+
+- Linux `.desktop` file: `linux/com.verseles.crossbar.desktop`
+- Tray icons in `assets/icons/`
+
+---
+
+## Directory Structure
 
 ```text
 crossbar/
-├── bin/                    # Unified Entrypoints
-│   ├── crossbar.dart       # CLI + Launcher
-│   └── crossbar_tray_daemon.dart # Linux Multi-Icon Tray Daemon
-├── packages/
-│   ├── crossbar_core/      # Shared Business Logic & Lua Runner (Pure Dart)
-│   ├── crossbar_cli/       # Standalone CLI Executable
-│   └── crossbar_api/       # Developer SDK for Dart Plugins
+├── bin/
+│   ├── crossbar.dart
+│   └── crossbar_tray_daemon.dart
 ├── lib/
-│   ├── main.dart           # Flutter GUI Entrypoint
-│   ├── services/           # Singleton Services (Tray, Refresh, Config, Marketplace)
-│   ├── ui/                 # Flutter Widgets & Tabs
-│   └── core/               # App-specific core logic
-│       ├── runners/        # Declarative and Dart Runners
-│       └── bridge/         # Native bridges (Android)
-├── android/                # Native Android Kotlin/XML (Widgets)
-├── ios/                    # Native iOS Swift (WidgetKit)
-├── linux/                  # GTK/Runner C++ logic
-├── plugins/                # Bundled example plugins (7+ languages)
-├── test/                   # Comprehensive Test Suite (Unit, Widget, Integration)
-└── docs/                   # ADRs, Specifications, and Guides
+│   ├── main.dart
+│   ├── core/
+│   ├── services/
+│   ├── ui/
+│   └── cli/
+├── packages/
+│   ├── crossbar_core/
+│   ├── crossbar_cli/
+│   └── crossbar_api/
+├── android/
+├── ios/
+├── linux/
+├── macos/
+├── windows/
+├── plugins/
+├── docs/
+├── test/
+└── Makefile
 ```
 
 ---
 
-## 🧪 Testing & Quality
+## Testing and Quality
 
--   **Goal**: >60% coverage (excluding generated code).
--   **CI/CD**: GitHub Actions validates builds for 5 platforms on every push.
--   **Pre-commit**: Always run `make analyze` and `make coverage` before committing.
--   **Hardware Tags**: Tests that modify system state (volume, wifi) are tagged with `hardware` and should be excluded in restricted environments.
+- Static analysis: `make analyze`
+- Tests + coverage: `make coverage` (coverage target 60%)
+- Builds: `make linux`, `make android`
+- Hardware-affecting tests are tagged `hardware` and should be excluded locally
 
 ---
 
-## 📜 Development Guidelines
+## Documentation
 
--   **Portability First**: Prefer Lua for new plugins to ensure they work on mobile.
--   **Async/Sync**: The core uses `Future` (Async), but provides `Sync` variants for embedded interpreters to ensure low latency.
--   **ADRs**: Architecture decisions are documented in `AGENTS.md` and `docs/archive/`. Always check them before introducing major changes.
+- Architectural decisions: `ADR.md`
+- Operational rules and context: `AGENTS.md`
+- API reference and plugin guides: `docs/`
