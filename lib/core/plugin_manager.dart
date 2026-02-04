@@ -21,6 +21,7 @@ class PluginManager {
   final PluginExecutor _pluginExecutor = PluginExecutor();
   final PluginConfigService _configService = PluginConfigService();
   static const int maxConcurrent = 10;
+  int _emptyDiscoveryStreak = 0;
 
   static const List<String> supportedLanguages = [
     'bash',
@@ -85,21 +86,29 @@ class PluginManager {
   }
 
   Future<void> discoverPlugins() async {
-    _plugins.clear();
-
     final pluginsDirPath = await pluginsDirectory;
     final pluginsDir = Directory(pluginsDirPath);
 
     if (!await pluginsDir.exists()) {
+      if (_plugins.isNotEmpty) {
+        _emptyDiscoveryStreak++;
+        if (_emptyDiscoveryStreak < 2) {
+          return;
+        }
+      }
+      _emptyDiscoveryStreak = 0;
+      _plugins.clear();
       return;
     }
 
     // Map to group plugins by their directory and base name
     // Key: directory_path:base_name
     final groups = <String, List<File>>{};
+    var foundFiles = 0;
 
     await for (final entity in pluginsDir.list(recursive: true)) {
       if (entity is File && _isValidPluginFile(entity.path)) {
+        foundFiles++;
         final dir = path.dirname(entity.path);
         final fileName = path.basename(entity.path);
 
@@ -112,6 +121,8 @@ class PluginManager {
       }
     }
 
+    final discovered = <Plugin>[];
+
     for (final entry in groups.entries) {
       final files = entry.value;
       if (files.isEmpty) continue;
@@ -119,9 +130,25 @@ class PluginManager {
       // Create a single plugin representing this group
       final plugin = await _createPluginFromGroup(files);
       if (plugin != null) {
-        _plugins.add(plugin);
+        discovered.add(plugin);
       }
     }
+
+    if (_plugins.isNotEmpty) {
+      final emptyDiscovery =
+          foundFiles == 0 || (foundFiles > 0 && discovered.isEmpty);
+      if (emptyDiscovery) {
+        _emptyDiscoveryStreak++;
+        if (_emptyDiscoveryStreak < 2) {
+          return;
+        }
+      }
+    }
+
+    _emptyDiscoveryStreak = 0;
+    _plugins
+      ..clear()
+      ..addAll(discovered);
   }
 
   String _extractPluginBaseName(String fileName) {
@@ -479,5 +506,6 @@ class PluginManager {
 
   void clear() {
     _plugins.clear();
+    _emptyDiscoveryStreak = 0;
   }
 }

@@ -103,7 +103,7 @@ class LuaRunner {
     _registerConfigTable(lua, configValues);
     _registerConfigGet(lua, configValues);
     _registerStorage(lua, pluginId);
-    _registerWeb(lua);
+    _registerWeb(lua, pluginId);
     _registerSyncNoArgFunc(lua, 'platform', () => _bridge.platform);
     _registerSyncNoArgFunc(lua, 'homeDir', () => _bridge.homeDir);
     _registerSyncNoArgBool(lua, 'isMobile', () => _bridge.isMobile);
@@ -336,7 +336,7 @@ class LuaRunner {
     lua.setField(-2, 'execResult');
   }
 
-  void _registerWeb(LuaState lua) {
+  void _registerWeb(LuaState lua, String pluginId) {
     lua.pushDartFunction((ls) {
       final url = ls.getTop() >= 1 ? ls.toStr(1) : null;
       if (url == null || url.isEmpty) {
@@ -361,18 +361,26 @@ class LuaRunner {
       }
 
       if (_bridge.isMobile) {
-        final cacheKey = _buildWebCacheKey(
+        final cacheKey = '$pluginId|${_buildWebCacheKey(
           url,
           method: method,
           headers: headers,
           body: body,
           timeout: timeout,
           raw: raw,
-        );
+        )}';
 
-        final cached = _webCache[cacheKey];
+        var cached = _webCache[cacheKey];
+        if (cached == null) {
+          cached = _readWebCache(pluginId, cacheKey);
+          if (cached != null) {
+            _webCache[cacheKey] = cached;
+          }
+        }
+
         if (!_webInFlight.contains(cacheKey)) {
           _webInFlight.add(cacheKey);
+          final cachedSnapshot = cached;
           _bridge
               .web(
             url,
@@ -382,8 +390,14 @@ class LuaRunner {
             timeout: timeout ?? 30,
           )
               .then((response) {
-            _webCache[cacheKey] = response;
+            if (_isSuccessfulWebResponse(response)) {
+              _webCache[cacheKey] = response;
+              _writeWebCache(pluginId, cacheKey, response);
+            } else if (cachedSnapshot == null) {
+              _webCache[cacheKey] = response;
+            }
           }).catchError((e) {
+            if (cachedSnapshot != null) return;
             _webCache[cacheKey] = {
               'error': true,
               'message': e.toString(),
@@ -498,6 +512,57 @@ class LuaRunner {
     } catch (_) {
       return value.toString();
     }
+  }
+
+  String _resolveWebCacheBaseDir() {
+    final appDir = _bridge.appDataDir;
+    if (appDir != null && appDir.isNotEmpty && appDir != '~') {
+      return appDir;
+    }
+    if (_bridge.isMobile) {
+      return Directory.systemTemp.path;
+    }
+    return _bridge.homeDir;
+  }
+
+  File _webCacheFile(String pluginId, String cacheKey) {
+    final safeId = _sanitizePluginId(pluginId.isEmpty ? 'unknown' : pluginId);
+    final baseDir = _resolveWebCacheBaseDir();
+    final dir = Directory(path.join(baseDir, 'crossbar_web_cache', safeId));
+    final fileName = _bridge.hash(cacheKey);
+    return File(path.join(dir.path, '$fileName.json'));
+  }
+
+  dynamic _readWebCache(String pluginId, String cacheKey) {
+    final file = _webCacheFile(pluginId, cacheKey);
+    if (!file.existsSync()) return null;
+    try {
+      return jsonDecode(file.readAsStringSync());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _writeWebCache(String pluginId, String cacheKey, dynamic value) {
+    try {
+      final file = _webCacheFile(pluginId, cacheKey);
+      final dir = file.parent;
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+      file.writeAsStringSync(jsonEncode(value));
+    } catch (_) {
+      // Ignore cache write errors
+    }
+  }
+
+  bool _isSuccessfulWebResponse(dynamic response) {
+    if (response is Map) {
+      if (response['error'] == true) return false;
+      final status = response['status'];
+      if (status is int && status >= 400) return false;
+    }
+    return true;
   }
 
   void _registerStorage(LuaState lua, String pluginId) {

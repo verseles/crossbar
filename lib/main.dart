@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:crossbar_core/crossbar_core.dart';
+import 'package:path_provider/path_provider.dart';
 import 'core/api/android_native_bridge.dart';
 import 'core/plugin_manager.dart';
 import 'services/background_service.dart';
@@ -45,6 +45,11 @@ void main(List<String> args) async {
     // Inject platform-specific bridge implementation
     if (Platform.isAndroid) {
       CrossbarBridge.instance.androidBridge = AndroidNativeBridge();
+    }
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      final appDir = await getApplicationDocumentsDirectory();
+      CrossbarBridge.instance.appDataDir = appDir.path;
     }
 
     // Register Android widget refresh handler EARLY

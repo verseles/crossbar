@@ -25,6 +25,12 @@ class CrossbarBridge {
   AndroidBridgeInterface _androidBridge =
       AndroidNativeBridge(); // Default to stub
 
+  String? _appDataDir;
+
+  /// Optional app-private data directory (mobile).
+  set appDataDir(String? value) => _appDataDir = value;
+  String? get appDataDir => _appDataDir;
+
   /// Inject a platform-specific implementation (e.g. from Flutter)
   set androidBridge(AndroidBridgeInterface bridge) => _androidBridge = bridge;
 

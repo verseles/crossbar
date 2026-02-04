@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../core/plugin_executor.dart';
@@ -34,6 +37,10 @@ void callbackDispatcher() {
 
 /// Updates widgets in background without full app initialization
 Future<void> _updateWidgetsInBackground() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDir = await getApplicationDocumentsDirectory();
+  CrossbarBridge.instance.appDataDir = appDir.path;
+
   // Initialize HomeWidget
   await HomeWidget.setAppGroupId('group.crossbar.widgets');
 
