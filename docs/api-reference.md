@@ -2,7 +2,7 @@
 
 Complete documentation for all Crossbar CLI commands.
 
-**Version**: 1.7.2
+**Version**: 1.8.0
 **Last Updated**: January 2026
 
 ## Table of Contents

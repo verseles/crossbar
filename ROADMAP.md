@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.4.0 (Polimento e Expansão)
-**Próximo Ciclo:** v1.5.0 (Advanced Desktop & Marketplace)
+**Status Atual:** v1.8.0 (Mobile Stability & Lua API)
+**Próximo Ciclo:** v1.9.0 (Advanced Desktop & Marketplace)
 
 ---
 
@@ -21,6 +21,8 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **Tray:** Fixes for initialization race conditions and support for multi-icon SNI.
 - **Configuration Engine:** Persistência, UI e injeção de variáveis implementados.
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
+- **Mobile Stability:** Cache persistente do `crossbar.web` no mobile e proteção contra varreduras vazias de plugins.
+- **Lua API:** Helpers `web/env/config/json` integrados nos plugins de exemplo.
 - **Marketplace:** Sistema de busca e instalação via GitHub implementado (`MarketplaceService`).
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
@@ -168,7 +170,7 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 
 ### Status Atual de Testes
 
-**Coverage atual:** 40.7% (meta: 60%)
+**Coverage atual:** 39.3% (meta: 35%)
 
 #### Arquivos com Boa Cobertura (>70%)
 

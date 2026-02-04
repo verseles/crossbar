@@ -6,6 +6,7 @@ Best practices for creating plugins that work across platforms.
 
 | Plugin Type      | Linux | macOS | Windows | Android | iOS |
 | ---------------- | ----- | ----- | ------- | ------- | --- |
+| Lua              | ✅    | ✅    | ✅      | ✅      | ✅  |
 | YAML             | ✅    | ✅    | ✅      | ✅      | ✅  |
 | Dart Interpreted | ✅    | ✅    | ✅      | ✅      | ✅  |
 | Script (.sh)     | ✅    | ✅    | ⚠️      | ❌      | ❌  |
@@ -125,6 +126,12 @@ These require desktop:
 - `crossbar.clipboard()`, `setClipboard()`
 - `crossbar.notify()` (on mobile, use push notifications instead)
 - `crossbar.openUrl()`, `openFile()`
+
+### Mobile Web Cache
+
+On mobile, Lua `crossbar.web()` returns the last successful response and
+refreshes in the background. If there is no cached value yet, it may return
+an error with `message = "Fetching..."` on the first call.
 
 ### Platform-Specific Results
 

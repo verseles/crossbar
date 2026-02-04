@@ -30,6 +30,7 @@ Crossbar plugins are simple scripts that output information in a specific format
 - **Dart** (.dart)
 - **Go** (.go)
 - **Rust** (.rs)
+- **Lua** (.lua)
 
 Plugins are executed periodically based on the interval specified in their filename.
 

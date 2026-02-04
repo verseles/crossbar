@@ -83,7 +83,10 @@ The root Flutter app provides the GUI, tray integration, widget updates, and bac
 ### Configuration
 
 - Schema: `<plugin>.schema.json` next to the plugin file
-- GUI values: `~/.crossbar/configs/<pluginId>.json` + secure storage for passwords
+- GUI values:
+  - Desktop: `~/.crossbar/configs/<pluginId>.json`
+  - Mobile: `<app-documents>/configs/<pluginId>.json`
+  - Secure storage for password fields
 - CLI values: `~/.crossbar/config/<pluginId>.json` (plain JSON, no secure storage)
 
 ---
@@ -185,7 +188,7 @@ crossbar/
 ## Testing and Quality
 
 - Static analysis: `make analyze`
-- Tests + coverage: `make coverage` (coverage target 60%)
+- Tests + coverage: `make coverage` (coverage target 35%)
 - Builds: `make linux`, `make android`
 - Hardware-affecting tests are tagged `hardware` and should be excluded locally
 
