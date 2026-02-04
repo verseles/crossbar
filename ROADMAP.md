@@ -163,7 +163,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 **Objetivo:** Permitir título customizado por usuário com fallback automático para o nome padrão (UI e widgets).
 
-- [x] Adicionar override de título salvo por usuário e propagar para UI/Widgets. (Commit hash: pending)
+- [x] Adicionar override de título salvo por usuário e propagar para UI/Widgets. (Commit hash: 969c394)
 
 ## 🧪 Estratégia de Qualidade
 
