@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:home_widget/home_widget.dart';
-
 import 'package:crossbar_core/crossbar_core.dart';
+import 'package:home_widget/home_widget.dart';
 import 'logger_service.dart';
 import 'refresh_service.dart';
 
@@ -272,7 +271,7 @@ class WidgetDataBuilder {
     return WidgetDataBuilder(
       pluginId: output.pluginId,
       icon: output.icon,
-      title: output.pluginId,
+      title: output.title ?? output.pluginId,
       value: output.text,
       color: output.color?.toRadixString(16),
       deepLink: 'crossbar://plugin/${output.pluginId}',

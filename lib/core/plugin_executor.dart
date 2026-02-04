@@ -37,21 +37,21 @@ class PluginExecutor {
 
     switch (runnerType) {
       case RunnerType.declarative:
-        return _runDeclarative(plugin);
+        return _applyTitle(plugin, await _runDeclarative(plugin));
 
       case RunnerType.dart:
-        return _runDart(plugin);
+        return _applyTitle(plugin, await _runDart(plugin));
 
       case RunnerType.lua:
-        return _runLua(plugin, additionalEnv);
+        return _applyTitle(plugin, await _runLua(plugin, additionalEnv));
 
       case RunnerType.script:
-        return _runScript(plugin, additionalEnv);
+        return _applyTitle(plugin, await _runScript(plugin, additionalEnv));
 
       case RunnerType.unknown:
-        return PluginOutput.error(
-          plugin.id,
-          'Unknown plugin type: ${plugin.path}',
+        return _applyTitle(
+          plugin,
+          PluginOutput.error(plugin.id, 'Unknown plugin type: ${plugin.path}'),
         );
     }
   }
@@ -225,6 +225,14 @@ class PluginExecutor {
       'go',
       'rs',
     ].contains(ext);
+  }
+
+  PluginOutput _applyTitle(Plugin plugin, PluginOutput output) {
+    final title = output.title?.trim();
+    if (title != null && title.isNotEmpty) {
+      return output;
+    }
+    return output.copyWith(title: plugin.displayName);
   }
 }
 

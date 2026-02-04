@@ -159,6 +159,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ---
 
+## 🧩 Epic v1.8.1: Plugin Display Titles (Concluído)
+
+**Objetivo:** Permitir título customizado por usuário com fallback automático para o nome padrão (UI e widgets).
+
+- [x] Adicionar override de título salvo por usuário e propagar para UI/Widgets. (Commit hash: pending)
+
 ## 🧪 Estratégia de Qualidade
 
 Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:

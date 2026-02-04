@@ -2,8 +2,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crossbar_core/crossbar_core.dart';
 import 'package:crossbar/services/plugin_config_service.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,7 +39,9 @@ void main() {
       });
 
       test('creates configs directory if not exists', () async {
-        final newTempDir = await Directory.systemTemp.createTemp('crossbar_new_');
+        final newTempDir = await Directory.systemTemp.createTemp(
+          'crossbar_new_',
+        );
         final configsPath = '${newTempDir.path}/configs';
 
         final newService = PluginConfigService();
@@ -85,23 +87,12 @@ void main() {
           icon: '🔐',
           configRequired: 'optional',
           settings: [
-            Setting(
-              key: 'api_key',
-              label: 'API Key',
-              type: 'text',
-            ),
-            Setting(
-              key: 'password',
-              label: 'Password',
-              type: 'password',
-            ),
+            Setting(key: 'api_key', label: 'API Key', type: 'text'),
+            Setting(key: 'password', label: 'Password', type: 'password'),
           ],
         );
 
-        final values = {
-          'api_key': 'abc123',
-          'password': 'secret123',
-        };
+        final values = {'api_key': 'abc123', 'password': 'secret123'};
 
         await service.saveValues('secure-test.sh', values, schema: schema);
 
@@ -125,9 +116,7 @@ void main() {
           description: 'Test',
           icon: '',
           configRequired: 'optional',
-          settings: [
-            Setting(key: 'secret', label: 'Secret', type: 'password'),
-          ],
+          settings: [Setting(key: 'secret', label: 'Secret', type: 'password')],
         );
 
         // Pre-populate secure storage
@@ -140,8 +129,7 @@ void main() {
         await configFile.writeAsString('{"other": "value"}');
 
         // Load with schema - should read from secure storage
-        final loaded =
-            await service.loadValues('load-test.sh', schema: schema);
+        final loaded = await service.loadValues('load-test.sh', schema: schema);
 
         expect(loaded['secret'], equals('my-secret'));
         expect(loaded['other'], equals('value'));
@@ -188,25 +176,26 @@ void main() {
           description: 'Test',
           icon: '',
           configRequired: 'optional',
-          settings: [
-            Setting(key: 'pass', label: 'Pass', type: 'password'),
-          ],
+          settings: [Setting(key: 'pass', label: 'Pass', type: 'password')],
         );
 
-        await service.saveValues('delete-secure.sh', {'pass': 'secret'},
-            schema: schema);
+        await service.saveValues('delete-secure.sh', {
+          'pass': 'secret',
+        }, schema: schema);
 
         expect(
-          mockSecureStorage.storage
-              .containsKey('crossbar_plugin_delete-secure.sh_pass'),
+          mockSecureStorage.storage.containsKey(
+            'crossbar_plugin_delete-secure.sh_pass',
+          ),
           isTrue,
         );
 
         await service.deleteValues('delete-secure.sh', schema: schema);
 
         expect(
-          mockSecureStorage.storage
-              .containsKey('crossbar_plugin_delete-secure.sh_pass'),
+          mockSecureStorage.storage.containsKey(
+            'crossbar_plugin_delete-secure.sh_pass',
+          ),
           isFalse,
         );
       });
@@ -244,8 +233,7 @@ void main() {
           'timeout': '30',
         });
 
-        final envVars =
-            await service.getAsEnvironmentVariables('env-test.sh');
+        final envVars = await service.getAsEnvironmentVariables('env-test.sh');
 
         expect(envVars['CROSSBAR_PLUGIN_API_KEY'], equals('abc123'));
         expect(envVars['CROSSBAR_PLUGIN_TIMEOUT'], equals('30'));
@@ -257,11 +245,24 @@ void main() {
           'some_other_key': 'value2',
         });
 
-        final envVars =
-            await service.getAsEnvironmentVariables('upper-test.sh');
+        final envVars = await service.getAsEnvironmentVariables(
+          'upper-test.sh',
+        );
 
         expect(envVars['CROSSBAR_PLUGIN_MYKEY'], equals('value1'));
         expect(envVars['CROSSBAR_PLUGIN_SOME_OTHER_KEY'], equals('value2'));
+      });
+
+      test('excludes custom title from environment variables', () async {
+        await service.saveValues('env-title.sh', {
+          PluginConfigService.customTitleKey: 'Custom Title',
+          'api_key': 'abc123',
+        });
+
+        final envVars = await service.getAsEnvironmentVariables('env-title.sh');
+
+        expect(envVars.containsKey('CROSSBAR_PLUGIN__CROSSBAR_TITLE'), isFalse);
+        expect(envVars['CROSSBAR_PLUGIN_API_KEY'], equals('abc123'));
       });
 
       test('includes password values', () async {
@@ -270,9 +271,7 @@ void main() {
           description: 'Test',
           icon: '',
           configRequired: 'optional',
-          settings: [
-            Setting(key: 'token', label: 'Token', type: 'password'),
-          ],
+          settings: [Setting(key: 'token', label: 'Token', type: 'password')],
         );
 
         // Pre-populate secure storage

@@ -60,6 +60,36 @@ void main() {
       expect(plugin.refreshInterval, const Duration(hours: 1));
     });
 
+    test('displayName uses config name when available', () {
+      const config = PluginConfig(
+        name: 'CPU Monitor',
+        description: '',
+        icon: '',
+        configRequired: 'optional',
+        settings: [],
+      );
+      const plugin = Plugin(
+        id: 'cpu.10s.sh',
+        path: '/path/to/cpu.10s.sh',
+        interpreter: 'bash',
+        refreshInterval: Duration(seconds: 10),
+        config: config,
+      );
+
+      expect(plugin.displayName, 'CPU Monitor');
+    });
+
+    test('displayName formats id when config name is missing', () {
+      const plugin = Plugin(
+        id: 'my-plugin.5m.py',
+        path: '/path/to/my-plugin.5m.py',
+        interpreter: 'python3',
+        refreshInterval: Duration(minutes: 5),
+      );
+
+      expect(plugin.displayName, 'My Plugin');
+    });
+
     test('serializes to JSON', () {
       const plugin = Plugin(
         id: 'test.10s.sh',

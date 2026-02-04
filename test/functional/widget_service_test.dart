@@ -90,6 +90,21 @@ void main() {
       expect(builder.deepLink, equals('crossbar://plugin/disk-space'));
     });
 
+    test('fromPluginOutput uses title when available', () {
+      const output = PluginOutput(
+        pluginId: 'disk-space',
+        title: 'Disk Usage',
+        text: '250 GB free',
+        icon: '💾',
+        hasError: false,
+        menu: [],
+      );
+
+      final builder = WidgetDataBuilder.fromPluginOutput(output);
+
+      expect(builder.title, equals('Disk Usage'));
+    });
+
     test('fromPluginOutput handles null icon', () {
       const output = PluginOutput(
         pluginId: 'test',
@@ -226,11 +241,14 @@ void main() {
     });
 
     test('has correct Android widget names', () {
-      expect(WidgetService.androidWidgetNames, containsAll([
-        'CrossbarWidgetSmall',
-        'CrossbarWidgetMedium',
-        'CrossbarWidgetLarge',
-      ]));
+      expect(
+        WidgetService.androidWidgetNames,
+        containsAll([
+          'CrossbarWidgetSmall',
+          'CrossbarWidgetMedium',
+          'CrossbarWidgetLarge',
+        ]),
+      );
     });
   });
 
@@ -252,10 +270,7 @@ void main() {
   group('WidgetDataBuilder - Edge Cases', () {
     test('handles very long text values', () {
       final longText = 'A' * 1000;
-      final builder = WidgetDataBuilder(
-        pluginId: 'long-text',
-        value: longText,
-      );
+      final builder = WidgetDataBuilder(pluginId: 'long-text', value: longText);
 
       expect(builder.value, equals(longText));
       expect(builder.value!.length, equals(1000));
@@ -305,4 +320,3 @@ void main() {
     });
   });
 }
-

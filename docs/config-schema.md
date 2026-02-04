@@ -27,6 +27,12 @@ Crossbar plugins can declare their configuration in a JSON file. When present, C
 - Automatic validation and type checking
 - Secure storage for sensitive values (passwords)
 
+**Display Title Override**:
+
+- Users can optionally set a custom display title in the plugin configuration dialog.
+- This overrides the default plugin name in widgets and UI lists.
+- If left empty, Crossbar uses the plugin's default name.
+
 ### Configuration File Location
 
 Configuration files are placed alongside the plugin file:
@@ -69,7 +75,7 @@ plugin.10s.py.schema.json
 
 | Property          | Type   | Required | Description                      |
 | ----------------- | ------ | -------- | -------------------------------- |
-| `name`            | string | Yes      | Plugin display name              |
+| `name`            | string | Yes      | Plugin display name (UI/widgets) |
 | `version`         | string | No       | Plugin version (semver)          |
 | `description`     | string | No       | Plugin description               |
 | `author`          | string | No       | Author name or email             |

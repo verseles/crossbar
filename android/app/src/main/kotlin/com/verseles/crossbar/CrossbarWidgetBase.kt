@@ -234,7 +234,12 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             
             val icon = pluginData.optString("icon", "📊")
             val text = pluginData.optString("text", "--")
-            val title = pluginData.optString("pluginId", "Plugin")
+            val rawTitle = pluginData.optString("title", "")
+            val title = if (rawTitle.isNotBlank()) {
+                rawTitle
+            } else {
+                pluginData.optString("pluginId", "Plugin")
+            }
             val tooltip = pluginData.optString("tooltip", "")
 
             views.setTextViewText(R.id.widget_icon, icon)
@@ -307,7 +312,12 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                     
                     val icon = pluginData.optString("icon", "📊")
                     val text = pluginData.optString("text", "--")
-                    val title = pluginData.optString("pluginId", "Plugin")
+                    val rawTitle = pluginData.optString("title", "")
+                    val title = if (rawTitle.isNotBlank()) {
+                        rawTitle
+                    } else {
+                        pluginData.optString("pluginId", "Plugin")
+                    }
 
                     views.setViewVisibility(itemContainerIds[index], View.VISIBLE)
                     views.setTextViewText(iconIds[index], icon)

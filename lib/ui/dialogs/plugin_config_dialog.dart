@@ -1,7 +1,8 @@
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import 'package:crossbar_core/crossbar_core.dart';
+import '../../services/plugin_config_service.dart';
 import '../widgets/config_fields/config_field.dart';
 
 class PluginConfigDialog extends StatefulWidget {
@@ -126,9 +127,7 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.config.name.isNotEmpty
-                      ? widget.config.name
-                      : widget.plugin.id,
+                  _resolveDialogTitle(),
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 if (widget.config.description.isNotEmpty)
@@ -151,37 +150,80 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
   }
 
   Widget _buildForm(BuildContext context) {
+    final titleField = _buildTitleField(context);
+
     if (widget.config.settings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.settings_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          titleField,
+          const SizedBox(height: 24),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.settings_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.noConfigurationRequired,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context)!.noConfigurationRequired,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
-    return ConfigFormBuilder(
-      settings: widget.config.settings,
-      values: _values,
-      onFieldChanged: (entry) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleField,
+        const SizedBox(height: 24),
+        ConfigFormBuilder(
+          settings: widget.config.settings,
+          values: _values,
+          onFieldChanged: (entry) {
+            setState(() {
+              _values[entry.key] = entry.value;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleField(BuildContext context) {
+    return TextFormField(
+      initialValue: _values[PluginConfigService.customTitleKey] ?? '',
+      decoration: InputDecoration(
+        labelText: 'Display Title (optional)',
+        hintText: widget.plugin.displayName,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (value) {
         setState(() {
-          _values[entry.key] = entry.value;
+          _values[PluginConfigService.customTitleKey] = value;
         });
       },
     );
+  }
+
+  String _resolveDialogTitle() {
+    final custom = _values[PluginConfigService.customTitleKey]?.trim();
+    if (custom != null && custom.isNotEmpty) {
+      return custom;
+    }
+    if (widget.config.name.isNotEmpty) {
+      return widget.config.name;
+    }
+    return widget.plugin.displayName;
   }
 
   Widget _buildActions(BuildContext context) {
@@ -277,7 +319,10 @@ class PluginInfoDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(plugin.id, style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                plugin.displayName,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               Text(
                 '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(

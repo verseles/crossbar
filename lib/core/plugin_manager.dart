@@ -216,12 +216,15 @@ class PluginManager {
     final id = isRoot ? fileName : path.basename(dir);
 
     final config = await _loadPluginConfig(primaryVariant.path);
+    final configValues = await _configService.loadValues(id, schema: config);
+    final customTitle = _configService.getCustomTitle(configValues);
 
     return Plugin(
       id: id,
       path: primaryVariant.path,
       interpreter: primaryVariant.interpreter,
       refreshInterval: refreshInterval,
+      customTitle: customTitle,
       enabled: primaryVariant.enabled,
       config: config,
       variants: variants,
@@ -340,7 +343,11 @@ class PluginManager {
     try {
       // Load config values if plugin has config
       var configEnv = <String, String>{};
-      if (plugin.config != null) {
+      final configValues = await _configService.loadValues(
+        plugin.id,
+        schema: plugin.config,
+      );
+      if (configValues.isNotEmpty) {
         configEnv = await _configService.getAsEnvironmentVariables(
           plugin.id,
           schema: plugin.config,
@@ -351,16 +358,20 @@ class PluginManager {
         plugin,
         additionalEnv: configEnv,
       );
+      final customTitle = _configService.getCustomTitle(configValues);
+      final titledOutput = customTitle != null
+          ? output.copyWith(title: customTitle)
+          : output;
 
       final index = _plugins.indexWhere((p) => p.id == plugin.id);
       if (index >= 0) {
         _plugins[index] = plugin.copyWith(
           lastRun: DateTime.now(),
-          lastError: output.hasError ? output.errorMessage : null,
+          lastError: titledOutput.hasError ? titledOutput.errorMessage : null,
         );
       }
 
-      return output;
+      return titledOutput;
     } catch (e) {
       final index = _plugins.indexWhere((p) => p.id == plugin.id);
       if (index >= 0) {
@@ -369,7 +380,10 @@ class PluginManager {
           lastError: e.toString(),
         );
       }
-      return PluginOutput.error(plugin.id, e.toString());
+      return PluginOutput.error(
+        plugin.id,
+        e.toString(),
+      ).copyWith(title: plugin.displayName);
     }
   }
 

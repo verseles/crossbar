@@ -1,11 +1,10 @@
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 
-import 'package:crossbar_core/crossbar_core.dart';
-
 class PluginCard extends StatelessWidget {
-
   const PluginCard({
-    required this.plugin, super.key,
+    required this.plugin,
+    super.key,
     this.output,
     this.onTap,
     this.onToggle,
@@ -28,8 +27,8 @@ class PluginCard extends StatelessWidget {
       color: hasError
           ? colorScheme.errorContainer.withAlpha(50)
           : isDisabled
-              ? colorScheme.surfaceContainerHighest.withAlpha(50)
-              : null,
+          ? colorScheme.surfaceContainerHighest.withAlpha(50)
+          : null,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -42,9 +41,7 @@ class PluginCard extends StatelessWidget {
                 children: [
                   _buildIcon(context),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildTitle(context),
-                  ),
+                  Expanded(child: _buildTitle(context)),
                   _buildActions(context),
                 ],
               ),
@@ -67,10 +64,7 @@ class PluginCard extends StatelessWidget {
     final hasOutput = output != null && output!.icon.isNotEmpty;
 
     if (hasOutput) {
-      return Text(
-        output!.icon,
-        style: const TextStyle(fontSize: 24),
-      );
+      return Text(output!.icon, style: const TextStyle(fontSize: 24));
     }
 
     return Icon(
@@ -87,18 +81,18 @@ class PluginCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          plugin.id,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          plugin.displayName,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         Text(
           '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+            color: Theme.of(context).colorScheme.outline,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -138,9 +132,9 @@ class PluginCard extends StatelessWidget {
       child: Text(
         output!.text!,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: output!.color != null ? Color(output!.color!) : null,
-              fontWeight: FontWeight.w500,
-            ),
+          color: output!.color != null ? Color(output!.color!) : null,
+          fontWeight: FontWeight.w500,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -160,8 +154,8 @@ class PluginCard extends StatelessWidget {
           child: Text(
             output!.errorMessage!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+              color: Theme.of(context).colorScheme.error,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -182,12 +176,7 @@ class PluginCard extends StatelessWidget {
 }
 
 class PluginTile extends StatelessWidget {
-
-  const PluginTile({
-    required this.plugin, super.key,
-    this.output,
-    this.onTap,
-  });
+  const PluginTile({required this.plugin, super.key, this.output, this.onTap});
   final Plugin plugin;
   final PluginOutput? output;
   final VoidCallback? onTap;
@@ -204,7 +193,7 @@ class PluginTile extends StatelessWidget {
               plugin.enabled ? Icons.extension : Icons.extension_off,
               color: plugin.enabled ? Colors.green : Colors.grey,
             ),
-      title: Text(plugin.id),
+      title: Text(plugin.displayName),
       subtitle: hasOutput && output!.text != null
           ? Text(
               output!.text!,
@@ -214,12 +203,14 @@ class PluginTile extends StatelessWidget {
                     : (output!.color != null ? Color(output!.color!) : null),
               ),
             )
-          : Text('${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}'),
+          : Text(
+              '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
+            ),
       trailing: hasError
           ? const Icon(Icons.error, color: Colors.red)
           : plugin.enabled
-              ? const Icon(Icons.chevron_right)
-              : const Icon(Icons.pause, color: Colors.grey),
+          ? const Icon(Icons.chevron_right)
+          : const Icon(Icons.pause, color: Colors.grey),
       onTap: onTap,
     );
   }

@@ -305,6 +305,13 @@ L0
         expect(output.trayTooltip, 'CPU: 45%');
       });
 
+      test('parses JSON with title', () {
+        const json = '{"icon":"","text":"45%","title":"CPU Monitor"}';
+        final output = OutputParser.parse(json, 'test.sh');
+
+        expect(output.title, 'CPU Monitor');
+      });
+
       test('parses JSON with menu', () {
         const json = '''
 {

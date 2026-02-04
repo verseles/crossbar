@@ -1,8 +1,8 @@
 class PluginOutput {
-
   const PluginOutput({
     required this.pluginId,
     required this.icon,
+    this.title,
     this.text,
     this.color,
     this.trayTooltip,
@@ -31,9 +31,11 @@ class PluginOutput {
   }
   final String pluginId;
   final String icon;
+  final String? title;
   final String? text;
   final int? color;
   final String? trayTooltip;
+
   /// Freedesktop icon name for tray (e.g., 'battery-level-50-symbolic').
   /// If null, falls back to icon name mapping based on pluginId.
   final String? trayIcon;
@@ -44,6 +46,7 @@ class PluginOutput {
   PluginOutput copyWith({
     String? pluginId,
     String? icon,
+    String? title,
     String? text,
     int? color,
     String? trayTooltip,
@@ -55,6 +58,7 @@ class PluginOutput {
     return PluginOutput(
       pluginId: pluginId ?? this.pluginId,
       icon: icon ?? this.icon,
+      title: title ?? this.title,
       text: text ?? this.text,
       color: color ?? this.color,
       trayTooltip: trayTooltip ?? this.trayTooltip,
@@ -69,6 +73,7 @@ class PluginOutput {
     return {
       'pluginId': pluginId,
       'icon': icon,
+      'title': title,
       'text': text,
       'color': color,
       'trayTooltip': trayTooltip,
@@ -81,12 +86,11 @@ class PluginOutput {
 
   @override
   String toString() {
-    return 'PluginOutput(pluginId: $pluginId, icon: $icon, text: $text, hasError: $hasError)';
+    return 'PluginOutput(pluginId: $pluginId, icon: $icon, title: $title, text: $text, hasError: $hasError)';
   }
 }
 
 class MenuItem {
-
   const MenuItem({
     this.text,
     this.separator = false,

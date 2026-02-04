@@ -2,12 +2,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import 'package:crossbar_core/crossbar_core.dart';
 import 'logger_service.dart';
 
 /// Service responsible for loading, saving, and securely storing plugin configuration values.
@@ -21,6 +21,8 @@ class PluginConfigService extends ChangeNotifier {
 
   PluginConfigService._internal();
   static final PluginConfigService _instance = PluginConfigService._internal();
+
+  static const String customTitleKey = '_crossbar_title';
 
   FlutterSecureStorage? _secureStorage;
   bool _initialized = false;
@@ -135,6 +137,8 @@ class PluginConfigService extends ChangeNotifier {
         }
       }
 
+      _normalizeCustomTitle(values);
+
       // Cache the loaded values
       _cache[pluginId] = Map.from(values);
     } catch (e, stackTrace) {
@@ -159,6 +163,8 @@ class PluginConfigService extends ChangeNotifier {
     if (!_initialized) await init();
 
     try {
+      final normalizedValues = Map<String, String>.from(values);
+      _normalizeCustomTitle(normalizedValues);
       final regularValues = <String, String>{};
       final secureKeys = <String>[];
 
@@ -171,7 +177,7 @@ class PluginConfigService extends ChangeNotifier {
         }
       }
 
-      for (final entry in values.entries) {
+      for (final entry in normalizedValues.entries) {
         if (secureKeys.contains(entry.key)) {
           // Store in secure storage
           final secureKey = _getSecureKey(pluginId, entry.key);
@@ -191,7 +197,7 @@ class PluginConfigService extends ChangeNotifier {
       await configFile.writeAsString(json);
 
       // Update cache
-      _cache[pluginId] = Map.from(values);
+      _cache[pluginId] = Map.from(normalizedValues);
 
       LoggerService().info('Saved config for plugin: $pluginId');
       notifyListeners();
@@ -260,11 +266,36 @@ class PluginConfigService extends ChangeNotifier {
     final envVars = <String, String>{};
 
     for (final entry in values.entries) {
+      if (entry.key == customTitleKey) {
+        continue;
+      }
       final envKey = 'CROSSBAR_PLUGIN_${entry.key.toUpperCase()}';
       envVars[envKey] = entry.value;
     }
 
     return envVars;
+  }
+
+  String? getCustomTitle(Map<String, String> values) {
+    final title = values[customTitleKey]?.trim();
+    if (title == null || title.isEmpty) {
+      return null;
+    }
+    return title;
+  }
+
+  void _normalizeCustomTitle(Map<String, String> values) {
+    if (!values.containsKey(customTitleKey)) {
+      return;
+    }
+
+    final raw = values[customTitleKey];
+    final trimmed = raw?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      values.remove(customTitleKey);
+    } else {
+      values[customTitleKey] = trimmed;
+    }
   }
 
   /// Clears the in-memory cache.

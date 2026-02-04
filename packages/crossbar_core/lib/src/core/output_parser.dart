@@ -31,6 +31,7 @@ class OutputParser {
     return PluginOutput(
       pluginId: pluginId,
       icon: data['icon'] as String? ?? '',
+      title: data['title'] as String?,
       text: data['text'] as String?,
       color:
           data['color'] != null ? _parseColor(data['color'] as String) : null,

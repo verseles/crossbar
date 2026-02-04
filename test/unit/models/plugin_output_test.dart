@@ -5,13 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('PluginOutput', () {
     test('creates plugin output with required parameters', () {
-      const output = PluginOutput(
-        pluginId: 'test.sh',
-        icon: '',
-      );
+      const output = PluginOutput(pluginId: 'test.sh', icon: '');
 
       expect(output.pluginId, 'test.sh');
       expect(output.icon, '');
+      expect(output.title, isNull);
       expect(output.text, isNull);
       expect(output.menu, isEmpty);
       expect(output.hasError, false);
@@ -21,6 +19,7 @@ void main() {
       const output = PluginOutput(
         pluginId: 'test.sh',
         icon: '',
+        title: 'CPU Monitor',
         text: '45%',
         color: 0xFFFFA500, // Colors.orange
         trayTooltip: 'CPU: 45%',
@@ -30,6 +29,7 @@ void main() {
 
       expect(output.pluginId, 'test.sh');
       expect(output.icon, '');
+      expect(output.title, 'CPU Monitor');
       expect(output.text, '45%');
       expect(output.color, 0xFFFFA500);
       expect(output.trayTooltip, 'CPU: 45%');
@@ -57,11 +57,7 @@ void main() {
     });
 
     test('copyWith creates new instance', () {
-      const output = PluginOutput(
-        pluginId: 'test.sh',
-        icon: '',
-        text: '45%',
-      );
+      const output = PluginOutput(pluginId: 'test.sh', icon: '', text: '45%');
 
       final updated = output.copyWith(text: '50%');
 
@@ -83,16 +79,13 @@ void main() {
 
       expect(json['pluginId'], 'test.sh');
       expect(json['icon'], '');
+      expect(json['title'], isNull);
       expect(json['text'], '45%');
       expect(json['hasError'], false);
     });
 
     test('toString returns readable representation', () {
-      const output = PluginOutput(
-        pluginId: 'test.sh',
-        icon: '',
-        text: '45%',
-      );
+      const output = PluginOutput(pluginId: 'test.sh', icon: '', text: '45%');
 
       expect(output.toString(), contains('test.sh'));
       expect(output.toString(), contains('45%'));
@@ -117,20 +110,14 @@ void main() {
     });
 
     test('creates menu item with bash command', () {
-      const item = MenuItem(
-        text: 'Run Script',
-        bash: '/usr/bin/script.sh',
-      );
+      const item = MenuItem(text: 'Run Script', bash: '/usr/bin/script.sh');
 
       expect(item.text, 'Run Script');
       expect(item.bash, '/usr/bin/script.sh');
     });
 
     test('creates menu item with href', () {
-      const item = MenuItem(
-        text: 'Open Website',
-        href: 'https://example.com',
-      );
+      const item = MenuItem(text: 'Open Website', href: 'https://example.com');
 
       expect(item.text, 'Open Website');
       expect(item.href, 'https://example.com');
@@ -168,9 +155,7 @@ void main() {
     test('toJson includes submenu', () {
       const item = MenuItem(
         text: 'Parent',
-        submenu: [
-          MenuItem(text: 'Child'),
-        ],
+        submenu: [MenuItem(text: 'Child')],
       );
 
       final json = item.toJson();
@@ -211,10 +196,7 @@ void main() {
     });
 
     test('copyWith creates new instance', () {
-      const item = MenuItem(
-        text: 'Original',
-        bash: '/bin/bash',
-      );
+      const item = MenuItem(text: 'Original', bash: '/bin/bash');
 
       final updated = item.copyWith(text: 'Updated');
 

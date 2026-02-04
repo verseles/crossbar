@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
@@ -9,7 +10,6 @@ import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/logger_service.dart';
 import '../../services/refresh_service.dart';
-import 'package:crossbar_core/crossbar_core.dart';
 
 /// Dialog for configuring which plugins to display in a widget.
 ///
@@ -357,7 +357,7 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
           key: ValueKey(plugin.id), // Ensure unique key for each item
           value: isSelected,
           onChanged: (_) => _togglePlugin(plugin.id),
-          title: Text(_formatPluginName(plugin.id)),
+          title: Text(plugin.displayName),
           subtitle: Text(
             '${plugin.interpreter} • ${_formatInterval(plugin.refreshInterval)}',
             style: theme.textTheme.bodySmall,
@@ -387,12 +387,6 @@ class _WidgetConfigDialogState extends State<WidgetConfigDialog> {
         ],
       ),
     );
-  }
-
-  String _formatPluginName(String pluginId) {
-    return pluginId
-        .replaceAll(RegExp(r'\.\d+[smh]\..*$'), '')
-        .replaceFirstMapped(RegExp('^.'), (m) => m.group(0)!.toUpperCase());
   }
 
   String _formatInterval(Duration duration) {

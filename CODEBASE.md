@@ -87,6 +87,7 @@ The root Flutter app provides the GUI, tray integration, widget updates, and bac
   - Desktop: `~/.crossbar/configs/<pluginId>.json`
   - Mobile: `<app-documents>/configs/<pluginId>.json`
   - Secure storage for password fields
+- Optional custom display title stored as `_crossbar_title` in the config values
 - CLI values: `~/.crossbar/config/<pluginId>.json` (plain JSON, no secure storage)
 
 ---

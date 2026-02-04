@@ -41,12 +41,12 @@ class PluginVariant {
 }
 
 class Plugin {
-
   const Plugin({
     required this.id,
     required this.path,
     required this.interpreter,
     required this.refreshInterval,
+    this.customTitle,
     this.enabled = true,
     this.lastRun,
     this.lastError,
@@ -59,6 +59,7 @@ class Plugin {
     String path = '/path/to/mock.10s.sh',
     String interpreter = 'bash',
     Duration refreshInterval = const Duration(seconds: 10),
+    String? customTitle,
     PluginConfig? config,
     List<PluginVariant> variants = const [],
   }) {
@@ -67,6 +68,7 @@ class Plugin {
       path: path,
       interpreter: interpreter,
       refreshInterval: refreshInterval,
+      customTitle: customTitle,
       config: config,
       variants: variants,
     );
@@ -77,9 +79,9 @@ class Plugin {
       id: json['id'] as String,
       path: json['path'] as String,
       interpreter: json['interpreter'] as String,
-      refreshInterval:
-          Duration(milliseconds: json['refreshInterval'] as int),
+      refreshInterval: Duration(milliseconds: json['refreshInterval'] as int),
       enabled: json['enabled'] as bool? ?? true,
+      customTitle: json['customTitle'] as String?,
       lastRun: json['lastRun'] != null
           ? DateTime.parse(json['lastRun'] as String)
           : null,
@@ -97,6 +99,7 @@ class Plugin {
   final String path;
   final String interpreter;
   final Duration refreshInterval;
+  final String? customTitle;
   final bool enabled;
   final DateTime? lastRun;
   final String? lastError;
@@ -109,6 +112,49 @@ class Plugin {
   /// Returns true if the plugin requires configuration before running.
   bool get requiresConfig => config?.configRequired == 'required';
 
+  /// Human-friendly display name for UI and widgets.
+  ///
+  /// Uses config.name when available, otherwise derives from the plugin id.
+  String get displayName {
+    final override = customTitle?.trim();
+    if (override != null && override.isNotEmpty) {
+      return override;
+    }
+    final configured = config?.name.trim();
+    if (configured != null && configured.isNotEmpty) {
+      return configured;
+    }
+    return _formatDisplayName(id);
+  }
+
+  static String _formatDisplayName(String pluginId) {
+    var normalized = pluginId.replaceFirst('.off.', '.');
+
+    final match = RegExp(r'^(.+?)\.(?:\d+(?:\.\d+)?)[smh]\.').firstMatch(
+      normalized,
+    );
+    if (match != null) {
+      normalized = match.group(1) ?? normalized;
+    } else {
+      final firstDot = normalized.indexOf('.');
+      if (firstDot > 0) {
+        normalized = normalized.substring(0, firstDot);
+      }
+    }
+
+    final words = normalized
+        .replaceAll('-', ' ')
+        .replaceAll('_', ' ')
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .map(
+          (word) => '${word[0].toUpperCase()}${word.substring(1)}',
+        )
+        .toList();
+
+    return words.isEmpty ? pluginId : words.join(' ');
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -116,6 +162,7 @@ class Plugin {
       'interpreter': interpreter,
       'refreshInterval': refreshInterval.inMilliseconds,
       'enabled': enabled,
+      if (customTitle != null) 'customTitle': customTitle,
       'lastRun': lastRun?.toIso8601String(),
       'lastError': lastError,
       if (config != null) 'config': config!.toJson(),
@@ -128,6 +175,7 @@ class Plugin {
     String? path,
     String? interpreter,
     Duration? refreshInterval,
+    String? customTitle,
     bool? enabled,
     DateTime? lastRun,
     String? lastError,
@@ -139,6 +187,7 @@ class Plugin {
       path: path ?? this.path,
       interpreter: interpreter ?? this.interpreter,
       refreshInterval: refreshInterval ?? this.refreshInterval,
+      customTitle: customTitle ?? this.customTitle,
       enabled: enabled ?? this.enabled,
       lastRun: lastRun ?? this.lastRun,
       lastError: lastError ?? this.lastError,
@@ -149,7 +198,7 @@ class Plugin {
 
   @override
   String toString() {
-    return 'Plugin(id: $id, interpreter: $interpreter, enabled: $enabled, variants: ${variants.length})';
+    return 'Plugin(id: $id, interpreter: $interpreter, enabled: $enabled, customTitle: $customTitle, variants: ${variants.length})';
   }
 
   @override
@@ -161,6 +210,7 @@ class Plugin {
         other.interpreter == interpreter &&
         other.refreshInterval == refreshInterval &&
         other.enabled == enabled &&
+        other.customTitle == customTitle &&
         other.config == config &&
         _listEquals(other.variants, variants);
   }
@@ -176,6 +226,14 @@ class Plugin {
   @override
   int get hashCode {
     return Object.hash(
-        id, path, interpreter, refreshInterval, enabled, config, variants);
+      id,
+      path,
+      interpreter,
+      refreshInterval,
+      customTitle,
+      enabled,
+      config,
+      variants,
+    );
   }
 }

@@ -13,11 +13,14 @@ struct CrossbarPluginData: Identifiable {
     
     static func from(dictionary: [String: Any]) -> CrossbarPluginData? {
         guard let pluginId = dictionary["pluginId"] as? String else { return nil }
+        let titleOverride = (dictionary["title"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fallbackTitle = pluginId.components(separatedBy: ".").first?.capitalized ?? "Plugin"
+        let title = (titleOverride?.isEmpty == false) ? titleOverride! : fallbackTitle
         return CrossbarPluginData(
             id: pluginId,
             icon: dictionary["icon"] as? String ?? "📊",
             text: dictionary["text"] as? String ?? "--",
-            title: (dictionary["pluginId"] as? String)?.components(separatedBy: ".").first?.capitalized ?? "Plugin",
+            title: title,
             color: dictionary["color"] as? String,
             tooltip: dictionary["tooltip"] as? String
         )

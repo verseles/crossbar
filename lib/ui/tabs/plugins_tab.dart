@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:clipboard/clipboard.dart';
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'package:crossbar_core/crossbar_core.dart';
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/plugin_config_service.dart';
@@ -508,7 +507,7 @@ class _PluginsTabState extends State<PluginsTab> {
                           children: [
                             Expanded(
                               child: Text(
-                                _formatPluginName(plugin.id),
+                                plugin.displayName,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -806,12 +805,11 @@ class _PluginsTabState extends State<PluginsTab> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (plugin.hasConfig)
-                  OutlinedButton.icon(
-                    onPressed: () => _showConfigDialog(context, plugin),
-                    icon: const Icon(Icons.settings, size: 18),
-                    label: Text(l10n.configure),
-                  ),
+                OutlinedButton.icon(
+                  onPressed: () => _showConfigDialog(context, plugin),
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: Text(l10n.configure),
+                ),
                 OutlinedButton.icon(
                   onPressed: () => _handleTogglePlugin(plugin),
                   icon: Icon(
@@ -1048,11 +1046,19 @@ class _PluginsTabState extends State<PluginsTab> {
   }
 
   Future<void> _showConfigDialog(BuildContext context, Plugin plugin) async {
-    if (plugin.config == null) return;
-
     // Capture context-dependent objects before async gap
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
+
+    final schema =
+        plugin.config ??
+        const PluginConfig(
+          name: '',
+          description: '',
+          icon: '',
+          configRequired: 'optional',
+          settings: [],
+        );
 
     final currentValues = await _configService.loadValues(
       plugin.id,
@@ -1064,7 +1070,7 @@ class _PluginsTabState extends State<PluginsTab> {
     final newValues = await PluginConfigDialog.show(
       context: context,
       plugin: plugin,
-      config: plugin.config!,
+      config: schema,
       initialValues: currentValues,
     );
 
@@ -1074,6 +1080,8 @@ class _PluginsTabState extends State<PluginsTab> {
         newValues,
         schema: plugin.config,
       );
+
+      await _refreshService.discoverPlugins();
 
       // Re-run plugin immediately via RefreshService
       if (!mounted) return;
@@ -1256,22 +1264,6 @@ class _PluginsTabState extends State<PluginsTab> {
     );
   }
 
-  String _formatPluginName(String pluginId) {
-    // Convert "cpu.10s.sh" to "CPU"
-    // or "my-plugin.5m.py" to "My Plugin"
-    final name = pluginId.split('.').first;
-    return name
-        .replaceAll('-', ' ')
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map(
-          (word) => word.isNotEmpty
-              ? '${word[0].toUpperCase()}${word.substring(1)}'
-              : '',
-        )
-        .join(' ');
-  }
-
   String _formatInterval(Duration duration) {
     if (duration.inHours > 0) {
       return '${duration.inHours}h';
@@ -1375,9 +1367,7 @@ class _PluginsTabState extends State<PluginsTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            )!.clickDeleteAgain(_formatPluginName(plugin.id)),
+            AppLocalizations.of(context)!.clickDeleteAgain(plugin.displayName),
           ),
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -1391,7 +1381,7 @@ class _PluginsTabState extends State<PluginsTab> {
     // Capture context-dependent objects before async gap
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final pluginName = _formatPluginName(plugin.id);
+    final pluginName = plugin.displayName;
 
     try {
       final file = File(plugin.path);
@@ -1478,10 +1468,15 @@ List<Plugin> filterAndSortPlugins({
     return plugin.id.replaceFirst('.off.', '.');
   }
 
+  String normalizedDisplayName(Plugin plugin) {
+    return plugin.displayName.toLowerCase();
+  }
+
   if (searchQuery.isNotEmpty) {
     final query = searchQuery.toLowerCase();
     filtered = filtered.where((p) {
       return normalizedPluginId(p).toLowerCase().contains(query) ||
+          normalizedDisplayName(p).contains(query) ||
           p.interpreter.toLowerCase().contains(query);
     }).toList();
   }
@@ -1496,13 +1491,9 @@ List<Plugin> filterAndSortPlugins({
         if (a.enabled != b.enabled) {
           return a.enabled ? -1 : 1;
         }
-        return normalizedPluginId(
-          a,
-        ).toLowerCase().compareTo(normalizedPluginId(b).toLowerCase());
+        return normalizedDisplayName(a).compareTo(normalizedDisplayName(b));
       case PluginSortOrder.alphabetical:
-        return normalizedPluginId(
-          a,
-        ).toLowerCase().compareTo(normalizedPluginId(b).toLowerCase());
+        return normalizedDisplayName(a).compareTo(normalizedDisplayName(b));
       case PluginSortOrder.lastRun:
         final aRun = a.lastRun ?? DateTime(1970);
         final bRun = b.lastRun ?? DateTime(1970);
