@@ -21,6 +21,8 @@ class LuaRunner {
   LuaRunner._();
   static final LuaRunner instance = LuaRunner._();
   final CrossbarBridge _bridge = CrossbarBridge();
+  final Map<String, dynamic> _webCache = {};
+  final Set<String> _webInFlight = {};
 
   Future<LuaRunResult> run(
     String pluginPath, {
@@ -342,14 +344,6 @@ class LuaRunner {
         return 1;
       }
 
-      if (_bridge.isMobile) {
-        _pushLuaValue(ls, {
-          'error': true,
-          'message': 'crossbar.web is desktop-only in Lua',
-        });
-        return 1;
-      }
-
       String? method;
       Map<String, String>? headers;
       dynamic body;
@@ -364,6 +358,61 @@ class LuaRunner {
         if (_hasField(ls, 2, 'body')) {
           body = _getDynamicField(ls, 2, 'body');
         }
+      }
+
+      if (_bridge.isMobile) {
+        final cacheKey = _buildWebCacheKey(
+          url,
+          method: method,
+          headers: headers,
+          body: body,
+          timeout: timeout,
+          raw: raw,
+        );
+
+        final cached = _webCache[cacheKey];
+        if (!_webInFlight.contains(cacheKey)) {
+          _webInFlight.add(cacheKey);
+          _bridge
+              .web(
+            url,
+            method: method ?? 'GET',
+            headers: headers,
+            body: body,
+            timeout: timeout ?? 30,
+          )
+              .then((response) {
+            _webCache[cacheKey] = response;
+          }).catchError((e) {
+            _webCache[cacheKey] = {
+              'error': true,
+              'message': e.toString(),
+            };
+          }).whenComplete(() {
+            _webInFlight.remove(cacheKey);
+          });
+        }
+
+        if (cached == null) {
+          _pushLuaValue(ls, {
+            'error': true,
+            'message': 'Fetching...',
+          });
+          return 1;
+        }
+
+        if (raw) {
+          final rawValue = _extractRawResponse(cached);
+          if (rawValue is String) {
+            ls.pushString(rawValue);
+          } else {
+            ls.pushString(jsonEncode(rawValue));
+          }
+          return 1;
+        }
+
+        _pushLuaValue(ls, cached);
+        return 1;
       }
 
       final command = _buildWebCommand(
@@ -408,6 +457,47 @@ class LuaRunner {
       }
     });
     lua.setField(-2, 'web');
+  }
+
+  String _buildWebCacheKey(
+    String url, {
+    String? method,
+    Map<String, String>? headers,
+    dynamic body,
+    int? timeout,
+    bool raw = false,
+  }) {
+    final buffer = StringBuffer(url);
+    buffer.write('|');
+    buffer.write(method?.toUpperCase() ?? 'GET');
+    buffer.write('|');
+    buffer.write(timeout?.toString() ?? '');
+    buffer.write('|');
+    buffer.write(raw ? 'raw' : 'json');
+    if (headers != null && headers.isNotEmpty) {
+      buffer.write('|h:');
+      buffer.write(_safeJsonEncode(headers));
+    }
+    if (body != null) {
+      buffer.write('|b:');
+      buffer.write(_safeJsonEncode(body));
+    }
+    return buffer.toString();
+  }
+
+  dynamic _extractRawResponse(dynamic response) {
+    if (response is Map && response.containsKey('data')) {
+      return response['data'];
+    }
+    return response;
+  }
+
+  String _safeJsonEncode(dynamic value) {
+    try {
+      return jsonEncode(value);
+    } catch (_) {
+      return value.toString();
+    }
   }
 
   void _registerStorage(LuaState lua, String pluginId) {

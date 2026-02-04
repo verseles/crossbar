@@ -23,17 +23,42 @@ local timeout = env_num('SITE_TIMEOUT', 5)
 
 local response, err = crossbar.web(url, { timeout = timeout })
 local status_code = nil
+local error_message = nil
+
 if response == nil then
-    status_code = nil
-elseif response.status ~= nil then
-    status_code = tonumber(response.status)
+    error_message = err or 'No response'
+elseif type(response) ~= 'table' then
+    error_message = 'Invalid response'
+else
+    if response.status ~= nil then
+        status_code = tonumber(response.status)
+    end
+    if response.error then
+        error_message = response.message or 'Request failed'
+    end
 end
 
 local icon = '✅'
 local color = 'green'
 local status_text = 'Up'
 
-if status_code == nil then
+if error_message ~= nil then
+    if error_message == 'Fetching...' then
+        icon = '⏳'
+        color = 'gray'
+        status_text = 'Fetching'
+    elseif status_code ~= nil and status_code >= 400 then
+        icon = '❌'
+        color = 'red'
+        status_text = 'Down (HTTP ' .. status_code .. ')'
+    else
+        icon = '⚠️'
+        color = 'orange'
+        status_text = status_code ~= nil
+            and ('Error (HTTP ' .. status_code .. ')')
+            or 'Error'
+    end
+elseif status_code == nil then
     icon = '⚠️'
     color = 'orange'
     status_text = 'Unknown'
@@ -53,6 +78,9 @@ print(icon .. ' ' .. status_text .. ' | color=' .. color)
 print('---')
 print('Site: ' .. url)
 print('Timeout: ' .. tostring(timeout) .. 's')
+if error_message ~= nil then
+    print('Error: ' .. error_message)
+end
 print('---')
 print('Open Site | href=' .. url)
 print('Refresh | refresh=true')

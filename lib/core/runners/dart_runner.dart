@@ -15,7 +15,7 @@ import 'package:dart_eval/stdlib/core.dart';
 /// Example plugin code:
 /// ```dart
 /// import 'package:crossbar_bridge/crossbar_bridge.dart';
-/// 
+///
 /// void main() {
 ///   final crossbar = CrossbarBridge();
 ///   final time = crossbar.time();
@@ -34,43 +34,44 @@ import 'package:dart_eval/stdlib/core.dart';
 class DartRunner {
   factory DartRunner() => instance;
   DartRunner._();
-  
+
   static final DartRunner instance = DartRunner._();
-  
+
   /// Execute a Dart plugin file and capture its output
   Future<DartRunResult> run(String pluginPath) async {
     final file = File(pluginPath);
     if (!file.existsSync()) {
       return DartRunResult.error('Plugin file not found: $pluginPath');
     }
-    
+
     final sourceCode = await file.readAsString();
     return runSource(sourceCode, pluginPath: pluginPath);
   }
-  
+
   /// Execute Dart source code and capture its output
-  Future<DartRunResult> runSource(String sourceCode, {String? pluginPath}) async {
+  Future<DartRunResult> runSource(
+    String sourceCode, {
+    String? pluginPath,
+  }) async {
     final output = StringBuffer();
     final errors = StringBuffer();
     var exitCode = 0;
-    
+
     try {
       // Wrap the source code with our bridge injection
       final wrappedCode = _wrapWithBridge(sourceCode);
-      
+
       // Compile
       final compiler = Compiler();
       compiler.addPlugin(CrossbarPlugin());
-      
+
       final program = compiler.compile({
-        'crossbar_plugin': {
-          'main.dart': wrappedCode,
-        },
+        'crossbar_plugin': {'main.dart': wrappedCode},
       });
-      
+
       final runtime = Runtime.ofProgram(program);
       runtime.addPlugin(CrossbarPlugin());
-      
+
       // Capture print statements using Zone
       await runZoned(
         () async {
@@ -79,7 +80,7 @@ class DartRunner {
             'package:crossbar_plugin/main.dart',
             'main',
           );
-          
+
           // Handle async results
           if (result is Future) {
             await result;
@@ -96,13 +97,12 @@ class DartRunner {
           },
         ),
       );
-      
     } catch (e, stack) {
       errors.writeln('Error executing plugin: $e');
       errors.writeln(stack.toString().split('\n').take(5).join('\n'));
       exitCode = 1;
     }
-    
+
     return DartRunResult(
       output: output.toString().trim(),
       errors: errors.toString().trim(),
@@ -110,35 +110,37 @@ class DartRunner {
       pluginPath: pluginPath,
     );
   }
-  
+
   /// Wrap plugin code with bridge injection
   String _wrapWithBridge(String sourceCode) {
     // Check if code already has main function
-    if (!sourceCode.contains('void main()') && 
+    if (!sourceCode.contains('void main()') &&
         !sourceCode.contains('void main(') &&
         !sourceCode.contains('Future<void> main()') &&
         !sourceCode.contains('Future main()')) {
       // Wrap in main if no main function
-      sourceCode = '''
+      sourceCode =
+          '''
 void main() {
 $sourceCode
 }
 ''';
     }
-    
+
     // Check if already has import
     if (!sourceCode.contains('crossbar_bridge')) {
       // Inject bridge import
-      sourceCode = '''
+      sourceCode =
+          '''
 import 'package:crossbar_bridge/crossbar_bridge.dart';
 
 $sourceCode
 ''';
     }
-    
+
     return sourceCode;
   }
-  
+
   /// Check if this runner can handle the given plugin
   bool canRun(String pluginPath) {
     final ext = pluginPath.split('.').last.toLowerCase();
@@ -155,24 +157,20 @@ class DartRunResult {
     required this.exitCode,
     this.pluginPath,
   });
-  
+
   factory DartRunResult.error(String message) {
-    return DartRunResult(
-      output: '',
-      errors: message,
-      exitCode: 1,
-    );
+    return DartRunResult(output: '', errors: message, exitCode: 1);
   }
-  
+
   final String output;
   final String errors;
   final int exitCode;
   final String? pluginPath;
-  
+
   bool get success => exitCode == 0;
   bool get hasOutput => output.isNotEmpty;
   bool get hasErrors => errors.isNotEmpty;
-  
+
   @override
   String toString() {
     if (hasErrors) {
@@ -186,16 +184,16 @@ class DartRunResult {
 class CrossbarPlugin implements EvalPlugin {
   @override
   String get identifier => 'crossbar_bridge';
-  
+
   @override
   void configureForCompile(BridgeDeclarationRegistry registry) {
     // Register CrossbarBridge class
     registry.defineBridgeClass($CrossbarBridgeDeclaration());
-    
+
     // Register 'crossbar' top-level getter
     registry.defineBridgeTopLevelFunction(_crossbarGetterDeclaration);
   }
-  
+
   @override
   void configureForRuntime(Runtime runtime) {
     // Register constructor
@@ -204,7 +202,7 @@ class CrossbarPlugin implements EvalPlugin {
       'CrossbarBridge.',
       $CrossbarBridge.$new,
     );
-    
+
     // Register 'crossbar' top-level getter
     runtime.registerBridgeFunc(
       'package:crossbar_bridge/crossbar_bridge.dart',
@@ -212,13 +210,18 @@ class CrossbarPlugin implements EvalPlugin {
       (runtime, target, args) => $CrossbarBridge.wrap(CrossbarBridge.instance),
     );
   }
-  
+
   static const _crossbarGetterDeclaration = BridgeFunctionDeclaration(
     'package:crossbar_bridge/crossbar_bridge.dart',
     'crossbar',
     BridgeFunctionDef(
       returns: BridgeTypeAnnotation(
-        BridgeTypeRef(BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge')),
+        BridgeTypeRef(
+          BridgeTypeSpec(
+            'package:crossbar_bridge/crossbar_bridge.dart',
+            'CrossbarBridge',
+          ),
+        ),
       ),
     ),
   );
@@ -227,13 +230,23 @@ class CrossbarPlugin implements EvalPlugin {
 /// Bridge declaration for CrossbarBridge
 BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
   BridgeClassType(
-    BridgeTypeRef(BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge')),
+    BridgeTypeRef(
+      BridgeTypeSpec(
+        'package:crossbar_bridge/crossbar_bridge.dart',
+        'CrossbarBridge',
+      ),
+    ),
   ),
   constructors: {
     '': BridgeConstructorDef(
       BridgeFunctionDef(
         returns: BridgeTypeAnnotation(
-          BridgeTypeRef(BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge')),
+          BridgeTypeRef(
+            BridgeTypeSpec(
+              'package:crossbar_bridge/crossbar_bridge.dart',
+              'CrossbarBridge',
+            ),
+          ),
         ),
       ),
     ),
@@ -260,7 +273,10 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
         params: [
           BridgeParameter(
             'format',
-            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string), nullable: true),
+            BridgeTypeAnnotation(
+              BridgeTypeRef(CoreTypes.string),
+              nullable: true,
+            ),
             true,
           ),
         ],
@@ -272,7 +288,10 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
         params: [
           BridgeParameter(
             'format',
-            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string), nullable: true),
+            BridgeTypeAnnotation(
+              BridgeTypeRef(CoreTypes.string),
+              nullable: true,
+            ),
             true,
           ),
         ],
@@ -282,8 +301,16 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
       BridgeFunctionDef(
         returns: BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.future)),
         params: [
-          BridgeParameter('title', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
-          BridgeParameter('message', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
+          BridgeParameter(
+            'title',
+            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)),
+            false,
+          ),
+          BridgeParameter(
+            'message',
+            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)),
+            false,
+          ),
         ],
       ),
     ),
@@ -291,7 +318,11 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
       BridgeFunctionDef(
         returns: BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.future)),
         params: [
-          BridgeParameter('url', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
+          BridgeParameter(
+            'url',
+            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)),
+            false,
+          ),
         ],
       ),
     ),
@@ -299,15 +330,26 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
       BridgeFunctionDef(
         returns: BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.future)),
         params: [
-          BridgeParameter('command', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
+          BridgeParameter(
+            'command',
+            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)),
+            false,
+          ),
         ],
       ),
     ),
     'env': BridgeMethodDef(
       BridgeFunctionDef(
-        returns: BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string), nullable: true),
+        returns: BridgeTypeAnnotation(
+          BridgeTypeRef(CoreTypes.string),
+          nullable: true,
+        ),
         params: [
-          BridgeParameter('name', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
+          BridgeParameter(
+            'name',
+            BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)),
+            false,
+          ),
         ],
       ),
     ),
@@ -341,12 +383,19 @@ BridgeClassDef $CrossbarBridgeDeclaration() => const BridgeClassDef(
 class $CrossbarBridge implements $Instance {
   $CrossbarBridge.wrap(this.$value);
 
-  static $CrossbarBridge $new(Runtime runtime, $Value? target, List<$Value?> args) {
+  static $CrossbarBridge $new(
+    Runtime runtime,
+    $Value? target,
+    List<$Value?> args,
+  ) {
     return $CrossbarBridge.wrap(CrossbarBridge.instance);
   }
-  
+
   static const $type = BridgeTypeRef(
-    BridgeTypeSpec('package:crossbar_bridge/crossbar_bridge.dart', 'CrossbarBridge'),
+    BridgeTypeSpec(
+      'package:crossbar_bridge/crossbar_bridge.dart',
+      'CrossbarBridge',
+    ),
   );
 
   @override
@@ -367,37 +416,44 @@ class $CrossbarBridge implements $Instance {
         });
       case 'memory':
         return $Function((runtime, target, args) {
-          return $Future.wrap($value.memory().then((v) => $Map.wrap(_wrapDartMap(v))));
+          return $Future.wrap(
+            $value.memory().then((v) => $Map.wrap(_wrapDartMap(v))),
+          );
         });
       case 'battery':
         return $Function((runtime, target, args) {
-          return $Future.wrap($value.battery().then((v) => $Map.wrap(_wrapDartMap(v))));
+          return $Future.wrap(
+            $value.battery().then((v) => $Map.wrap(_wrapDartMap(v))),
+          );
         });
       case 'time':
         return $Function((runtime, target, args) {
-          final format = args.isNotEmpty && args[0] != null ? args[0]!.$value as String : 'HH:mm:ss';
+          final format = args.isNotEmpty && args[0] != null
+              ? args[0]!.$value as String
+              : 'HH:mm:ss';
           return $String($value.time(format));
         });
       case 'date':
         return $Function((runtime, target, args) {
-          final format = args.isNotEmpty && args[0] != null ? args[0]!.$value as String : 'yyyy-MM-dd';
+          final format = args.isNotEmpty && args[0] != null
+              ? args[0]!.$value as String
+              : 'yyyy-MM-dd';
           return $String($value.date(format));
         });
       case 'notify':
         return $Function((runtime, target, args) {
           final title = args[0]!.$value as String;
           final message = args[1]!.$value as String;
-          return $Future.wrap($value.notify(title, message).then((_) => const $null()));
+          return $Future.wrap(
+            $value.notify(title, message).then((_) => const $null()),
+          );
         });
       case 'web':
         return $Function((runtime, target, args) {
           final url = args[0]!.$value as String;
-          return $Future.wrap($value.web(url).then((v) {
-            if (v is Map) {
-              return $Map.wrap(_wrapDartMap(v as Map<String, dynamic>));
-            }
-            return $String(v.toString());
-          }));
+          return $Future.wrap(
+            $value.web(url).then((v) => $Map.wrap(_wrapDartMap(v))),
+          );
         });
       case 'exec':
         return $Function((runtime, target, args) {
@@ -426,15 +482,12 @@ class $CrossbarBridge implements $Instance {
   void $setProperty(Runtime runtime, String identifier, $Value value) {
     // Read-only
   }
-  
+
   /// Wrap a Dart Map for dart_eval
   static Map<$Value, $Value> _wrapDartMap(Map<dynamic, dynamic> map) {
-    return map.map((k, v) => MapEntry(
-      $String(k.toString()),
-      _wrapValue(v),
-    ));
+    return map.map((k, v) => MapEntry($String(k.toString()), _wrapValue(v)));
   }
-  
+
   /// Wrap a dynamic value for dart_eval
   static $Value _wrapValue(dynamic v) {
     if (v == null) return const $null();
