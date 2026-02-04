@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.8.0 (Mobile Stability & Lua API)
-**Próximo Ciclo:** v1.9.0 (Advanced Desktop & Marketplace)
+**Status Atual:** v1.9.0 (Plugin Display Titles)
+**Próximo Ciclo:** v1.9.1 (Code Quality & Robustness)
 
 ---
 
@@ -165,6 +165,82 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 - [x] Adicionar override de título salvo por usuário e propagar para UI/Widgets. (Commit hash: 969c394)
 
+---
+
+## 🔧 Epic v1.9.1: Code Quality & Robustness
+
+**Objetivo:** Resolver dívidas técnicas identificadas no code review dos commits 32faafb..73d8515, focando em prevenção de memory leaks, robustez de recursos e cobertura de testes.
+
+**Context:** Code review identificou áreas críticas que precisam de melhorias para garantir estabilidade em execuções longas e edge cases.
+
+### Fase 1: Resource Management (Alta Prioridade)
+
+- [ ] **LRU Cache para `_webCache`:** Em `packages/crossbar_core/lib/src/core/lua_runner.dart`:
+  - [ ] Implementar limite de tamanho para `Map<String, dynamic> _webCache`
+  - [ ] Adicionar estratégia LRU (Least Recently Used) ou limitar a 100 entradas
+  - [ ] Adicionar métrica de hit/miss rate para monitoramento
+  - [ ] Teste: Validar que cache não cresce indefinidamente após 500+ requests
+
+- [ ] **Rotação de Logs Android:** Em `android/app/src/main/kotlin/com/verseles/crossbar/WidgetLogStore.kt`:
+  - [ ] Implementar `MAX_LOG_ENTRIES = 500` com FIFO
+  - [ ] Adicionar método `clear()` para limpeza manual
+  - [ ] Expor contador de logs descartados na UI de debug
+  - [ ] Teste: Verificar que logs não excedem limite após 1000+ entradas
+
+- [ ] **Empty Discovery Guard Documentation:** Em `lib/core/plugin_manager.dart`:
+  - [ ] Documentar lógica do `_emptyDiscoveryStreak >= 3` com comentário inline
+  - [ ] Adicionar reset do contador quando plugins são encontrados novamente
+  - [ ] Considerar tornar threshold configurável via `ConfigService`
+  - [ ] Teste: Validar comportamento em cenário "diretório realmente vazio"
+
+### Fase 2: Test Coverage Expansion (Média Prioridade)
+
+- [ ] **Output Parser Edge Cases:** Em `test/unit/core/output_parser_test.dart`:
+  - [ ] Adicionar teste: Strings com pipes escapados (`text | inner=pipe\|here`)
+  - [ ] Adicionar teste: Atributos multi-valor com quotes (`bash="/bin/sh -c 'echo test'"`)
+  - [ ] Adicionar teste: Atributos com espaços e caracteres especiais
+  - [ ] Adicionar teste: Parsing de atributos vazios ou malformados
+  - [ ] Target: Aumentar coverage de `output_parser.dart` para 99%+
+
+- [ ] **Widget Tests para Plugins Tab:** Criar `test/widget/tabs/plugins_tab_test.dart`:
+  - [ ] Testar filtro "Enabled only" com lista mista de plugins
+  - [ ] Testar ordenação por nome, interval, status
+  - [ ] Testar busca/search functionality
+  - [ ] Testar ações de enable/disable via UI
+  - [ ] Target: Aumentar coverage de `plugins_tab.dart` de 10% para 60%+
+
+- [ ] **Integration Test: Web Cache Persistence:** Criar `test/integration/web_cache_persistence_test.dart`:
+  - [ ] Validar que cache sobrevive a restart do app
+  - [ ] Validar estratégia stale-while-revalidate em caso de erro de rede
+  - [ ] Validar limpeza de cache obsoleto (>7 dias)
+
+### Fase 3: Code Organization & Maintainability (Baixa Prioridade)
+
+- [ ] **Mover `customTitleKey` para Core:** Em `packages/crossbar_core/lib/src/models/plugin_config.dart`:
+  - [ ] Mover constante `customTitleKey` de `PluginConfigService` para `PluginConfig`
+  - [ ] Adicionar documentação sobre convenção de chaves reservadas (prefixo `_crossbar_`)
+  - [ ] Atualizar referências em `plugin_config_service.dart`
+
+- [ ] **Avaliar Compressão de Cache:** Em `packages/crossbar_core/lib/src/core/lua_runner.dart`:
+  - [ ] Medir tamanho médio de cache em disco após 1 semana de uso
+  - [ ] Se > 10MB, implementar compressão gzip para arquivos `.json` do cache
+  - [ ] Adicionar métrica de espaço em disco salvo na UI de debug
+
+- [ ] **Refactor: Widget Log Storage Abstraction:** Em `lib/services/widget_log_store.dart`:
+  - [ ] Criar interface `LogStore` com implementações `MemoryLogStore` e `FileLogStore`
+  - [ ] Permitir switch entre in-memory (rápido) e persistente (diagnóstico)
+  - [ ] Adicionar toggle na UI de Settings
+
+### Success Metrics (Definition of Done)
+
+- ✅ Zero memory leaks detectados em execução de 24h+ (Android Profiler)
+- ✅ Coverage geral aumentado para 42%+ (atualmente 39.5%)
+- ✅ Todos os testes de edge cases do `output_parser` passando
+- ✅ Widget tests para `plugins_tab.dart` implementados
+- ✅ Documentação inline adicionada para lógicas complexas
+
+---
+
 ## 🧪 Estratégia de Qualidade
 
 Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
@@ -204,5 +280,8 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 #### Próximas Melhorias de Testes
 
 - [ ] Refatorar `scheduler_service_test.dart` para usar classe real
-- [ ] Adicionar testes de widget/UI para `plugins_tab.dart`
+- [ ] Adicionar testes de widget/UI para `plugins_tab.dart` (ver Epic v1.9.1)
+- [ ] Adicionar edge cases para `output_parser.dart` (ver Epic v1.9.1)
 - [ ] Excluir arquivos `l10n/*` do cálculo de coverage (gerados automaticamente)
+
+**Nota:** Melhorias detalhadas de testes estão documentadas no **Epic v1.9.1: Code Quality & Robustness**.
