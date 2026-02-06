@@ -104,6 +104,9 @@ install-linux: ## Run checks/builds and install Crossbar to ~/.local/ (Linux onl
 	@# Install icons with APPLICATION_ID naming for proper GNOME association
 	@cp assets/icons/icon_linux.png $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
 	@cp assets/icons/icon_linux.png $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
+	@# Install symbolic icon for GNOME panel/notifications
+	@mkdir -p $(INSTALL_DIR)/share/icons/hicolor/symbolic/apps
+	@cp assets/icons/com.verseles.crossbar-symbolic.svg $(INSTALL_DIR)/share/icons/hicolor/symbolic/apps/
 	@# Update icon cache
 	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
 	@echo ""
@@ -127,6 +130,8 @@ uninstall: ## Uninstall Crossbar from ~/.local/
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/128x128/apps/com.verseles.crossbar.png
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/crossbar.png
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
+	@rm -f $(INSTALL_DIR)/share/icons/hicolor/symbolic/apps/com.verseles.crossbar-symbolic.svg
+	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
 	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
 macos: ## Build for macOS (Flutter GUI + CLI)

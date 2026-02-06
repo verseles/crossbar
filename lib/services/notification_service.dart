@@ -38,11 +38,12 @@ class NotificationService {
         requestBadgePermission: true,
         requestSoundPermission: true,
       );
-      const linuxSettings = LinuxInitializationSettings(
+      final linuxSettings = LinuxInitializationSettings(
         defaultActionName: 'Open',
+        defaultIcon: ThemeLinuxIcon('com.verseles.crossbar-symbolic'),
       );
 
-      const initSettings = InitializationSettings(
+      final initSettings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
         macOS: iosSettings,
