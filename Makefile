@@ -233,7 +233,9 @@ icons: ## Generate icons from assets
 	@for size_dir in "drawable-mdpi:24" "drawable-hdpi:36" "drawable-xhdpi:48" "drawable-xxhdpi:72" "drawable-xxxhdpi:96"; do \
 		dir=$${size_dir%%:*}; size=$${size_dir##*:}; \
 		mkdir -p android/app/src/main/res/$$dir; \
-		magick assets/icons/icon.png -resize $${size}x$${size} -alpha extract -negate \
+		magick -size $${size}x$${size} xc:white \
+			\( assets/icons/icon.png -resize $${size}x$${size} -alpha extract \) \
+			-compose CopyOpacity -composite \
 			PNG32:android/app/src/main/res/$$dir/ic_stat_crossbar.png; \
 	done
 	@echo "Notification icons generated:"
