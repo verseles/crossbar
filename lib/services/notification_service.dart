@@ -32,7 +32,7 @@ class NotificationService {
     if (_initialized) return;
 
     try {
-      const androidSettings = AndroidInitializationSettings('@drawable/ic_stat_crossbar');
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
