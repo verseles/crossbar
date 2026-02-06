@@ -135,7 +135,7 @@ class CrossbarForegroundService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_title))
             .setContentText(contentText)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_stat_crossbar)
             .setContentIntent(openPendingIntent)
             .setOngoing(true) // Cannot be swiped away (pre-Android 13)
             .setAutoCancel(false)
