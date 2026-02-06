@@ -71,19 +71,31 @@ print(json.dumps({
 
 ### Installation
 
-#### 1. One-Line Install (Linux)
+#### 1. One-Line Install
+
+**Linux / macOS:**
 
 ```bash
 curl -fsSL https://install.cat/verseles/crossbar | sh
 ```
 
-This installs Crossbar to `~/.local/share/crossbar` with a symlink at `~/.local/bin/crossbar`. A `.desktop` entry is created automatically so you can find it in your app menu.
+**Windows (PowerShell):**
+
+```powershell
+irm https://install.cat/verseles/crossbar?format=ps1 | iex
+```
+
+On Linux this installs Crossbar to `~/.local/share/crossbar` with a symlink at `~/.local/bin/crossbar`.  
+On macOS this installs `Crossbar.app` to `~/Applications/Crossbar.app` and creates `~/.local/bin/crossbar`.  
+On Windows this installs Crossbar to `%LOCALAPPDATA%\Crossbar` and adds this path to user `PATH`.
 
 #### 2. Download Pre-built Binaries
 
 Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases):
 
 - **Linux**: `crossbar-linux-x64.tar.gz`
+- **macOS**: `crossbar-macos-arm64.tar.gz`
+- **Windows**: `crossbar-windows-x64.zip`
 - **Android**: `crossbar-android-arm64.apk`
 
 **Linux manual install:**
@@ -92,6 +104,22 @@ Download the latest release from [GitHub Releases](https://github.com/verseles/c
 mkdir -p ~/.local/share/crossbar
 tar -xzf crossbar-linux-x64.tar.gz -C ~/.local/share/crossbar
 ln -sf ~/.local/share/crossbar/crossbar ~/.local/bin/crossbar
+```
+
+**macOS manual install:**
+
+```bash
+mkdir -p ~/Applications
+tar -xzf crossbar-macos-arm64.tar.gz -C /tmp
+mv /tmp/crossbar.app ~/Applications/Crossbar.app
+ln -sf ~/Applications/Crossbar.app/Contents/MacOS/crossbar ~/.local/bin/crossbar
+```
+
+**Windows manual install (PowerShell):**
+
+```powershell
+Expand-Archive .\crossbar-windows-x64.zip -DestinationPath "$env:LOCALAPPDATA\Crossbar" -Force
+[Environment]::SetEnvironmentVariable("Path", "$([Environment]::GetEnvironmentVariable('Path','User'));$env:LOCALAPPDATA\Crossbar", "User")
 ```
 
 **Usage:**

@@ -52,7 +52,6 @@ jobs:
           retention-days: 7
 
   build-macos:
-    if: false # Temporarily disabled
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,16 +72,19 @@ jobs:
             ${{ runner.os }}-pub-cache-
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          cd packages/crossbar_cli
+          dart pub get
 
       - name: Build macOS GUI
         run: flutter build macos --release
 
       - name: Setup unified binaries
         run: |
-          cd build/macos/Build/Products/Release/crossbar.app/Contents/MacOS
-          mv crossbar crossbar-gui
-          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar
+          mv build/macos/Build/Products/Release/crossbar.app/Contents/MacOS/crossbar build/macos/Build/Products/Release/crossbar.app/Contents/MacOS/crossbar-gui
+          cd packages/crossbar_cli
+          dart compile exe bin/crossbar.dart -o ../../build/macos/Build/Products/Release/crossbar.app/Contents/MacOS/crossbar
 
       - name: Compress artifact
         run: |
@@ -97,7 +99,6 @@ jobs:
           retention-days: 7
 
   build-windows:
-    if: false # Temporarily disabled
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +119,10 @@ jobs:
             ${{ runner.os }}-pub-cache-
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          cd packages/crossbar_cli
+          dart pub get
 
       - name: Build Windows GUI
         run: flutter build windows --release
@@ -127,7 +131,7 @@ jobs:
         shell: pwsh
         run: |
           Rename-Item -Path "build/windows/x64/runner/Release/crossbar.exe" -NewName "crossbar-gui.exe"
-          dart compile exe bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar.exe
+          dart compile exe packages/crossbar_cli/bin/crossbar.dart -o build/windows/x64/runner/Release/crossbar.exe
 
       - name: Compress artifact
         shell: pwsh
@@ -205,7 +209,7 @@ jobs:
           retention-days: 7
 
   create-release:
-    needs: [build-linux, build-android]
+    needs: [build-linux, build-macos, build-windows, build-android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -225,6 +229,8 @@ jobs:
         with:
           files: |
             artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
+            artifacts/crossbar-macos/crossbar-macos-arm64.tar.gz
+            artifacts/crossbar-windows/crossbar-windows-x64.zip
             artifacts/crossbar-android/crossbar-android-arm64.apk
           generate_release_notes: true
           draft: false

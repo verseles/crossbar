@@ -65,7 +65,7 @@ linux: ## Build for Linux (Flutter GUI + CLI + Tray Daemon)
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
 	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
 	@echo "Compiling tray daemon for multi-icon support..."
-	dart build cli --target=bin/crossbar_tray_daemon.dart --output=build/tray_daemon_tmp 2>&1 | tail -1
+	dart build cli --target=bin/crossbar_tray_daemon.dart --output=build/tray_daemon_tmp
 	cp build/tray_daemon_tmp/bundle/bin/crossbar_tray_daemon $(LINUX_BUNDLE)/crossbar_tray_daemon
 	rm -rf build/tray_daemon_tmp
 	@echo "Copying desktop integration files..."
