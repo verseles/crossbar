@@ -603,6 +603,41 @@ Crossbar Main ──stdin/JSON──> Daemon (CPU) ──> SNI Icon 1
 - ⚠️ Processos adicionais (limitado a 10 ícones)
 - ⚠️ Atualização visual requer interação do usuário
 
+### ADR-013: Platform Theme Detection & Monochrome Icons (2026-02-06)
+
+**Status**: ✅ Accepted
+**Context**: Dois problemas relacionados a ícones e tema nas plataformas:
+
+1. **Linux/GNOME**: Flutter's `platformDispatcher.onPlatformBrightnessChanged` não dispara quando o usuário troca entre light/dark mode no GNOME Settings. O Flutter lê o valor correto na inicialização via `org.gnome.desktop.interface.color-scheme`, mas o callback de mudança em runtime não é propagado pelo GTK event loop do Flutter ([flutter#101438](https://github.com/flutter/flutter/issues/101438), [flutter#135390](https://github.com/flutter/flutter/issues/135390)). Isso afeta tanto o ícone do tray quanto o tema do app (`ThemeMode.system`).
+
+2. **Android + GNOME**: Ambas as plataformas exigem ícones monocromáticos (branco + transparente) para notificações e barras de status. No Android, o small icon na status bar deve ser branco com alpha channel. No GNOME, ícones no painel usam o estilo "symbolic" (monocromáticos, recoloridos programaticamente conforme o tema).
+
+**Decision**:
+
+- **Linux theme**: Usar `gsettings monitor org.gnome.desktop.interface color-scheme` como processo externo para detectar mudanças de tema em tempo real. O processo emite eventos quando o tema muda, e o callback `_onGsettingsChanged()` propaga o brightness para `SettingsService.detectedSystemBrightness`, que dispara `notifyListeners()` e faz o `MaterialApp` rebuildar. O `onPlatformBrightnessChanged` do Flutter é mantido como fallback.
+
+- **Notification icons**: Gerar PNGs monocromáticos (branco + transparência via ImageMagick `CopyOpacity`) em 5 densidades Android (`ic_stat_crossbar.png`). Referenciar via `AndroidNotificationDetails.icon` (não no `AndroidInitializationSettings`, que deve manter `@mipmap/ic_launcher` para evitar falha silenciosa na inicialização). O foreground service Kotlin (`CrossbarForegroundService.kt`) também deve usar `R.drawable.ic_stat_crossbar`.
+
+**Architecture**:
+```
+GNOME Settings → gsettings monitor (Process)
+                   ↓ stdout "color-scheme: 'prefer-dark'"
+                 TrayService._onGsettingsChanged()
+                   ↓
+                 SettingsService.updateSystemBrightness(Brightness.dark)
+                   ↓ notifyListeners()
+                 MaterialApp rebuilds (ThemeMode.dark)
+                 TrayService._updateIconForTheme() (tray icon)
+```
+
+**Consequences**:
+- ✅ Tema do app e ícone do tray reagem em tempo real a mudanças no GNOME
+- ✅ Ícones de notificação monocromáticos funcionam em Android e GNOME
+- ⚠️ Dependência de `gsettings` (disponível em GNOME/GTK; falha silenciosamente em KDE/outros)
+- ⚠️ Processo externo adicional no Linux (mínimo overhead, event-driven)
+- ℹ️ `AndroidInitializationSettings` DEVE usar `@mipmap/ic_launcher`, nunca drawable customizado (causa falha silenciosa)
+- ℹ️ GNOME usa convenção `-symbolic.svg` para ícones de painel; futuro: instalar `com.verseles.crossbar-symbolic.svg`
+
 ### Template para Novas ADRs
 
 ```markdown
