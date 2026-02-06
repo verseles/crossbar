@@ -229,6 +229,16 @@ icons: ## Generate icons from assets
 	@echo "Monochrome icon generated:"
 	@ls -la assets/icons/icon_monochrome.png
 	@echo ""
+	@echo "Generating Android notification icons (monochrome for status bar)..."
+	@for size_dir in "drawable-mdpi:24" "drawable-hdpi:36" "drawable-xhdpi:48" "drawable-xxhdpi:72" "drawable-xxxhdpi:96"; do \
+		dir=$${size_dir%%:*}; size=$${size_dir##*:}; \
+		mkdir -p android/app/src/main/res/$$dir; \
+		magick assets/icons/icon.png -resize $${size}x$${size} -alpha extract -negate \
+			PNG32:android/app/src/main/res/$$dir/ic_stat_crossbar.png; \
+	done
+	@echo "Notification icons generated:"
+	@ls -la android/app/src/main/res/drawable-*/ic_stat_crossbar.png
+	@echo ""
 	@echo "Generating launcher icons (Android, Windows, macOS)..."
 	dart run flutter_launcher_icons
 	@echo "Done! All icons generated."

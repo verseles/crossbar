@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_slow_async_io
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -44,6 +45,7 @@ class TrayService with TrayListener {
   bool _unifiedTrayActive = false; // Tracks if unified tray_manager is active
   String? _iconPath;
   Brightness? _lastBrightness;
+  Process? _gsettingsProcess;
 
   /// Returns the current tray display mode from settings.
   TrayDisplayMode get _displayMode => SettingsService().trayDisplayMode;
@@ -143,8 +145,41 @@ class TrayService with TrayListener {
   }
 
   void _setupThemeListener() {
+    // Fallback: Flutter dispatcher (works on some DEs)
     final dispatcher = SchedulerBinding.instance.platformDispatcher;
     dispatcher.onPlatformBrightnessChanged = _onThemeChanged;
+
+    // Primary: gsettings monitor (reliable on GNOME/GTK)
+    _startGsettingsMonitor();
+  }
+
+  void _startGsettingsMonitor() {
+    Process.start(
+      'gsettings',
+      ['monitor', 'org.gnome.desktop.interface', 'color-scheme'],
+    ).then((process) {
+      _gsettingsProcess = process;
+      process.stdout
+          .transform(const SystemEncoding().decoder)
+          .transform(const LineSplitter())
+          .listen(_onGsettingsChanged);
+      // Silently ignore stderr (non-GNOME environments)
+      process.stderr.drain<void>();
+      LoggerService().info('gsettings monitor started for theme detection');
+    }).catchError((Object e) {
+      LoggerService().info('gsettings monitor not available: $e');
+    });
+  }
+
+  void _onGsettingsChanged(String line) {
+    // line format: "color-scheme: 'prefer-dark'" or "'default'"
+    final isDark = line.contains('prefer-dark');
+    final newBrightness = isDark ? Brightness.dark : Brightness.light;
+    if (_lastBrightness != newBrightness) {
+      _lastBrightness = newBrightness;
+      LoggerService().info('Theme changed via gsettings: $newBrightness');
+      unawaited(_updateIconForTheme());
+    }
   }
 
   void _onThemeChanged() {
@@ -178,7 +213,8 @@ class TrayService with TrayListener {
     String candidate;
 
     if (Platform.isLinux) {
-      final brightness =
+      // Use cached brightness from gsettings if available, otherwise read from dispatcher
+      final brightness = _lastBrightness ??
           SchedulerBinding.instance.platformDispatcher.platformBrightness;
       _lastBrightness = brightness;
 
@@ -605,6 +641,10 @@ class TrayService with TrayListener {
     if (!_initialized) return;
 
     RefreshService().removeListChangedListener(_onPluginListChanged);
+
+    // Kill gsettings monitor process
+    _gsettingsProcess?.kill();
+    _gsettingsProcess = null;
 
     // Dispose SNI backend and all separate icons
     if (_backend != null) {

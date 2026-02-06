@@ -300,7 +300,9 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 #### Fase 1: Correções Imediatas ✅
 
 - [x] **Linux - Reaplicar ícone ao trocar tema:** Corrigido `_onThemeChanged()` para chamar `setIcon()` após recalcular path via novo método `_updateIconForTheme()`
+- [x] **Linux - gsettings monitor:** Adicionado `gsettings monitor org.gnome.desktop.interface color-scheme` para detecção confiável de mudança de tema no GNOME (o callback `onPlatformBrightnessChanged` do Flutter não dispara no Linux)
 - [x] **Android - Monochrome Icon:** Adicionado `adaptive_icon_monochrome` no pubspec.yaml + geração automática no Makefile para Material You (Android 13+)
+- [x] **Android - Notification Small Icon:** Geração de `ic_stat_crossbar.png` monocromático (branco+transparente) em 5 densidades + referência em `notification_service.dart` para status bar
 - [x] **Makefile - dart build cli:** Migrado compilação do tray daemon de `dart compile exe` para `dart build cli` (compatibilidade com build hooks do Dart 3.10+)
 
 #### Fase 2: Melhorias Nativas 🟡

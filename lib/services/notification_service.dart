@@ -32,7 +32,7 @@ class NotificationService {
     if (_initialized) return;
 
     try {
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings('@drawable/ic_stat_crossbar');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -117,6 +117,7 @@ class NotificationService {
       channelDescription: channelDescription,
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
+      icon: '@drawable/ic_stat_crossbar',
     );
 
     const iosDetails = DarwinNotificationDetails();
@@ -232,6 +233,7 @@ class NotificationService {
       playSound: false,
       enableVibration: false,
       category: AndroidNotificationCategory.service,
+      icon: '@drawable/ic_stat_crossbar',
     );
 
     const details = NotificationDetails(android: androidDetails);
