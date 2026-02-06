@@ -7,7 +7,6 @@ on:
 
 jobs:
   build-linux:
-    if: false # Temporarily disabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,22 +26,18 @@ jobs:
       - name: Cache Pub dependencies
         uses: actions/cache@v4
         with:
-          path: ${{ runner.os == 'Windows' && '~\AppData\Local\Pub\Cache' || '~/.pub-cache' }}
+          path: ~/.pub-cache
           key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-cache-
 
       - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build Linux GUI
-        run: flutter build linux --release
-
-      - name: Setup unified binaries
         run: |
-          cd build/linux/x64/release/bundle
-          mv crossbar crossbar-gui
-          dart compile exe $GITHUB_WORKSPACE/bin/crossbar.dart -o crossbar
+          flutter pub get
+          cd packages/crossbar_cli && dart pub get
+
+      - name: Build Linux (GUI + CLI + Tray Daemon)
+        run: make linux
 
       - name: Compress artifact
         run: |
@@ -210,7 +205,7 @@ jobs:
           retention-days: 7
 
   create-release:
-    needs: [build-android] # linux/macos/windows temporarily disabled
+    needs: [build-linux, build-android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -229,8 +224,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            artifacts/crossbar-linux/crossbar-linux-x64.tar.gz
             artifacts/crossbar-android/crossbar-android-arm64.apk
-            # linux/macos/windows temporarily disabled
           generate_release_notes: true
           draft: false
           prerelease: false

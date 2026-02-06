@@ -71,46 +71,51 @@ print(json.dumps({
 
 ### Installation
 
-#### 1. Development Setup (Recommended for Contributors)
+#### 1. One-Line Install (Linux)
 
-If you plan to develop plugins or contribute to Crossbar core, we recommend setting up the full environment.
+```bash
+curl -fsSL https://install.cat/verseles/crossbar | sh
+```
+
+This installs Crossbar to `~/.local/share/crossbar` with a symlink at `~/.local/bin/crossbar`. A `.desktop` entry is created automatically so you can find it in your app menu.
+
+#### 2. Download Pre-built Binaries
+
+Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases):
+
+- **Linux**: `crossbar-linux-x64.tar.gz`
+- **Android**: `crossbar-android-arm64.apk`
+
+**Linux manual install:**
+
+```bash
+mkdir -p ~/.local/share/crossbar
+tar -xzf crossbar-linux-x64.tar.gz -C ~/.local/share/crossbar
+ln -sf ~/.local/share/crossbar/crossbar ~/.local/bin/crossbar
+```
+
+**Usage:**
+
+```bash
+crossbar              # Launch (Start in Tray)
+crossbar gui          # Launch GUI (Open Window)
+crossbar --help       # Show CLI commands
+crossbar cpu          # Example CLI usage
+```
+
+#### 3. Build from Source (Contributors)
 
 **Prerequisites:**
 
-- Flutter 3.35.0+ ([Install Flutter](https://docs.flutter.dev/get-started/install))
+- Flutter 3.38.3+ ([Install Flutter](https://docs.flutter.dev/get-started/install))
 - Dart 3.10.0+ (comes with Flutter)
 - `make` (optional, for easier build commands)
 
-**Setup:**
-
 ```bash
-# Clone the repository
 git clone https://github.com/verseles/crossbar.git
 cd crossbar
-
-# Install dependencies
 flutter pub get
-
-# Build and Run (Desktop)
-# Using Makefile (Recommended - builds full architecture)
-make help    # List all available commands
 make linux   # or make macos, make windows
-
-# Or using Flutter directly (GUI only)
-flutter run -d linux
-```
-
-#### 2. Download Pre-built Binaries (For Users)
-
-Download the latest release from [GitHub Releases](https://github.com/verseles/crossbar/releases).
-
-**Linux**: Extract `crossbar-linux.zip` and run:
-
-```bash
-./crossbar          # Launch (Start in Tray)
-./crossbar gui      # Launch GUI (Open Window)
-./crossbar --help   # Show CLI commands
-./crossbar cpu      # Example CLI usage
 ```
 
 ### Your First Plugin
