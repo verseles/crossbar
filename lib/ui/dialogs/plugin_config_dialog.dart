@@ -2,7 +2,6 @@ import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../services/plugin_config_service.dart';
 import '../widgets/config_fields/config_field.dart';
 
 class PluginConfigDialog extends StatefulWidget {
@@ -201,7 +200,7 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
 
   Widget _buildTitleField(BuildContext context) {
     return TextFormField(
-      initialValue: _values[PluginConfigService.customTitleKey] ?? '',
+      initialValue: _values[PluginConfig.customTitleKey] ?? '',
       decoration: InputDecoration(
         labelText: 'Display Title (optional)',
         hintText: widget.plugin.displayName,
@@ -209,14 +208,14 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
       ),
       onChanged: (value) {
         setState(() {
-          _values[PluginConfigService.customTitleKey] = value;
+          _values[PluginConfig.customTitleKey] = value;
         });
       },
     );
   }
 
   String _resolveDialogTitle() {
-    final custom = _values[PluginConfigService.customTitleKey]?.trim();
+    final custom = _values[PluginConfig.customTitleKey]?.trim();
     if (custom != null && custom.isNotEmpty) {
       return custom;
     }

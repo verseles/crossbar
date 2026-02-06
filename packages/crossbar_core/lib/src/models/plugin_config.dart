@@ -1,4 +1,7 @@
 class PluginConfig {
+  /// Reserved config key for custom display title.
+  /// Keys prefixed with `_crossbar_` are reserved by the system.
+  static const String customTitleKey = '_crossbar_title';
 
   const PluginConfig({
     required this.name,
@@ -79,7 +82,6 @@ class SelectOption {
 }
 
 class Setting {
-
   const Setting({
     required this.key,
     required this.label,
@@ -171,4 +173,3 @@ class Setting {
     return 'Setting(key: $key, type: $type, required: $required)';
   }
 }
-

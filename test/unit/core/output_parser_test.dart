@@ -101,6 +101,63 @@ Open File | bash="xdg-open /home/helio/My File" color=blue
         expect(output.menu[0].color, 'blue');
       });
 
+      test('parses escaped pipes in attributes', () {
+        const input = '''
+Test
+---
+Item | href=https://example.com?q=a\|b
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 1);
+        expect(output.menu[0].href, 'https://example.com?q=a|b');
+      });
+
+      test('parses attributes with nested quotes', () {
+        const input = '''
+Test
+---
+Run | bash="/bin/sh -c 'echo test'" color=green
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 1);
+        expect(output.menu[0].bash, "/bin/sh -c 'echo test'");
+        expect(output.menu[0].color, 'green');
+      });
+
+      test('handles attributes with escaped spaces', () {
+        const input = '''
+Test
+---
+Echo | bash=echo\ Hello\ World color=red
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 1);
+        expect(output.menu[0].bash, 'echo Hello World');
+        expect(output.menu[0].color, 'red');
+      });
+
+      test('handles empty or malformed attributes', () {
+        const input = '''
+Test
+---
+Item | 
+Broken | bash=
+''';
+
+        final output = OutputParser.parse(input, 'test.sh');
+
+        expect(output.menu.length, 2);
+        expect(output.menu[0].text, 'Item');
+        expect(output.menu[1].text, 'Broken');
+        expect(output.menu[1].bash, '');
+      });
+
       test('handles empty output', () {
         final output = OutputParser.parse('', 'test.sh');
 

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:lua_dardo/lua.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'bridge/crossbar_bridge.dart';
+import 'web_cache_store.dart';
 
 class LuaRunResult {
   final bool success;
@@ -16,13 +18,29 @@ class LuaRunResult {
       LuaRunResult(success: false, error: message);
 }
 
+typedef WebFetcher = Future<Map<String, dynamic>> Function(
+  String url, {
+  String method,
+  Map<String, String>? headers,
+  dynamic body,
+  int timeout,
+});
+
 class LuaRunner {
   factory LuaRunner() => instance;
-  LuaRunner._();
+  LuaRunner._() {
+    _webCacheStore = WebCacheStore(
+      baseDirProvider: _resolveWebCacheBaseDir,
+      hash: _bridge.hash,
+      sanitizePluginId: _sanitizePluginId,
+    );
+  }
   static final LuaRunner instance = LuaRunner._();
   final CrossbarBridge _bridge = CrossbarBridge();
-  final Map<String, dynamic> _webCache = {};
+  late final WebCacheStore _webCacheStore;
   final Set<String> _webInFlight = {};
+  bool _forceWebCache = false;
+  WebFetcher? _webFetcherOverride;
 
   Future<LuaRunResult> run(
     String pluginPath, {
@@ -360,72 +378,27 @@ class LuaRunner {
         }
       }
 
-      if (_bridge.isMobile) {
-        final cacheKey = '$pluginId|${_buildWebCacheKey(
-          url,
+      if (_shouldUseWebCache()) {
+        final cachedResponse = _handleWebCacheRequest(
+          pluginId: pluginId,
+          url: url,
           method: method,
           headers: headers,
           body: body,
           timeout: timeout,
           raw: raw,
-        )}';
-
-        var cached = _webCache[cacheKey];
-        if (cached == null) {
-          cached = _readWebCache(pluginId, cacheKey);
-          if (cached != null) {
-            _webCache[cacheKey] = cached;
-          }
-        }
-
-        if (!_webInFlight.contains(cacheKey)) {
-          _webInFlight.add(cacheKey);
-          final cachedSnapshot = cached;
-          _bridge
-              .web(
-            url,
-            method: method ?? 'GET',
-            headers: headers,
-            body: body,
-            timeout: timeout ?? 30,
-          )
-              .then((response) {
-            if (_isSuccessfulWebResponse(response)) {
-              _webCache[cacheKey] = response;
-              _writeWebCache(pluginId, cacheKey, response);
-            } else if (cachedSnapshot == null) {
-              _webCache[cacheKey] = response;
-            }
-          }).catchError((e) {
-            if (cachedSnapshot != null) return;
-            _webCache[cacheKey] = {
-              'error': true,
-              'message': e.toString(),
-            };
-          }).whenComplete(() {
-            _webInFlight.remove(cacheKey);
-          });
-        }
-
-        if (cached == null) {
-          _pushLuaValue(ls, {
-            'error': true,
-            'message': 'Fetching...',
-          });
-          return 1;
-        }
+        );
 
         if (raw) {
-          final rawValue = _extractRawResponse(cached);
-          if (rawValue is String) {
-            ls.pushString(rawValue);
+          if (cachedResponse is String) {
+            ls.pushString(cachedResponse);
           } else {
-            ls.pushString(jsonEncode(rawValue));
+            ls.pushString(jsonEncode(cachedResponse));
           }
           return 1;
         }
 
-        _pushLuaValue(ls, cached);
+        _pushLuaValue(ls, cachedResponse);
         return 1;
       }
 
@@ -471,6 +444,96 @@ class LuaRunner {
       }
     });
     lua.setField(-2, 'web');
+  }
+
+  bool _shouldUseWebCache() => _bridge.isMobile || _forceWebCache;
+
+  Future<Map<String, dynamic>> _fetchWeb(
+    String url, {
+    String method = 'GET',
+    Map<String, String>? headers,
+    dynamic body,
+    int timeout = 30,
+  }) {
+    final fetcher = _webFetcherOverride ?? _bridge.web;
+    return fetcher(
+      url,
+      method: method,
+      headers: headers,
+      body: body,
+      timeout: timeout,
+    );
+  }
+
+  dynamic _handleWebCacheRequest({
+    required String pluginId,
+    required String url,
+    String? method,
+    Map<String, String>? headers,
+    dynamic body,
+    int? timeout,
+    bool raw = false,
+  }) {
+    _webCacheStore.pruneStale(pluginId: pluginId);
+    final cacheKey = '$pluginId|${_buildWebCacheKey(
+      url,
+      method: method,
+      headers: headers,
+      body: body,
+      timeout: timeout,
+      raw: raw,
+    )}';
+
+    final cached = _webCacheStore.read(pluginId, cacheKey);
+
+    if (!_webInFlight.contains(cacheKey)) {
+      _webInFlight.add(cacheKey);
+      final cachedSnapshot = cached;
+      _fetchWeb(
+        url,
+        method: method ?? 'GET',
+        headers: headers,
+        body: body,
+        timeout: timeout ?? 30,
+      ).then((response) {
+        if (_isSuccessfulWebResponse(response)) {
+          _webCacheStore.write(pluginId, cacheKey, response);
+        } else if (cachedSnapshot == null) {
+          _webCacheStore.write(
+            pluginId,
+            cacheKey,
+            response,
+            persist: false,
+          );
+        }
+      }).catchError((e) {
+        if (cachedSnapshot != null) return;
+        _webCacheStore.write(
+          pluginId,
+          cacheKey,
+          {
+            'error': true,
+            'message': e.toString(),
+          },
+          persist: false,
+        );
+      }).whenComplete(() {
+        _webInFlight.remove(cacheKey);
+      });
+    }
+
+    if (cached == null) {
+      return {
+        'error': true,
+        'message': 'Fetching...',
+      };
+    }
+
+    if (raw) {
+      return _extractRawResponse(cached);
+    }
+
+    return cached;
   }
 
   String _buildWebCacheKey(
@@ -525,37 +588,6 @@ class LuaRunner {
     return _bridge.homeDir;
   }
 
-  File _webCacheFile(String pluginId, String cacheKey) {
-    final safeId = _sanitizePluginId(pluginId.isEmpty ? 'unknown' : pluginId);
-    final baseDir = _resolveWebCacheBaseDir();
-    final dir = Directory(path.join(baseDir, 'crossbar_web_cache', safeId));
-    final fileName = _bridge.hash(cacheKey);
-    return File(path.join(dir.path, '$fileName.json'));
-  }
-
-  dynamic _readWebCache(String pluginId, String cacheKey) {
-    final file = _webCacheFile(pluginId, cacheKey);
-    if (!file.existsSync()) return null;
-    try {
-      return jsonDecode(file.readAsStringSync());
-    } catch (_) {
-      return null;
-    }
-  }
-
-  void _writeWebCache(String pluginId, String cacheKey, dynamic value) {
-    try {
-      final file = _webCacheFile(pluginId, cacheKey);
-      final dir = file.parent;
-      if (!dir.existsSync()) {
-        dir.createSync(recursive: true);
-      }
-      file.writeAsStringSync(jsonEncode(value));
-    } catch (_) {
-      // Ignore cache write errors
-    }
-  }
-
   bool _isSuccessfulWebResponse(dynamic response) {
     if (response is Map) {
       if (response['error'] == true) return false;
@@ -563,6 +595,104 @@ class LuaRunner {
       if (status is int && status >= 400) return false;
     }
     return true;
+  }
+
+  WebCacheMetrics get webCacheMetrics => _webCacheStore.metrics;
+  int get webCacheEntryCount => _webCacheStore.memoryEntryCount;
+  int get webCacheMaxEntries => _webCacheStore.maxEntries;
+  int get webCacheEvictions => _webCacheStore.evictions;
+  bool get webCacheCompressionEnabled => _webCacheStore.compressionEnabled;
+
+  Future<WebCacheDiskStats> get webCacheDiskStats =>
+      _webCacheStore.getDiskStats();
+
+  @visibleForTesting
+  void forceWebCacheForTesting(bool value) {
+    _forceWebCache = value;
+  }
+
+  @visibleForTesting
+  void setWebFetcherForTesting(WebFetcher? fetcher) {
+    _webFetcherOverride = fetcher;
+  }
+
+  @visibleForTesting
+  void resetWebCacheForTesting({bool clearDisk = false, String? pluginId}) {
+    _webCacheStore.resetMemory();
+    _webInFlight.clear();
+    if (clearDisk) {
+      _webCacheStore.clearAll(pluginId: pluginId);
+    }
+  }
+
+  @visibleForTesting
+  void setWebCacheMaxAgeForTesting(Duration value) {
+    _webCacheStore.setMaxAge(value);
+  }
+
+  @visibleForTesting
+  File? findWebCacheFileForTesting(String pluginId, String cacheKey) {
+    return _webCacheStore.findExistingCacheFile(pluginId, cacheKey);
+  }
+
+  @visibleForTesting
+  String buildWebCacheKeyForTesting({
+    required String url,
+    String? method,
+    Map<String, String>? headers,
+    dynamic body,
+    int? timeout,
+    bool raw = false,
+  }) {
+    return _buildWebCacheKey(
+      url,
+      method: method,
+      headers: headers,
+      body: body,
+      timeout: timeout,
+      raw: raw,
+    );
+  }
+
+  @visibleForTesting
+  String buildWebCacheKeyWithPluginForTesting({
+    required String pluginId,
+    required String url,
+    String? method,
+    Map<String, String>? headers,
+    dynamic body,
+    int? timeout,
+    bool raw = false,
+  }) {
+    return '$pluginId|${_buildWebCacheKey(
+      url,
+      method: method,
+      headers: headers,
+      body: body,
+      timeout: timeout,
+      raw: raw,
+    )}';
+  }
+
+  @visibleForTesting
+  dynamic debugWebCacheRequest({
+    required String pluginId,
+    required String url,
+    String? method,
+    Map<String, String>? headers,
+    dynamic body,
+    int? timeout,
+    bool raw = false,
+  }) {
+    return _handleWebCacheRequest(
+      pluginId: pluginId,
+      url: url,
+      method: method,
+      headers: headers,
+      body: body,
+      timeout: timeout,
+      raw: raw,
+    );
   }
 
   void _registerStorage(LuaState lua, String pluginId) {

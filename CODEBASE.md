@@ -79,6 +79,7 @@ The root Flutter app provides the GUI, tray integration, widget updates, and bac
 - `OutputParser` in `crossbar_core` accepts JSON or BitBar/Argos text
 - Nested menus are supported via indented `--` prefixes
 - `PluginOutput` includes `trayIcon` for Freedesktop theme icons (Linux)
+- Web cache: `WebCacheStore` provides LRU + disk persistence for `crossbar.web`
 
 ### Configuration
 
@@ -112,6 +113,7 @@ Entry: `lib/main.dart`
 - `SchedulerService`: schedules periodic runs and delegates execution to `RefreshService`
 - `TrayService`: unified and separate tray modes
 - `WidgetService`: HomeWidget sync for Android/iOS widgets
+- `WidgetLogStore`: Android widget log storage with in-memory or persistent modes
 - `BackgroundService`: WorkManager-based background updates on Android
 - `PluginConfigService`: schema-based config persistence and secure storage
 - `MarketplaceService`: plugin discovery/installation via GitHub

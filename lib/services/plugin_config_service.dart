@@ -22,8 +22,6 @@ class PluginConfigService extends ChangeNotifier {
   PluginConfigService._internal();
   static final PluginConfigService _instance = PluginConfigService._internal();
 
-  static const String customTitleKey = '_crossbar_title';
-
   FlutterSecureStorage? _secureStorage;
   bool _initialized = false;
   String? _configsDirectory;
@@ -266,7 +264,7 @@ class PluginConfigService extends ChangeNotifier {
     final envVars = <String, String>{};
 
     for (final entry in values.entries) {
-      if (entry.key == customTitleKey) {
+      if (entry.key == PluginConfig.customTitleKey) {
         continue;
       }
       final envKey = 'CROSSBAR_PLUGIN_${entry.key.toUpperCase()}';
@@ -277,7 +275,7 @@ class PluginConfigService extends ChangeNotifier {
   }
 
   String? getCustomTitle(Map<String, String> values) {
-    final title = values[customTitleKey]?.trim();
+    final title = values[PluginConfig.customTitleKey]?.trim();
     if (title == null || title.isEmpty) {
       return null;
     }
@@ -285,16 +283,16 @@ class PluginConfigService extends ChangeNotifier {
   }
 
   void _normalizeCustomTitle(Map<String, String> values) {
-    if (!values.containsKey(customTitleKey)) {
+    if (!values.containsKey(PluginConfig.customTitleKey)) {
       return;
     }
 
-    final raw = values[customTitleKey];
+    final raw = values[PluginConfig.customTitleKey];
     final trimmed = raw?.trim() ?? '';
     if (trimmed.isEmpty) {
-      values.remove(customTitleKey);
+      values.remove(PluginConfig.customTitleKey);
     } else {
-      values[customTitleKey] = trimmed;
+      values[PluginConfig.customTitleKey] = trimmed;
     }
   }
 

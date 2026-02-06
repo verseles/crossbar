@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../services/config_service.dart';
+import '../services/settings_service.dart';
 import 'paths/platform_paths.dart'
     if (dart.library.ui) 'paths/platform_paths_flutter.dart';
 import 'plugin_executor.dart';
@@ -59,6 +60,11 @@ class PluginManager {
 
   List<Plugin> get plugins => List.unmodifiable(_plugins);
 
+  int get _emptyDiscoveryThreshold {
+    final threshold = SettingsService().emptyDiscoveryThreshold;
+    return threshold < 1 ? 1 : threshold;
+  }
+
   String? _customPluginsDirectory;
 
   @visibleForTesting
@@ -92,7 +98,8 @@ class PluginManager {
     if (!await pluginsDir.exists()) {
       if (_plugins.isNotEmpty) {
         _emptyDiscoveryStreak++;
-        if (_emptyDiscoveryStreak < 2) {
+        // Require consecutive empty scans before clearing plugins list.
+        if (_emptyDiscoveryStreak < _emptyDiscoveryThreshold) {
           return;
         }
       }
@@ -139,7 +146,8 @@ class PluginManager {
           foundFiles == 0 || (foundFiles > 0 && discovered.isEmpty);
       if (emptyDiscovery) {
         _emptyDiscoveryStreak++;
-        if (_emptyDiscoveryStreak < 2) {
+        // Require consecutive empty scans before clearing plugins list.
+        if (_emptyDiscoveryStreak < _emptyDiscoveryThreshold) {
           return;
         }
       }

@@ -18,5 +18,9 @@ export 'src/models/plugin_output.dart';
 // Core
 export 'src/core/output_parser.dart';
 export 'src/core/lua_runner.dart';
+export 'src/core/web_cache_store.dart';
 export 'src/core/bridge/crossbar_bridge.dart';
 export 'src/core/bridge/android_bridge_interface.dart';
+
+// Utils
+export 'src/utils/lru_cache.dart';

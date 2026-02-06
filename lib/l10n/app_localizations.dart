@@ -378,6 +378,24 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
+  /// No description provided for @widgetLogStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget log storage'**
+  String get widgetLogStorage;
+
+  /// No description provided for @widgetLogStoragePersistent.
+  ///
+  /// In en, this message translates to:
+  /// **'Persistent (diagnostic)'**
+  String get widgetLogStoragePersistent;
+
+  /// No description provided for @widgetLogStorageMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'In-memory (fast)'**
+  String get widgetLogStorageMemory;
+
   /// No description provided for @debugLogsTitle.
   ///
   /// In en, this message translates to:
@@ -419,6 +437,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No widget logs yet'**
   String get debugLogsWidgetEmpty;
+
+  /// No description provided for @debugLogsWidgetDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Discarded logs: {count}'**
+  String debugLogsWidgetDiscarded(int count);
+
+  /// No description provided for @debugWebCacheTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Web cache'**
+  String get debugWebCacheTitle;
+
+  /// No description provided for @debugWebCacheEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory entries'**
+  String get debugWebCacheEntries;
+
+  /// No description provided for @debugWebCacheHitRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hit rate'**
+  String get debugWebCacheHitRate;
+
+  /// No description provided for @debugWebCacheHits.
+  ///
+  /// In en, this message translates to:
+  /// **'Hits'**
+  String get debugWebCacheHits;
+
+  /// No description provided for @debugWebCacheMisses.
+  ///
+  /// In en, this message translates to:
+  /// **'Misses'**
+  String get debugWebCacheMisses;
+
+  /// No description provided for @debugWebCacheEvictions.
+  ///
+  /// In en, this message translates to:
+  /// **'Evictions'**
+  String get debugWebCacheEvictions;
+
+  /// No description provided for @debugWebCacheCompression.
+  ///
+  /// In en, this message translates to:
+  /// **'Compression'**
+  String get debugWebCacheCompression;
+
+  /// No description provided for @debugWebCacheBytesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Space saved'**
+  String get debugWebCacheBytesSaved;
+
+  /// No description provided for @debugWebCacheDiskSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Disk size'**
+  String get debugWebCacheDiskSize;
+
+  /// No description provided for @debugWebCacheFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get debugWebCacheFiles;
+
+  /// No description provided for @debugWebCacheFilesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} total (compressed {compressed}, plain {plain})'**
+  String debugWebCacheFilesCount(int total, int compressed, int plain);
 
   /// No description provided for @debugLogsRange.
   ///

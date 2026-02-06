@@ -343,7 +343,7 @@ class OutputParser {
   static Map<String, String> _parseAttributes(String input) {
     if (input.isEmpty) return {};
 
-    final normalized = input.replaceAll('|', ' ');
+    final normalized = _normalizeAttributeInput(input);
     final tokens = _tokenizeAttributes(normalized);
     final attributes = <String, String>{};
 
@@ -417,6 +417,47 @@ class OutputParser {
 
     flush();
     return tokens;
+  }
+
+  static String _normalizeAttributeInput(String input) {
+    final buffer = StringBuffer();
+    var escaping = false;
+
+    for (var i = 0; i < input.length; i++) {
+      final ch = input[i];
+
+      if (ch == '\\' && i + 1 < input.length && input[i + 1] == '|') {
+        buffer.write('|');
+        i++;
+        continue;
+      }
+
+      if (escaping) {
+        buffer.write(ch);
+        escaping = false;
+        continue;
+      }
+
+      if (ch == '\\') {
+        buffer.write(ch);
+        escaping = true;
+        continue;
+      }
+
+      if (ch == '|') {
+        final prevIsSpace = i == 0 || input[i - 1].trim().isEmpty;
+        final nextIsSpace =
+            i + 1 >= input.length || input[i + 1].trim().isEmpty;
+        if (prevIsSpace || nextIsSpace) {
+          buffer.write(' ');
+          continue;
+        }
+      }
+
+      buffer.write(ch);
+    }
+
+    return buffer.toString();
   }
 
   static String _stripQuotes(String value) {

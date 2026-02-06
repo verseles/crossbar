@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_slow_async_io
+import 'dart:io';
+
 import 'package:crossbar/core/plugin_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   group('PluginManager', () {
@@ -111,6 +114,35 @@ void main() {
         // This tests the internal _parseRefreshInterval method indirectly
         // through the plugin discovery process
         expect(PluginManager.supportedLanguages.length, 7);
+      });
+    });
+
+    group('empty discovery guard', () {
+      test('requires consecutive empty scans before clearing', () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'crossbar_plugins_',
+        );
+        addTearDown(() {
+          if (tempDir.existsSync()) {
+            tempDir.deleteSync(recursive: true);
+          }
+        });
+
+        manager.customPluginsDirectory = tempDir.path;
+
+        final pluginFile = File(path.join(tempDir.path, 'cpu.1s.lua'));
+        pluginFile.writeAsStringSync("print('ok')\n");
+        await Process.run('chmod', ['+x', pluginFile.path]);
+
+        await manager.discoverPlugins();
+        expect(manager.plugins, isNotEmpty);
+
+        await pluginFile.delete();
+        await manager.discoverPlugins();
+        expect(manager.plugins, isNotEmpty);
+
+        await manager.discoverPlugins();
+        expect(manager.plugins, isEmpty);
       });
     });
   });

@@ -5,22 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum TrayDisplayMode {
-  unified,
-  separate,
-  smartCollapse,
-  smartOverflow,
-}
+enum TrayDisplayMode { unified, separate, smartCollapse, smartOverflow }
 
 /// Theme mode options: light, dark, or system (auto-detect)
-enum ThemeModeOption {
-  light,
-  dark,
-  system,
-}
+enum ThemeModeOption { light, dark, system }
 
 class SettingsService extends ChangeNotifier {
-
   factory SettingsService() => _instance;
 
   SettingsService._internal();
@@ -36,6 +26,8 @@ class SettingsService extends ChangeNotifier {
   static const String _keyLanguage = 'language';
   static const String _keyTrayDisplayMode = 'tray_display_mode';
   static const String _keyTrayClusterThreshold = 'tray_cluster_threshold';
+  static const String _keyEmptyDiscoveryThreshold = 'empty_discovery_threshold';
+  static const String _keyWidgetLogStorageMode = 'widget_log_storage_mode';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
@@ -45,8 +37,12 @@ class SettingsService extends ChangeNotifier {
   // NOTE: tray_manager uses a single global tray instance.
   // Using 'unified' mode ensures a single tray icon with submenus for plugins.
   // Other modes (separate, smartCollapse) are reserved for future multi-tray implementations.
-  static const TrayDisplayMode _defaultTrayDisplayMode = TrayDisplayMode.unified;
+  static const TrayDisplayMode _defaultTrayDisplayMode =
+      TrayDisplayMode.unified;
   static const int _defaultTrayClusterThreshold = 3;
+  static const int _defaultEmptyDiscoveryThreshold = 2;
+  static const WidgetLogStorageMode _defaultWidgetLogStorageMode =
+      WidgetLogStorageMode.persistent;
 
   // State
   ThemeModeOption _themeMode = _defaultThemeMode;
@@ -55,12 +51,14 @@ class SettingsService extends ChangeNotifier {
   String _language = _defaultLanguage;
   TrayDisplayMode _trayDisplayMode = _defaultTrayDisplayMode;
   int _trayClusterThreshold = _defaultTrayClusterThreshold;
+  int _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
+  WidgetLogStorageMode _widgetLogStorageMode = _defaultWidgetLogStorageMode;
 
   bool get isInitialized => _initialized;
 
   // Getters
   ThemeModeOption get themeMode => _themeMode;
-  
+
   /// Legacy getter for backwards compatibility
   @Deprecated('Use themeMode instead')
   bool get darkMode => _themeMode == ThemeModeOption.dark;
@@ -69,6 +67,8 @@ class SettingsService extends ChangeNotifier {
   String get language => _language;
   TrayDisplayMode get trayDisplayMode => _trayDisplayMode;
   int get trayClusterThreshold => _trayClusterThreshold;
+  int get emptyDiscoveryThreshold => _emptyDiscoveryThreshold;
+  WidgetLogStorageMode get widgetLogStorageMode => _widgetLogStorageMode;
 
   // Setters
   set themeMode(ThemeModeOption value) {
@@ -103,7 +103,9 @@ class SettingsService extends ChangeNotifier {
     try {
       final homeDir = Platform.environment['HOME'];
       if (homeDir == null) {
-        LoggerService().warning('HOME environment variable not set, cannot manage autostart');
+        LoggerService().warning(
+          'HOME environment variable not set, cannot manage autostart',
+        );
         return;
       }
 
@@ -125,7 +127,8 @@ class SettingsService extends ChangeNotifier {
             ? localBin
             : 'crossbar'; // Fallback to PATH lookup
 
-        final desktopEntry = '''[Desktop Entry]
+        final desktopEntry =
+            '''[Desktop Entry]
 Type=Application
 Name=Crossbar
 Comment=Universal Plugin System for Taskbar/Menu Bar
@@ -137,20 +140,23 @@ X-GNOME-Autostart-enabled=true
 ''';
 
         await autostartFile.writeAsString(desktopEntry);
-        LoggerService().info('Autostart entry created at ${autostartFile.path}');
+        LoggerService().info(
+          'Autostart entry created at ${autostartFile.path}',
+        );
       } else {
         // Remove autostart file if it exists
         // ignore: avoid_slow_async_io
         if (await autostartFile.exists()) {
           await autostartFile.delete();
-          LoggerService().info('Autostart entry removed: ${autostartFile.path}');
+          LoggerService().info(
+            'Autostart entry removed: ${autostartFile.path}',
+          );
         }
       }
     } catch (e, stackTrace) {
       LoggerService().error('Failed to update autostart entry', e, stackTrace);
     }
   }
-
 
   set showInTray(bool value) {
     if (_showInTray != value) {
@@ -175,7 +181,11 @@ X-GNOME-Autostart-enabled=true
         LoggerService().info('Android foreground service stopped');
       }
     } catch (e, stackTrace) {
-      LoggerService().error('Failed to update Android foreground service', e, stackTrace);
+      LoggerService().error(
+        'Failed to update Android foreground service',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -203,6 +213,23 @@ X-GNOME-Autostart-enabled=true
     }
   }
 
+  set emptyDiscoveryThreshold(int value) {
+    final normalized = value < 1 ? 1 : value;
+    if (_emptyDiscoveryThreshold != normalized) {
+      _emptyDiscoveryThreshold = normalized;
+      _saveInt(_keyEmptyDiscoveryThreshold, normalized);
+      notifyListeners();
+    }
+  }
+
+  set widgetLogStorageMode(WidgetLogStorageMode value) {
+    if (_widgetLogStorageMode != value) {
+      _widgetLogStorageMode = value;
+      _saveString(_keyWidgetLogStorageMode, value.name);
+      notifyListeners();
+    }
+  }
+
   Future<void> init() async {
     if (_initialized) return;
 
@@ -220,7 +247,9 @@ X-GNOME-Autostart-enabled=true
         // Migrate from old boolean darkMode setting
         final oldDarkMode = _prefs.getBool('dark_mode');
         if (oldDarkMode != null) {
-          _themeMode = oldDarkMode ? ThemeModeOption.dark : ThemeModeOption.light;
+          _themeMode = oldDarkMode
+              ? ThemeModeOption.dark
+              : ThemeModeOption.light;
           // Save migrated value
           await _prefs.setString(_keyThemeMode, _themeMode.name);
           // Remove old key
@@ -229,14 +258,17 @@ X-GNOME-Autostart-enabled=true
           _themeMode = _defaultThemeMode;
         }
       }
-      _startWithSystem = _prefs.getBool(_keyStartWithSystem) ?? _defaultStartWithSystem;
+      _startWithSystem =
+          _prefs.getBool(_keyStartWithSystem) ?? _defaultStartWithSystem;
       _showInTray = _prefs.getBool(_keyShowInTray) ?? _defaultShowInTray;
       _language = _prefs.getString(_keyLanguage) ?? _defaultLanguage;
 
       final modeString = _prefs.getString(_keyTrayDisplayMode);
       if (modeString != null) {
         try {
-          _trayDisplayMode = TrayDisplayMode.values.firstWhere((e) => e.name == modeString);
+          _trayDisplayMode = TrayDisplayMode.values.firstWhere(
+            (e) => e.name == modeString,
+          );
         } catch (_) {
           _trayDisplayMode = _defaultTrayDisplayMode;
         }
@@ -244,12 +276,34 @@ X-GNOME-Autostart-enabled=true
         _trayDisplayMode = _defaultTrayDisplayMode;
       }
 
-      _trayClusterThreshold = _prefs.getInt(_keyTrayClusterThreshold) ?? _defaultTrayClusterThreshold;
+      _trayClusterThreshold =
+          _prefs.getInt(_keyTrayClusterThreshold) ??
+          _defaultTrayClusterThreshold;
+      _emptyDiscoveryThreshold =
+          _prefs.getInt(_keyEmptyDiscoveryThreshold) ??
+          _defaultEmptyDiscoveryThreshold;
+
+      final logMode = _prefs.getString(_keyWidgetLogStorageMode);
+      if (logMode != null) {
+        try {
+          _widgetLogStorageMode = WidgetLogStorageMode.values.firstWhere(
+            (e) => e.name == logMode,
+          );
+        } catch (_) {
+          _widgetLogStorageMode = _defaultWidgetLogStorageMode;
+        }
+      } else {
+        _widgetLogStorageMode = _defaultWidgetLogStorageMode;
+      }
 
       _initialized = true;
       LoggerService().info('SettingsService initialized');
     } catch (e, stackTrace) {
-      LoggerService().error('Failed to initialize SettingsService', e, stackTrace);
+      LoggerService().error(
+        'Failed to initialize SettingsService',
+        e,
+        stackTrace,
+      );
       // Fallback to defaults if initialization fails
     }
   }
@@ -259,7 +313,11 @@ X-GNOME-Autostart-enabled=true
     try {
       await _prefs.setBool(key, value);
     } catch (e, stackTrace) {
-      LoggerService().error('Failed to save boolean setting: $key=$value', e, stackTrace);
+      LoggerService().error(
+        'Failed to save boolean setting: $key=$value',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -268,7 +326,11 @@ X-GNOME-Autostart-enabled=true
     try {
       await _prefs.setString(key, value);
     } catch (e, stackTrace) {
-      LoggerService().error('Failed to save string setting: $key=$value', e, stackTrace);
+      LoggerService().error(
+        'Failed to save string setting: $key=$value',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -277,7 +339,11 @@ X-GNOME-Autostart-enabled=true
     try {
       await _prefs.setInt(key, value);
     } catch (e, stackTrace) {
-      LoggerService().error('Failed to save int setting: $key=$value', e, stackTrace);
+      LoggerService().error(
+        'Failed to save int setting: $key=$value',
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -290,5 +356,9 @@ X-GNOME-Autostart-enabled=true
     _language = _defaultLanguage;
     _trayDisplayMode = _defaultTrayDisplayMode;
     _trayClusterThreshold = _defaultTrayClusterThreshold;
+    _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
+    _widgetLogStorageMode = _defaultWidgetLogStorageMode;
   }
 }
+
+enum WidgetLogStorageMode { memory, persistent }

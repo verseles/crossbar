@@ -153,6 +153,24 @@ class _SettingsTabState extends State<SettingsTab> {
                 title: l10n.about,
                 icon: Icons.info,
                 children: [
+                  if (Platform.isAndroid)
+                    SwitchListTile(
+                      title: Text(l10n.widgetLogStorage),
+                      subtitle: Text(
+                        settings.widgetLogStorageMode ==
+                                WidgetLogStorageMode.persistent
+                            ? l10n.widgetLogStoragePersistent
+                            : l10n.widgetLogStorageMemory,
+                      ),
+                      value:
+                          settings.widgetLogStorageMode ==
+                          WidgetLogStorageMode.persistent,
+                      onChanged: (value) {
+                        settings.widgetLogStorageMode = value
+                            ? WidgetLogStorageMode.persistent
+                            : WidgetLogStorageMode.memory;
+                      },
+                    ),
                   ListTile(
                     title: Text(l10n.debugLogsTitle),
                     trailing: const Icon(Icons.chevron_right),

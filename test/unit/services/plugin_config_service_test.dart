@@ -255,7 +255,7 @@ void main() {
 
       test('excludes custom title from environment variables', () async {
         await service.saveValues('env-title.sh', {
-          PluginConfigService.customTitleKey: 'Custom Title',
+          PluginConfig.customTitleKey: 'Custom Title',
           'api_key': 'abc123',
         });
 

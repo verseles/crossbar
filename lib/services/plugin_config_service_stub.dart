@@ -10,8 +10,6 @@ class PluginConfigService {
   PluginConfigService._internal();
   static final PluginConfigService _instance = PluginConfigService._internal();
 
-  static const String customTitleKey = '_crossbar_title';
-
   bool get isInitialized => true;
 
   Future<void> init() async {}
@@ -41,7 +39,7 @@ class PluginConfigService {
   }
 
   String? getCustomTitle(Map<String, String> values) {
-    final title = values[customTitleKey]?.trim();
+    final title = values[PluginConfig.customTitleKey]?.trim();
     if (title == null || title.isEmpty) {
       return null;
     }

@@ -42,6 +42,9 @@
   "pluginsDirectory": "플러그인 디렉토리",
   "openPluginsDirectory": "플러그인 디렉토리 열기",
   "about": "정보",
+  "widgetLogStorage": "Widget log storage",
+  "widgetLogStoragePersistent": "Persistent (diagnostic)",
+  "widgetLogStorageMemory": "In-memory (fast)",
   "debugLogsTitle": "Debug Logs",
   "debugLogsCopy": "Copy logs",
   "debugLogsClear": "Clear logs",
@@ -49,6 +52,38 @@
   "debugLogsCopied": "Logs copied to clipboard",
   "debugLogsWidgetTitle": "Widget native logs",
   "debugLogsWidgetEmpty": "No widget logs yet",
+  "debugLogsWidgetDiscarded": "Discarded logs: {count}",
+  "@debugLogsWidgetDiscarded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debugWebCacheTitle": "Web cache",
+  "debugWebCacheEntries": "Memory entries",
+  "debugWebCacheHitRate": "Hit rate",
+  "debugWebCacheHits": "Hits",
+  "debugWebCacheMisses": "Misses",
+  "debugWebCacheEvictions": "Evictions",
+  "debugWebCacheCompression": "Compression",
+  "debugWebCacheBytesSaved": "Space saved",
+  "debugWebCacheDiskSize": "Disk size",
+  "debugWebCacheFiles": "Files",
+  "debugWebCacheFilesCount": "{total} total (compressed {compressed}, plain {plain})",
+  "@debugWebCacheFilesCount": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "compressed": {
+        "type": "int"
+      },
+      "plain": {
+        "type": "int"
+      }
+    }
+  },
   "debugLogsRange": "Range",
   "debugLogsCategory": "Category",
   "version": "버전",

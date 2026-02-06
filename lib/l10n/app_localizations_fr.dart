@@ -140,6 +140,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get about => 'À propos';
 
   @override
+  String get widgetLogStorage => 'Widget log storage';
+
+  @override
+  String get widgetLogStoragePersistent => 'Persistent (diagnostic)';
+
+  @override
+  String get widgetLogStorageMemory => 'In-memory (fast)';
+
+  @override
   String get debugLogsTitle => 'Debug Logs';
 
   @override
@@ -159,6 +168,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get debugLogsWidgetEmpty => 'No widget logs yet';
+
+  @override
+  String debugLogsWidgetDiscarded(int count) {
+    return 'Discarded logs: $count';
+  }
+
+  @override
+  String get debugWebCacheTitle => 'Web cache';
+
+  @override
+  String get debugWebCacheEntries => 'Memory entries';
+
+  @override
+  String get debugWebCacheHitRate => 'Hit rate';
+
+  @override
+  String get debugWebCacheHits => 'Hits';
+
+  @override
+  String get debugWebCacheMisses => 'Misses';
+
+  @override
+  String get debugWebCacheEvictions => 'Evictions';
+
+  @override
+  String get debugWebCacheCompression => 'Compression';
+
+  @override
+  String get debugWebCacheBytesSaved => 'Space saved';
+
+  @override
+  String get debugWebCacheDiskSize => 'Disk size';
+
+  @override
+  String get debugWebCacheFiles => 'Files';
+
+  @override
+  String debugWebCacheFilesCount(int total, int compressed, int plain) {
+    return '$total total (compressed $compressed, plain $plain)';
+  }
 
   @override
   String get debugLogsRange => 'Range';

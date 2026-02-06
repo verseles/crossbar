@@ -80,7 +80,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.8.0+15` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.9.1+16` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do plano original concluídas.
@@ -185,6 +185,17 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 3.  **Caminhos em Mobile**: Nunca use paths absolutos (`/home/user`) em Android/iOS. Use `path_provider`.
 4.  **CLI vs GUI**: Não importe `dart:ui` ou widgets Flutter dentro de `lib/cli/`. Isso quebra o binário CLI puro.
 5.  **Testes de Hardware**: Testes em `cli_handler_hardware_test.dart` alteram volume, brilho, wifi e bluetooth. Use `--exclude-tags=hardware` localmente para evitar glitches.
+
+### Versionamento Android (APK)
+
+- **Fonte de verdade**: `pubspec.yaml` deve usar `x.y.z+build` (ex.: `1.9.1+16`).
+- **versionCode**: é o número após `+` e deve **sempre** aumentar a cada APK publicado.
+- **versionName**: é a parte `x.y.z` e deve refletir a versão visível no app.
+- **Gradle**: `android/app/build.gradle.kts` usa `flutter.versionCode` e `flutter.versionName`.
+- **local.properties** (apenas local): pode conter `flutter.versionCode`/`flutter.versionName` para builds manuais, **não commitar**.
+- **Erros comuns**:
+  - `versionCode already used` → incremente o `+build` no `pubspec.yaml`.
+  - `versionCode not found` → garantir `x.y.z+build` no `pubspec.yaml` ou preencher `local.properties` localmente.
 
 ### Validação Local CI (act)
 

@@ -463,8 +463,8 @@ flutter analyze
 
 **Current stats**:
 
-- 116 tests passing (individual test cases)
-- ~41% code coverage (Target: 60%)
+- 676 tests passing (individual test cases)
+- 40.7% code coverage (Target: 60%)
 - 0 analysis errors
 
 ## 🔧 Development
@@ -511,7 +511,7 @@ Note: The main executable (`crossbar`) automatically supports both GUI (no args)
 
 ## 🌐 Internationalization
 
-Crossbar supports **10 languages**:
+Crossbar supports **13 languages**:
 
 - 🇺🇸 English (en)
 - 🇧🇷 Portuguese (pt)
@@ -523,6 +523,9 @@ Crossbar supports **10 languages**:
 - 🇰🇷 Korean (ko)
 - 🇮🇹 Italian (it)
 - 🇷🇺 Russian (ru)
+- 🇸🇦 Arabic (ar)
+- 🇧🇩 Bengali (bn)
+- 🇮🇳 Hindi (hi)
 
 Locale is auto-detected from system settings.
 

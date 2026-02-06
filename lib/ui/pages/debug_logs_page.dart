@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -31,18 +32,25 @@ class DebugLogsPage extends StatefulWidget {
 class _DebugLogsPageState extends State<DebugLogsPage> {
   final LoggerService _logger = LoggerService();
   final WidgetLogStore _widgetLogStore = WidgetLogStore();
+  final LuaRunner _luaRunner = LuaRunner();
   late StreamSubscription<LogEntry> _logSubscription;
 
   LogTimeRange _timeRange = LogTimeRange.fiveMinutes;
   LogCategory _category = LogCategory.all;
   List<LogEntry> _logs = [];
   Future<List<String>>? _widgetLogsFuture;
+  Future<int?>? _widgetDiscardedFuture;
+  Future<WebCacheDiskStats>? _webCacheDiskFuture;
+  WebCacheMetrics _webCacheMetrics = LuaRunner().webCacheMetrics;
 
   @override
   void initState() {
     super.initState();
     _refreshLogs();
     _widgetLogsFuture = _widgetLogStore.loadLines();
+    _widgetDiscardedFuture = _widgetLogStore.loadDiscardedCount();
+    _webCacheDiskFuture = _luaRunner.webCacheDiskStats;
+    _webCacheMetrics = _luaRunner.webCacheMetrics;
     _logSubscription = _logger.logStream.listen((_) => _refreshLogs());
   }
 
@@ -94,6 +102,15 @@ class _DebugLogsPageState extends State<DebugLogsPage> {
     if (!mounted) return;
     setState(() {
       _widgetLogsFuture = _widgetLogStore.loadLines();
+      _widgetDiscardedFuture = _widgetLogStore.loadDiscardedCount();
+    });
+  }
+
+  void _refreshWebCacheStats() {
+    if (!mounted) return;
+    setState(() {
+      _webCacheMetrics = _luaRunner.webCacheMetrics;
+      _webCacheDiskFuture = _luaRunner.webCacheDiskStats;
     });
   }
 
@@ -125,6 +142,7 @@ class _DebugLogsPageState extends State<DebugLogsPage> {
             child: _logs.isEmpty ? _buildEmptyState(l10n) : _buildLogList(),
           ),
           if (Platform.isAndroid) _buildWidgetLogsSection(l10n),
+          _buildWebCacheSection(l10n),
         ],
       ),
     );
@@ -234,6 +252,7 @@ class _DebugLogsPageState extends State<DebugLogsPage> {
               onPressed: () {
                 setState(() {
                   _widgetLogsFuture = _widgetLogStore.loadLines();
+                  _widgetDiscardedFuture = _widgetLogStore.loadDiscardedCount();
                 });
               },
               icon: const Icon(Icons.refresh, size: 18),
@@ -272,15 +291,144 @@ class _DebugLogsPageState extends State<DebugLogsPage> {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: SelectableText(
-                lines.join('\n'),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder<int?>(
+                    future: _widgetDiscardedFuture,
+                    builder: (context, snapshot) {
+                      final discarded = snapshot.data ?? 0;
+                      if (discarded <= 0) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          l10n.debugLogsWidgetDiscarded(discarded),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: 12,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  SelectableText(
+                    lines.join('\n'),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             );
           },
         ),
       ],
     );
+  }
+
+  Widget _buildWebCacheSection(AppLocalizations l10n) {
+    final metrics = _webCacheMetrics;
+    final hitRate = (metrics.hitRate * 100).toStringAsFixed(1);
+    final entryLabel =
+        '${_luaRunner.webCacheEntryCount}/${_luaRunner.webCacheMaxEntries}';
+    final compressionLabel = _luaRunner.webCacheCompressionEnabled
+        ? l10n.enabled
+        : l10n.disabled;
+
+    return ExpansionTile(
+      title: Text(l10n.debugWebCacheTitle),
+      childrenPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      children: [
+        Row(
+          children: [
+            TextButton.icon(
+              onPressed: _refreshWebCacheStats,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(l10n.refresh),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        _buildStatRow(l10n.debugWebCacheEntries, entryLabel),
+        _buildStatRow(l10n.debugWebCacheHitRate, '$hitRate%'),
+        _buildStatRow(l10n.debugWebCacheHits, metrics.hits.toString()),
+        _buildStatRow(l10n.debugWebCacheMisses, metrics.misses.toString()),
+        _buildStatRow(
+          l10n.debugWebCacheEvictions,
+          _luaRunner.webCacheEvictions.toString(),
+        ),
+        _buildStatRow(l10n.debugWebCacheCompression, compressionLabel),
+        _buildStatRow(
+          l10n.debugWebCacheBytesSaved,
+          _formatBytes(metrics.bytesSaved),
+        ),
+        FutureBuilder<WebCacheDiskStats>(
+          future: _webCacheDiskFuture,
+          builder: (context, snapshot) {
+            final stats = snapshot.data;
+            if (stats == null) {
+              return const SizedBox.shrink();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatRow(
+                  l10n.debugWebCacheDiskSize,
+                  _formatBytes(stats.totalBytes),
+                ),
+                _buildStatRow(
+                  l10n.debugWebCacheFiles,
+                  l10n.debugWebCacheFilesCount(
+                    stats.fileCount,
+                    stats.compressedFiles,
+                    stats.uncompressedFiles,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+          ),
+          Text(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatBytes(int bytes) {
+    const kb = 1024;
+    const mb = 1024 * 1024;
+    const gb = 1024 * 1024 * 1024;
+
+    if (bytes >= gb) {
+      return '${(bytes / gb).toStringAsFixed(2)} GB';
+    }
+    if (bytes >= mb) {
+      return '${(bytes / mb).toStringAsFixed(2)} MB';
+    }
+    if (bytes >= kb) {
+      return '${(bytes / kb).toStringAsFixed(2)} KB';
+    }
+    return '$bytes B';
   }
 }
 

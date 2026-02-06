@@ -10,6 +10,7 @@ import java.util.TimeZone
 object WidgetLogStore {
     private const val PREFS_NAME = "HomeWidgetPreferences"
     private const val LOG_KEY = "widget_debug_logs"
+    private const val DISCARDED_KEY = "widget_debug_logs_discarded"
     private const val MAX_LINES = 200
 
     fun append(
@@ -42,17 +43,23 @@ object WidgetLogStore {
             existing.split("\n").toMutableList()
         }
 
+        var discarded = prefs.getString(DISCARDED_KEY, "0")?.toIntOrNull() ?: 0
+
         lines.add(lineBuilder.toString().trim())
         while (lines.size > MAX_LINES) {
             lines.removeAt(0)
+            discarded++
         }
 
-        prefs.edit().putString(LOG_KEY, lines.joinToString("\n")).apply()
+        prefs.edit()
+            .putString(LOG_KEY, lines.joinToString("\n"))
+            .putString(DISCARDED_KEY, discarded.toString())
+            .apply()
     }
 
     fun clear(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(LOG_KEY).apply()
+        prefs.edit().remove(LOG_KEY).remove(DISCARDED_KEY).apply()
     }
 
     private fun isoTimestamp(): String {
