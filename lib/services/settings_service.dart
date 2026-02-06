@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:crossbar/services/logger_service.dart';
 import 'package:flutter/foundation.dart';
@@ -54,6 +55,10 @@ class SettingsService extends ChangeNotifier {
   int _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
   WidgetLogStorageMode _widgetLogStorageMode = _defaultWidgetLogStorageMode;
 
+  /// System brightness detected externally (e.g. gsettings on Linux).
+  /// Used to override ThemeMode.system when Flutter doesn't propagate changes.
+  Brightness? _detectedSystemBrightness;
+
   bool get isInitialized => _initialized;
 
   // Getters
@@ -69,6 +74,19 @@ class SettingsService extends ChangeNotifier {
   int get trayClusterThreshold => _trayClusterThreshold;
   int get emptyDiscoveryThreshold => _emptyDiscoveryThreshold;
   WidgetLogStorageMode get widgetLogStorageMode => _widgetLogStorageMode;
+
+  /// Returns the system brightness detected via platform-specific monitors
+  /// (e.g. gsettings on Linux). Null if not detected or not applicable.
+  Brightness? get detectedSystemBrightness => _detectedSystemBrightness;
+
+  /// Called by external monitors (e.g. gsettings) when system brightness changes.
+  /// Triggers a rebuild of the MaterialApp to update the theme.
+  void updateSystemBrightness(Brightness brightness) {
+    if (_detectedSystemBrightness != brightness) {
+      _detectedSystemBrightness = brightness;
+      notifyListeners();
+    }
+  }
 
   // Setters
   set themeMode(ThemeModeOption value) {

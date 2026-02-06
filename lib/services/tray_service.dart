@@ -179,6 +179,8 @@ class TrayService with TrayListener {
       _lastBrightness = newBrightness;
       LoggerService().info('Theme changed via gsettings: $newBrightness');
       unawaited(_updateIconForTheme());
+      // Notify SettingsService so MaterialApp rebuilds with correct theme
+      SettingsService().updateSystemBrightness(newBrightness);
     }
   }
 
@@ -217,6 +219,8 @@ class TrayService with TrayListener {
       final brightness = _lastBrightness ??
           SchedulerBinding.instance.platformDispatcher.platformBrightness;
       _lastBrightness = brightness;
+      // Keep SettingsService in sync for MaterialApp theme
+      SettingsService().updateSystemBrightness(brightness);
 
       if (brightness == Brightness.dark) {
         candidate = 'assets/icons/tray_icon_light.png';

@@ -12,14 +12,21 @@ import 'tabs/settings_tab.dart';
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
 
-  /// Convert ThemeModeOption to Flutter's ThemeMode
-  ThemeMode _getThemeMode(ThemeModeOption option) {
-    switch (option) {
+  /// Convert ThemeModeOption to Flutter's ThemeMode.
+  /// On Linux, Flutter doesn't propagate system brightness changes from GNOME,
+  /// so when a brightness is detected externally (via gsettings), we use it
+  /// directly instead of relying on ThemeMode.system.
+  ThemeMode _getThemeMode(SettingsService settings) {
+    switch (settings.themeMode) {
       case ThemeModeOption.light:
         return ThemeMode.light;
       case ThemeModeOption.dark:
         return ThemeMode.dark;
       case ThemeModeOption.system:
+        final detected = settings.detectedSystemBrightness;
+        if (detected != null) {
+          return detected == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
+        }
         return ThemeMode.system;
     }
   }
@@ -60,7 +67,7 @@ class MainWindow extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          themeMode: _getThemeMode(settings.themeMode),
+          themeMode: _getThemeMode(settings),
           onGenerateRoute: (routeSettings) {
             final uri = Uri.parse(routeSettings.name ?? '/');
             
