@@ -129,20 +129,22 @@ uninstall: ## Uninstall Crossbar from ~/.local/
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
-macos: ## Build for macOS
+macos: ## Build for macOS (Flutter GUI + CLI)
 	@echo "Building Flutter GUI..."
 	flutter build macos --release
 	@echo "Setting up unified architecture..."
 	mv $(MACOS_BUNDLE)/crossbar $(MACOS_BUNDLE)/crossbar-gui
-	dart compile exe bin/crossbar.dart -o $(MACOS_BUNDLE)/crossbar
+	@echo "Compiling unified CLI from packages/crossbar_cli..."
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(MACOS_BUNDLE)/crossbar
 	@echo "Done! Binaries at $(MACOS_BUNDLE)/"
 
-windows: ## Build for Windows
+windows: ## Build for Windows (Flutter GUI + CLI)
 	@echo "Building Flutter GUI..."
 	flutter build windows --release
 	@echo "Setting up unified architecture..."
 	mv $(WINDOWS_BUNDLE)/crossbar.exe $(WINDOWS_BUNDLE)/crossbar-gui.exe
-	dart compile exe bin/crossbar.dart -o $(WINDOWS_BUNDLE)/crossbar.exe
+	@echo "Compiling unified CLI from packages/crossbar_cli..."
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(WINDOWS_BUNDLE)/crossbar.exe
 	@echo "Done! Binaries at $(WINDOWS_BUNDLE)/"
 
 CAPTION ?=
