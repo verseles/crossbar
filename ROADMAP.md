@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.9.1 (Code Quality & Robustness)
-**Próximo Ciclo:** TBD
+**Status Atual:** v1.10.0 (Tray Icon Standardization - Phase 1)
+**Próximo Ciclo:** v1.10.1+ (Tray Icon Phases 2-3)
 
 ---
 
@@ -284,3 +284,32 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 - [ ] Excluir arquivos `l10n/*` do cálculo de coverage (gerados automaticamente)
 
 **Nota:** Melhorias detalhadas de testes estão documentadas no **Epic v1.9.1: Code Quality & Robustness**.
+
+---
+
+## 🎨 Epic v1.10.0: Tray Icon Standardization
+
+**Objetivo:** Padronizar ícones de tray (bandeja do sistema) para funcionar corretamente em todas as plataformas: Linux, macOS, Windows e Android.
+
+**Status:** 🟢 Fase 1 Concluída
+
+**Documento Detalhado:** [`ROADMAP.feat013-tray-icons.md`](./ROADMAP.feat013-tray-icons.md) - contém pesquisa completa, especificações técnicas e plano de implementação.
+
+### Resumo das Fases
+
+#### Fase 1: Correções Imediatas ✅
+
+- [x] **Linux - Reaplicar ícone ao trocar tema:** Corrigido `_onThemeChanged()` para chamar `setIcon()` após recalcular path via novo método `_updateIconForTheme()`
+- [x] **Android - Monochrome Icon:** Adicionado `adaptive_icon_monochrome` no pubspec.yaml + geração automática no Makefile para Material You (Android 13+)
+- [x] **Makefile - dart build cli:** Migrado compilação do tray daemon de `dart compile exe` para `dart build cli` (compatibilidade com build hooks do Dart 3.10+)
+
+#### Fase 2: Melhorias Nativas 🟡
+
+- [ ] **Linux - Freedesktop IconName:** Migrar para ícone simbólico SVG que respeita tema do shell
+- [ ] **macOS - Template Image:** Validar/corrigir `isTemplate: true` para adaptação automática
+- [ ] **Windows - Detecção de Tema:** (Opcional) Ler registry para trocar ícone conforme tema
+
+#### Fase 3: Widgets Mobile 🔵
+
+- [ ] **Android Widgets - ImageView:** Migrar de TextView para ImageView com tint dinâmico
+- [ ] **iOS Widgets - SF Symbols:** Suporte a prefixo `sf:` para ícones nativos

@@ -1,7 +1,7 @@
 name: crossbar
 description: Universal Plugin System for Taskbar/Menu Bar - Cross-platform BitBar/Argos alternative
 publish_to: "none"
-version: 1.9.1+16
+version: 1.10.0+17
 
 environment:
   sdk: ^3.10.0
@@ -116,6 +116,7 @@ flutter_launcher_icons:
   # Para Android - Adaptive Icon (2 camadas)
   adaptive_icon_foreground: "assets/icons/icon.png"
   adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_monochrome: "assets/icons/icon_monochrome.png"
   
   # Para iOS e outras plataformas
   image_path: "assets/icons/icon_opaque.png"

@@ -65,7 +65,9 @@ linux: ## Build for Linux (Flutter GUI + CLI + Tray Daemon)
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
 	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
 	@echo "Compiling tray daemon for multi-icon support..."
-	dart compile exe bin/crossbar_tray_daemon.dart -o $(LINUX_BUNDLE)/crossbar_tray_daemon
+	dart build cli --target=bin/crossbar_tray_daemon.dart --output=build/tray_daemon_tmp 2>&1 | tail -1
+	cp build/tray_daemon_tmp/bundle/bin/crossbar_tray_daemon $(LINUX_BUNDLE)/crossbar_tray_daemon
+	rm -rf build/tray_daemon_tmp
 	@echo "Copying desktop integration files..."
 	cp linux/com.verseles.crossbar.desktop $(LINUX_BUNDLE)/
 	cp assets/icons/icon_linux.png $(LINUX_BUNDLE)/crossbar.png
@@ -218,6 +220,12 @@ icons: ## Generate icons from assets
 		\) -alpha off -compose CopyOpacity -composite PNG32:icon_linux.png
 	@echo "Linux icon generated:"
 	@ls -la assets/icons/icon_linux.png
+	@echo ""
+	@echo "Generating monochrome icon for Android Material You..."
+	@cd assets/icons && \
+	magick icon.png -resize 1024x1024 -alpha extract -negate PNG32:icon_monochrome.png
+	@echo "Monochrome icon generated:"
+	@ls -la assets/icons/icon_monochrome.png
 	@echo ""
 	@echo "Generating launcher icons (Android, Windows, macOS)..."
 	dart run flutter_launcher_icons

@@ -156,7 +156,20 @@ class TrayService with TrayListener {
     if (_lastBrightness != currentBrightness) {
       _lastBrightness = currentBrightness;
       LoggerService().info('Theme changed to: $currentBrightness');
-      _resolveIconPath();
+      unawaited(_updateIconForTheme());
+    }
+  }
+
+  /// Recalculates the icon path and reapplies it to the tray.
+  Future<void> _updateIconForTheme() async {
+    await _resolveIconPath();
+    if (_unifiedTrayActive && _iconPath != null) {
+      try {
+        await trayManager.setIcon(_iconPath!);
+        LoggerService().info('Tray icon updated for theme change: $_iconPath');
+      } catch (e) {
+        LoggerService().warning('Failed to update tray icon on theme change: $e');
+      }
     }
   }
 
