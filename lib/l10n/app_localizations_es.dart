@@ -308,6 +308,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get behavior => 'Comportamiento';
 
   @override
+  String get globalHotkey => 'Global Hotkey';
+
+  @override
+  String get globalHotkeyDescription => 'Toggle visibility with Ctrl+Alt+C';
+
+  @override
   String get license => 'Licencia';
 
   @override

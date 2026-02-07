@@ -307,6 +307,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get behavior => '동작';
 
   @override
+  String get globalHotkey => 'Global Hotkey';
+
+  @override
+  String get globalHotkeyDescription => 'Toggle visibility with Ctrl+Alt+C';
+
+  @override
   String get license => '라이선스';
 
   @override

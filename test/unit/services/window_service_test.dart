@@ -11,6 +11,16 @@ void main() {
     final log = <MethodCall>[];
 
     setUp(() async {
+      // Mock HotKeyManager channel
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('hotkey_manager'),
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
       // Mock WindowManager channel
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(

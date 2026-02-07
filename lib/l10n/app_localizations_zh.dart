@@ -307,6 +307,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get behavior => '行为';
 
   @override
+  String get globalHotkey => 'Global Hotkey';
+
+  @override
+  String get globalHotkeyDescription => 'Toggle visibility with Ctrl+Alt+C';
+
+  @override
   String get license => '许可证';
 
   @override

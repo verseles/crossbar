@@ -82,6 +82,15 @@ class _SettingsTabState extends State<SettingsTab> {
                 title: l10n.behavior,
                 icon: Icons.tune,
                 children: [
+                  if (!Platform.isAndroid && !Platform.isIOS)
+                    SwitchListTile(
+                      title: Text(l10n.globalHotkey),
+                      subtitle: Text(l10n.globalHotkeyDescription),
+                      value: settings.globalHotkeyEnabled,
+                      onChanged: (value) {
+                        settings.globalHotkeyEnabled = value;
+                      },
+                    ),
                   SwitchListTile(
                     title: Text(l10n.startOnBoot),
                     subtitle: Text(l10n.launchOnLogin),
