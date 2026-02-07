@@ -17,6 +17,7 @@ echo "📦 2/10 Dependências Flutter + Testes..."
 paru -S --noconfirm --needed \
     pkgconf \
     gtk3 \
+    libkeybinder3 \
     xz \
     glib2 \
     gcc \

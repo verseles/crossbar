@@ -117,6 +117,8 @@
   "other": "Outros",
   "appearance": "Aparência",
   "behavior": "Comportamento",
+  "globalHotkey": "Atalho Global",
+  "globalHotkeyDescription": "Alternar visibilidade com Ctrl+Alt+C",
   "license": "Licença",
   "useDarkTheme": "Usar tema escuro",
   "launchOnLogin": "Iniciar Crossbar no login",

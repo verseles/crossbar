@@ -4,7 +4,7 @@ publish_to: "none"
 version: 1.10.0+17
 
 environment:
-  sdk: ^3.10.0
+  sdk: ">=3.10.0-0 <4.0.0"
   flutter: ">=3.35.0"
 
 dependencies:
@@ -18,6 +18,7 @@ dependencies:
 
   # System & Desktop
   window_manager: ^0.5.1
+  hotkey_manager: ^0.2.3
 
   # Core Utils
   path_provider: ^2.1.4
