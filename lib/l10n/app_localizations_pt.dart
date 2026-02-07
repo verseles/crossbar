@@ -308,6 +308,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get behavior => 'Comportamento';
 
   @override
+  String get globalHotkey => 'Atalho Global';
+
+  @override
+  String get globalHotkeyDescription => 'Alternar visibilidade com Ctrl+Alt+C';
+
+  @override
   String get license => 'Licença';
 
   @override

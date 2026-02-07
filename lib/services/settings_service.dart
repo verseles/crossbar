@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:crossbar/services/logger_service.dart';
+import 'package:crossbar/services/window_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,11 +29,13 @@ class SettingsService extends ChangeNotifier {
   static const String _keyTrayClusterThreshold = 'tray_cluster_threshold';
   static const String _keyEmptyDiscoveryThreshold = 'empty_discovery_threshold';
   static const String _keyWidgetLogStorageMode = 'widget_log_storage_mode';
+  static const String _keyGlobalHotkeyEnabled = 'global_hotkey_enabled';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
   static const bool _defaultStartWithSystem = false;
   static const bool _defaultShowInTray = true;
+  static const bool _defaultGlobalHotkeyEnabled = true;
   static const String _defaultLanguage = 'system';
   // NOTE: tray_manager uses a single global tray instance.
   // Using 'unified' mode ensures a single tray icon with submenus for plugins.
@@ -54,6 +56,7 @@ class SettingsService extends ChangeNotifier {
   int _trayClusterThreshold = _defaultTrayClusterThreshold;
   int _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
   WidgetLogStorageMode _widgetLogStorageMode = _defaultWidgetLogStorageMode;
+  bool _globalHotkeyEnabled = _defaultGlobalHotkeyEnabled;
 
   /// System brightness detected externally (e.g. gsettings on Linux).
   /// Used to override ThemeMode.system when Flutter doesn't propagate changes.
@@ -69,6 +72,7 @@ class SettingsService extends ChangeNotifier {
   bool get darkMode => _themeMode == ThemeModeOption.dark;
   bool get startWithSystem => _startWithSystem;
   bool get showInTray => _showInTray;
+  bool get globalHotkeyEnabled => _globalHotkeyEnabled;
   String get language => _language;
   TrayDisplayMode get trayDisplayMode => _trayDisplayMode;
   int get trayClusterThreshold => _trayClusterThreshold;
@@ -182,6 +186,29 @@ X-GNOME-Autostart-enabled=true
       _saveBool(_keyShowInTray, value);
       _updateAndroidForegroundService(value);
       notifyListeners();
+    }
+  }
+
+  set globalHotkeyEnabled(bool value) {
+    if (_globalHotkeyEnabled != value) {
+      _globalHotkeyEnabled = value;
+      _saveBool(_keyGlobalHotkeyEnabled, value);
+      _updateGlobalHotkey(value);
+      notifyListeners();
+    }
+  }
+
+  Future<void> _updateGlobalHotkey(bool enable) async {
+    try {
+      if (enable) {
+        await WindowService().registerGlobalHotkey();
+        LoggerService().info('Global hotkey registered');
+      } else {
+        await WindowService().unregisterGlobalHotkey();
+        LoggerService().info('Global hotkey unregistered');
+      }
+    } catch (e, stackTrace) {
+      LoggerService().error('Failed to update global hotkey', e, stackTrace);
     }
   }
 
@@ -314,6 +341,18 @@ X-GNOME-Autostart-enabled=true
         _widgetLogStorageMode = _defaultWidgetLogStorageMode;
       }
 
+      _globalHotkeyEnabled =
+          _prefs.getBool(_keyGlobalHotkeyEnabled) ?? _defaultGlobalHotkeyEnabled;
+      if (_globalHotkeyEnabled) {
+        // Register hotkey if enabled (and platform supports it)
+        // We call unregister first just to be safe, which is handled in init of WindowService,
+        // but explicit registration is needed here.
+        // Actually WindowService().registerGlobalHotkey() handles registration.
+        // But since we are inside init(), let's wait a bit or just fire and forget?
+        // Better to await it if possible, but init is async.
+        await _updateGlobalHotkey(true);
+      }
+
       _initialized = true;
       LoggerService().info('SettingsService initialized');
     } catch (e, stackTrace) {
@@ -371,6 +410,7 @@ X-GNOME-Autostart-enabled=true
     _themeMode = _defaultThemeMode;
     _startWithSystem = _defaultStartWithSystem;
     _showInTray = _defaultShowInTray;
+    _globalHotkeyEnabled = _defaultGlobalHotkeyEnabled;
     _language = _defaultLanguage;
     _trayDisplayMode = _defaultTrayDisplayMode;
     _trayClusterThreshold = _defaultTrayClusterThreshold;

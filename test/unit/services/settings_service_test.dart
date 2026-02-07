@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_slow_async_io
 import 'package:crossbar/services/settings_service.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +11,24 @@ void main() {
     late SettingsService settingsService;
 
     setUp(() async {
+      // Mock HotKeyManager channel
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('hotkey_manager'),
+        (MethodCall methodCall) async {
+          return null;
+        },
+      );
+
+      // Mock WindowManager channel
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        (MethodCall methodCall) async {
+          return null;
+        },
+      );
+
       SharedPreferences.setMockInitialValues({});
       settingsService = SettingsService();
       settingsService.resetForTesting();
@@ -70,6 +89,18 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('tray_display_mode'), 'separate');
       expect(prefs.getInt('tray_cluster_threshold'), 5);
+    });
+
+    test('Global hotkey settings are persisted', () async {
+      await settingsService.init();
+
+      expect(settingsService.globalHotkeyEnabled, true); // default
+
+      settingsService.globalHotkeyEnabled = false;
+      expect(settingsService.globalHotkeyEnabled, false);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('global_hotkey_enabled'), false);
     });
   });
 }

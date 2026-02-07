@@ -708,6 +708,18 @@ abstract class AppLocalizations {
   /// **'Behavior'**
   String get behavior;
 
+  /// No description provided for @globalHotkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Hotkey'**
+  String get globalHotkey;
+
+  /// No description provided for @globalHotkeyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle visibility with Ctrl+Alt+C'**
+  String get globalHotkeyDescription;
+
   /// No description provided for @license.
   ///
   /// In en, this message translates to:

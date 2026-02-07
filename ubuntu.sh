@@ -17,6 +17,7 @@ sudo apt-get install -y -qq \
     libgtk-3-dev \
     libayatana-appindicator3-dev \
     libsecret-1-dev \
+    libkeybinder-3.0-dev \
     cmake \
     clang \
     ninja-build \
