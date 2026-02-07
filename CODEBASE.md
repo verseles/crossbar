@@ -16,35 +16,26 @@ Crossbar is a monorepo with a Flutter application and multiple pure Dart package
 
 - `crossbar` (CLI + launcher)
   - Build target: `packages/crossbar_cli/bin/crossbar.dart`
-  - Repository mirror: `bin/crossbar.dart` (same launcher logic)
-  - Behavior: no args launches GUI (minimized), `gui` launches visible GUI, other args run CLI commands
+  - Function: CLI unified + launcher. No args or explicit `gui` command launches the GUI. Other args execute CLI commands via `handleCliCommand`.
 - `crossbar-gui` (Flutter GUI)
   - Entry: `lib/main.dart`
+  - Function: Graphical interface, Tray, and Services.
 - `crossbar_tray_daemon` (Linux only)
   - Entry: `bin/crossbar_tray_daemon.dart`
-  - Spawns one daemon per plugin to create independent tray icons
+  - Spawns one daemon per plugin to create independent tray icons via SNI.
 
 ### Packages
 
 1. `crossbar_core`
-   - Pure Dart (no `dart:ui`)
-   - Shared models: `Plugin`, `PluginOutput`, `PluginConfig`
-   - Output parsing: `OutputParser` (JSON or BitBar)
-   - Embedded Lua runner: `LuaRunner` (via `lua_dardo`)
-   - Plugin API bridge: `CrossbarBridge` + `AndroidBridgeInterface`
-   - Core APIs: `SystemApi`, `NetworkApi`, `MediaApi`, `UtilsApi`
-
+   - Pure Dart (no `dart:ui`). Shared models: `Plugin`, `PluginOutput`, `PluginConfig`.
+   - Core runners: `LuaRunner` (embedded), `OutputParser`.
+   - Bridge APIs: `CrossbarBridge`, `SystemApi`, `NetworkApi`.
 2. `crossbar_cli`
-   - CLI package compiled into the `crossbar` binary
-   - Command registry in `packages/crossbar_cli/lib/src/commands`
-   - CLI handler: `packages/crossbar_cli/lib/src/cli_handler.dart`
-   - CLI-only plugin discovery: `PluginManagerCli`
-   - JSON/XML output helpers in `packages/crossbar_cli/lib/src/cli_utils.dart`
-
+   - Compiled into the `crossbar` binary.
+   - Depends on `crossbar_core`.
+   - Registry and handler for hardware, network, and utility CLI commands.
 3. `crossbar_api`
-   - SDK for authors of compiled Dart plugins
-   - Type-safe API surface for system/network/utility access
-   - See `packages/crossbar_api/README.md`
+   - SDK for authors of compiled Dart plugins.
 
 ### Main Application (Flutter)
 
@@ -99,30 +90,29 @@ The root Flutter app provides the GUI, tray integration, widget updates, and bac
 
 Entry: `lib/main.dart`
 
-1. Initialize Flutter and inject `AndroidNativeBridge` into `CrossbarBridge`
-2. Initialize `LoggerService`, `WindowService`, `SettingsService`
-3. Start `IpcServer` on `localhost:48291`
-4. Discover plugins via `PluginManager`
-5. Initialize `TrayService`
-6. Start `SchedulerService` (which uses `RefreshService`)
-7. Initialize `HotReloadService`
+1. Initialize Flutter and inject `AndroidNativeBridge` into `CrossbarBridge`.
+2. Initialize `LoggerService` and `BackgroundService` (Android).
+3. Initialize `WindowService` (Lifecycle) and `SettingsService` (Persistence).
+4. Start `IpcServer` on `localhost:48291`.
+5. Sync/Discover plugins via `SamplePluginsService` and `PluginManager`.
+6. Initialize `TrayService` and start `SchedulerService` (delegates to `RefreshService`).
+7. Initialize `HotReloadService`.
 
 ### Key Services
 
-- `RefreshService`: single source of truth for plugin execution + output cache
-- `SchedulerService`: schedules periodic runs and delegates execution to `RefreshService`
-- `TrayService`: unified and separate tray modes
-- `WidgetService`: HomeWidget sync for Android/iOS widgets
-- `WidgetLogStore`: Android widget log storage with in-memory or persistent modes
-- `BackgroundService`: WorkManager-based background updates on Android
-- `PluginConfigService`: schema-based config persistence and secure storage
-- `MarketplaceService`: plugin discovery/installation via GitHub
-- `IpcServer`: local HTTP control surface for UI and external tools
-- `HotReloadService`: file watcher for plugins/config changes
-- `NotificationService`: system notifications + Android foreground service channel
-- `WindowService`: desktop window lifecycle
-- `LoggerService`: rotating log files under `~/.crossbar/logs`
-- `DebugLogsPage`: in-app log viewer with widget-native log section
+- `RefreshService`: Single source of truth for plugin execution and output caching.
+- `SchedulerService`: Schedules periodic runs and delegates to `RefreshService`.
+- `PluginManager`: Central registry for plugin discovery and state management.
+- `SettingsService`: Manages application settings and theme detection.
+- `TrayService`: Manages tray icon lifecycle (Unified or Separate backends).
+- `PluginConfigService`: Handles schema-based configuration and secure storage.
+- `WidgetService`: Synchronizes data with Android/iOS home screen widgets.
+- `NotificationService`: Manages system notifications and Android foreground services.
+- `SamplePluginsService`: Synchronizes default/example plugins to the user's directory.
+- `MarketplaceService`: Plugin installation and discovery via GitHub.
+- `IpcServer`: HTTP server for inter-process communication.
+- `LoggerService`: Rotating log file management.
+- `HotReloadService`: Watches for file changes to auto-refresh plugins.
 
 ---
 
@@ -161,29 +151,29 @@ Entry: `lib/main.dart`
 ## Directory Structure
 
 ```text
-crossbar/
-├── bin/
-│   ├── crossbar.dart
-│   └── crossbar_tray_daemon.dart
+├── assets/
+│   ├── icons/                  # Tray and app icons (PNG, SVG, ICO)
+│   └── fonts/                  # Custom application fonts
+├── bin/                        # Standalone Dart scripts and daemons
 ├── lib/
-│   ├── main.dart
-│   ├── core/
-│   ├── services/
-│   ├── ui/
-│   └── cli/
+│   ├── cli/                    # CLI logic (non-Flutter)
+│   ├── core/                   # Core business logic and runners
+│   ├── services/               # Singleton application services
+│   ├── ui/                     # Flutter widgets and screens
+│   └── main.dart               # GUI entrypoint
 ├── packages/
-│   ├── crossbar_core/
-│   ├── crossbar_cli/
-│   └── crossbar_api/
-├── android/
-├── ios/
-├── linux/
-├── macos/
-├── windows/
-├── plugins/
-├── docs/
-├── test/
-└── Makefile
+│   ├── crossbar_core/          # Shared models and runners (Pure Dart)
+│   ├── crossbar_cli/           # CLI Command implementations
+│   └── crossbar_api/           # Public SDK for plugin authors
+├── android/                    # Android-specific native code and layouts
+├── ios/                        # iOS-specific native code and WidgetKit
+├── linux/                      # Linux-specific runner and .desktop files
+├── macos/                      # macOS-specific runner
+├── windows/                    # Windows-specific runner
+├── plugins/                    # Default and sample plugins
+├── docs/                       # Technical documentation and guides
+├── test/                       # Unit, widget, and functional tests
+└── Makefile                    # Build and development orchestration
 ```
 
 ---
