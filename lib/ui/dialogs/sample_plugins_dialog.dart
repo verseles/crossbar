@@ -24,8 +24,6 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   final SamplePluginsService _service = SamplePluginsService();
   final Map<String, bool> _installedStatus =
       {}; // variant.filename -> installed
-  final Map<String, PluginLanguage> _selectedLanguages =
-      {}; // plugin.id -> language
   final Set<String> _installingPlugins = {}; // plugin.id being installed
   final List<String> _installedFilenames = []; // track what we installed
   PluginCategory? _selectedCategory;
@@ -39,16 +37,10 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
 
   Future<void> _loadInstalledStatus() async {
     for (final plugin in SamplePluginsService.allPlugins) {
-      // Set default language to Lua (universal, works everywhere) or first available
-      _selectedLanguages[plugin.id] = plugin.hasLanguage(PluginLanguage.lua)
-          ? PluginLanguage.lua
-          : plugin.variants.first.language;
-
-      for (final variant in plugin.variants) {
-        _installedStatus[variant.filename] = await _service.isInstalled(
-          variant.filename,
-        );
-      }
+      final variant = plugin.variants.first;
+      _installedStatus[variant.filename] = await _service.isInstalled(
+        variant.filename,
+      );
     }
     if (mounted) {
       setState(() {
@@ -69,23 +61,12 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   }
 
   bool _isPluginInstalled(PluginMetadata plugin) {
-    // A plugin is considered installed if ANY variant is installed
-    return plugin.variants.any((v) => _installedStatus[v.filename] ?? false);
-  }
-
-  /// Check if the currently selected variant is installed
-  bool _isVariantInstalled(PluginMetadata plugin) {
-    final language =
-        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
-    final variant = plugin.getVariant(language);
-    if (variant == null) return false;
+    final variant = plugin.variants.first;
     return _installedStatus[variant.filename] ?? false;
   }
 
   Future<void> _installPlugin(PluginMetadata plugin) async {
-    final language =
-        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
-    final variant = plugin.getVariant(language) ?? plugin.defaultVariant;
+    final variant = plugin.variants.first;
 
     setState(() {
       _installingPlugins.add(plugin.id);
@@ -101,7 +82,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Installed ${plugin.name} (${language.displayName})'),
+            content: Text('Installed ${plugin.name} (Lua)'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -200,6 +181,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   }
 
   Widget _buildHeader(ThemeData theme) {
+    final pluginCount = SamplePluginsService.universalPlugins.length;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -221,10 +203,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                   ),
                 ),
                 Text(
-                  AppLocalizations.of(context)!.universalAndAdditionalPlugins(
-                    SamplePluginsService.universalPlugins.length,
-                    0,
-                  ),
+                  '$pluginCount Lua plugins — all platforms',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer.withValues(
                       alpha: 0.7,
@@ -331,11 +310,8 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
   }
 
   Widget _buildPluginCard(ThemeData theme, PluginMetadata plugin) {
-    final hasInstalledVariant = _isPluginInstalled(plugin);
-    final isVariantInstalled = _isVariantInstalled(plugin);
+    final isInstalled = _isPluginInstalled(plugin);
     final isInstalling = _installingPlugins.contains(plugin.id);
-    final selectedLang =
-        _selectedLanguages[plugin.id] ?? plugin.defaultVariant.language;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -382,7 +358,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                               ),
                             ),
                           ],
-                          if (hasInstalledVariant) ...[
+                          if (isInstalled) ...[
                             const SizedBox(width: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -418,86 +394,28 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
               ],
             ),
             const Spacer(),
-            // Action row: Language selector + Install button
+            // Action row: Lua chip + Install button
             Row(
               children: [
-                // Language dropdown
-                if (plugin.variants.length > 1) ...[
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: theme.colorScheme.outline.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<PluginLanguage>(
-                          value: selectedLang,
-                          isDense: true,
-                          isExpanded: true,
-                          items: plugin.availableLanguages.map((lang) {
-                            final langVariant = plugin.getVariant(lang);
-                            final langInstalled =
-                                langVariant != null &&
-                                (_installedStatus[langVariant.filename] ??
-                                    false);
-                            return DropdownMenuItem(
-                              value: lang,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    '${lang.icon} ${lang.displayName}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  if (langInstalled) ...[
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      Icons.check,
-                                      size: 12,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (lang) {
-                            if (lang != null) {
-                              setState(() {
-                                _selectedLanguages[plugin.id] = lang;
-                              });
-                            }
-                          },
-                        ),
-                      ),
+                // Fixed Lua chip
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${PluginLanguage.lua.icon} Lua',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                ] else ...[
-                  // Single language - just show a chip
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${selectedLang.icon} ${selectedLang.displayName}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                ],
+                ),
+                const Spacer(),
                 // Install button
                 if (isInstalling)
                   const SizedBox(
@@ -505,7 +423,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                else if (!isVariantInstalled)
+                else if (!isInstalled)
                   FilledButton.tonal(
                     onPressed: () => _installPlugin(plugin),
                     child: Text(AppLocalizations.of(context)!.install),

@@ -136,15 +136,8 @@ class PluginMetadata {
     );
   }
 
-  /// Get the default/preferred variant (Lua first for universal compatibility)
-  PluginMetadataVariant get defaultVariant {
-    // Prefer Lua for universal compatibility, then Bash for desktop
-    for (final lang in [PluginLanguage.lua, PluginLanguage.bash, PluginLanguage.python, PluginLanguage.dart]) {
-      final v = getVariant(lang);
-      if (v != null) return v;
-    }
-    return variants.first;
-  }
+  /// Get the default variant (first/only variant — Lua for samples)
+  PluginMetadataVariant get defaultVariant => variants.first;
 
   /// Category icon
   String get categoryIcon => category.icon;

@@ -127,7 +127,7 @@ O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
 │   │   └── runners/            # Declarative and Dart Runners
 │   ├── services/               # Singleton Services (Tray, Refresh, Config, Marketplace)
 │   └── ui/                     # Widgets Flutter (Material 3)
-├── plugins/                    # Exemplos de plugins (Lua, Bash, Python, JS, Dart...)
+├── plugins/                    # 25 Lua sample plugins (all platforms)
 ├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
 └── Makefile                    # Comandos de dev (make linux, make test)
 ```
@@ -140,7 +140,8 @@ O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
 
 - Local: `~/.crossbar/plugins/` (ou pasta local em dev).
 - Identificação: Extensão (`.py`, `.sh`) ou Shebang.
-- Intervalo: Parseado do nome (ex: `cpu.10s.sh` = 10 segundos).
+- Intervalo: Parseado do nome (ex: `cpu.10s.lua` = 10 segundos).
+- **Samples**: Todos os 25 plugins de exemplo usam Lua (ADR-014). Usuários podem criar plugins em qualquer linguagem.
 
 ### Execução
 
@@ -165,7 +166,7 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 > **Decisão Crítica (v1.1)**: Separação estrita entre definição e dados.
 
-- **Schema (`.schema.json`)**: Define os campos/UI. Reside junto ao plugin (ex: `plugins/cpu.py.schema.json`). Deve ser versionado.
+- **Schema (`.schema.json`)**: Define os campos/UI. Reside junto ao plugin (ex: `plugins/cpu/cpu.10s.lua.schema.json`). Deve ser versionado.
 - **Values (`.json`)**: Valores preenchidos pelo usuário. Reside em `~/.crossbar/configs/`. JAMAIS salve dados na pasta de plugins.
 - **Secrets**: Campos `type: password` são salvos no SecureStorage (Keyring/Keychain), nunca em texto plano.
 
@@ -637,6 +638,25 @@ GNOME Settings → gsettings monitor (Process)
 - ⚠️ Processo externo adicional no Linux (mínimo overhead, event-driven)
 - ℹ️ `AndroidInitializationSettings` DEVE usar `@mipmap/ic_launcher`, nunca drawable customizado (causa falha silenciosa)
 - ℹ️ GNOME usa convenção `-symbolic.svg` para ícones de painel; futuro: instalar `com.verseles.crossbar-symbolic.svg`
+
+### ADR-014: Lua-First Sample Plugin System (2026-02-06)
+
+**Status**: ✅ Accepted
+**Context**: O Crossbar suportava 8 linguagens para plugins de exemplo (Bash, Python, Node.js, Dart, Go, Rust, Lua, YAML). Cada plugin mantinha 2-8 variantes, totalizando ~80 arquivos, complexidade na UI (dropdown de linguagem por plugin) e assets desnecessários no bundle. Todos os 25 plugins já tinham versão Lua funcional. Lua é a única linguagem com interpretador embarcado (lua_dardo), funcionando em TODAS as plataformas (Linux, macOS, Windows, Android, iOS) sem dependências externas, com footprint de ~400KB, sandboxing nativo e API projetada para embedding.
+
+**Decision**:
+- Tornar samples oficiais Lua-only (remover variantes bash/python/node/dart/go/rust/yaml)
+- Manter enum `PluginLanguage` completo e core de execução intacto (usuarios podem criar plugins em qualquer linguagem)
+- Simplificar UI do diálogo de samples (remover dropdown de linguagem)
+- Scaffolding (`crossbar init`) e marketplace continuam suportando todas as linguagens
+
+**Consequences**:
+- Redução de ~47 arquivos do bundle (~43 scripts + 4 schemas)
+- UI dramaticamente simplificada (sem dropdown de linguagem)
+- Menor tamanho do APK/bundle
+- Consistência: todos os samples funcionam em todas as plataformas
+- Trade-off: desenvolvedores que preferem bash/python precisam criar plugins próprios
+- Marketplace e execução de plugins do usuario NÃO são afetados
 
 ### Template para Novas ADRs
 

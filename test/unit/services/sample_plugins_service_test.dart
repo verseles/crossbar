@@ -38,9 +38,38 @@ void main() {
       expect(SamplePluginsService.universalPlugins, isNotEmpty);
     });
 
+    test('has 25 sample plugins', () {
+      expect(SamplePluginsService.universalPlugins.length, equals(25));
+    });
+
     test('allPlugins combines universal plugins', () {
       final all = SamplePluginsService.allPlugins;
       expect(all.length, equals(SamplePluginsService.universalPlugins.length));
+    });
+
+    test('all plugins have exactly 1 Lua variant', () {
+      for (final plugin in SamplePluginsService.allPlugins) {
+        expect(
+          plugin.variants.length,
+          equals(1),
+          reason: '${plugin.id} should have exactly 1 variant',
+        );
+        expect(
+          plugin.variants.first.language,
+          equals(PluginLanguage.lua),
+          reason: '${plugin.id} variant should be Lua',
+        );
+      }
+    });
+
+    test('all plugins have schema files', () {
+      for (final plugin in SamplePluginsService.allPlugins) {
+        expect(
+          plugin.variants.first.schemaAssetPath,
+          isNotNull,
+          reason: '${plugin.id} should have a schema',
+        );
+      }
     });
 
     group('search', () {
@@ -89,10 +118,32 @@ void main() {
       test('pluginsByCategory groups correctly', () {
         final service = SamplePluginsService();
         final grouped = service.pluginsByCategory;
-        
+
         expect(grouped[PluginCategory.system], isNotEmpty);
         final cpuPlugin = grouped[PluginCategory.system]!.firstWhere((p) => p.id == 'cpu');
         expect(cpuPlugin, isNotNull);
+      });
+    });
+
+    group('new plugins present', () {
+      test('disk plugin exists', () {
+        final found = SamplePluginsService.allPlugins.any((p) => p.id == 'disk');
+        expect(found, isTrue);
+      });
+
+      test('network plugin exists', () {
+        final found = SamplePluginsService.allPlugins.any((p) => p.id == 'network');
+        expect(found, isTrue);
+      });
+
+      test('spotify plugin exists', () {
+        final found = SamplePluginsService.allPlugins.any((p) => p.id == 'spotify');
+        expect(found, isTrue);
+      });
+
+      test('ssh-connections plugin exists', () {
+        final found = SamplePluginsService.allPlugins.any((p) => p.id == 'ssh-connections');
+        expect(found, isTrue);
       });
     });
 
@@ -100,7 +151,7 @@ void main() {
       // We need to mock rootBundle for this to work in unit tests
       // or use integration tests.
       // For unit testing logic, we can verify paths.
-      
+
       test('isInstalled checks correct path', () async {
         final service = SamplePluginsService();
         final isInstalled = await service.isInstalled('non_existent.sh');

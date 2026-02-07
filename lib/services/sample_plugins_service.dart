@@ -11,6 +11,10 @@ import '../models/plugin_metadata.dart';
 export '../models/plugin_metadata.dart';
 
 /// Service for managing sample/example plugins bundled with the app.
+///
+/// All sample plugins use Lua (embedded interpreter) for universal
+/// cross-platform compatibility. Users can create plugins in any
+/// language they prefer for their own use.
 class SamplePluginsService {
   factory SamplePluginsService() => _instance;
 
@@ -21,7 +25,7 @@ class SamplePluginsService {
 
   final PluginManager _pluginManager = PluginManager();
 
-  /// Universal plugins with multi-language support
+  /// Sample plugins — all Lua-only for universal compatibility
   static const List<PluginMetadata> universalPlugins = [
     // ─────────────────────────────────────────────────────────────
     // SYSTEM MONITORING
@@ -35,45 +39,10 @@ class SamplePluginsService {
       tags: ['cpu', 'monitor', 'usage', 'hardware'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'cpu.10s.sh',
-          assetPath: 'plugins/cpu/cpu.10s.sh',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.python,
-          filename: 'cpu.10s.py',
-          assetPath: 'plugins/cpu/cpu.10s.py',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.node,
-          filename: 'cpu.10s.js',
-          assetPath: 'plugins/cpu/cpu.10s.js',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.dart,
-          filename: 'cpu.10s.dart',
-          assetPath: 'plugins/cpu/cpu.10s.dart',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.go,
-          filename: 'cpu.10s.go',
-          assetPath: 'plugins/cpu/cpu.10s.go',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.rust,
-          filename: 'cpu.10s.rs',
-          assetPath: 'plugins/cpu/cpu.10s.rs',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'cpu.10s.lua',
           assetPath: 'plugins/cpu/cpu.10s.lua',
           schemaAssetPath: 'plugins/cpu/cpu.10s.lua.schema.json',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.yaml,
-          filename: 'cpu.5s.yaml',
-          assetPath: 'plugins/yaml/cpu.5s.yaml',
         ),
       ],
     ),
@@ -85,11 +54,6 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['memory', 'ram', 'monitor', 'usage'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'memory.10s.sh',
-          assetPath: 'plugins/memory/memory.10s.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'memory.10s.lua',
@@ -107,11 +71,6 @@ class SamplePluginsService {
       tags: ['battery', 'power', 'charging'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'battery.2s.sh',
-          assetPath: 'plugins/battery/battery.2s.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'battery.2s.lua',
           assetPath: 'plugins/battery/battery.2s.lua',
@@ -128,36 +87,6 @@ class SamplePluginsService {
       tags: ['uptime', 'boot', 'system'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'uptime.1m.sh',
-          assetPath: 'plugins/uptime/uptime.1m.sh',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.python,
-          filename: 'uptime.1m.py',
-          assetPath: 'plugins/uptime/uptime.1m.py',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.node,
-          filename: 'uptime.1m.js',
-          assetPath: 'plugins/uptime/uptime.1m.js',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.dart,
-          filename: 'uptime.1m.dart',
-          assetPath: 'plugins/uptime/uptime.1m.dart',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.go,
-          filename: 'uptime.1m.go',
-          assetPath: 'plugins/uptime/uptime.1m.go',
-        ),
-        PluginMetadataVariant(
-          language: PluginLanguage.rust,
-          filename: 'uptime.1m.rs',
-          assetPath: 'plugins/uptime/uptime.1m.rs',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'uptime.1m.lua',
           assetPath: 'plugins/uptime/uptime.1m.lua',
@@ -173,15 +102,41 @@ class SamplePluginsService {
       tags: ['system', 'os', 'kernel'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'system-info.1m.sh',
-          assetPath: 'plugins/system-info/system-info.1m.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'system-info.1m.lua',
           assetPath: 'plugins/system-info/system-info.1m.lua',
           schemaAssetPath: 'plugins/system-info/system-info.1m.lua.schema.json',
+        ),
+      ],
+    ),
+    PluginMetadata(
+      id: 'disk',
+      name: 'Disk Usage',
+      description: 'Shows disk space usage',
+      category: PluginCategory.system,
+      tags: ['disk', 'storage', 'space'],
+      variants: [
+        PluginMetadataVariant(
+          language: PluginLanguage.lua,
+          filename: 'disk.5m.lua',
+          assetPath: 'plugins/disk/disk.5m.lua',
+          schemaAssetPath: 'plugins/disk/disk.5m.lua.schema.json',
+        ),
+      ],
+    ),
+    PluginMetadata(
+      id: 'process-monitor',
+      name: 'Process Monitor',
+      description: 'Shows top CPU processes',
+      category: PluginCategory.system,
+      tags: ['process', 'cpu', 'monitor'],
+      variants: [
+        PluginMetadataVariant(
+          language: PluginLanguage.lua,
+          filename: 'process-monitor.10s.lua',
+          assetPath: 'plugins/process-monitor/process-monitor.10s.lua',
+          schemaAssetPath:
+              'plugins/process-monitor/process-monitor.10s.lua.schema.json',
         ),
       ],
     ),
@@ -198,11 +153,6 @@ class SamplePluginsService {
       tags: ['time', 'clock', 'date'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'clock.1s.sh',
-          assetPath: 'plugins/clock/clock.1s.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'clock.1s.lua',
           assetPath: 'plugins/clock/clock.1s.lua',
@@ -217,11 +167,6 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['time', 'clock'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'time.1s.sh',
-          assetPath: 'plugins/time/time.1s.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'time.1s.lua',
@@ -238,11 +183,6 @@ class SamplePluginsService {
       tags: ['time', 'clock', 'emoji'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'emoji-clock.1m.sh',
-          assetPath: 'plugins/emoji-clock/emoji-clock.1m.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'emoji-clock.1m.lua',
           assetPath: 'plugins/emoji-clock/emoji-clock.1m.lua',
@@ -257,11 +197,6 @@ class SamplePluginsService {
       category: PluginCategory.time,
       tags: ['time', 'timezone', 'world'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'world-clock.1m.sh',
-          assetPath: 'plugins/world-clock/world-clock.1m.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'world-clock.1m.lua',
@@ -278,11 +213,6 @@ class SamplePluginsService {
       tags: ['countdown', 'timer'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'countdown.1s.sh',
-          assetPath: 'plugins/countdown/countdown.1s.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'countdown.1s.lua',
           assetPath: 'plugins/countdown/countdown.1s.lua',
@@ -297,11 +227,6 @@ class SamplePluginsService {
       category: PluginCategory.productivity,
       tags: ['pomodoro', 'timer', 'focus'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'pomodoro.1s.sh',
-          assetPath: 'plugins/pomodoro/pomodoro.1s.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'pomodoro.1s.lua',
@@ -324,12 +249,6 @@ class SamplePluginsService {
       tags: ['weather', 'temperature', 'forecast', 'api'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'weather.30m.sh',
-          assetPath: 'plugins/weather/weather.30m.sh',
-          schemaAssetPath: 'plugins/weather/weather.schema.json',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'weather.30m.lua',
           assetPath: 'plugins/weather/weather.30m.lua',
@@ -344,11 +263,6 @@ class SamplePluginsService {
       category: PluginCategory.network,
       tags: ['ip', 'location', 'public'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'ip-info.1h.sh',
-          assetPath: 'plugins/ip-info/ip-info.1h.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'ip-info.1h.lua',
@@ -365,15 +279,25 @@ class SamplePluginsService {
       tags: ['network', 'status', 'ping'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'site-check.1m.sh',
-          assetPath: 'plugins/site-check/site-check.1m.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'site-check.1m.lua',
           assetPath: 'plugins/site-check/site-check.1m.lua',
           schemaAssetPath: 'plugins/site-check/site-check.1m.lua.schema.json',
+        ),
+      ],
+    ),
+    PluginMetadata(
+      id: 'network',
+      name: 'Network Monitor',
+      description: 'Shows network interface status and traffic',
+      category: PluginCategory.network,
+      tags: ['network', 'traffic', 'interface'],
+      variants: [
+        PluginMetadataVariant(
+          language: PluginLanguage.lua,
+          filename: 'network.30s.lua',
+          assetPath: 'plugins/network/network.30s.lua',
+          schemaAssetPath: 'plugins/network/network.30s.lua.schema.json',
         ),
       ],
     ),
@@ -389,11 +313,6 @@ class SamplePluginsService {
       mobileCompatible: true,
       tags: ['bitcoin', 'crypto', 'price', 'finance', 'btc'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'bitcoin.5m.sh',
-          assetPath: 'plugins/bitcoin/bitcoin.5m.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'bitcoin.5m.lua',
@@ -414,11 +333,6 @@ class SamplePluginsService {
       tags: ['git', 'vcs', 'repo'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'git-status.30s.sh',
-          assetPath: 'plugins/git-status/git-status.30s.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'git-status.30s.lua',
           assetPath: 'plugins/git-status/git-status.30s.lua',
@@ -433,11 +347,6 @@ class SamplePluginsService {
       category: PluginCategory.development,
       tags: ['npm', 'package', 'downloads'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'npm-downloads.1h.sh',
-          assetPath: 'plugins/npm-downloads/npm-downloads.1h.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'npm-downloads.1h.lua',
@@ -456,13 +365,6 @@ class SamplePluginsService {
       tags: ['github', 'notifications', 'api'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'github-notifications.5m.sh',
-          assetPath: 'plugins/github-notifications/github-notifications.5m.sh',
-          schemaAssetPath:
-              'plugins/github-notifications/github-notifications.5m.py.schema.json', // Reuse existing schema
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'github-notifications.5m.lua',
           assetPath: 'plugins/github-notifications/github-notifications.5m.lua',
@@ -472,23 +374,33 @@ class SamplePluginsService {
       ],
     ),
     PluginMetadata(
-      id: 'process-monitor',
-      name: 'Process Monitor',
-      description: 'Shows top CPU processes',
+      id: 'spotify',
+      name: 'Spotify Now Playing',
+      description: 'Shows currently playing track on Spotify',
       category: PluginCategory.development,
-      tags: ['process', 'cpu', 'monitor'],
+      tags: ['spotify', 'music', 'media', 'player'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'process-monitor.10s.sh',
-          assetPath: 'plugins/process-monitor/process-monitor.10s.sh',
+          language: PluginLanguage.lua,
+          filename: 'spotify.5s.lua',
+          assetPath: 'plugins/spotify/spotify.5s.lua',
+          schemaAssetPath: 'plugins/spotify/spotify.5s.lua.schema.json',
         ),
+      ],
+    ),
+    PluginMetadata(
+      id: 'ssh-connections',
+      name: 'SSH Connections',
+      description: 'Shows active SSH connections',
+      category: PluginCategory.development,
+      tags: ['ssh', 'connections', 'network', 'remote'],
+      variants: [
         PluginMetadataVariant(
           language: PluginLanguage.lua,
-          filename: 'process-monitor.10s.lua',
-          assetPath: 'plugins/process-monitor/process-monitor.10s.lua',
+          filename: 'ssh-connections.30s.lua',
+          assetPath: 'plugins/ssh-connections/ssh-connections.30s.lua',
           schemaAssetPath:
-              'plugins/process-monitor/process-monitor.10s.lua.schema.json',
+              'plugins/ssh-connections/ssh-connections.30s.lua.schema.json',
         ),
       ],
     ),
@@ -504,11 +416,6 @@ class SamplePluginsService {
       tags: ['todo', 'tasks', 'list'],
       variants: [
         PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'todo.1m.sh',
-          assetPath: 'plugins/todo/todo.1m.sh',
-        ),
-        PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'todo.1m.lua',
           assetPath: 'plugins/todo/todo.1m.lua',
@@ -523,11 +430,6 @@ class SamplePluginsService {
       category: PluginCategory.fun,
       tags: ['quotes', 'inspiration', 'motivation'],
       variants: [
-        PluginMetadataVariant(
-          language: PluginLanguage.bash,
-          filename: 'quotes.1h.sh',
-          assetPath: 'plugins/quotes/quotes.1h.sh',
-        ),
         PluginMetadataVariant(
           language: PluginLanguage.lua,
           filename: 'quotes.1h.lua',
@@ -556,11 +458,6 @@ class SamplePluginsService {
       ..sort((a, b) => a.displayName.compareTo(b.displayName));
   }
 
-  /// Get plugins that support a specific language
-  List<PluginMetadata> getPluginsForLanguage(PluginLanguage language) {
-    return allPlugins.where((p) => p.hasLanguage(language)).toList();
-  }
-
   /// Get mobile-compatible plugins
   List<PluginMetadata> get mobileCompatiblePlugins {
     return allPlugins.where((p) => p.mobileCompatible).toList();
@@ -576,49 +473,48 @@ class SamplePluginsService {
     final pluginsDir = await _pluginManager.pluginsDirectory;
 
     for (final plugin in allPlugins) {
-      for (final variant in plugin.variants) {
-        final baseName = variant.filename.split('.').first;
-        final targetDir = path.join(pluginsDir, baseName);
+      final variant = plugin.variants.first;
+      final baseName = variant.filename.split('.').first;
+      final targetDir = path.join(pluginsDir, baseName);
 
-        final enabledPath = path.join(targetDir, variant.filename);
-        final disabledPath = path.join(
-          targetDir,
-          variant.filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1'),
-        );
+      final enabledPath = path.join(targetDir, variant.filename);
+      final disabledPath = path.join(
+        targetDir,
+        variant.filename.replaceFirst(RegExp(r'\.([^.]+)$'), r'.off.$1'),
+      );
 
-        final enabledFile = File(enabledPath);
-        final disabledFile = File(disabledPath);
+      final enabledFile = File(enabledPath);
+      final disabledFile = File(disabledPath);
 
-        final targetFile = await enabledFile.exists()
-            ? enabledFile
-            : await disabledFile.exists()
-            ? disabledFile
-            : null;
+      final targetFile = await enabledFile.exists()
+          ? enabledFile
+          : await disabledFile.exists()
+          ? disabledFile
+          : null;
 
-        if (targetFile == null) continue;
+      if (targetFile == null) continue;
 
-        final assetContent = await rootBundle.loadString(variant.assetPath);
-        final currentContent = await targetFile.readAsString();
+      final assetContent = await rootBundle.loadString(variant.assetPath);
+      final currentContent = await targetFile.readAsString();
 
-        if (!force && currentContent != assetContent) {
-          continue;
-        }
+      if (!force && currentContent != assetContent) {
+        continue;
+      }
 
-        if (currentContent != assetContent) {
-          await targetFile.writeAsString(assetContent);
-        }
+      if (currentContent != assetContent) {
+        await targetFile.writeAsString(assetContent);
+      }
 
-        if (variant.schemaAssetPath != null) {
-          try {
-            final schemaContent = await rootBundle.loadString(
-              variant.schemaAssetPath!,
-            );
-            await File(
-              '${targetFile.path}.schema.json',
-            ).writeAsString(schemaContent);
-          } catch (_) {
-            // Schema file is optional
-          }
+      if (variant.schemaAssetPath != null) {
+        try {
+          final schemaContent = await rootBundle.loadString(
+            variant.schemaAssetPath!,
+          );
+          await File(
+            '${targetFile.path}.schema.json',
+          ).writeAsString(schemaContent);
+        } catch (_) {
+          // Schema file is optional
         }
       }
     }
@@ -697,24 +593,15 @@ class SamplePluginsService {
     }
   }
 
-  /// Install a plugin with the preferred language
-  Future<void> install(
-    PluginMetadata plugin, {
-    PluginLanguage? preferredLanguage,
-  }) async {
-    final variant = preferredLanguage != null
-        ? plugin.getVariant(preferredLanguage) ?? plugin.defaultVariant
-        : plugin.defaultVariant;
-    await installVariant(variant);
+  /// Install the Lua variant of a plugin
+  Future<void> install(PluginMetadata plugin) async {
+    await installVariant(plugin.defaultVariant);
   }
 
   /// Install multiple plugins at once
-  Future<void> installMultiple(
-    List<PluginMetadata> plugins, {
-    PluginLanguage? preferredLanguage,
-  }) async {
+  Future<void> installMultiple(List<PluginMetadata> plugins) async {
     for (final plugin in plugins) {
-      await install(plugin, preferredLanguage: preferredLanguage);
+      await install(plugin);
     }
   }
 

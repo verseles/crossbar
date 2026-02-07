@@ -106,30 +106,21 @@ void main() {
   });
 
   group('PluginMetadata', () {
-    late PluginMetadata pluginWithMultipleVariants;
+    late PluginMetadata pluginWithLua;
     late PluginMetadata pluginWithSingleVariant;
 
     setUp(() {
-      pluginWithMultipleVariants = const PluginMetadata(
+      pluginWithLua = const PluginMetadata(
         id: 'cpu',
         name: 'CPU Monitor',
         description: 'Shows CPU usage',
         category: PluginCategory.system,
         variants: [
           PluginMetadataVariant(
-            language: PluginLanguage.bash,
-            filename: 'cpu.sh',
-            assetPath: 'plugins/cpu.sh',
-          ),
-          PluginMetadataVariant(
             language: PluginLanguage.lua,
-            filename: 'cpu.lua',
-            assetPath: 'plugins/cpu.lua',
-          ),
-          PluginMetadataVariant(
-            language: PluginLanguage.python,
-            filename: 'cpu.py',
-            assetPath: 'plugins/cpu.py',
+            filename: 'cpu.10s.lua',
+            assetPath: 'plugins/cpu/cpu.10s.lua',
+            schemaAssetPath: 'plugins/cpu/cpu.10s.lua.schema.json',
           ),
         ],
         tags: ['system', 'monitoring'],
@@ -144,22 +135,22 @@ void main() {
         category: PluginCategory.other,
         variants: [
           PluginMetadataVariant(
-            language: PluginLanguage.node,
-            filename: 'weather.js',
-            assetPath: 'plugins/weather.js',
+            language: PluginLanguage.lua,
+            filename: 'weather.30m.lua',
+            assetPath: 'plugins/weather/weather.30m.lua',
           ),
         ],
       );
     });
 
     test('stores properties correctly', () {
-      expect(pluginWithMultipleVariants.id, 'cpu');
-      expect(pluginWithMultipleVariants.name, 'CPU Monitor');
-      expect(pluginWithMultipleVariants.description, 'Shows CPU usage');
-      expect(pluginWithMultipleVariants.category, PluginCategory.system);
-      expect(pluginWithMultipleVariants.tags, ['system', 'monitoring']);
-      expect(pluginWithMultipleVariants.configRequired, false);
-      expect(pluginWithMultipleVariants.mobileCompatible, true);
+      expect(pluginWithLua.id, 'cpu');
+      expect(pluginWithLua.name, 'CPU Monitor');
+      expect(pluginWithLua.description, 'Shows CPU usage');
+      expect(pluginWithLua.category, PluginCategory.system);
+      expect(pluginWithLua.tags, ['system', 'monitoring']);
+      expect(pluginWithLua.configRequired, false);
+      expect(pluginWithLua.mobileCompatible, true);
     });
 
     test('default values are correct', () {
@@ -170,61 +161,59 @@ void main() {
 
     group('availableLanguages', () {
       test('returns list of all variant languages', () {
-        final languages = pluginWithMultipleVariants.availableLanguages;
+        final languages = pluginWithLua.availableLanguages;
 
-        expect(languages, hasLength(3));
-        expect(languages, contains(PluginLanguage.bash));
+        expect(languages, hasLength(1));
         expect(languages, contains(PluginLanguage.lua));
-        expect(languages, contains(PluginLanguage.python));
       });
     });
 
     group('getVariant', () {
       test('returns variant for existing language', () {
-        final variant = pluginWithMultipleVariants.getVariant(PluginLanguage.lua);
+        final variant = pluginWithLua.getVariant(PluginLanguage.lua);
 
         expect(variant, isNotNull);
         expect(variant!.language, PluginLanguage.lua);
-        expect(variant.filename, 'cpu.lua');
+        expect(variant.filename, 'cpu.10s.lua');
       });
 
       test('returns null for non-existing language', () {
-        final variant = pluginWithMultipleVariants.getVariant(PluginLanguage.rust);
+        final variant = pluginWithLua.getVariant(PluginLanguage.rust);
 
         expect(variant, isNull);
       });
     });
 
     group('defaultVariant', () {
-      test('prefers Lua when available', () {
-        final variant = pluginWithMultipleVariants.defaultVariant;
+      test('returns first (Lua) variant', () {
+        final variant = pluginWithLua.defaultVariant;
 
         expect(variant.language, PluginLanguage.lua);
       });
 
-      test('falls back to first variant if no preferred language', () {
+      test('returns first variant for any plugin', () {
         final variant = pluginWithSingleVariant.defaultVariant;
 
-        expect(variant.language, PluginLanguage.node);
+        expect(variant.language, PluginLanguage.lua);
       });
     });
 
     group('categoryIcon', () {
       test('returns category icon', () {
-        expect(pluginWithMultipleVariants.categoryIcon, '🖥️');
+        expect(pluginWithLua.categoryIcon, '🖥️');
         expect(pluginWithSingleVariant.categoryIcon, '📦');
       });
     });
 
     group('hasLanguage', () {
       test('returns true for existing language', () {
-        expect(pluginWithMultipleVariants.hasLanguage(PluginLanguage.lua), true);
-        expect(pluginWithMultipleVariants.hasLanguage(PluginLanguage.bash), true);
+        expect(pluginWithLua.hasLanguage(PluginLanguage.lua), true);
       });
 
       test('returns false for non-existing language', () {
-        expect(pluginWithMultipleVariants.hasLanguage(PluginLanguage.rust), false);
-        expect(pluginWithMultipleVariants.hasLanguage(PluginLanguage.yaml), false);
+        expect(pluginWithLua.hasLanguage(PluginLanguage.rust), false);
+        expect(pluginWithLua.hasLanguage(PluginLanguage.yaml), false);
+        expect(pluginWithLua.hasLanguage(PluginLanguage.bash), false);
       });
     });
   });

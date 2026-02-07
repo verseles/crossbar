@@ -23,6 +23,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
 - **Mobile Stability:** Cache persistente do `crossbar.web` no mobile e proteção contra varreduras vazias de plugins.
 - **Lua API:** Helpers `web/env/config/json` integrados nos plugins de exemplo.
+- **Lua-First Samples:** Todos os 25 sample plugins são Lua-only (ADR-014), UI simplificada sem dropdown de linguagem.
 - **Marketplace:** Sistema de busca e instalação via GitHub implementado (`MarketplaceService`).
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)

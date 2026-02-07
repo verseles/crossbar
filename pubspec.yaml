@@ -107,7 +107,6 @@ flutter:
     - plugins/uptime/
     - plugins/weather/
     - plugins/world-clock/
-    - plugins/yaml/
 
 flutter_launcher_icons:
   android: true

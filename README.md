@@ -11,18 +11,16 @@
 
 Crossbar is a revolutionary cross-platform plugin system inspired by [BitBar](https://github.com/matryer/xbar) (macOS) and [Argos](https://github.com/p-e-w/argos) (Linux), bringing the power of scriptable status bar widgets to **all platforms** - desktop and mobile.
 
-```python
-#!/usr/bin/env python3
-# This plugin works WITHOUT MODIFICATION on:
-# Linux, Windows, macOS, Android, iOS
-import subprocess, json
+```lua
+-- cpu.10s.lua — Works on ALL platforms (Linux, macOS, Windows, Android, iOS)
+local cpu = crossbar.cpu()
+local color = cpu >= 80 and 'red' or cpu >= 60 and 'yellow' or 'green'
 
-cpu = subprocess.run(['crossbar', 'cpu'], capture_output=True, text=True)
-print(json.dumps({
-    "icon": "⚡",
-    "text": f"{cpu.stdout.strip()}%",
-    "menu": [{"text": "Details", "bash": "crossbar process list"}]
-}))
+print('⚡ ' .. math.floor(cpu + 0.5) .. '% | color=' .. color)
+print('---')
+print('Usage: ' .. string.format('%.1f%%', cpu))
+print('Platform: ' .. crossbar.platform())
+print('Refresh | refresh=true')
 ```
 
 ## ✨ Features
@@ -30,7 +28,7 @@ print(json.dumps({
 ### 🚀 Core Capabilities
 
 - **🌍 True Cross-Platform**: One plugin, five target platforms (Linux, macOS, Windows, Android, iOS)
-- **8️⃣ Multi-Language Support**: Write plugins in Bash, Python, Node.js, Dart (Interpreted & Compiled), Go, Rust, or YAML
+- **🌙 Lua-First Plugins**: 25 sample plugins in Lua run on all platforms via embedded interpreter. Also supports Bash, Python, Node.js, Dart, Go, Rust, YAML
 - **⚡ Hot Reload**: Automatic plugin detection and reload (<1s)
 - **🎨 Adaptive Rendering**: Same plugin renders as tray icon, notification, or widget
 - **🔒 Secure Storage**: Passwords stored in system Keychain/KeyStore
@@ -150,22 +148,18 @@ make linux   # or make macos, make windows
 
 1. Create a plugin file in `~/.crossbar/plugins/` (plugins can be files in the root or inside subdirectories):
 
-```bash
-#!/bin/bash
-# ~/.crossbar/plugins/hello.10s.sh
-echo "👋 Hello Crossbar!"
-echo "---"
-echo "System: $(uname -s)"
-echo "Refresh | refresh=true"
+```lua
+-- ~/.crossbar/plugins/hello.10s.lua
+print('👋 Hello Crossbar!')
+print('---')
+print('Platform: ' .. crossbar.platform())
+print('Uptime: ' .. crossbar.uptime())
+print('Refresh | refresh=true')
 ```
 
-2. Make it executable:
+2. The plugin will auto-refresh every 10 seconds (from filename `*.10s.lua`)
 
-```bash
-chmod +x ~/.crossbar/plugins/hello.10s.sh
-```
-
-3. The plugin will auto-refresh every 10 seconds (from filename `*.10s.sh`)
+> **Tip**: Lua plugins work on **all platforms** (Linux, macOS, Windows, Android, iOS) without external dependencies. For desktop-only scripts, you can also use `.sh`, `.py`, `.js`, etc.
 
 ## 📖 Documentation
 
@@ -173,12 +167,13 @@ chmod +x ~/.crossbar/plugins/hello.10s.sh
 
 Crossbar supports multiple plugin types for different use cases:
 
-| Type                 | Extension           | Platforms | Use Case                            |
-| -------------------- | ------------------- | --------- | ----------------------------------- |
-| **YAML**             | `.yaml`             | All ✅    | Simple data display, no code needed |
-| **Dart Interpreted** | `.dart`             | All ✅    | Logic without external packages     |
-| **Script**           | `.sh`, `.py`, `.js` | Desktop   | Existing scripts, shell commands    |
-| **Dart Compiled**    | `.dart.exe`         | Desktop   | Full Dart with any package          |
+| Type                 | Extension           | Platforms | Use Case                                |
+| -------------------- | ------------------- | --------- | --------------------------------------- |
+| **Lua** ⭐           | `.lua`              | All ✅    | Recommended — embedded, fast, sandboxed |
+| **YAML**             | `.yaml`             | All ✅    | Simple data display, no code needed     |
+| **Dart Interpreted** | `.dart`             | All ✅    | Logic without external packages         |
+| **Script**           | `.sh`, `.py`, `.js` | Desktop   | Existing scripts, shell commands        |
+| **Dart Compiled**    | `.dart.exe`         | Desktop   | Full Dart with any package              |
 
 **Quick Examples:**
 
@@ -397,47 +392,55 @@ WEATHER_UNITS=metric
 For comprehensive documentation, see:
 
 - **[API Reference](docs/api-reference.md)** - Complete CLI command documentation (~75 commands)
-- **[Plugin Development Guide](docs/plugin-development.md)** - Step-by-step tutorial for all 6 languages
+- **[Plugin Development Guide](docs/plugin-development.md)** - Lua-first development guide with multi-language support
 - **[Configuration Schema](docs/config-schema.md)** - 25+ field types and grid layout system
 - **[Security Policy](SECURITY.md)** - Vulnerability reporting and security considerations
 
 ## 📦 Example Plugins
 
-Crossbar includes **24 example plugins** in 6 languages:
+Crossbar includes **25 Lua sample plugins** that run on **all platforms** via the embedded Lua interpreter:
 
-### Bash (8 plugins)
+### System Monitoring
 
-- `cpu.10s.sh` - CPU usage with color coding
-- `memory.10s.sh` - RAM usage visualization
-- `battery.30s.sh` - Battery status with icon
-- `disk.5m.sh` - Disk space monitor
-- `network.30s.sh` - Network speed (up/down)
-- `uptime.1m.sh` - System uptime
-- `spotify.5s.sh` - Now playing on Spotify
+- `cpu.10s.lua` - CPU usage with color coding
+- `memory.10s.lua` - RAM usage visualization
+- `battery.2s.lua` - Battery status with dynamic icons
+- `disk.5m.lua` - Disk space monitor
+- `uptime.1m.lua` - System uptime
+- `system-info.1m.lua` - Comprehensive system info
+- `process-monitor.10s.lua` - Top CPU processes
 
-### Python (8 plugins)
+### Time & Clocks
 
-- `weather.30m.py` - Weather from OpenWeatherMap API
-- `time.1s.py` - Live clock
-- `countdown.1s.py` - Event countdown timer
-- `todo.1m.py` - Simple todo list
-- `bitcoin.5m.py` - BTC price from CoinGecko
-- `github-notifications.5m.py` - GitHub notifications
-- `process-monitor.10s.py` - Top CPU processes
-- `quotes.1h.py` - Random inspirational quotes
+- `clock.1s.lua` - Current time display
+- `time.1s.lua` - Time with day phase icon
+- `emoji-clock.1m.lua` - Time as emoji clock faces
+- `world-clock.1m.lua` - Multi-timezone clocks
+- `countdown.1s.lua` - Event countdown timer
+- `pomodoro.1s.lua` - Pomodoro technique timer
 
-### Node.js (6 plugins)
+### Network & Web
 
-- `npm-downloads.1h.js` - NPM package stats
-- `ip-info.1h.js` - Geolocation info
-- `world-clock.1m.js` - Multi-timezone clocks
-- `pomodoro.1s.js` - Pomodoro timer
-- `emoji-clock.1m.js` - Time as emojis
+- `weather.30m.lua` - Weather from OpenWeatherMap API
+- `ip-info.1h.lua` - Public IP and geolocation
+- `site-check.1m.lua` - Website uptime checker
+- `network.30s.lua` - Network interface status
 
-### Dart (2 plugins)
+### Development
 
-- `system-info.1m.dart` - Comprehensive system info
-- `git-status.30s.dart` - Current repo status
+- `git-status.30s.lua` - Git repository status
+- `npm-downloads.1h.lua` - NPM package stats
+- `github-notifications.5m.lua` - GitHub notification count
+- `spotify.5s.lua` - Now playing on Spotify
+- `ssh-connections.30s.lua` - Active SSH connections
+
+### Productivity & Fun
+
+- `todo.1m.lua` - Simple todo list
+- `quotes.1h.lua` - Random inspirational quotes
+- `bitcoin.5m.lua` - BTC price from CoinGecko
+
+> **Note**: Users can still write plugins in Bash, Python, Node.js, Dart, Go, Rust, or YAML. Lua is the recommended default for cross-platform compatibility.
 
 ## 🏗️ Architecture
 
