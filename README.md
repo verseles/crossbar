@@ -362,14 +362,26 @@ Plugins can declare their configuration needs:
       "key": "UNITS",
       "type": "select",
       "label": "Temperature Units",
-      "options": ["metric", "imperial"],
+      "options": [
+        { "value": "metric", "label": "Celsius" },
+        { "value": "imperial", "label": "Fahrenheit" }
+      ],
       "default": "metric"
+    },
+    {
+      "key": "ALERT_AT",
+      "type": "datetime",
+      "label": "Alert datetime",
+      "default": "2026-12-31T23:59:59+00:00"
     }
   ]
 }
 ```
 
 Crossbar automatically generates a configuration dialog with proper UI controls.
+Tipos com suporte direto na UI hoje:
+`text`, `password`, `number`, `select`, `checkbox`, `color`, `file`, `path`,
+`url`, `textarea`, `slider`, `date`, `time`, `datetime`.
 
 ### Environment Variables
 
@@ -393,7 +405,7 @@ For comprehensive documentation, see:
 
 - **[API Reference](docs/api-reference.md)** - Complete CLI command documentation (~75 commands)
 - **[Plugin Development Guide](docs/plugin-development.md)** - Lua-first development guide with multi-language support
-- **[Configuration Schema](docs/config-schema.md)** - 25+ field types and grid layout system
+- **[Configuration Schema](docs/config-schema.md)** - Field types and validation reference
 - **[Security Policy](SECURITY.md)** - Vulnerability reporting and security considerations
 
 ## 📦 Example Plugins

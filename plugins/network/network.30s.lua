@@ -27,6 +27,9 @@ local is_mobile = crossbar.isMobile()
 local show_public = env_bool('NET_SHOW_PUBLIC_IP', false)
 local ping_host = env('NET_PING_HOST', '1.1.1.1')
 local show_ping = env_bool('NET_SHOW_PING', false)
+if ping_host == '' then
+    ping_host = '1.1.1.1'
+end
 
 if is_mobile then
     print('NET Mobile | color=gray')

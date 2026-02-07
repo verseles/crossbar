@@ -2,13 +2,32 @@
 -- Demonstrates nested menus using BitBar format
 -- Uses Crossbar embedded API for cross-platform compatibility
 
+local function env(name, default)
+    local value = crossbar.env(name, default)
+    if value == nil or value == '' then
+        return default
+    end
+    return value
+end
+
+local function env_bool(name, default)
+    local value = env(name, default and 'true' or 'false')
+    if value == nil then
+        return default
+    end
+    value = tostring(value):lower()
+    return value == 'true' or value == '1' or value == 'yes' or value == 'on'
+end
+
 local cpu = crossbar.cpu()
 local mem = crossbar.memory()
 local platform = crossbar.platform()
 local home = crossbar.homeDir()
 local uptime = crossbar.uptime()
+local show_env = env_bool('SUBMENU_SHOW_ENV', true)
+local menu_title = env('SUBMENU_TITLE', 'System')
 
-print('📊 System | color=blue')
+print('📊 ' .. menu_title .. ' | color=blue')
 print('---')
 
 -- Hardware submenu
@@ -49,6 +68,10 @@ print('---')
 print('Info')
 print('--Home: ' .. home)
 print('--OS: ' .. platform)
+if show_env then
+    print('--CROSSBAR_OS: ' .. env('CROSSBAR_OS', platform))
+    print('--CROSSBAR_VERSION: ' .. env('CROSSBAR_VERSION', 'unknown'))
+end
 
 print('---')
 print('Refresh | refresh=true')

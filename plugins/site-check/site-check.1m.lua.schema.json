@@ -7,14 +7,19 @@
     {
       "key": "SITE_URL",
       "label": "URL",
-      "type": "text",
-      "default": "https://www.google.com"
+      "type": "url",
+      "default": "https://www.google.com",
+      "required": true
     },
     {
       "key": "SITE_TIMEOUT",
-      "label": "Timeout (seconds)",
-      "type": "number",
-      "default": "5"
+      "label": "Timeout",
+      "type": "slider",
+      "default": "5",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "s"
     }
   ]
 }

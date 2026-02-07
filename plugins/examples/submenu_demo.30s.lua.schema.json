@@ -1,0 +1,20 @@
+{
+  "name": "Submenu Demo (Lua)",
+  "description": "Demonstrates nested menu rendering.",
+  "icon": "MENU",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "SUBMENU_SHOW_ENV",
+      "label": "Show environment section",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "SUBMENU_TITLE",
+      "label": "Menu title",
+      "type": "text",
+      "default": "System"
+    }
+  ]
+}

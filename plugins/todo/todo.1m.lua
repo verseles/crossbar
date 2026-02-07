@@ -16,6 +16,11 @@ local function expand_home(path)
     return path
 end
 
+local function shell_quote(value)
+    local escaped = tostring(value):gsub("'", "'\\''")
+    return "'" .. escaped .. "'"
+end
+
 local todo_file = expand_home(env('TODO_FILE', crossbar.homeDir() .. '/.crossbar/todo.txt'))
 
 local function read_todos()
@@ -46,5 +51,6 @@ else
 end
 
 print("---")
-print("Edit Todo List | bash='crossbar open file \"" .. todo_file .. "\"' terminal=false refresh=true")
+local open_cmd = "crossbar open file " .. shell_quote(todo_file)
+print('Edit Todo List | bash="' .. open_cmd .. '" terminal=false refresh=true')
 print("Refresh | refresh=true")

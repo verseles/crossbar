@@ -49,6 +49,8 @@ local status = data.status
 local artist = data.artist
 local track = data.title
 local max_len = env_num('MEDIA_MAX_LEN', 40)
+if max_len < 10 then max_len = 10 end
+if max_len > 200 then max_len = 200 end
 
 -- 3. Display info based on status
 if status == 'playing' and artist and track then

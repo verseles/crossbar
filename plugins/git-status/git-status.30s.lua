@@ -43,6 +43,8 @@ if is_mobile then
 end
 
 local max_files = env_num('GIT_MAX_FILES', 10)
+if max_files < 1 then max_files = 1 end
+if max_files > 200 then max_files = 200 end
 local show_files = env_bool('GIT_SHOW_FILES', true)
 
 local git_check = trim(crossbar.exec('git rev-parse --is-inside-work-tree 2>/dev/null'))

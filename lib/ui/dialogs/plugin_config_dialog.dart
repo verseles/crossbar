@@ -60,12 +60,9 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
 
   bool get _isValid {
     for (final setting in widget.config.settings) {
-      if (setting.required) {
-        final value = _values[setting.key];
-        if (value == null || value.isEmpty) {
-          return false;
-        }
-      }
+      final value = _values[setting.key];
+      final error = validateSettingValue(setting, value);
+      if (error != null) return false;
     }
     return true;
   }
@@ -108,7 +105,11 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
   Widget _buildFormScroller(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Form(key: _formKey, child: _buildForm(context)),
+      child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: _buildForm(context),
+      ),
     );
   }
 

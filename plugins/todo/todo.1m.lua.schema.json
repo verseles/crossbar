@@ -7,7 +7,7 @@
     {
       "key": "TODO_FILE",
       "label": "Todo file path",
-      "type": "text",
+      "type": "path",
       "default": "~/.crossbar/todo.txt"
     }
   ]

@@ -20,7 +20,8 @@
       "key": "NET_PING_HOST",
       "label": "Ping host",
       "type": "text",
-      "default": "1.1.1.1"
+      "default": "1.1.1.1",
+      "placeholder": "1.1.1.1"
     }
   ]
 }

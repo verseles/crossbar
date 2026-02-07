@@ -18,6 +18,11 @@ local function env_num(name, default)
     return num
 end
 
+local function shell_quote(value)
+    local escaped = tostring(value):gsub("'", "'\\''")
+    return "'" .. escaped .. "'"
+end
+
 local is_mobile = crossbar.isMobile()
 if is_mobile then
     print('DISK N/A | color=gray')
@@ -33,8 +38,15 @@ local default_path = platform == 'windows' and 'C:\\' or '/'
 local path = env('DISK_PATH', default_path)
 local warn = env_num('DISK_WARN', 75)
 local crit = env_num('DISK_CRIT', 90)
+if warn < 1 then warn = 1 end
+if warn > 100 then warn = 100 end
+if crit < 1 then crit = 1 end
+if crit > 100 then crit = 100 end
+if warn >= crit then
+    warn = math.max(1, crit - 1)
+end
 
-local result = crossbar.exec('crossbar disk ' .. path)
+local result = crossbar.exec('crossbar disk ' .. shell_quote(path))
 
 if result == nil or result == '' then
     print('DISK -- | color=gray')

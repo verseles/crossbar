@@ -10,6 +10,15 @@ local function env(name, default)
 end
 
 local package_name = env('NPM_PACKAGE', 'lodash')
+if not package_name:match('^[a-z0-9@._/%-]+$') then
+    print('📦 N/A | color=red')
+    print('---')
+    print('Invalid package name')
+    print('Allowed: a-z 0-9 @ . _ / -')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
 local url = 'https://api.npmjs.org/downloads/point/last-week/' .. package_name
 local response, err = crossbar.web(url)
 if response == nil then

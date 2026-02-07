@@ -7,9 +7,10 @@
     {
       "key": "WORLD_CLOCK_ZONES",
       "label": "Zones",
-      "type": "text",
-      "default": "New York|-5|US,London|0|UK,Tokyo|9|JP",
-      "help": "Format: Name|Offset|Flag,Name|Offset|Flag"
+      "type": "textarea",
+      "rows": 6,
+      "default": "New York|-5|🇺🇸\nLondon|0|🇬🇧\nTokyo|9|🇯🇵",
+      "help": "One per line: Name|Offset|Flag"
     }
   ]
 }

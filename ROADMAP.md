@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.10.0 (Tray Icon Standardization - Phase 1)
-**Próximo Ciclo:** v1.10.1+ (Tray Icon Phases 2-3)
+**Status Atual:** v1.11.0 (Configuration Engine v1.1 for Lua sample plugins)
+**Próximo Ciclo:** v1.11.1+ (Tray Icon Phases 2-3)
 
 ---
 
@@ -20,6 +20,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **UI Desktop:** Janela principal e abas implementadas.
 - **Tray:** Fixes for initialization race conditions and support for multi-icon SNI.
 - **Configuration Engine:** Persistência, UI e injeção de variáveis implementados.
+- **Configuration Engine v1.1:** Campos avançados de schema (`date`, `time`, `datetime`, `url`, `path`, `textarea`, `slider`) suportados na UI com validação.
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
 - **Mobile Stability:** Cache persistente do `crossbar.web` no mobile e proteção contra varreduras vazias de plugins.
 - **Lua API:** Helpers `web/env/config/json` integrados nos plugins de exemplo.

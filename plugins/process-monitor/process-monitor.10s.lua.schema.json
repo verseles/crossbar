@@ -7,8 +7,11 @@
     {
       "key": "PROC_MAX_ITEMS",
       "label": "Max items",
-      "type": "number",
-      "default": "5"
+      "type": "slider",
+      "default": "5",
+      "min": 1,
+      "max": 50,
+      "step": 1
     }
   ]
 }

@@ -8,13 +8,15 @@
       "key": "TIME_FORMAT",
       "label": "Time format",
       "type": "text",
-      "default": "HH:mm:ss"
+      "default": "HH:mm:ss",
+      "placeholder": "HH:mm:ss"
     },
     {
       "key": "DATE_FORMAT",
       "label": "Date format",
       "type": "text",
-      "default": "yyyy-MM-dd"
+      "default": "yyyy-MM-dd",
+      "placeholder": "yyyy-MM-dd"
     },
     {
       "key": "TIME_SHOW_DATE",

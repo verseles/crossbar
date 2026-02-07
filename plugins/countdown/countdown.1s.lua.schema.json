@@ -1,14 +1,16 @@
 {
   "name": "Countdown (Lua)",
-  "description": "Counts down to a target date/time.",
+  "description": "Counts down to a target date/time with timezone.",
   "icon": "COUNT",
   "config_required": "optional",
   "settings": [
     {
       "key": "COUNTDOWN_TARGET",
-      "label": "Target (YYYY-MM-DD HH:MM:SS)",
-      "type": "text",
-      "default": "2025-12-31 23:59:59"
+      "label": "Target datetime",
+      "type": "datetime",
+      "default": "2026-12-31T23:59:59+00:00",
+      "required": true,
+      "help": "RFC3339 with timezone, e.g. 2026-12-31T23:59:59+00:00."
     },
     {
       "key": "COUNTDOWN_LABEL",
@@ -19,7 +21,8 @@
     {
       "key": "COUNTDOWN_DONE_TEXT",
       "label": "Done message",
-      "type": "text",
+      "type": "textarea",
+      "rows": 2,
       "default": "Countdown complete!"
     }
   ]

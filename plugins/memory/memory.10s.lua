@@ -30,6 +30,13 @@ end
 
 local warn = env_num('MEM_WARN', 70)
 local crit = env_num('MEM_CRIT', 85)
+if warn < 1 then warn = 1 end
+if warn > 100 then warn = 100 end
+if crit < 1 then crit = 1 end
+if crit > 100 then crit = 100 end
+if warn >= crit then
+    warn = math.max(1, crit - 1)
+end
 local show_raw = env_bool('MEM_SHOW_RAW', false)
 local show_total = env_bool('MEM_SHOW_TOTAL', true)
 

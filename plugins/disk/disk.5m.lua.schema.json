@@ -7,21 +7,29 @@
     {
       "key": "DISK_PATH",
       "label": "Path",
-      "type": "text",
+      "type": "path",
       "default": "/",
-      "help": "Use C:\\ on Windows"
+      "help": "Directory to inspect. Use C:\\ on Windows."
     },
     {
       "key": "DISK_WARN",
-      "label": "Warning threshold (%)",
-      "type": "number",
-      "default": "75"
+      "label": "Warning threshold",
+      "type": "slider",
+      "default": "75",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "%"
     },
     {
       "key": "DISK_CRIT",
-      "label": "Critical threshold (%)",
-      "type": "number",
-      "default": "90"
+      "label": "Critical threshold",
+      "type": "slider",
+      "default": "90",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "%"
     }
   ]
 }

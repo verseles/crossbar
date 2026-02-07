@@ -53,13 +53,7 @@ void main() {
         description: 'Test description',
         icon: '',
         configRequired: 'optional',
-        settings: [
-          Setting(
-            key: 'TEST_KEY',
-            label: 'Test',
-            type: 'text',
-          ),
-        ],
+        settings: [Setting(key: 'TEST_KEY', label: 'Test', type: 'text')],
       );
 
       final json = config.toJson();
@@ -130,9 +124,7 @@ void main() {
         description: 'Test',
         icon: '',
         configRequired: 'optional',
-        settings: [
-          Setting(key: 'KEY', label: 'Label', type: 'text'),
-        ],
+        settings: [Setting(key: 'KEY', label: 'Label', type: 'text')],
       );
 
       expect(config.toString(), contains('Test Plugin'));
@@ -200,11 +192,7 @@ void main() {
     });
 
     test('serializes to JSON omits null values', () {
-      const setting = Setting(
-        key: 'TEST',
-        label: 'Test',
-        type: 'text',
-      );
+      const setting = Setting(key: 'TEST', label: 'Test', type: 'text');
 
       final json = setting.toJson();
 
@@ -233,6 +221,85 @@ void main() {
       expect(setting.required, true);
       expect(setting.defaultValue, 'default_value');
       expect(setting.width, 75);
+    });
+
+    test('deserializes options from map choices and numeric metadata', () {
+      final json = {
+        'key': 'TIMEOUT',
+        'label': 'Timeout',
+        'type': 'select',
+        'default': 5,
+        'required': 'true',
+        'options': {
+          'choices': [
+            {'value': '5', 'label': '5s'},
+            {'value': '10', 'label': '10s'},
+          ],
+          'min': 1,
+          'max': 30,
+          'step': 1,
+          'unit': 's',
+          'pattern': r'^\d+$',
+          'format': 'seconds',
+        },
+      };
+
+      final setting = Setting.fromJson(json);
+
+      expect(setting.defaultValue, '5');
+      expect(setting.required, isTrue);
+      expect(setting.options, isNotNull);
+      expect(setting.options!.length, 2);
+      expect(setting.min, 1);
+      expect(setting.max, 30);
+      expect(setting.step, 1);
+      expect(setting.unit, 's');
+      expect(setting.pattern, r'^\d+$');
+      expect(setting.format, 'seconds');
+    });
+
+    test('deserializes string list choices', () {
+      final json = {
+        'key': 'UNITS',
+        'label': 'Units',
+        'type': 'select',
+        'options': {
+          'choices': ['metric', 'imperial'],
+        },
+      };
+
+      final setting = Setting.fromJson(json);
+
+      expect(setting.options, isNotNull);
+      expect(setting.options!.map((o) => o.value), ['metric', 'imperial']);
+      expect(setting.options!.map((o) => o.label), ['metric', 'imperial']);
+    });
+
+    test('serializes additional metadata fields', () {
+      const setting = Setting(
+        key: 'SITE_URL',
+        label: 'URL',
+        type: 'url',
+        min: 1,
+        max: 30,
+        step: 1,
+        pattern: r'^https://',
+        format: 'rfc3339',
+        accept: '.json,.yaml',
+        unit: 's',
+        rows: 4,
+      );
+
+      final json = setting.toJson();
+
+      expect(json['min'], 1);
+      expect(json['max'], 30);
+      expect(json['step'], 1);
+      expect(json['pattern'], r'^https://');
+      expect(json['format'], 'rfc3339');
+      expect(json['accept'], '.json,.yaml');
+      expect(json['unit'], 's');
+      expect(json['rows'], 4);
     });
 
     test('copyWith creates new instance', () {

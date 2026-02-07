@@ -110,7 +110,16 @@ class Plugin {
   bool get hasConfig => config != null && config!.settings.isNotEmpty;
 
   /// Returns true if the plugin requires configuration before running.
-  bool get requiresConfig => config?.configRequired == 'required';
+  bool get requiresConfig {
+    final mode = config?.configRequired;
+    return mode == 'required' || mode == 'always' || mode == 'first_run';
+  }
+
+  /// Returns true when configuration should be requested on every run.
+  bool get requiresConfigAlways => config?.configRequired == 'always';
+
+  /// Returns true when configuration should be requested only for first run.
+  bool get requiresConfigFirstRun => config?.configRequired == 'first_run';
 
   /// Human-friendly display name for UI and widgets.
   ///

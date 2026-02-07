@@ -90,6 +90,73 @@ void main() {
       expect(plugin.displayName, 'My Plugin');
     });
 
+    test('requiresConfig supports required, always and first_run', () {
+      const requiredConfig = PluginConfig(
+        name: 'Required',
+        description: '',
+        icon: '',
+        configRequired: 'required',
+        settings: [Setting(key: 'A', label: 'A', type: 'text')],
+      );
+      const alwaysConfig = PluginConfig(
+        name: 'Always',
+        description: '',
+        icon: '',
+        configRequired: 'always',
+        settings: [Setting(key: 'A', label: 'A', type: 'text')],
+      );
+      const firstRunConfig = PluginConfig(
+        name: 'FirstRun',
+        description: '',
+        icon: '',
+        configRequired: 'first_run',
+        settings: [Setting(key: 'A', label: 'A', type: 'text')],
+      );
+      const optionalConfig = PluginConfig(
+        name: 'Optional',
+        description: '',
+        icon: '',
+        configRequired: 'optional',
+        settings: [Setting(key: 'A', label: 'A', type: 'text')],
+      );
+
+      const requiredPlugin = Plugin(
+        id: 'required.10s.lua',
+        path: '/tmp/required.10s.lua',
+        interpreter: 'lua',
+        refreshInterval: Duration(seconds: 10),
+        config: requiredConfig,
+      );
+      const alwaysPlugin = Plugin(
+        id: 'always.10s.lua',
+        path: '/tmp/always.10s.lua',
+        interpreter: 'lua',
+        refreshInterval: Duration(seconds: 10),
+        config: alwaysConfig,
+      );
+      const firstRunPlugin = Plugin(
+        id: 'first.10s.lua',
+        path: '/tmp/first.10s.lua',
+        interpreter: 'lua',
+        refreshInterval: Duration(seconds: 10),
+        config: firstRunConfig,
+      );
+      const optionalPlugin = Plugin(
+        id: 'optional.10s.lua',
+        path: '/tmp/optional.10s.lua',
+        interpreter: 'lua',
+        refreshInterval: Duration(seconds: 10),
+        config: optionalConfig,
+      );
+
+      expect(requiredPlugin.requiresConfig, isTrue);
+      expect(alwaysPlugin.requiresConfig, isTrue);
+      expect(firstRunPlugin.requiresConfig, isTrue);
+      expect(optionalPlugin.requiresConfig, isFalse);
+      expect(alwaysPlugin.requiresConfigAlways, isTrue);
+      expect(firstRunPlugin.requiresConfigFirstRun, isTrue);
+    });
+
     test('serializes to JSON', () {
       const plugin = Plugin(
         id: 'test.10s.sh',

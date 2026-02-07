@@ -2,8 +2,13 @@
 
 Complete documentation for plugin configuration field types and the grid layout system.
 
-**Version**: 1.0.0
-**Last Updated**: December 2025
+**Version**: 1.1.0
+**Last Updated**: February 2026
+
+> Implementation status (v1.1):
+> Supported in runtime UI today: `text`, `password`, `number`, `select`,
+> `checkbox`, `color`, `file`, `path`, `url`, `textarea`, `slider`,
+> `date`, `time`, `datetime`.
 
 ## Table of Contents
 

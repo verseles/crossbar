@@ -25,8 +25,21 @@ local function expand_home(path)
     return path
 end
 
+local function shell_escape(value)
+    local escaped = tostring(value)
+    escaped = escaped:gsub('\\', '\\\\')
+    escaped = escaped:gsub(' ', '\\ ')
+    escaped = escaped:gsub('"', '\\"')
+    escaped = escaped:gsub("'", "\\'")
+    return escaped
+end
+
 local work_mins = env_num('POMODORO_WORK_MINS', 25)
 local break_mins = env_num('POMODORO_BREAK_MINS', 5)
+if work_mins < 1 then work_mins = 1 end
+if work_mins > 180 then work_mins = 180 end
+if break_mins < 1 then break_mins = 1 end
+if break_mins > 60 then break_mins = 60 end
 local state_file = expand_home(env('POMODORO_STATE_FILE', crossbar.homeDir() .. '/.crossbar/pomodoro.state'))
 
 local function read_state()
@@ -67,7 +80,12 @@ end
 local function build_write_cmd(running, is_break, start_time, completed)
     local running_str = running and 'true' or 'false'
     local break_str = is_break and 'true' or 'false'
-    local cmd = "sh -c 'printf RUNNING=" .. running_str .. "\\nSTART_TIME=" .. start_time .. "\\nIS_BREAK=" .. break_str .. "\\nCOMPLETED=" .. completed .. "\\n > " .. state_file .. "'"
+    local escaped_path = shell_escape(state_file)
+    local cmd = "sh -c 'printf RUNNING=" .. running_str
+        .. "\\nSTART_TIME=" .. start_time
+        .. "\\nIS_BREAK=" .. break_str
+        .. "\\nCOMPLETED=" .. completed
+        .. "\\n > " .. escaped_path .. "'"
     return cmd
 end
 

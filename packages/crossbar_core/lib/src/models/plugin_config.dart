@@ -93,27 +93,50 @@ class Setting {
     this.width,
     this.placeholder,
     this.help,
+    this.min,
+    this.max,
+    this.step,
+    this.pattern,
+    this.format,
+    this.accept,
+    this.unit,
+    this.rows,
   });
 
   factory Setting.fromJson(Map<String, dynamic> json) {
+    final optionsJson = json['options'];
     List<SelectOption>? options;
-    if (json['options'] != null) {
-      options = (json['options'] as List<dynamic>)
-          .map((o) => SelectOption.fromJson(o as Map<String, dynamic>))
-          .toList();
+    if (optionsJson is List<dynamic>) {
+      options = optionsJson.map(_parseSelectOption).toList();
+    } else if (optionsJson is Map<String, dynamic>) {
+      final choices = optionsJson['choices'];
+      if (choices is List<dynamic>) {
+        options = choices.map(_parseSelectOption).toList();
+      }
     }
 
     return Setting(
       key: json['key'] as String,
       label: json['label'] as String,
       type: json['type'] as String,
-      defaultValue: json['default'] as String?,
+      defaultValue: json['default']?.toString(),
       description: json['description'] as String?,
-      required: json['required'] as bool? ?? false,
+      required: _toBool(json['required']),
       options: options,
-      width: json['width'] as int?,
+      width: _toInt(json['width']),
       placeholder: json['placeholder'] as String?,
       help: json['help'] as String?,
+      min: _toDouble(json['min'] ?? _readOption(optionsJson, 'min')),
+      max: _toDouble(json['max'] ?? _readOption(optionsJson, 'max')),
+      step: _toDouble(json['step'] ?? _readOption(optionsJson, 'step')),
+      pattern:
+          (json['pattern'] ?? _readOption(optionsJson, 'pattern'))?.toString(),
+      format:
+          (json['format'] ?? _readOption(optionsJson, 'format'))?.toString(),
+      accept:
+          (json['accept'] ?? _readOption(optionsJson, 'accept'))?.toString(),
+      unit: (json['unit'] ?? _readOption(optionsJson, 'unit'))?.toString(),
+      rows: _toInt(json['rows'] ?? _readOption(optionsJson, 'rows')),
     );
   }
   final String key;
@@ -126,6 +149,14 @@ class Setting {
   final int? width;
   final String? placeholder;
   final String? help;
+  final double? min;
+  final double? max;
+  final double? step;
+  final String? pattern;
+  final String? format;
+  final String? accept;
+  final String? unit;
+  final int? rows;
 
   Map<String, dynamic> toJson() {
     return {
@@ -139,6 +170,14 @@ class Setting {
       if (width != null) 'width': width,
       if (placeholder != null) 'placeholder': placeholder,
       if (help != null) 'help': help,
+      if (min != null) 'min': min,
+      if (max != null) 'max': max,
+      if (step != null) 'step': step,
+      if (pattern != null) 'pattern': pattern,
+      if (format != null) 'format': format,
+      if (accept != null) 'accept': accept,
+      if (unit != null) 'unit': unit,
+      if (rows != null) 'rows': rows,
     };
   }
 
@@ -153,6 +192,14 @@ class Setting {
     int? width,
     String? placeholder,
     String? help,
+    double? min,
+    double? max,
+    double? step,
+    String? pattern,
+    String? format,
+    String? accept,
+    String? unit,
+    int? rows,
   }) {
     return Setting(
       key: key ?? this.key,
@@ -165,6 +212,14 @@ class Setting {
       width: width ?? this.width,
       placeholder: placeholder ?? this.placeholder,
       help: help ?? this.help,
+      min: min ?? this.min,
+      max: max ?? this.max,
+      step: step ?? this.step,
+      pattern: pattern ?? this.pattern,
+      format: format ?? this.format,
+      accept: accept ?? this.accept,
+      unit: unit ?? this.unit,
+      rows: rows ?? this.rows,
     );
   }
 
@@ -172,4 +227,49 @@ class Setting {
   String toString() {
     return 'Setting(key: $key, type: $type, required: $required)';
   }
+}
+
+SelectOption _parseSelectOption(dynamic value) {
+  if (value is String) {
+    return SelectOption(value: value, label: value);
+  }
+  if (value is Map<String, dynamic>) {
+    return SelectOption.fromJson(value);
+  }
+  final fallback = value.toString();
+  return SelectOption(value: fallback, label: fallback);
+}
+
+dynamic _readOption(dynamic options, String key) {
+  if (options is Map<String, dynamic>) {
+    return options[key];
+  }
+  return null;
+}
+
+bool _toBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final normalized = value.toLowerCase().trim();
+    return normalized == 'true' ||
+        normalized == '1' ||
+        normalized == 'yes' ||
+        normalized == 'on';
+  }
+  return false;
+}
+
+int? _toInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim());
+  return null;
+}
+
+double? _toDouble(dynamic value) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim());
+  return null;
 }

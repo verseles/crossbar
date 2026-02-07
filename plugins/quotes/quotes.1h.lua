@@ -19,6 +19,8 @@ local function env_num(name, default)
 end
 
 local max_len = env_num('QUOTE_MAX_LEN', 40)
+if max_len < 20 then max_len = 20 end
+if max_len > 300 then max_len = 300 end
 local response, err = crossbar.web('https://api.quotable.io/random')
 if response == nil then
     print('QUOTE Error | color=gray')

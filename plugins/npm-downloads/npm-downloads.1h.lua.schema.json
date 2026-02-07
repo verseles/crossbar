@@ -8,7 +8,9 @@
       "key": "NPM_PACKAGE",
       "label": "Package name",
       "type": "text",
-      "default": "lodash"
+      "default": "lodash",
+      "pattern": "^[a-z0-9@._/-]+$",
+      "help": "Examples: lodash, @scope/package"
     }
   ]
 }

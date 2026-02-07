@@ -20,6 +20,18 @@ end
 
 local url = env('SITE_URL', 'https://www.google.com')
 local timeout = env_num('SITE_TIMEOUT', 5)
+if timeout < 1 then timeout = 1 end
+if timeout > 60 then timeout = 60 end
+
+if not url:match('^https?://') then
+    print('⚠️ Invalid URL | color=red')
+    print('---')
+    print('URL must start with http:// or https://')
+    print('Current: ' .. url)
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
 
 local response, err = crossbar.web(url, { timeout = timeout })
 local status_code = nil

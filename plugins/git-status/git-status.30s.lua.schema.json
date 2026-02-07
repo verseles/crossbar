@@ -13,8 +13,11 @@
     {
       "key": "GIT_MAX_FILES",
       "label": "Max files",
-      "type": "number",
-      "default": "10"
+      "type": "slider",
+      "default": "10",
+      "min": 1,
+      "max": 200,
+      "step": 1
     }
   ]
 }

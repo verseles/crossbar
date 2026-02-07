@@ -20,6 +20,8 @@ end
 
 local is_mobile = crossbar.isMobile()
 local max_items = env_num('PROC_MAX_ITEMS', 5)
+if max_items < 1 then max_items = 1 end
+if max_items > 50 then max_items = 50 end
 if is_mobile then
     print('PROC N/A | color=gray')
     print('---')

@@ -80,7 +80,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.10.0+17` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.11.0+18` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do plano original concluídas.

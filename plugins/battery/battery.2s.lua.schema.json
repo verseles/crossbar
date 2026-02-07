@@ -6,9 +6,14 @@
   "settings": [
     {
       "key": "BATTERY_LOW",
-      "label": "Low battery threshold (%)",
-      "type": "number",
-      "default": "20"
+      "label": "Low battery threshold",
+      "type": "slider",
+      "default": "20",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "help": "Below this level the plugin uses low battery color."
     },
     {
       "key": "BATTERY_SHOW_PERCENT",

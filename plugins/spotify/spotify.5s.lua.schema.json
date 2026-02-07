@@ -7,8 +7,11 @@
     {
       "key": "MEDIA_MAX_LEN",
       "label": "Max title length",
-      "type": "number",
-      "default": "40"
+      "type": "slider",
+      "default": "40",
+      "min": 10,
+      "max": 200,
+      "step": 1
     }
   ]
 }

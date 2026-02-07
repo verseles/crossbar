@@ -8,7 +8,9 @@
       "key": "CLOCK_FORMAT",
       "label": "Time format",
       "type": "text",
-      "default": "HH:mm:ss"
+      "default": "HH:mm:ss",
+      "placeholder": "HH:mm:ss",
+      "help": "Uses crossbar.time() format tokens."
     }
   ]
 }

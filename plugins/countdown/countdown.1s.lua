@@ -9,36 +9,70 @@ local function env(name, default)
     return value
 end
 
-local target_str = env('COUNTDOWN_TARGET', '')
-if target_str == '' then
-    target_str = env('CROSSBAR_COUNTDOWN_TARGET', '2025-12-31 23:59:59')
-end
+local target_str = env('COUNTDOWN_TARGET', '2026-12-31T23:59:59+00:00')
 local label = env('COUNTDOWN_LABEL', 'Countdown')
 local done_text = env('COUNTDOWN_DONE_TEXT', 'Countdown complete!')
 
--- 2. Parse the date string "YYYY-MM-DD HH:MM:SS"
-local year, month, day, hour, min, sec = target_str:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+local function get_local_offset_seconds(ts)
+    local local_t = os.date('*t', ts)
+    local utc_t = os.date('!*t', ts)
+    return os.difftime(os.time(local_t), os.time(utc_t))
+end
 
-if not year then
+local function parse_target(raw)
+    -- RFC3339 with explicit timezone: YYYY-MM-DDTHH:MM:SS+HH:MM
+    local y, mo, d, h, mi, s, sign, off_h, off_m = raw:match(
+        '^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)([+-])(%d%d):(%d%d)$'
+    )
+    if y then
+        local local_ts = os.time({
+            year = tonumber(y),
+            month = tonumber(mo),
+            day = tonumber(d),
+            hour = tonumber(h),
+            min = tonumber(mi),
+            sec = tonumber(s),
+        })
+        local specified_offset = tonumber(off_h) * 3600 + tonumber(off_m) * 60
+        if sign == '-' then
+            specified_offset = -specified_offset
+        end
+        local local_offset = get_local_offset_seconds(local_ts)
+        return local_ts + (local_offset - specified_offset), raw
+    end
+
+    -- RFC3339 UTC suffix
+    y, mo, d, h, mi, s = raw:match(
+        '^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)Z$'
+    )
+    if y then
+        local local_ts = os.time({
+            year = tonumber(y),
+            month = tonumber(mo),
+            day = tonumber(d),
+            hour = tonumber(h),
+            min = tonumber(mi),
+            sec = tonumber(s),
+        })
+        local local_offset = get_local_offset_seconds(local_ts)
+        return local_ts + local_offset, raw
+    end
+
+    return nil, raw
+end
+
+local target_time, normalized = parse_target(target_str)
+if target_time == nil then
     print('! | color=red')
     print('---')
-    print('Error: Invalid date format')
-    print('Set COUNTDOWN_TARGET')
-    print('Format: YYYY-MM-DD HH:MM:SS')
+    print('Error: Invalid datetime format')
+    print('Expected: YYYY-MM-DDTHH:MM:SS+00:00')
     return
 end
 
--- 3. Convert target date to a Unix timestamp
-local target_time = os.time({
-    year = tonumber(year), month = tonumber(month), day = tonumber(day),
-    hour = tonumber(hour), min = tonumber(min), sec = tonumber(sec)
-})
-
--- 4. Get current time and calculate the difference
 local now = os.time()
 local diff_seconds = target_time - now
 
--- 5. Format the output based on the difference
 if diff_seconds <= 0 then
     print('Done!')
     print('---')
@@ -62,7 +96,7 @@ else
 
     print('⏳ ' .. display)
     print('---')
-    print(label .. ': ' .. target_str)
+    print(label .. ': ' .. normalized)
 end
 
 print('---')

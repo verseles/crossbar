@@ -17,7 +17,8 @@
       "label": "City",
       "type": "text",
       "default": "London",
-      "required": true
+      "required": true,
+      "placeholder": "e.g. London"
     },
     {
       "key": "WEATHER_UNITS",
@@ -25,8 +26,14 @@
       "type": "select",
       "default": "metric",
       "options": [
-        {"value": "metric", "label": "Celsius"},
-        {"value": "imperial", "label": "Fahrenheit"}
+        {
+          "value": "metric",
+          "label": "Celsius"
+        },
+        {
+          "value": "imperial",
+          "label": "Fahrenheit"
+        }
       ]
     }
   ]

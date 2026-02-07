@@ -7,19 +7,27 @@
     {
       "key": "POMODORO_WORK_MINS",
       "label": "Work minutes",
-      "type": "number",
-      "default": "25"
+      "type": "slider",
+      "default": "25",
+      "min": 1,
+      "max": 180,
+      "step": 1,
+      "unit": "m"
     },
     {
       "key": "POMODORO_BREAK_MINS",
       "label": "Break minutes",
-      "type": "number",
-      "default": "5"
+      "type": "slider",
+      "default": "5",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "m"
     },
     {
       "key": "POMODORO_STATE_FILE",
       "label": "State file",
-      "type": "text",
+      "type": "path",
       "default": "~/.crossbar/pomodoro.state"
     }
   ]

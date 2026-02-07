@@ -11,23 +11,51 @@ end
 
 local function parse_timezones(raw)
     local zones = {}
-    for entry in raw:gmatch('[^,]+') do
-        local name, offset, flag = entry:match('^%s*(.-)%s*|%s*([%-%d%.]+)%s*|%s*(.-)%s*$')
-        if name and offset then
-            table.insert(zones, {
-                name = name,
-                offset = tonumber(offset) or 0,
-                flag = flag ~= '' and flag or '🕒',
-            })
+    if raw == nil then
+        return zones
+    end
+
+    -- Prefer one-entry-per-line, but keep comma compatibility.
+    raw = raw:gsub(',', '\n')
+
+    for line in raw:gmatch('[^\r\n]+') do
+        local trimmed = line:gsub('^%s+', ''):gsub('%s+$', '')
+        if trimmed ~= '' then
+            local name, offset, flag = trimmed:match('^(.-)|([%-%d%.]+)|?(.*)$')
+            if name and offset then
+                name = name:gsub('^%s+', ''):gsub('%s+$', '')
+                local parsed_offset = tonumber(offset)
+                if parsed_offset ~= nil and name ~= '' then
+                    local parsed_flag = (flag or ''):gsub('^%s+', ''):gsub('%s+$', '')
+                    if parsed_flag == '' then
+                        parsed_flag = '🕒'
+                    end
+                    table.insert(zones, {
+                        name = name,
+                        offset = parsed_offset,
+                        flag = parsed_flag,
+                    })
+                end
+            end
         end
     end
     return zones
 end
 
-local default_zones = 'New York|-5|🇺🇸,London|0|🇬🇧,Tokyo|9|🇯🇵,Sydney|11|🇦🇺,Dubai|4|🇦🇪'
+local default_zones = 'New York|-5|🇺🇸\nLondon|0|🇬🇧\nTokyo|9|🇯🇵\nSydney|11|🇦🇺\nDubai|4|🇦🇪'
 local timezones = parse_timezones(env('WORLD_CLOCK_ZONES', default_zones))
 
--- 2. Get current local and UTC time
+if #timezones == 0 then
+    print('🌍 Invalid config | color=red')
+    print('---')
+    print('Expected one zone per line:')
+    print('Name|Offset|Flag')
+    print('Example: London|0|🇬🇧')
+    print('---')
+    print('Refresh | refresh=true')
+    return
+end
+
 local local_time = os.date('%H:%M')
 local utc_time = os.time(os.date('!*t')) -- Get current UTC timestamp
 
