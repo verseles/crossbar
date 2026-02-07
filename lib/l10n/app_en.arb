@@ -118,6 +118,8 @@
   "other": "Other",
   "appearance": "Appearance",
   "behavior": "Behavior",
+  "globalHotkey": "Global Hotkey",
+  "globalHotkeyDescription": "Toggle visibility with Ctrl+Alt+C",
   "license": "License",
   "useDarkTheme": "Use dark theme",
   "launchOnLogin": "Launch Crossbar on login",
