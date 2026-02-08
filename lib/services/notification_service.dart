@@ -1,9 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:crossbar_core/crossbar_core.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'logger_service.dart';
 
 class NotificationService {
 
@@ -18,13 +24,20 @@ class NotificationService {
   bool _initialized = false;
   int _notificationId = 0;
 
+  /// Callback for refresh requests from notification actions.
+  void Function(String pluginId)? onRefreshRequested;
+
+  /// Callback for CLI command requests from notification actions.
+  void Function(List<String> args)? onCliCommandRequested;
+
+  /// Callback for showing plugin menu (from "More..." button).
+  void Function(String pluginId)? onShowPluginMenu;
+
   // Regular notification channel
   static const String channelId = 'crossbar_plugins';
   static const String channelName = 'Plugin Notifications';
   static const String channelDescription = 'Notifications from Crossbar plugins';
 
-  // Notification group key for Android 7+ grouping
-  static const String _groupKey = 'crossbar_plugins_group';
   static const int _combinedNotificationId = 8000;
   static const int _individualIdBase = 8100;
 
@@ -35,6 +48,71 @@ class NotificationService {
   static const int persistentNotificationId = 9999;
 
   bool _persistentNotificationShown = false;
+
+  // Cache of emoji → PNG bytes (avoids re-rendering on each notification)
+  static final Map<String, Uint8List> _emojiIconCache = {};
+
+  static Future<Uint8List?> _renderEmojiToBitmap(String emoji) async {
+    if (emoji.isEmpty) return null;
+    if (_emojiIconCache.containsKey(emoji)) return _emojiIconCache[emoji];
+
+    const size = 128.0;
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(
+      recorder,
+      const ui.Rect.fromLTWH(0, 0, size, size),
+    );
+
+    final painter = TextPainter(
+      text: TextSpan(
+        text: emoji,
+        style: const TextStyle(fontSize: size * 0.7),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    painter.layout();
+    painter.paint(
+      canvas,
+      Offset(
+        (size - painter.width) / 2,
+        (size - painter.height) / 2,
+      ),
+    );
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) return null;
+
+    final bytes = byteData.buffer.asUint8List();
+    _emojiIconCache[emoji] = bytes;
+    return bytes;
+  }
+
+  static const _systemChannel = MethodChannel('com.verseles.crossbar/system');
+
+  /// Updates the foreground service notification via Kotlin MethodChannel.
+  /// Only works on Android where the foreground service owns notification 9999.
+  Future<void> _updateForegroundNotification({
+    required String title,
+    required String body,
+    List<String>? lines,
+  }) async {
+    try {
+      await _systemChannel.invokeMethod('updateForegroundNotification', {
+        'title': title,
+        'body': body,
+        if (lines != null) 'lines': lines,
+      });
+      LoggerService().info(
+        'Foreground notification updated: $title'
+        '${lines != null ? " (${lines.length} lines)" : ""}',
+      );
+    } catch (e) {
+      LoggerService().error('Foreground notification update failed', e);
+    }
+    _persistentNotificationShown = true;
+  }
 
   Future<void> init() async {
     if (_initialized) return;
@@ -119,9 +197,35 @@ class NotificationService {
       return;
     }
 
-    // Handle "More" action - open the app
+    // Handle refresh action
+    if (actionId != null && actionId.startsWith('refresh:')) {
+      final pluginId = actionId.substring('refresh:'.length);
+      onRefreshRequested?.call(pluginId);
+      return;
+    }
+
+    // Handle CLI command action
+    if (actionId != null && actionId.startsWith('cli:') && payload != null) {
+      try {
+        final data = jsonDecode(payload) as Map<String, dynamic>;
+        final cmd = data[actionId] as String?;
+        if (cmd != null) {
+          onCliCommandRequested?.call(cmd.split(RegExp(r'\s+')));
+        }
+      } catch (_) {
+        // Payload is not JSON - ignore
+      }
+      return;
+    }
+
+    // Handle "More" action - show plugin menu or open the app
+    if (actionId != null && actionId.startsWith('more:')) {
+      final pluginId = actionId.substring('more:'.length);
+      onShowPluginMenu?.call(pluginId);
+      return;
+    }
     if (actionId == 'more') {
-      // App will be brought to foreground by showsUserInterface: true
+      // Combined notification: just bring app to foreground
       return;
     }
   }
@@ -206,7 +310,8 @@ class NotificationService {
       if (output.hasError) continue;
       final icon = output.icon.isNotEmpty ? '${output.icon} ' : '';
       final title = output.title ?? entry.key;
-      final text = output.text ?? '--';
+      final fullText = output.text ?? '--';
+      final text = fullText.split('\n').first;
       lines.add('$icon$title: $text');
     }
 
@@ -214,7 +319,7 @@ class NotificationService {
 
     final summary = '${lines.length} plugin(s) active';
 
-    // Collect first 2 href items across all plugins for action buttons
+    // Collect first 2 actionable items across all plugins for action buttons
     final actions = <AndroidNotificationAction>[];
     final actionPayload = <String, String>{};
     var actionIndex = 0;
@@ -223,25 +328,48 @@ class NotificationService {
       final output = entry.value;
       for (final item in output.menu) {
         if (actionIndex >= 2) break;
-        if (item.separator || item.href == null) continue;
-        final label = item.text ?? entry.key;
-        final actionId = 'open_url:$actionIndex';
-        actions.add(AndroidNotificationAction(
-          actionId,
-          label.length > 20 ? '${label.substring(0, 17)}...' : label,
-          showsUserInterface: true,
-          cancelNotification: false,
-        ));
-        actionPayload[actionId] = item.href!;
-        actionIndex++;
+        if (item.separator) continue;
+
+        if (item.href != null) {
+          final label = item.text ?? entry.key;
+          final actionId = 'open_url:$actionIndex';
+          actions.add(AndroidNotificationAction(
+            actionId,
+            label.length > 20 ? '${label.substring(0, 17)}...' : label,
+            showsUserInterface: true,
+            cancelNotification: false,
+          ));
+          actionPayload[actionId] = item.href!;
+          actionIndex++;
+        } else if (item.refresh) {
+          final label = item.text ?? 'Refresh';
+          actions.add(AndroidNotificationAction(
+            'refresh:${entry.key}',
+            label.length > 20 ? '${label.substring(0, 17)}...' : label,
+            showsUserInterface: false,
+            cancelNotification: false,
+          ));
+          actionIndex++;
+        } else if (item.isCrossbarCommand) {
+          final label = item.text ?? 'Run';
+          final actionId = 'cli:$actionIndex';
+          actions.add(AndroidNotificationAction(
+            actionId,
+            label.length > 20 ? '${label.substring(0, 17)}...' : label,
+            showsUserInterface: false,
+            cancelNotification: false,
+          ));
+          actionPayload[actionId] = item.bash!.replaceFirst('crossbar ', '');
+          actionIndex++;
+        }
       }
     }
-    // Add "More" button if there are additional href items
-    final totalHrefs = outputs.values
+    // Add "More" button if there are additional actionable items
+    final totalActions = outputs.values
         .expand((o) => o.menu)
-        .where((m) => !m.separator && m.href != null)
+        .where((m) => !m.separator && m.isMobileAction)
         .length;
-    if (totalHrefs > 2) {
+    if (totalActions > 2) {
       actions.add(const AndroidNotificationAction(
         'more',
         'More...',
@@ -254,15 +382,24 @@ class NotificationService {
         ? jsonEncode(actionPayload)
         : 'combined';
 
+    // Body shown in collapsed view: first lines preview
+    final bodyPreview = lines.take(3).join(' · ');
+
+    // Reuse the persistent notification slot so the combined summary
+    // replaces "Crossbar Running" instead of creating a second notification.
     final androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: channelDescription,
-      importance: Importance.defaultImportance,
-      priority: Priority.defaultPriority,
+      persistentChannelId,
+      persistentChannelName,
+      channelDescription: persistentChannelDescription,
+      importance: Importance.low,
+      priority: Priority.low,
+      ongoing: true,
+      autoCancel: false,
+      showWhen: false,
+      playSound: false,
+      enableVibration: false,
+      category: AndroidNotificationCategory.service,
       icon: '@drawable/ic_stat_crossbar',
-      groupKey: _groupKey,
-      setAsGroupSummary: true,
       actions: actions,
       styleInformation: InboxStyleInformation(
         lines.take(6).toList(),
@@ -281,13 +418,25 @@ class NotificationService {
       linux: linuxDetails,
     );
 
-    await _notifications.show(
-      _combinedNotificationId,
-      'Crossbar',
-      summary,
-      details,
-      payload: payload,
-    );
+    if (Platform.isAndroid) {
+      LoggerService().info(
+        'showCombinedNotification: ${lines.length} plugins, '
+        'preview=$bodyPreview',
+      );
+      await _updateForegroundNotification(
+        title: 'Crossbar - ${lines.length} plugins',
+        body: bodyPreview,
+        lines: lines.take(6).toList(),
+      );
+    } else {
+      await _notifications.show(
+        persistentNotificationId,
+        'Crossbar - ${lines.length} plugins',
+        bodyPreview,
+        details,
+        payload: payload,
+      );
+    }
   }
 
   /// Shows an individual notification for a specific plugin.
@@ -311,31 +460,54 @@ class NotificationService {
       expandedLines.add(itemText);
     }
 
-    // Extract first 2 menu items with href as action buttons
+    // Extract first 2 actionable menu items as notification buttons
     final actions = <AndroidNotificationAction>[];
     final actionPayload = <String, String>{};
     var actionIndex = 0;
     for (final item in output.menu) {
       if (actionIndex >= 2) break;
-      if (item.separator || item.href == null) continue;
-      final label = item.text ?? 'Open';
-      final actionId = 'open_url:$actionIndex';
-      actions.add(AndroidNotificationAction(
-        actionId,
-        label.length > 20 ? '${label.substring(0, 17)}...' : label,
-        showsUserInterface: true,
-        cancelNotification: false,
-      ));
-      actionPayload[actionId] = item.href!;
-      actionIndex++;
+      if (item.separator) continue;
+
+      if (item.href != null) {
+        final label = item.text ?? 'Open';
+        final actionId = 'open_url:$actionIndex';
+        actions.add(AndroidNotificationAction(
+          actionId,
+          label.length > 20 ? '${label.substring(0, 17)}...' : label,
+          showsUserInterface: true,
+          cancelNotification: false,
+        ));
+        actionPayload[actionId] = item.href!;
+        actionIndex++;
+      } else if (item.refresh) {
+        final label = item.text ?? 'Refresh';
+        actions.add(AndroidNotificationAction(
+          'refresh:$pluginId',
+          label.length > 20 ? '${label.substring(0, 17)}...' : label,
+          showsUserInterface: false,
+          cancelNotification: false,
+        ));
+        actionIndex++;
+      } else if (item.isCrossbarCommand) {
+        final label = item.text ?? 'Run';
+        final actionId = 'cli:$actionIndex';
+        actions.add(AndroidNotificationAction(
+          actionId,
+          label.length > 20 ? '${label.substring(0, 17)}...' : label,
+          showsUserInterface: false,
+          cancelNotification: false,
+        ));
+        actionPayload[actionId] = item.bash!.replaceFirst('crossbar ', '');
+        actionIndex++;
+      }
     }
     // Add "More" button if there are additional actionable items
-    final totalHrefs = output.menu
-        .where((m) => !m.separator && m.href != null)
+    final totalActions = output.menu
+        .where((m) => !m.separator && m.isMobileAction)
         .length;
-    if (totalHrefs > 2) {
-      actions.add(const AndroidNotificationAction(
-        'more',
+    if (totalActions > 2) {
+      actions.add(AndroidNotificationAction(
+        'more:$pluginId',
         'More...',
         showsUserInterface: true,
         cancelNotification: false,
@@ -346,6 +518,17 @@ class NotificationService {
         ? jsonEncode(actionPayload)
         : pluginId;
 
+    // Render emoji as large icon bitmap
+    ByteArrayAndroidBitmap? largeIcon;
+    if (output.icon.isNotEmpty) {
+      try {
+        final bytes = await _renderEmojiToBitmap(output.icon);
+        if (bytes != null) largeIcon = ByteArrayAndroidBitmap(bytes);
+      } catch (e) {
+        LoggerService().error('Failed to render emoji icon', e);
+      }
+    }
+
     final androidDetails = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -353,7 +536,7 @@ class NotificationService {
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
       icon: '@drawable/ic_stat_crossbar',
-      groupKey: _groupKey,
+      largeIcon: largeIcon,
       actions: actions,
       styleInformation: BigTextStyleInformation(
         expandedLines.join('\n'),
@@ -436,37 +619,14 @@ class NotificationService {
   }) async {
     if (!Platform.isAndroid) return;
     if (!_initialized) return;
-    
-    final actualBody = enabledPlugins > 0 
-        ? '$enabledPlugins plugin(s) active' 
+
+    // Only override body with plugin count when using the default body text
+    final actualBody = (body == 'Monitoring plugins in background' && enabledPlugins > 0)
+        ? '$enabledPlugins plugin(s) active'
         : body;
 
-    const androidDetails = AndroidNotificationDetails(
-      persistentChannelId,
-      persistentChannelName,
-      channelDescription: persistentChannelDescription,
-      importance: Importance.low,
-      priority: Priority.low,
-      ongoing: true,
-      autoCancel: false,
-      showWhen: false,
-      playSound: false,
-      enableVibration: false,
-      category: AndroidNotificationCategory.service,
-      icon: '@drawable/ic_stat_crossbar',
-    );
-
-    const details = NotificationDetails(android: androidDetails);
-
-    await _notifications.show(
-      persistentNotificationId,
-      title,
-      actualBody,
-      details,
-      payload: 'persistent',
-    );
-    
-    _persistentNotificationShown = true;
+    LoggerService().info('showPersistentNotification: $title / $actualBody');
+    await _updateForegroundNotification(title: title, body: actualBody);
   }
 
   /// Updates the persistent notification with new plugin count.
