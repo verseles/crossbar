@@ -1,0 +1,22 @@
+# Bitcoin Price - Declarative YAML
+# Shows BTC price from Coinbase API
+
+name: Bitcoin Price
+interval: 5m
+
+source:
+  type: http
+  url: "https://api.coinbase.com/v2/prices/BTC-USD/spot"
+
+output:
+  icon: "₿"
+  text: "$${response.data.amount}"
+  tooltip: "Bitcoin price in USD"
+
+menu:
+  - title: "Currency: ${response.data.currency}"
+  - separator
+  - title: "Open Coinbase"
+    action: url:https://www.coinbase.com
+  - title: "Refresh"
+    action: refresh

@@ -1,0 +1,21 @@
+# Memory Monitor - Declarative YAML
+# Shows RAM usage
+
+name: Memory Monitor
+interval: 10s
+
+source:
+  type: system
+  command: memory
+
+output:
+  icon: "🧠"
+  text: "${response.percent}"
+  tooltip: "RAM: ${response.used}/${response.total} ${response.unit}"
+
+menu:
+  - title: "Used: ${response.used} ${response.unit}"
+  - title: "Total: ${response.total} ${response.unit}"
+  - separator
+  - title: "Refresh"
+    action: refresh

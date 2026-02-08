@@ -1,0 +1,21 @@
+# Battery Status - Declarative YAML
+# Shows battery level and charging status
+
+name: Battery Status
+interval: 1m
+
+source:
+  type: system
+  command: battery
+
+output:
+  icon: "🔋"
+  text: "${response.level}%"
+  tooltip: "${response.status}"
+
+menu:
+  - title: "Level: ${response.level}%"
+  - title: "Charging: ${response.charging}"
+  - separator
+  - title: "Refresh"
+    action: refresh

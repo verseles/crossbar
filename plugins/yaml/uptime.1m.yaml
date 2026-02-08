@@ -1,0 +1,20 @@
+# System Uptime - Declarative YAML
+# Shows how long the system has been running
+
+name: System Uptime
+interval: 1m
+
+source:
+  type: system
+  command: uptime
+
+output:
+  icon: "⬆️"
+  text: "${response}"
+  tooltip: "System Uptime"
+
+menu:
+  - title: "Uptime: ${response}"
+  - separator
+  - title: "Refresh"
+    action: refresh
