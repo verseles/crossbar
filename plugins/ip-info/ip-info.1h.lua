@@ -91,7 +91,7 @@ if show_timezone and timezone and timezone ~= '' then
 end
 print('---')
 if enable_copy then
-    print('Copy IP | bash="crossbar clipboard ' .. ip .. '" terminal=false refresh=true')
+    print('Copy IP | bash="crossbar clipboard ' .. ip .. '" terminal=false')
 end
 if show_map and loc and loc ~= '' then
     print('Open Map | href=https://www.google.com/maps?q=' .. loc)
