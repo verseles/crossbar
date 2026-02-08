@@ -5,6 +5,11 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_sec_durations",
+      "label": "Timer Durations",
+      "type": "section"
+    },
+    {
       "key": "POMODORO_WORK_MINS",
       "label": "Work minutes",
       "type": "slider",
@@ -23,6 +28,22 @@
       "max": 60,
       "step": 1,
       "unit": "m"
+    },
+    {
+      "key": "POMODORO_ALERT_RANGE",
+      "label": "Alert at remaining minutes",
+      "type": "range",
+      "default": "1,5",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "m",
+      "help": "Show orange color when remaining time is within this range."
+    },
+    {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
     },
     {
       "key": "POMODORO_STATE_FILE",

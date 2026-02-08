@@ -5,6 +5,12 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_sec_fields",
+      "label": "Visible Fields",
+      "type": "section",
+      "description": "Toggle which system details appear in the dropdown."
+    },
+    {
       "key": "SYS_SHOW_PLATFORM",
       "label": "Show platform",
       "type": "checkbox",

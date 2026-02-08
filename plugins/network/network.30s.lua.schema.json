@@ -5,15 +5,22 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_info_desktop",
+      "label": "Desktop Only",
+      "type": "info",
+      "format": "warning",
+      "description": "Network monitoring requires shell access and is only available on desktop platforms."
+    },
+    {
       "key": "NET_SHOW_PUBLIC_IP",
       "label": "Show public IP",
-      "type": "checkbox",
+      "type": "switch",
       "default": "false"
     },
     {
       "key": "NET_SHOW_PING",
       "label": "Show ping",
-      "type": "checkbox",
+      "type": "switch",
       "default": "false"
     },
     {

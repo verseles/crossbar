@@ -81,6 +81,38 @@ class SelectOption {
   Map<String, dynamic> toJson() => {'value': value, 'label': label};
 }
 
+/// Represents a tab within a `tabs` type setting.
+class SettingTab {
+  const SettingTab({
+    required this.label,
+    required this.fields,
+    this.icon,
+  });
+
+  factory SettingTab.fromJson(Map<String, dynamic> json) {
+    return SettingTab(
+      label: json['label'] as String? ?? '',
+      icon: json['icon'] as String?,
+      fields: (json['fields'] as List<dynamic>?)
+              ?.map((s) => Setting.fromJson(s as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  final String label;
+  final String? icon;
+  final List<Setting> fields;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      if (icon != null) 'icon': icon,
+      'fields': fields.map((s) => s.toJson()).toList(),
+    };
+  }
+}
+
 class Setting {
   const Setting({
     required this.key,
@@ -101,6 +133,8 @@ class Setting {
     this.accept,
     this.unit,
     this.rows,
+    this.fields,
+    this.tabs,
   });
 
   factory Setting.fromJson(Map<String, dynamic> json) {
@@ -137,6 +171,12 @@ class Setting {
           (json['accept'] ?? _readOption(optionsJson, 'accept'))?.toString(),
       unit: (json['unit'] ?? _readOption(optionsJson, 'unit'))?.toString(),
       rows: _toInt(json['rows'] ?? _readOption(optionsJson, 'rows')),
+      fields: (json['fields'] as List<dynamic>?)
+          ?.map((s) => Setting.fromJson(s as Map<String, dynamic>))
+          .toList(),
+      tabs: (json['tabs'] as List<dynamic>?)
+          ?.map((t) => SettingTab.fromJson(t as Map<String, dynamic>))
+          .toList(),
     );
   }
   final String key;
@@ -158,6 +198,12 @@ class Setting {
   final String? unit;
   final int? rows;
 
+  /// Child fields for container types like `collapsible`.
+  final List<Setting>? fields;
+
+  /// Tab definitions for `tabs` type.
+  final List<SettingTab>? tabs;
+
   Map<String, dynamic> toJson() {
     return {
       'key': key,
@@ -178,6 +224,8 @@ class Setting {
       if (accept != null) 'accept': accept,
       if (unit != null) 'unit': unit,
       if (rows != null) 'rows': rows,
+      if (fields != null) 'fields': fields!.map((s) => s.toJson()).toList(),
+      if (tabs != null) 'tabs': tabs!.map((t) => t.toJson()).toList(),
     };
   }
 
@@ -200,6 +248,8 @@ class Setting {
     String? accept,
     String? unit,
     int? rows,
+    List<Setting>? fields,
+    List<SettingTab>? tabs,
   }) {
     return Setting(
       key: key ?? this.key,
@@ -220,6 +270,8 @@ class Setting {
       accept: accept ?? this.accept,
       unit: unit ?? this.unit,
       rows: rows ?? this.rows,
+      fields: fields ?? this.fields,
+      tabs: tabs ?? this.tabs,
     );
   }
 

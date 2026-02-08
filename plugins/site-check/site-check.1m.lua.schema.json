@@ -20,6 +20,13 @@
       "max": 60,
       "step": 1,
       "unit": "s"
+    },
+    {
+      "key": "SITE_HEADERS",
+      "label": "Custom headers",
+      "type": "keyvalue",
+      "default": "",
+      "help": "Optional HTTP headers (e.g. Authorization, User-Agent)."
     }
   ]
 }

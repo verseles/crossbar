@@ -11,6 +11,14 @@
       "rows": 6,
       "default": "New York|-5|🇺🇸\nLondon|0|🇬🇧\nTokyo|9|🇯🇵",
       "help": "One per line: Name|Offset|Flag"
+    },
+    {
+      "key": "WORLD_CLOCK_JSON",
+      "label": "Zones (JSON)",
+      "type": "json",
+      "rows": 6,
+      "default": "",
+      "help": "Optional JSON array: [{\"name\":\"London\",\"offset\":0,\"flag\":\"🇬🇧\"}]. Takes priority over text format."
     }
   ]
 }

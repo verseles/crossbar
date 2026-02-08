@@ -5,6 +5,12 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_sec_location",
+      "label": "Location Fields",
+      "type": "section",
+      "description": "Choose which details to show in the dropdown."
+    },
+    {
       "key": "IPINFO_SHOW_REGION",
       "label": "Show region",
       "type": "checkbox",
@@ -27,6 +33,11 @@
       "label": "Show timezone",
       "type": "checkbox",
       "default": "false"
+    },
+    {
+      "key": "_div1",
+      "label": "Actions",
+      "type": "divider"
     },
     {
       "key": "IPINFO_SHOW_MAP",

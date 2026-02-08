@@ -5,12 +5,24 @@
   "config_required": "required",
   "settings": [
     {
+      "key": "_info_token",
+      "label": "Token Scope",
+      "type": "info",
+      "format": "info",
+      "description": "Create a personal access token at github.com/settings/tokens with the 'notifications' scope."
+    },
+    {
       "key": "GITHUB_TOKEN",
       "label": "GitHub Token",
       "type": "password",
       "required": true,
       "placeholder": "ghp_xxxxxxxxxxxxxxxxxxxx",
       "help": "Needs notifications scope."
+    },
+    {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
     },
     {
       "key": "GITHUB_MAX_ITEMS",

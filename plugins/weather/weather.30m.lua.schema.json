@@ -5,34 +5,72 @@
   "config_required": "first_run",
   "settings": [
     {
-      "key": "WEATHER_API_KEY",
-      "label": "OpenWeather API Key",
-      "type": "password",
-      "required": true,
-      "placeholder": "Enter your API key",
-      "help": "Get a free key at openweathermap.org/appid"
+      "key": "_info_api",
+      "label": "API Key Required",
+      "type": "info",
+      "format": "info",
+      "description": "Get a free API key at openweathermap.org/appid. The free tier allows 1000 calls/day."
     },
     {
-      "key": "WEATHER_CITY",
-      "label": "City",
-      "type": "text",
-      "default": "London",
-      "required": true,
-      "placeholder": "e.g. London"
-    },
-    {
-      "key": "WEATHER_UNITS",
-      "label": "Units",
-      "type": "select",
-      "default": "metric",
-      "options": [
+      "key": "_tabs",
+      "label": "Configuration",
+      "type": "tabs",
+      "tabs": [
         {
-          "value": "metric",
-          "label": "Celsius"
+          "label": "General",
+          "fields": [
+            {
+              "key": "WEATHER_API_KEY",
+              "label": "OpenWeather API Key",
+              "type": "password",
+              "required": true,
+              "placeholder": "Enter your API key",
+              "help": "Get a free key at openweathermap.org/appid"
+            },
+            {
+              "key": "WEATHER_CITY",
+              "label": "City",
+              "type": "text",
+              "default": "London",
+              "required": true,
+              "placeholder": "e.g. London"
+            },
+            {
+              "key": "WEATHER_UNITS",
+              "label": "Units",
+              "type": "radio",
+              "default": "metric",
+              "options": [
+                {
+                  "value": "metric",
+                  "label": "Celsius"
+                },
+                {
+                  "value": "imperial",
+                  "label": "Fahrenheit"
+                }
+              ]
+            }
+          ]
         },
         {
-          "value": "imperial",
-          "label": "Fahrenheit"
+          "label": "Display",
+          "fields": [
+            {
+              "key": "WEATHER_SHOW_FIELDS",
+              "label": "Extra fields",
+              "type": "multiselect",
+              "default": "description",
+              "options": [
+                { "value": "description", "label": "Condition" },
+                { "value": "humidity", "label": "Humidity" },
+                { "value": "wind", "label": "Wind Speed" },
+                { "value": "pressure", "label": "Pressure" },
+                { "value": "feels_like", "label": "Feels Like" }
+              ],
+              "help": "Select which details to show in the dropdown."
+            }
+          ]
         }
       ]
     }

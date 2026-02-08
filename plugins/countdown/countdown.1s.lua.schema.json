@@ -19,11 +19,24 @@
       "default": "Countdown"
     },
     {
+      "key": "COUNTDOWN_ICON",
+      "label": "Display icon",
+      "type": "icon",
+      "default": "\u23f3",
+      "help": "Emoji shown before the countdown timer."
+    },
+    {
       "key": "COUNTDOWN_DONE_TEXT",
       "label": "Done message",
       "type": "textarea",
       "rows": 2,
       "default": "Countdown complete!"
+    },
+    {
+      "key": "_SCHEMA_VERSION",
+      "label": "",
+      "type": "hidden",
+      "default": "2"
     }
   ]
 }

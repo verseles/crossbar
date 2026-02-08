@@ -23,6 +23,16 @@ local timeout = env_num('SITE_TIMEOUT', 5)
 if timeout < 1 then timeout = 1 end
 if timeout > 60 then timeout = 60 end
 
+-- Parse custom headers from keyvalue JSON
+local headers = nil
+local headers_raw = env('SITE_HEADERS', '')
+if headers_raw ~= '' then
+    local ok, parsed = pcall(crossbar.jsonDecode, headers_raw)
+    if ok and type(parsed) == 'table' then
+        headers = parsed
+    end
+end
+
 if not url:match('^https?://') then
     print('⚠️ Invalid URL | color=red')
     print('---')
@@ -33,7 +43,11 @@ if not url:match('^https?://') then
     return
 end
 
-local response, err = crossbar.web(url, { timeout = timeout })
+local web_opts = { timeout = timeout }
+if headers then
+    web_opts.headers = headers
+end
+local response, err = crossbar.web(url, web_opts)
 local status_code = nil
 local error_message = nil
 

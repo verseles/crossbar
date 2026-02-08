@@ -11,6 +11,7 @@ end
 
 local target_str = env('COUNTDOWN_TARGET', '2026-12-31T23:59:59+00:00')
 local label = env('COUNTDOWN_LABEL', 'Countdown')
+local icon = env('COUNTDOWN_ICON', '⏳')
 local done_text = env('COUNTDOWN_DONE_TEXT', 'Countdown complete!')
 
 local function get_local_offset_seconds(ts)
@@ -94,7 +95,7 @@ else
         display = string.format("%dm %ds", minutes, seconds)
     end
 
-    print('⏳ ' .. display)
+    print(icon .. ' ' .. display)
     print('---')
     print(label .. ': ' .. normalized)
 end

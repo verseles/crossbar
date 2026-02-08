@@ -42,6 +42,18 @@ if break_mins < 1 then break_mins = 1 end
 if break_mins > 60 then break_mins = 60 end
 local state_file = expand_home(env('POMODORO_STATE_FILE', crossbar.homeDir() .. '/.crossbar/pomodoro.state'))
 
+-- Parse alert range (min,max in minutes)
+local alert_range_raw = env('POMODORO_ALERT_RANGE', '1,5')
+local alert_min_m, alert_max_m = 1, 5
+local ar_parts = {}
+for part in alert_range_raw:gmatch('[^,]+') do
+    table.insert(ar_parts, tonumber(part:match('^%s*(.-)%s*$')))
+end
+if #ar_parts == 2 and ar_parts[1] and ar_parts[2] then
+    alert_min_m = ar_parts[1]
+    alert_max_m = ar_parts[2]
+end
+
 local function read_state()
     local state = {
         running = false,
@@ -114,8 +126,12 @@ if state.running and state.start_time > 0 then
     else
         local mins = math.floor(remaining / 60)
         local secs = remaining % 60
+        local remaining_m = remaining / 60
         local icon = state.is_break and '☕' or '🍅'
         local color = state.is_break and 'green' or 'red'
+        if not state.is_break and remaining_m >= alert_min_m and remaining_m <= alert_max_m then
+            color = 'orange'
+        end
         print(string.format('%s %02d:%02d | color=%s', icon, mins, secs, color))
     end
 else

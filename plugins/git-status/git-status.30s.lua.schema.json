@@ -7,7 +7,7 @@
     {
       "key": "GIT_SHOW_FILES",
       "label": "Show changed files",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     },
     {

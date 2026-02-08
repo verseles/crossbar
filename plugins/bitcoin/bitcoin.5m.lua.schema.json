@@ -55,6 +55,21 @@
           "label": "Japanese Yen (JPY)"
         }
       ]
+    },
+    {
+      "key": "CRYPTO_WATCHLIST",
+      "label": "Watchlist",
+      "type": "tags",
+      "default": "",
+      "max": 5,
+      "options": [
+        { "value": "ethereum", "label": "ethereum" },
+        { "value": "solana", "label": "solana" },
+        { "value": "cardano", "label": "cardano" },
+        { "value": "dogecoin", "label": "dogecoin" },
+        { "value": "ripple", "label": "ripple" }
+      ],
+      "help": "Additional coins to show in the dropdown (max 5)."
     }
   ]
 }

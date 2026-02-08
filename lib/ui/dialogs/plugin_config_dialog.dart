@@ -50,8 +50,27 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
     super.initState();
     _values = Map.from(widget.initialValues);
 
-    // Apply default values for missing settings
-    for (final setting in widget.config.settings) {
+    // Apply default values for missing settings (recursively for containers)
+    _applyDefaults(widget.config.settings);
+  }
+
+  void _applyDefaults(List<Setting> settings) {
+    for (final setting in settings) {
+      // Skip layout-only types that have no data
+      if (layoutOnlyTypes.contains(setting.type)) continue;
+
+      // Recurse into container children
+      if (setting.type == 'collapsible' && setting.fields != null) {
+        _applyDefaults(setting.fields!);
+        continue;
+      }
+      if (setting.type == 'tabs' && setting.tabs != null) {
+        for (final tab in setting.tabs!) {
+          _applyDefaults(tab.fields);
+        }
+        continue;
+      }
+
       if (!_values.containsKey(setting.key) && setting.defaultValue != null) {
         _values[setting.key] = setting.defaultValue!;
       }
@@ -59,7 +78,26 @@ class _PluginConfigDialogState extends State<PluginConfigDialog> {
   }
 
   bool get _isValid {
-    for (final setting in widget.config.settings) {
+    return _validateSettings(widget.config.settings);
+  }
+
+  bool _validateSettings(List<Setting> settings) {
+    for (final setting in settings) {
+      // Skip layout-only types
+      if (layoutOnlyTypes.contains(setting.type)) continue;
+
+      // Recurse into container children
+      if (setting.type == 'collapsible' && setting.fields != null) {
+        if (!_validateSettings(setting.fields!)) return false;
+        continue;
+      }
+      if (setting.type == 'tabs' && setting.tabs != null) {
+        for (final tab in setting.tabs!) {
+          if (!_validateSettings(tab.fields)) return false;
+        }
+        continue;
+      }
+
       final value = _values[setting.key];
       final error = validateSettingValue(setting, value);
       if (error != null) return false;

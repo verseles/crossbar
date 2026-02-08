@@ -5,11 +5,23 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_info_desktop",
+      "label": "Desktop Only",
+      "type": "info",
+      "format": "warning",
+      "description": "Disk usage monitoring requires shell access and is only available on desktop platforms."
+    },
+    {
       "key": "DISK_PATH",
       "label": "Path",
       "type": "path",
       "default": "/",
       "help": "Directory to inspect. Use C:\\ on Windows."
+    },
+    {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
     },
     {
       "key": "DISK_WARN",

@@ -5,6 +5,11 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_sec_thresholds",
+      "label": "Thresholds",
+      "type": "section"
+    },
+    {
       "key": "BATTERY_LOW",
       "label": "Low battery threshold",
       "type": "slider",
@@ -16,34 +21,47 @@
       "help": "Below this level the plugin uses low battery color."
     },
     {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
+    },
+    {
       "key": "BATTERY_SHOW_PERCENT",
       "label": "Show percent in title",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     },
     {
       "key": "BATTERY_SHOW_STATE",
       "label": "Show charging state",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     },
     {
-      "key": "BATTERY_COLOR_LOW",
-      "label": "Low battery color",
-      "type": "color",
-      "default": "#ff5555"
-    },
-    {
-      "key": "BATTERY_COLOR_NORMAL",
-      "label": "Normal color",
-      "type": "color",
-      "default": "#f8f8f2"
-    },
-    {
-      "key": "BATTERY_COLOR_CHARGING",
-      "label": "Charging color",
-      "type": "color",
-      "default": "#8be9fd"
+      "key": "_colors",
+      "label": "Colors",
+      "type": "collapsible",
+      "description": "Customize battery indicator colors",
+      "fields": [
+        {
+          "key": "BATTERY_COLOR_LOW",
+          "label": "Low battery color",
+          "type": "color",
+          "default": "#ff5555"
+        },
+        {
+          "key": "BATTERY_COLOR_NORMAL",
+          "label": "Normal color",
+          "type": "color",
+          "default": "#f8f8f2"
+        },
+        {
+          "key": "BATTERY_COLOR_CHARGING",
+          "label": "Charging color",
+          "type": "color",
+          "default": "#8be9fd"
+        }
+      ]
     }
   ]
 }

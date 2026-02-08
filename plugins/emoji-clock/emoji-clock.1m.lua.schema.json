@@ -7,7 +7,7 @@
     {
       "key": "EMOJI_CLOCK_SHOW_DATE",
       "label": "Show date",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     }
   ]

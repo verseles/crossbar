@@ -26,9 +26,24 @@ local home = crossbar.homeDir()
 local uptime = crossbar.uptime()
 local show_env = env_bool('SUBMENU_SHOW_ENV', true)
 local menu_title = env('SUBMENU_TITLE', 'System')
+local custom_header = env('SUBMENU_CUSTOM_HEADER', '')
+local icon_path = env('SUBMENU_ICON_PATH', '')
 
-print('📊 ' .. menu_title .. ' | color=blue')
+-- Title with optional image attribute
+local title_attrs = 'color=blue'
+if icon_path ~= '' then
+    title_attrs = title_attrs .. ' image=' .. icon_path
+end
+print('📊 ' .. menu_title .. ' | ' .. title_attrs)
 print('---')
+
+-- Custom header lines
+if custom_header ~= '' then
+    for line in custom_header:gmatch('[^\r\n]+') do
+        print(line)
+    end
+    print('---')
+end
 
 -- Hardware submenu
 print('Hardware')

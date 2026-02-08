@@ -1,8 +1,15 @@
+import 'dart:convert';
+
 import 'package:crossbar_core/crossbar_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+
+import 'complex_fields.dart';
+import 'container_fields.dart';
+import 'layout_fields.dart';
+import 'selection_fields.dart';
 
 abstract class ConfigField extends StatelessWidget {
   const ConfigField({
@@ -117,6 +124,114 @@ abstract class ConfigField extends StatelessWidget {
           value: value,
           onChanged: onChanged,
         );
+      // Layout types
+      case 'hidden':
+        return HiddenConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'switch':
+        return SwitchConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'separator':
+        return SeparatorConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'divider':
+        return DividerConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'section':
+        return SectionConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'info':
+        return InfoConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      // Selection types
+      case 'radio':
+        return RadioConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'range':
+        return RangeConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'multiselect':
+        return MultiselectConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'tags':
+        return TagsConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      // Complex types
+      case 'image':
+        return ImageConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'keyvalue':
+        return KeyValueConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'json':
+        return JsonConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'code':
+        return CodeConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
+      case 'icon':
+        return IconConfigField(
+          key: key,
+          setting: setting,
+          value: value,
+          onChanged: onChanged,
+        );
       default:
         return TextConfigField(
           key: key,
@@ -132,7 +247,26 @@ abstract class ConfigField extends StatelessWidget {
   final ValueChanged<String> onChanged;
 }
 
+/// Types that render no data and should be skipped in validation and defaults.
+const layoutOnlyTypes = {'separator', 'divider', 'section', 'info'};
+
+/// Types that should span full width in the form builder.
+const fullWidthTypes = {
+  'separator',
+  'divider',
+  'section',
+  'info',
+  'collapsible',
+  'tabs',
+};
+
 String? validateSettingValue(Setting setting, String? rawValue) {
+  // Layout-only types never produce validation errors.
+  if (layoutOnlyTypes.contains(setting.type)) return null;
+
+  // Container types have no direct value.
+  if (setting.type == 'collapsible' || setting.type == 'tabs') return null;
+
   final value = (rawValue ?? '').trim();
 
   if (setting.required && value.isEmpty) {
@@ -186,6 +320,33 @@ String? validateSettingValue(Setting setting, String? rawValue) {
       final parsed = DateTime.tryParse(value);
       if (parsed == null) {
         return 'Datetime inválido';
+      }
+      break;
+    case 'range':
+      final parts = value.split(',');
+      if (parts.length != 2) {
+        return 'Formato esperado: min,max';
+      }
+      final start = double.tryParse(parts[0].trim());
+      final end = double.tryParse(parts[1].trim());
+      if (start == null || end == null) {
+        return 'Valores numéricos inválidos';
+      }
+      if (start > end) {
+        return 'Mínimo deve ser menor que máximo';
+      }
+      if (setting.min != null && start < setting.min!) {
+        return 'Valor mínimo: ${_formatNumber(setting.min!)}';
+      }
+      if (setting.max != null && end > setting.max!) {
+        return 'Valor máximo: ${_formatNumber(setting.max!)}';
+      }
+      break;
+    case 'json':
+      try {
+        jsonDecode(value);
+      } catch (_) {
+        return 'JSON inválido';
       }
       break;
     default:
@@ -1051,6 +1212,42 @@ class ConfigFormBuilder extends StatelessWidget {
           spacing: 16,
           runSpacing: 16,
           children: settings.map((setting) {
+            // Container types are rendered directly, not via ConfigField.
+            if (setting.type == 'collapsible') {
+              return SizedBox(
+                width: constraints.maxWidth,
+                child: CollapsibleConfigField(
+                  setting: setting,
+                  values: values,
+                  onFieldChanged: onFieldChanged,
+                ),
+              );
+            }
+            if (setting.type == 'tabs') {
+              return SizedBox(
+                width: constraints.maxWidth,
+                child: TabsConfigField(
+                  setting: setting,
+                  values: values,
+                  onFieldChanged: onFieldChanged,
+                ),
+              );
+            }
+
+            // Full-width types span the entire row.
+            if (fullWidthTypes.contains(setting.type)) {
+              return SizedBox(
+                width: constraints.maxWidth,
+                child: ConfigField.fromSetting(
+                  setting: setting,
+                  value: values[setting.key],
+                  onChanged: (newValue) {
+                    onFieldChanged(MapEntry(setting.key, newValue));
+                  },
+                ),
+              );
+            }
+
             final width = setting.width;
             final fieldWidth = width != null
                 ? constraints.maxWidth * (width / 100)

@@ -7,7 +7,7 @@
     {
       "key": "SUBMENU_SHOW_ENV",
       "label": "Show environment section",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     },
     {
@@ -15,6 +15,23 @@
       "label": "Menu title",
       "type": "text",
       "default": "System"
+    },
+    {
+      "key": "SUBMENU_CUSTOM_HEADER",
+      "label": "Custom header lines",
+      "type": "code",
+      "format": "text",
+      "default": "",
+      "rows": 3,
+      "help": "Raw BitBar lines added at the top. One per row."
+    },
+    {
+      "key": "SUBMENU_ICON_PATH",
+      "label": "Custom icon",
+      "type": "image",
+      "default": "",
+      "accept": ".png,.jpg,.svg",
+      "help": "Optional image for the menu title bar."
     }
   ]
 }

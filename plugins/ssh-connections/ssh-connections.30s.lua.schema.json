@@ -7,7 +7,7 @@
     {
       "key": "SSH_SHOW_LIST",
       "label": "Show session list",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     }
   ]

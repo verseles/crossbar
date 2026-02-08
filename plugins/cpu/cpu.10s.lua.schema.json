@@ -5,6 +5,18 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_info_android",
+      "label": "Android",
+      "type": "info",
+      "format": "warning",
+      "description": "CPU monitoring is unavailable on Android 8+ due to SELinux restrictions."
+    },
+    {
+      "key": "_sec_thresholds",
+      "label": "Thresholds",
+      "type": "section"
+    },
+    {
       "key": "CPU_WARN",
       "label": "Warning threshold",
       "type": "slider",
@@ -27,15 +39,20 @@
       "help": "Usage >= crit uses red"
     },
     {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
+    },
+    {
       "key": "CPU_SHOW_PLATFORM",
       "label": "Show platform",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     },
     {
       "key": "CPU_SHOW_RAW",
       "label": "Show 1-decimal value",
-      "type": "checkbox",
+      "type": "switch",
       "default": "false"
     }
   ]

@@ -5,6 +5,11 @@
   "config_required": "optional",
   "settings": [
     {
+      "key": "_sec_thresholds",
+      "label": "Thresholds",
+      "type": "section"
+    },
+    {
       "key": "MEM_WARN",
       "label": "Warning threshold",
       "type": "slider",
@@ -27,15 +32,20 @@
       "help": "Usage >= crit uses red"
     },
     {
+      "key": "_sep1",
+      "label": "",
+      "type": "separator"
+    },
+    {
       "key": "MEM_SHOW_RAW",
       "label": "Show raw string",
-      "type": "checkbox",
+      "type": "switch",
       "default": "false"
     },
     {
       "key": "MEM_SHOW_TOTAL",
       "label": "Show total memory",
-      "type": "checkbox",
+      "type": "switch",
       "default": "true"
     }
   ]

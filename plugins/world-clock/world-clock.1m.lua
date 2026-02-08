@@ -42,8 +42,29 @@ local function parse_timezones(raw)
     return zones
 end
 
-local default_zones = 'New York|-5|🇺🇸\nLondon|0|🇬🇧\nTokyo|9|🇯🇵\nSydney|11|🇦🇺\nDubai|4|🇦🇪'
-local timezones = parse_timezones(env('WORLD_CLOCK_ZONES', default_zones))
+-- Try JSON format first (takes priority)
+local timezones = {}
+local json_raw = env('WORLD_CLOCK_JSON', '')
+if json_raw ~= '' then
+    local ok, parsed = pcall(crossbar.jsonDecode, json_raw)
+    if ok and type(parsed) == 'table' then
+        for _, entry in ipairs(parsed) do
+            if type(entry) == 'table' and entry.name and entry.offset then
+                table.insert(timezones, {
+                    name = entry.name,
+                    offset = tonumber(entry.offset) or 0,
+                    flag = entry.flag or '🕒',
+                })
+            end
+        end
+    end
+end
+
+-- Fall back to text format if JSON is empty or invalid
+if #timezones == 0 then
+    local default_zones = 'New York|-5|🇺🇸\nLondon|0|🇬🇧\nTokyo|9|🇯🇵\nSydney|11|🇦🇺\nDubai|4|🇦🇪'
+    timezones = parse_timezones(env('WORLD_CLOCK_ZONES', default_zones))
+end
 
 if #timezones == 0 then
     print('🌍 Invalid config | color=red')
