@@ -30,7 +30,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
 
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
-- **API Gaps:** Comandos como `--location` (geocoding) e `--qr` não têm lógica implementada.
+- **API Gaps:** Comando `--location` (geocoding) não tem lógica implementada. Screenshot tem API mas sem comando CLI exposto.
 
 ---
 
@@ -107,12 +107,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 **Objetivo:** Polimento da experiência desktop e gerenciamento avançado de ícones de bandeja.
 
-### Fase 1: Global Hotkey
+### Fase 1: Global Hotkey ✅
 
-- [ ] **Dependência:** Adicionar `hotkey_manager` ao `pubspec.yaml`.
-- [ ] **Implementação:** Em `lib/services/window_service.dart`:
-  - [ ] Registrar `Ctrl+Alt+C` (ou `Cmd+Alt+C` no macOS).
-  - [ ] Handler deve fazer toggle de `show()` / `hide()`.
+- [x] **Dependência:** `hotkey_manager: ^0.2.3` adicionado ao `pubspec.yaml`.
+- [x] **Implementação:** Em `lib/services/window_service.dart`:
+  - [x] Registrar `Ctrl+Alt+C` (ou `Cmd+Alt+C` no macOS) via `registerGlobalHotkey()`.
+  - [x] Handler faz toggle de `show()` / `hide()`.
 - [ ] **Settings:** Adicionar opção na aba Settings para customizar/desativar o atalho.
 
 ### Fase 2: Tray Overflow Logic
@@ -140,13 +140,15 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - [ ] **Geolocation:** Implementar `lib/cli/commands/location_command.dart`.
   - [ ] Usar `geolocator` (se permissão concedida) ou API IP-based (ipapi.co) como fallback.
   - [ ] Implementar geocoding reverso (lat/long -> Cidade).
-- [ ] **QR Code:** Implementar `lib/cli/commands/utility_commands.dart` (subcomando `qr`).
-  - [ ] Gerar QR code em ASCII para terminal.
-  - [ ] Gerar PNG base64 se flag `--image` for passada.
-- [ ] **Screenshot:** Finalizar implementação multiplataforma em `lib/core/api/utils_api.dart`.
-  - [ ] Linux: `gnome-screenshot` ou `scrot` ou `import` (ImageMagick).
-  - [ ] Windows: PowerShell snippet para captura.
-  - [ ] macOS: `screencapture`.
+- [x] **QR Code:** Implementado em `lib/cli/commands/qr_command.dart` (`QrCommand`).
+  - [x] Gera QR code em ASCII (Unicode blocks) para terminal.
+  - [x] Gera PNG base64 com flag `--image`.
+  - [x] Tamanho customizável via `--size`. Suporte a JSON/XML output.
+- [x] **Screenshot:** API multiplataforma implementada em `lib/core/api/utils_api.dart`.
+  - [x] Linux: `gnome-screenshot`, `scrot`, `spectacle` (fallback chain).
+  - [x] Windows: PowerShell snippet para captura.
+  - [x] macOS: `screencapture`.
+  - [ ] Expor como comando CLI (API existe, falta wiring no CLI handler).
 
 ### Fase 2: Marketplace Engine
 
@@ -253,7 +255,7 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 
 ### Status Atual de Testes
 
-**Coverage atual:** 40.7% (meta: 35%)
+**Coverage atual:** 44.3% (meta: 35%)
 
 #### Arquivos com Boa Cobertura (>70%)
 
