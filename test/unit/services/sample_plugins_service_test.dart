@@ -38,8 +38,8 @@ void main() {
       expect(SamplePluginsService.universalPlugins, isNotEmpty);
     });
 
-    test('has 25 sample plugins', () {
-      expect(SamplePluginsService.universalPlugins.length, equals(25));
+    test('has 26 sample plugins', () {
+      expect(SamplePluginsService.universalPlugins.length, equals(26));
     });
 
     test('allPlugins combines universal plugins', () {

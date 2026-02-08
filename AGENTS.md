@@ -127,7 +127,7 @@ O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
 │   │   └── runners/            # Declarative and Dart Runners
 │   ├── services/               # Singleton Services (Tray, Refresh, Config, Marketplace)
 │   └── ui/                     # Widgets Flutter (Material 3)
-├── plugins/                    # 25 Lua sample plugins (all platforms)
+├── plugins/                    # 26 Lua sample plugins (all platforms)
 ├── .github/workflows/ci.yml    # Pipeline principal (Build 5 plataformas)
 └── Makefile                    # Comandos de dev (make linux, make test)
 ```
@@ -141,7 +141,7 @@ O projeto usa **monorepo** com 2 pacotes internos e compila **2 binários**:
 - Local: `~/.crossbar/plugins/` (ou pasta local em dev).
 - Identificação: Extensão (`.py`, `.sh`) ou Shebang.
 - Intervalo: Parseado do nome (ex: `cpu.10s.lua` = 10 segundos).
-- **Samples**: Todos os 25 plugins de exemplo usam Lua (ADR-014). Usuários podem criar plugins em qualquer linguagem.
+- **Samples**: Todos os 26 plugins de exemplo usam Lua (ADR-014). Usuários podem criar plugins em qualquer linguagem.
 
 ### Execução
 

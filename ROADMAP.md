@@ -24,7 +24,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 - **Mobile Widgets:** Integração nativa com Android (XML/Receiver) e iOS (WidgetKit/SwiftUI) via `home_widget`.
 - **Mobile Stability:** Cache persistente do `crossbar.web` no mobile e proteção contra varreduras vazias de plugins.
 - **Lua API:** Helpers `web/env/config/json` integrados nos plugins de exemplo.
-- **Lua-First Samples:** Todos os 25 sample plugins são Lua-only (ADR-014), UI simplificada sem dropdown de linguagem.
+- **Lua-First Samples:** Todos os 26 sample plugins são Lua-only (ADR-014), UI simplificada sem dropdown de linguagem.
 - **Marketplace:** Sistema de busca e instalação via GitHub implementado (`MarketplaceService`).
 
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
@@ -137,9 +137,11 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ### Fase 1: CLI Gaps
 
-- [ ] **Geolocation:** Implementar `lib/cli/commands/location_command.dart`.
-  - [ ] Usar `geolocator` (se permissão concedida) ou API IP-based (ipapi.co) como fallback.
-  - [ ] Implementar geocoding reverso (lat/long -> Cidade).
+- [x] **Geolocation:** Implementado em `lib/cli/commands/location_command.dart` (`LocationCommand`).
+  - [x] IP geolocation via ipapi.co com fallback ip-api.com (sem dependência de geolocator/Flutter).
+  - [x] Geocoding (endereço -> coordenadas) via Nominatim/OpenStreetMap.
+  - [x] Reverse geocoding (coordenadas -> endereço) via Nominatim/OpenStreetMap.
+  - [x] Suporte a --json e --xml output.
 - [x] **QR Code:** Implementado em `lib/cli/commands/qr_command.dart` (`QrCommand`).
   - [x] Gera QR code em ASCII (Unicode blocks) para terminal.
   - [x] Gera PNG base64 com flag `--image`.

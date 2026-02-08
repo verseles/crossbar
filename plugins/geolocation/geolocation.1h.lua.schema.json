@@ -1,0 +1,38 @@
+{
+  "name": "Geolocation",
+  "description": "Shows your geographic location based on IP with map links.",
+  "icon": "GEO",
+  "config_required": "optional",
+  "settings": [
+    {
+      "key": "_sec_display",
+      "label": "Display Options",
+      "type": "section",
+      "description": "Choose which details to show."
+    },
+    {
+      "key": "GEOLOCATION_SHOW_COORDINATES",
+      "label": "Show coordinates",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "GEOLOCATION_SHOW_TIMEZONE",
+      "label": "Show timezone",
+      "type": "checkbox",
+      "default": "true"
+    },
+    {
+      "key": "GEOLOCATION_SHOW_POSTAL",
+      "label": "Show postal code",
+      "type": "checkbox",
+      "default": "false"
+    },
+    {
+      "key": "GEOLOCATION_SHOW_MAP",
+      "label": "Show map links",
+      "type": "checkbox",
+      "default": "true"
+    }
+  ]
+}

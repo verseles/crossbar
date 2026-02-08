@@ -90,6 +90,7 @@ flutter:
 
     - plugins/emoji-clock/
     - plugins/examples/
+    - plugins/geolocation/
     - plugins/git-status/
     - plugins/github-notifications/
     - plugins/ip-info/

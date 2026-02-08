@@ -627,7 +627,7 @@ void main() {
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
 
-      expect(plugins.length, equals(26), reason: 'Should have exactly 26 Lua plugins');
+      expect(plugins.length, equals(27), reason: 'Should have exactly 27 Lua plugins');
 
       var testedCount = 0;
       var skippedCount = 0;
@@ -693,6 +693,7 @@ void main() {
         'disk/disk.5m.lua',
         'emoji-clock/emoji-clock.1m.lua',
         'examples/submenu_demo.30s.lua',
+        'geolocation/geolocation.1h.lua',
         'github-notifications/github-notifications.5m.lua',
         'git-status/git-status.30s.lua',
         'ip-info/ip-info.1h.lua',

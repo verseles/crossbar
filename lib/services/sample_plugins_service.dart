@@ -301,6 +301,23 @@ class SamplePluginsService {
         ),
       ],
     ),
+    PluginMetadata(
+      id: 'geolocation',
+      name: 'Geolocation',
+      description: 'Shows your geographic location with map links',
+      category: PluginCategory.network,
+      mobileCompatible: true,
+      tags: ['location', 'geolocation', 'gps', 'map', 'coordinates', 'country'],
+      variants: [
+        PluginMetadataVariant(
+          language: PluginLanguage.lua,
+          filename: 'geolocation.1h.lua',
+          assetPath: 'plugins/geolocation/geolocation.1h.lua',
+          schemaAssetPath:
+              'plugins/geolocation/geolocation.1h.lua.schema.json',
+        ),
+      ],
+    ),
 
     // ─────────────────────────────────────────────────────────────
     // FINANCE
