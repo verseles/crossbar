@@ -1,6 +1,9 @@
 package com.verseles.crossbar
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -15,6 +18,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONArray
 import org.json.JSONObject
@@ -264,7 +268,17 @@ class WidgetMenuActivity : Activity() {
                         }
                         finish()
                     }
-                    // Show ripple for clickable items
+                } else if (!hasBash) {
+                    // Info items: copy text to clipboard on tap
+                    setOnClickListener {
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Crossbar", text))
+                        Toast.makeText(this@WidgetMenuActivity, "Copied", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                // Show ripple for all interactive items (not bash-disabled)
+                if (!hasBash) {
                     val outValue = TypedValue()
                     theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
                     setBackgroundResource(outValue.resourceId)

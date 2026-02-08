@@ -302,10 +302,10 @@ class NotificationService {
     final title = output.title ?? pluginId;
     final text = output.text ?? '--';
 
-    // Build expanded text with menu info
+    // Build expanded text with informational menu items (skip actions)
     final expandedLines = <String>[text];
-    for (final item in output.menu.take(4)) {
-      if (item.separator) continue;
+    for (final item in output.menu.take(6)) {
+      if (item.separator || item.isAction) continue;
       final itemText = item.text ?? '';
       if (itemText.isEmpty) continue;
       expandedLines.add(itemText);

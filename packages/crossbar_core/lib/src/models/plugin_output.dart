@@ -96,6 +96,7 @@ class MenuItem {
     this.separator = false,
     this.bash,
     this.href,
+    this.refresh = false,
     this.color,
     this.submenu,
   });
@@ -110,6 +111,7 @@ class MenuItem {
       separator: json['separator'] as bool? ?? false,
       bash: json['bash'] as String?,
       href: json['href'] as String?,
+      refresh: json['refresh'] as bool? ?? false,
       color: json['color'] as String?,
       submenu: (json['submenu'] as List<dynamic>?)
           ?.map((s) => MenuItem.fromJson(s as Map<String, dynamic>))
@@ -120,8 +122,12 @@ class MenuItem {
   final bool separator;
   final String? bash;
   final String? href;
+  final bool refresh;
   final String? color;
   final List<MenuItem>? submenu;
+
+  /// Whether this item is purely an action (not informational content).
+  bool get isAction => bash != null || refresh || href != null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -129,6 +135,7 @@ class MenuItem {
       'separator': separator,
       if (bash != null) 'bash': bash,
       if (href != null) 'href': href,
+      if (refresh) 'refresh': refresh,
       if (color != null) 'color': color,
       if (submenu != null) 'submenu': submenu!.map((s) => s.toJson()).toList(),
     };
@@ -139,6 +146,7 @@ class MenuItem {
     bool? separator,
     String? bash,
     String? href,
+    bool? refresh,
     String? color,
     List<MenuItem>? submenu,
   }) {
@@ -147,6 +155,7 @@ class MenuItem {
       separator: separator ?? this.separator,
       bash: bash ?? this.bash,
       href: href ?? this.href,
+      refresh: refresh ?? this.refresh,
       color: color ?? this.color,
       submenu: submenu ?? this.submenu,
     );

@@ -168,6 +168,7 @@ class OutputParser {
       text: itemText,
       bash: parsedLine.attributes['bash'],
       href: parsedLine.attributes['href'],
+      refresh: parsedLine.attributes['refresh'] == 'true',
       color: parsedLine.attributes['color'],
     );
   }
