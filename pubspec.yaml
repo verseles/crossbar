@@ -61,6 +61,7 @@ dependencies:
 
   # Embedded interpreters (run scripts without external runtime)
   lua_dardo: ^0.0.5      # Lua 5.3 interpreter in pure Dart
+  screen_retriever: ^0.2.0
 
 dev_dependencies:
   flutter_test:

@@ -24,6 +24,49 @@ void main() {
         },
       );
 
+      // Mock ScreenRetriever channel
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('dev.leanflutter.plugins/screen_retriever'),
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          if (methodCall.method == 'getAllDisplays') {
+            return {
+              'displays': [
+                {
+                  'id': '0',
+                  'name': 'Display 1',
+                  'x': 0.0,
+                  'y': 0.0,
+                  'width': 1920.0,
+                  'height': 1080.0,
+                  'size': {'width': 1920.0, 'height': 1080.0},
+                  'visiblePosition': {'x': 0.0, 'y': 0.0, 'dx': 0.0, 'dy': 0.0},
+                  'visibleSize': {'width': 1920.0, 'height': 1080.0},
+                  'scaleFactor': 1.0,
+                }
+              ]
+            };
+          } else if (methodCall.method == 'getPrimaryDisplay') {
+            return {
+              'id': '0',
+              'name': 'Display 1',
+              'x': 0.0,
+              'y': 0.0,
+              'width': 1920.0,
+              'height': 1080.0,
+              'size': {'width': 1920.0, 'height': 1080.0},
+              'visiblePosition': {'x': 0.0, 'y': 0.0, 'dx': 0.0, 'dy': 0.0},
+              'visibleSize': {'width': 1920.0, 'height': 1080.0},
+              'scaleFactor': 1.0,
+            };
+          } else if (methodCall.method == 'getCursorScreenPoint') {
+            return {'x': 960.0, 'y': 540.0, 'dx': 960.0, 'dy': 540.0};
+          }
+          return null;
+        },
+      );
+
       // Mock WindowManager channel
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
@@ -100,6 +143,34 @@ void main() {
       expect(prefs.getDouble('window_y'), 200.0);
       expect(prefs.getDouble('window_width'), 800.0);
       expect(prefs.getDouble('window_height'), 600.0);
+    });
+
+    test('init resets bounds if off-screen', () async {
+      SharedPreferences.setMockInitialValues({
+        'window_x': 2000.0,
+        'window_y': 100.0,
+        'window_width': 700.0,
+        'window_height': 450.0,
+      });
+
+      await windowService.init();
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      // Verify setBounds is NOT called with the off-screen coordinates (2000, 100)
+      // Note: setBounds/setSize might be called for default size, but not for the invalid position.
+      final setBoundsCalls = log.where((c) => c.method == 'setBounds');
+      final usedOffScreenCoords = setBoundsCalls.any((c) {
+          final args = c.arguments as Map;
+          return args['x'] == 2000.0;
+      });
+      expect(usedOffScreenCoords, isFalse);
+
+      final setPosCalls = log.where((c) => c.method == 'setPosition');
+      final usedOffScreenPos = setPosCalls.any((c) {
+          final args = c.arguments as Map;
+          return args['x'] == 2000.0;
+      });
+      expect(usedOffScreenPos, isFalse);
     });
 
     test('init restores window bounds from SharedPreferences', () async {

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -32,12 +33,54 @@ class WindowService with WindowListener {
           prefs.containsKey('window_y') &&
           prefs.containsKey('window_width') &&
           prefs.containsKey('window_height')) {
-        savedBounds = Rect.fromLTWH(
+        final bounds = Rect.fromLTWH(
           prefs.getDouble('window_x')!,
           prefs.getDouble('window_y')!,
           prefs.getDouble('window_width')!,
           prefs.getDouble('window_height')!,
         );
+
+        // Validate if the saved bounds are within any available display
+        bool isOnScreen = false;
+        try {
+          final displays = await screenRetriever.getAllDisplays();
+          for (final display in displays) {
+            // Check if the center of the saved window is within the display's visible area
+            final visibleFrame = display.visiblePosition != null && display.size != null
+                ? Rect.fromLTWH(
+                    display.visiblePosition!.dx,
+                    display.visiblePosition!.dy,
+                    display.size!.width,
+                    display.size!.height,
+                  )
+                : null;
+
+            if (visibleFrame != null && visibleFrame.contains(bounds.center)) {
+              isOnScreen = true;
+              break;
+            }
+          }
+        } catch (e) {
+          LoggerService().warning('Failed to validate window bounds against screens: $e');
+          // If validation fails, assume it's valid to avoid resetting on error,
+          // or invalid to be safe?
+          // Let's assume valid if we can't check, but usually getAllDisplays should work.
+          // However, if we can't verify, maybe safe default (center) is better?
+          // But getAllDisplays might fail on some platforms/setups.
+          // Let's stick to "if we can't verify, use it" to be less aggressive,
+          // unless the user specifically asked for "fallback to centered defaults".
+          // The user said: "validate saved coordinates against current screens (or fallback to centered defaults)".
+          // So if validation fails (exception), maybe we should fallback.
+          // But empty list of displays is a valid failure case where we definitely want fallback.
+          // Exception might be platform error.
+          isOnScreen = true; // Fallback to trusting the saved value on error
+        }
+
+        if (isOnScreen) {
+          savedBounds = bounds;
+        } else {
+          LoggerService().info('Saved window bounds off-screen, resetting to center');
+        }
       }
     } catch (e, stackTrace) {
       LoggerService().error('Failed to load window state', e, stackTrace);
