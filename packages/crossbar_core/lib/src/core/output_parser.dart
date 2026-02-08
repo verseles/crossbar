@@ -185,15 +185,28 @@ class OutputParser {
     final firstCodePoint = runes.first;
 
     if (_isEmoji(firstCodePoint) || firstCodePoint > 127) {
-      final firstChar = String.fromCharCode(firstCodePoint);
-      final remaining = input.substring(firstChar.length).trim();
+      // Determine how many runes form the icon (flag emojis use 2 Regional
+      // Indicator Symbols that must stay together as one grapheme cluster).
+      var iconRuneCount = 1;
+      if (_isRegionalIndicator(firstCodePoint) &&
+          runes.length > 1 &&
+          _isRegionalIndicator(runes[1])) {
+        iconRuneCount = 2;
+      }
+      final icon = String.fromCharCodes(runes.take(iconRuneCount));
+      final remaining =
+          String.fromCharCodes(runes.skip(iconRuneCount)).trim();
       return (
-        icon: firstChar,
+        icon: icon,
         text: remaining.isNotEmpty ? remaining : null,
       );
     }
 
     return (icon: '', text: input);
+  }
+
+  static bool _isRegionalIndicator(int codePoint) {
+    return codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF;
   }
 
   static bool _isEmoji(int codePoint) {
