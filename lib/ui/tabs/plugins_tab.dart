@@ -946,29 +946,28 @@ class _PluginsTabState extends State<PluginsTab> {
               ],
               if (output.menu.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                ...output.menu
-                    .take(5)
-                    .map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 150),
+                  child: Scrollbar(
+                    thumbVisibility: output.menu.length > 5,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: output.menu.length,
+                      itemExtent: 22,
+                      itemBuilder: (context, index) {
+                        final item = output.menu[index];
+                        return Text(
                           '• ${item.text ?? ''}',
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                        ),
-                      ),
-                    ),
-                if (output.menu.length > 5)
-                  Text(
-                    '... and ${output.menu.length - 5} more',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.outline,
-                      fontStyle: FontStyle.italic,
+                        );
+                      },
                     ),
                   ),
+                ),
               ],
             ],
           ),
