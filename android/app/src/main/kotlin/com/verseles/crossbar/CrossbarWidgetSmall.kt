@@ -6,5 +6,4 @@ package com.verseles.crossbar
  */
 class CrossbarWidgetSmall : CrossbarWidgetBase() {
     override fun getLayoutId(): Int = R.layout.crossbar_widget_small
-    override fun hasRefreshButton(): Boolean = false
 }

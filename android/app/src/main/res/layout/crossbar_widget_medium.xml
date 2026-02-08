@@ -68,33 +68,17 @@
 
     </LinearLayout>
 
-    <!-- Actions on the right -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <!-- Edit action on the right -->
+    <ImageView
+        android:id="@+id/widget_edit"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_marginStart="12dp"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/widget_refresh"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/action_refresh"
-            android:padding="4dp"
-            android:src="@drawable/ic_refresh"
-            android:tint="@color/widget_icon_tint"
-            tools:ignore="UseAppTint" />
-
-        <TextView
-            android:id="@+id/widget_edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/action_edit_widget"
-            android:padding="2dp"
-            android:text="✏️"
-            android:textSize="14sp" />
-    </LinearLayout>
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_edit_widget"
+        android:padding="4dp"
+        android:src="@drawable/ic_edit"
+        android:tint="@color/widget_icon_tint"
+        tools:ignore="UseAppTint" />
 
 </LinearLayout>

@@ -20,18 +20,12 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
     companion object {
         private const val TAG = "CrossbarWidget"
-        private const val ACTION_REFRESH = "com.verseles.crossbar.ACTION_REFRESH"
     }
 
     /**
      * Returns the layout resource ID for this widget size.
      */
     abstract fun getLayoutId(): Int
-
-    /**
-     * Returns whether this widget shows refresh button.
-     */
-    open fun hasRefreshButton(): Boolean = false
 
     override fun onUpdate(
         context: Context,
@@ -171,7 +165,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                 }
             }
 
-            setupClickHandlers(context, views, layoutId, appWidgetId)
+            setupClickHandlers(context, views, appWidgetId)
             appWidgetManager.updateAppWidget(appWidgetId, views)
         } catch (e: Exception) {
             android.util.Log.e(TAG, "Error updating widget $appWidgetId", e)
@@ -412,7 +406,6 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
     private fun setupClickHandlers(
         context: Context,
         views: RemoteViews,
-        layoutId: Int,
         appWidgetId: Int
     ) {
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
@@ -425,22 +418,6 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_container, openAppPendingIntent)
-
-        if (hasRefreshButton() && layoutId != R.layout.crossbar_widget_small) {
-            val refreshIntent = Intent(context, MainActivity::class.java).apply {
-                action = ACTION_REFRESH
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                putExtra("refresh_widgets", true)
-                data = android.net.Uri.parse("crossbar://refresh/$appWidgetId")
-            }
-            val refreshPendingIntent = PendingIntent.getActivity(
-                context,
-                appWidgetId + 1000,
-                refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            views.setOnClickPendingIntent(R.id.widget_refresh, refreshPendingIntent)
-        }
 
         val editIntent = Intent(context, WidgetConfigActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
