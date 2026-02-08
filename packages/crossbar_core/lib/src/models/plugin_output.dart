@@ -129,6 +129,21 @@ class MenuItem {
   /// Whether this item is purely an action (not informational content).
   bool get isAction => bash != null || refresh || href != null;
 
+  /// Whether this bash command is a crossbar CLI command (works on all platforms).
+  bool get isCrossbarCommand =>
+      bash != null && bash!.trimLeft().startsWith('crossbar ');
+
+  /// Extracts crossbar CLI args from bash command.
+  /// e.g. 'crossbar clipboard hello' → ['clipboard', 'hello']
+  List<String>? get crossbarArgs {
+    if (!isCrossbarCommand) return null;
+    final parts = bash!.trim().split(RegExp(r'\s+'));
+    return parts.skip(1).toList();
+  }
+
+  /// Whether this action can be executed on mobile (not just desktop).
+  bool get isMobileAction => href != null || refresh || isCrossbarCommand;
+
   Map<String, dynamic> toJson() {
     return {
       if (text != null) 'text': text,

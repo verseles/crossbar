@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
+import '../cli/cli_handler.dart' as cli;
 import '../core/plugin_manager.dart';
 import 'background_service.dart';
 import 'notification_service.dart';
@@ -39,6 +42,11 @@ class SchedulerService {
   final Map<String, Timer> _timers = {};
   final Map<String, Duration> _timerIntervals = {};
 
+  /// Debounce timer for combined notifications.
+  /// Ensures the combined notification is only shown after all plugins
+  /// in the current cycle have finished updating (1.5s quiet period).
+  Timer? _combinedNotificationDebounce;
+
   bool _running = false;
 
   bool get isRunning => _running;
@@ -71,6 +79,16 @@ class SchedulerService {
     SettingsService().addListener(_onSettingsChanged);
     await _updatePersistentNotification();
 
+    // Connect notification action callbacks
+    _notificationService.onRefreshRequested = (id) => _refreshService.runPlugin(id);
+    _notificationService.onCliCommandRequested = (args) => cli.handleCliCommand(args);
+    if (Platform.isAndroid) {
+      _notificationService.onShowPluginMenu = (pluginId) {
+        const channel = MethodChannel('com.verseles.crossbar/system');
+        channel.invokeMethod('openPluginMenu', pluginId);
+      };
+    }
+
     // Register widget update listener
     _refreshService.addOutputListener(_onPluginOutput);
     _refreshService.addListChangedListener(_onPluginListChanged);
@@ -81,8 +99,13 @@ class SchedulerService {
   Future<void> stop() async {
     _running = false;
     SettingsService().removeListener(_onSettingsChanged);
+    _notificationService.onRefreshRequested = null;
+    _notificationService.onCliCommandRequested = null;
+    _notificationService.onShowPluginMenu = null;
     _refreshService.removeOutputListener(_onPluginOutput);
     _refreshService.removeListChangedListener(_onPluginListChanged);
+
+    _combinedNotificationDebounce?.cancel();
 
     for (final timer in _timers.values) {
       timer.cancel();
@@ -116,14 +139,19 @@ class SchedulerService {
     // Update widget
     await _widgetService.updateWidget(pluginId, output);
 
-    // Update persistent notification with latest time
-    final now = DateTime.now();
-    final timeStr =
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    await _notificationService.updatePersistentNotification(
-      enabledPlugins: _pluginManager.plugins.where((p) => p.enabled).length,
-      lastUpdate: timeStr,
-    );
+    // Update persistent notification with latest time.
+    // Skip when combined/both mode is active — the debounced
+    // showCombinedNotification() will update the persistent slot itself.
+    final style = SettingsService().notificationStyle;
+    if (style == NotificationStyle.individual) {
+      final now = DateTime.now();
+      final timeStr =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+      await _notificationService.updatePersistentNotification(
+        enabledPlugins: _pluginManager.plugins.where((p) => p.enabled).length,
+        lastUpdate: timeStr,
+      );
+    }
 
     // Handle error notifications
     if (output.hasError) {
@@ -134,12 +162,17 @@ class SchedulerService {
       return;
     }
 
-    // Show plugin output notifications based on configured style
-    final style = SettingsService().notificationStyle;
+    // Show plugin output notifications based on configured style.
+    // Combined mode uses debounce (1.5s) so the notification waits for all
+    // plugins in the current refresh cycle before showing a single snapshot.
     switch (style) {
       case NotificationStyle.combined:
-        await _notificationService.showCombinedNotification(
-          _refreshService.lastOutputs,
+        _combinedNotificationDebounce?.cancel();
+        _combinedNotificationDebounce = Timer(
+          const Duration(milliseconds: 1500),
+          () => _notificationService.showCombinedNotification(
+            _refreshService.lastOutputs,
+          ),
         );
       case NotificationStyle.individual:
         await _notificationService.showIndividualNotification(
@@ -147,8 +180,12 @@ class SchedulerService {
           output,
         );
       case NotificationStyle.both:
-        await _notificationService.showCombinedNotification(
-          _refreshService.lastOutputs,
+        _combinedNotificationDebounce?.cancel();
+        _combinedNotificationDebounce = Timer(
+          const Duration(milliseconds: 1500),
+          () => _notificationService.showCombinedNotification(
+            _refreshService.lastOutputs,
+          ),
         );
         await _notificationService.showIndividualNotification(
           pluginId,

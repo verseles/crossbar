@@ -8,6 +8,7 @@ import 'commands/clipboard_command.dart';
 import 'commands/dnd_command.dart';
 import 'commands/filesystem_commands.dart';
 import 'commands/media_command.dart';
+import 'commands/location_command.dart';
 import 'commands/network_command.dart';
 import 'commands/plugin_commands.dart';
 import 'commands/power_command.dart';
@@ -37,7 +38,8 @@ void _registerCommands() {
   _register(WallpaperCommand());
   _register(DndCommand());
 
-  // Network
+  // Network & Location
+  _register(LocationCommand());
   _register(NetworkCommand());
   _register(WebCommand());
   _register(WifiCommand());
@@ -178,6 +180,12 @@ Power Management (power):
   power sleep               Suspend system
   power restart --confirm   Restart system
   power shutdown --confirm  Shutdown system
+
+Location & Geolocation:
+  location                  Geolocate your current IP
+  location <ip>             Geolocate a specific IP
+  location geocode <addr>   Address to coordinates
+  location reverse <l> <l>  Coordinates to address
 
 Network & Connectivity:
   net status                Connection status

@@ -746,6 +746,102 @@ crossbar vpn status --xml
 
 ---
 
+## Location & Geolocation
+
+### `location`
+
+Geolocate your current public IP address.
+
+```bash
+crossbar location
+# Output:
+# Location: Mountain View, California, US
+# IP: 203.0.113.42
+# Coordinates: 37.386, -122.084
+# Timezone: America/Los_Angeles
+# ISP: Google LLC
+
+crossbar location --json
+# Output: {"ip":"203.0.113.42","city":"Mountain View","region":"California","country":"US","latitude":37.386,"longitude":-122.084,"timezone":"America/Los_Angeles","org":"Google LLC","postal":"94035"}
+```
+
+**Platforms**: Linux, macOS, Windows, Android, iOS (requires network)
+
+---
+
+### `location <ip>`
+
+Geolocate a specific IP address.
+
+**Arguments**:
+
+- `ip` - IPv4 address to geolocate
+
+```bash
+crossbar location 8.8.8.8
+# Output:
+# Location: Mountain View, California, US
+# IP: 8.8.8.8
+# Coordinates: 37.386, -122.084
+# Timezone: America/Los_Angeles
+# ISP: Google LLC
+
+crossbar location 8.8.8.8 --json
+# Output: {"ip":"8.8.8.8","city":"Mountain View",...}
+```
+
+**Platforms**: Linux, macOS, Windows, Android, iOS (requires network)
+
+---
+
+### `location geocode <address>`
+
+Convert a text address to geographic coordinates (geocoding).
+
+**Arguments**:
+
+- `address` - Address or place name to geocode
+
+```bash
+crossbar location geocode "São Paulo, Brazil"
+# Output:
+# Query: São Paulo, Brazil
+# Coordinates: -23.5506507, -46.6333824
+# Address: São Paulo, Região Imediata de São Paulo, ...
+
+crossbar location geocode "Tokyo" --json
+# Output: {"query":"Tokyo","latitude":35.6764225,"longitude":139.6500795,"display_name":"Tokyo, Japan","type":"city"}
+```
+
+**Platforms**: Linux, macOS, Windows, Android, iOS (requires network)
+
+---
+
+### `location reverse <lat> <lon>`
+
+Convert geographic coordinates to an address (reverse geocoding).
+
+**Arguments**:
+
+- `lat` - Latitude (decimal degrees)
+- `lon` - Longitude (decimal degrees)
+
+```bash
+crossbar location reverse -23.55 -46.63
+# Output:
+# Address: Rua ..., São Paulo, Brazil
+# Coordinates: -23.55, -46.63
+# City: São Paulo
+# Country: Brazil
+
+crossbar location reverse 48.8566 2.3522 --json
+# Output: {"latitude":48.8566,"longitude":2.3522,"display_name":"Paris, Île-de-France, France","city":"Paris","country":"France",...}
+```
+
+**Platforms**: Linux, macOS, Windows, Android, iOS (requires network)
+
+---
+
 ## Network
 
 ### `net status`
@@ -1528,6 +1624,10 @@ crossbar process count
 | bluetooth-\*        |     ✅     |  ✅   |   ✅    |
 | **VPN**             |
 | vpn-status          |     ✅     |  ✅   |   ✅    |
+| **Location**        |
+| location            |     ✅     |  ✅   |   ✅    |
+| location geocode    |     ✅     |  ✅   |   ✅    |
+| location reverse    |     ✅     |  ✅   |   ✅    |
 | **Network**         |
 | net-\*              |     ✅     |  ✅   |   ✅    |
 | wifi-\*             |     ✅     |  ✅   |   ✅    |
@@ -1624,7 +1724,7 @@ crossbar install https://github.com/example/crossbar-weather-plugin
 
 ---
 
-**Total Commands**: ~75 commands across 17 categories
+**Total Commands**: ~79 commands across 18 categories
 
 **See Also**:
 

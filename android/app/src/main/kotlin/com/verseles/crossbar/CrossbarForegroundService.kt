@@ -28,33 +28,105 @@ class CrossbarForegroundService : Service() {
 
     companion object {
         private const val TAG = "CrossbarFGService"
-        private const val CHANNEL_ID = "crossbar_foreground_channel"
-        private const val NOTIFICATION_ID = 1001
-        
+        private const val CHANNEL_ID = "crossbar_service"
+        private const val NOTIFICATION_ID = 9999
+
         private const val ACTION_REFRESH = "com.verseles.crossbar.ACTION_REFRESH"
         private const val ACTION_STOP = "com.verseles.crossbar.ACTION_STOP"
-        
+
+        // Service instance reference for reliable startForeground() updates
+        private var instance: CrossbarForegroundService? = null
+
+        /**
+         * Updates the foreground notification content from Dart via MethodChannel.
+         * Uses startForeground() from the service instance (guaranteed to work)
+         * instead of NotificationManager.notify() which can't reliably replace
+         * a notification created by startForeground().
+         */
+        fun updateContent(context: Context, title: String, body: String, lines: List<String>?) {
+            Log.d(TAG, "updateContent: title=$title, body=$body, lines=${lines?.size ?: 0}")
+
+            val openIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val openPendingIntent = PendingIntent.getActivity(
+                context, 0, openIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val refreshIntent = Intent(context, CrossbarForegroundService::class.java).apply {
+                action = ACTION_REFRESH
+            }
+            val refreshPendingIntent = PendingIntent.getService(
+                context, 1, refreshIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val stopIntent = Intent(context, CrossbarForegroundService::class.java).apply {
+                action = ACTION_STOP
+            }
+            val stopPendingIntent = PendingIntent.getService(
+                context, 2, stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setSmallIcon(R.drawable.ic_stat_crossbar)
+                .setContentIntent(openPendingIntent)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setShowWhen(false)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .addAction(R.drawable.ic_refresh, context.getString(R.string.action_refresh), refreshPendingIntent)
+                .addAction(R.drawable.ic_stop, context.getString(R.string.action_stop), stopPendingIntent)
+
+            if (lines != null && lines.isNotEmpty()) {
+                val inboxStyle = NotificationCompat.InboxStyle()
+                    .setBigContentTitle(title)
+                    .setSummaryText("${lines.size} plugin(s) active")
+                for (line in lines.take(6)) {
+                    inboxStyle.addLine(line)
+                }
+                builder.setStyle(inboxStyle)
+            }
+
+            val notification = builder.build()
+            val svc = instance
+            if (svc != null) {
+                // startForeground() is the ONLY reliable way to update the notification
+                Log.d(TAG, "updateContent: using startForeground (service alive)")
+                svc.startForeground(NOTIFICATION_ID, notification)
+            } else {
+                // Service not yet started - use NotificationManager as fallback
+                Log.w(TAG, "updateContent: service instance null, using nm.notify fallback")
+                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.notify(NOTIFICATION_ID, notification)
+            }
+        }
     }
 
     private lateinit var notificationManager: NotificationManager
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Service created")
+        instance = this
+        Log.d(TAG, "Service created, instance stored")
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Service started with action: ${intent?.action}")
-        
+
         when (intent?.action) {
             ACTION_STOP -> {
                 stopSelf()
                 return START_NOT_STICKY
             }
             ACTION_REFRESH -> {
-                // Trigger refresh via broadcast to MainActivity
                 val refreshIntent = Intent(this, MainActivity::class.java).apply {
                     action = "com.verseles.crossbar.ACTION_REFRESH"
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -64,18 +136,18 @@ class CrossbarForegroundService : Service() {
                 return START_STICKY
             }
         }
-        
-        // Start foreground with notification
+
+        // Initial foreground notification — Dart will overwrite this shortly
         startForeground(NOTIFICATION_ID, buildNotification())
-        
+
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        Log.d(TAG, "Service destroyed")
-        // Update settings to reflect that service is stopped
+        Log.d(TAG, "Service destroyed, clearing instance")
+        instance = null
         val flutterPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         flutterPrefs.edit().putBoolean("flutter.show_in_tray", false).apply()
         super.onDestroy()
@@ -86,7 +158,7 @@ class CrossbarForegroundService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.notification_channel_name),
-                NotificationManager.IMPORTANCE_LOW // Low to avoid sound/vibration
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = getString(R.string.notification_channel_description)
                 setShowBadge(false)
@@ -98,8 +170,7 @@ class CrossbarForegroundService : Service() {
 
     private fun buildNotification(): Notification {
         val pluginCount = getActivePluginCount()
-        
-        // Open app intent
+
         val openIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -107,8 +178,7 @@ class CrossbarForegroundService : Service() {
             this, 0, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        // Refresh action intent
+
         val refreshIntent = Intent(this, CrossbarForegroundService::class.java).apply {
             action = ACTION_REFRESH
         }
@@ -116,8 +186,7 @@ class CrossbarForegroundService : Service() {
             this, 1, refreshIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        // Stop action intent
+
         val stopIntent = Intent(this, CrossbarForegroundService::class.java).apply {
             action = ACTION_STOP
         }
@@ -125,32 +194,24 @@ class CrossbarForegroundService : Service() {
             this, 2, stopIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
+
         val contentText = resources.getQuantityString(
             R.plurals.notification_text_plugins,
             pluginCount,
             pluginCount
         )
-        
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_title))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_stat_crossbar)
             .setContentIntent(openPendingIntent)
-            .setOngoing(true) // Cannot be swiped away (pre-Android 13)
+            .setOngoing(true)
             .setAutoCancel(false)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .addAction(
-                R.drawable.ic_refresh,
-                getString(R.string.action_refresh),
-                refreshPendingIntent
-            )
-            .addAction(
-                R.drawable.ic_stop,
-                getString(R.string.action_stop),
-                stopPendingIntent
-            )
+            .addAction(R.drawable.ic_refresh, getString(R.string.action_refresh), refreshPendingIntent)
+            .addAction(R.drawable.ic_stop, getString(R.string.action_stop), stopPendingIntent)
             .build()
     }
 

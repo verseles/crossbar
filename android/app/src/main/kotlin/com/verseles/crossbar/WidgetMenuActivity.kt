@@ -35,6 +35,8 @@ class WidgetMenuActivity : Activity() {
         private const val TAG = "WidgetMenuActivity"
     }
 
+    private var pluginId: String? = null
+
     private val isDarkMode: Boolean
         get() = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
                 Configuration.UI_MODE_NIGHT_YES
@@ -42,14 +44,14 @@ class WidgetMenuActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val pluginId = intent.getStringExtra(EXTRA_PLUGIN_ID)
+        pluginId = intent.getStringExtra(EXTRA_PLUGIN_ID)
         if (pluginId == null) {
             finish()
             return
         }
 
         val widgetData = HomeWidgetPlugin.getData(this)
-        val pluginDataJson = widgetData.getString("plugin_$pluginId", null)
+        val pluginDataJson = widgetData.getString("plugin_${pluginId!!}", null)
         if (pluginDataJson == null) {
             finish()
             return
@@ -222,15 +224,23 @@ class WidgetMenuActivity : Activity() {
             if (text.isEmpty()) continue
 
             val href = item.optString("href", "")
-            val bash = item.optString("bash", "")
+            val bashCmd = item.optString("bash", "").trim()
+            val hasRefresh = item.optBoolean("refresh", false)
             val itemColorHex = item.optString("color", "")
             val submenu = item.optJSONArray("submenu")
 
             val hasHref = href.isNotBlank()
-            val hasBash = bash.isNotBlank()
+            val hasBash = bashCmd.isNotBlank()
+            val isCrossbarCmd = hasBash && bashCmd.startsWith("crossbar ")
 
             val itemView = TextView(this).apply {
-                this.text = if (hasBash && !hasHref) "$text (Desktop)" else text
+                this.text = when {
+                    hasHref -> text
+                    hasRefresh -> text
+                    isCrossbarCmd -> text
+                    hasBash -> "$text (Desktop)"
+                    else -> text
+                }
                 textSize = 15f
                 val baseColor = when {
                     itemColorHex.isNotBlank() -> {
@@ -241,12 +251,15 @@ class WidgetMenuActivity : Activity() {
                         }
                     }
                     hasHref -> accentColor
+                    hasRefresh -> accentColor
+                    isCrossbarCmd -> accentColor
                     hasBash -> secondaryText
                     else -> textColor
                 }
                 setTextColor(baseColor)
 
-                if (hasBash && !hasHref) {
+                // Only dim native bash commands (not crossbar CLI or refresh)
+                if (hasBash && !isCrossbarCmd && !hasHref) {
                     alpha = 0.5f
                 }
 
@@ -258,27 +271,57 @@ class WidgetMenuActivity : Activity() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
 
-                if (hasHref) {
-                    setOnClickListener {
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(href))
-                            startActivity(intent)
-                        } catch (e: Exception) {
-                            android.util.Log.e(TAG, "Failed to open URL: $href", e)
+                when {
+                    hasHref -> {
+                        setOnClickListener {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(href))
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                android.util.Log.e(TAG, "Failed to open URL: $href", e)
+                            }
+                            finish()
                         }
-                        finish()
                     }
-                } else if (!hasBash) {
-                    // Info items: copy text to clipboard on tap
-                    setOnClickListener {
-                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        clipboard.setPrimaryClip(ClipData.newPlainText("Crossbar", text))
-                        Toast.makeText(this@WidgetMenuActivity, "Copied", Toast.LENGTH_SHORT).show()
+                    hasRefresh -> {
+                        setOnClickListener {
+                            val intent = Intent(this@WidgetMenuActivity, MainActivity::class.java).apply {
+                                action = MainActivity.ACTION_REFRESH
+                                putExtra("plugin_id", this@WidgetMenuActivity.pluginId)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            }
+                            startActivity(intent)
+                            Toast.makeText(this@WidgetMenuActivity, "Refreshing...", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                    }
+                    isCrossbarCmd -> {
+                        setOnClickListener {
+                            val intent = Intent(this@WidgetMenuActivity, MainActivity::class.java).apply {
+                                action = MainActivity.ACTION_CLI
+                                putExtra("command", bashCmd.removePrefix("crossbar ").trim())
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                    hasBash -> {
+                        // Native bash - disabled on mobile (no shell)
+                    }
+                    else -> {
+                        // Info items: copy text to clipboard on tap
+                        setOnClickListener {
+                            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Crossbar", text))
+                            Toast.makeText(this@WidgetMenuActivity, "Copied", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
 
-                // Show ripple for all interactive items (not bash-disabled)
-                if (!hasBash) {
+                // Show ripple for all interactive items (not native-bash-disabled)
+                val isInteractive = hasHref || hasRefresh || isCrossbarCmd || !hasBash
+                if (isInteractive) {
                     val outValue = TypedValue()
                     theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
                     setBackgroundResource(outValue.resourceId)

@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'core/api/android_native_bridge.dart';
 import 'core/plugin_manager.dart';
+import 'cli/cli_handler.dart' as cli;
 import 'services/background_service.dart';
 import 'services/hot_reload_service.dart';
 import 'services/ipc_server.dart';
 import 'services/logger_service.dart';
+import 'services/refresh_service.dart';
 import 'services/sample_plugins_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
@@ -65,6 +67,17 @@ void main(List<String> args) async {
           } else {
             // Mark pending refresh - will be processed when scheduler starts
             _pendingWidgetRefresh = true;
+          }
+        } else if (call.method == 'onPluginRefresh') {
+          final pluginId = call.arguments as String?;
+          if (pluginId != null) {
+            await RefreshService().runPlugin(pluginId);
+          }
+        } else if (call.method == 'onCliCommand') {
+          final command = call.arguments as String?;
+          if (command != null) {
+            final args = command.split(RegExp(r'\s+'));
+            await cli.handleCliCommand(args);
           }
         }
         return null;

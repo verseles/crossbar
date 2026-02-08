@@ -104,5 +104,5 @@ if #watchlist > 0 and type(data) == 'table' then
     end
 end
 print('---')
-print('Open CoinGecko | href=https://www.coingecko.com')
+print('Open CoinGecko | href=https://www.coingecko.com/en/coins/bitcoin')
 print('Refresh | refresh=true')

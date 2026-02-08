@@ -14,6 +14,11 @@ import java.io.RandomAccessFile
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.verseles.crossbar/system"
 
+    companion object {
+        const val ACTION_REFRESH = "com.verseles.crossbar.ACTION_REFRESH"
+        const val ACTION_CLI = "com.verseles.crossbar.ACTION_CLI"
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
 
@@ -46,6 +51,26 @@ class MainActivity : FlutterActivity() {
                 "stopForegroundService" -> {
                     stopCrossbarForegroundService()
                     result.success(true)
+                }
+                "updateForegroundNotification" -> {
+                    val title = call.argument<String>("title") ?: "Crossbar"
+                    val body = call.argument<String>("body") ?: ""
+                    val lines = call.argument<List<String>>("lines")
+                    CrossbarForegroundService.updateContent(this, title, body, lines)
+                    result.success(true)
+                }
+                "openPluginMenu" -> {
+                    val pluginId = call.arguments as? String
+                    if (pluginId != null) {
+                        val menuIntent = Intent(this, WidgetMenuActivity::class.java).apply {
+                            putExtra(WidgetMenuActivity.EXTRA_PLUGIN_ID, pluginId)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(menuIntent)
+                        result.success(true)
+                    } else {
+                        result.error("INVALID_ARG", "pluginId is required", null)
+                    }
                 }
                 else -> result.notImplemented()
             }
@@ -122,11 +147,27 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent?.action == "com.verseles.crossbar.ACTION_REFRESH") {
-            android.util.Log.d("Crossbar", "Widget refresh requested")
-            // Notify Flutter to refresh widgets via Method Channel
-            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
-                MethodChannel(messenger, CHANNEL).invokeMethod("onWidgetRefresh", null)
+        when (intent?.action) {
+            ACTION_REFRESH -> {
+                val pluginId = intent.getStringExtra("plugin_id")
+                android.util.Log.d("Crossbar", "Refresh requested: pluginId=$pluginId")
+                flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                    val channel = MethodChannel(messenger, CHANNEL)
+                    if (pluginId != null) {
+                        channel.invokeMethod("onPluginRefresh", pluginId)
+                    } else {
+                        channel.invokeMethod("onWidgetRefresh", null)
+                    }
+                }
+            }
+            ACTION_CLI -> {
+                val command = intent.getStringExtra("command")
+                android.util.Log.d("Crossbar", "CLI command requested: $command")
+                if (command != null) {
+                    flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                        MethodChannel(messenger, CHANNEL).invokeMethod("onCliCommand", command)
+                    }
+                }
             }
         }
     }
