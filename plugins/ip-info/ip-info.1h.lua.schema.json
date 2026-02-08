@@ -1,5 +1,5 @@
 {
-  "name": "IP Info (Lua)",
+  "name": "IP Info",
   "description": "Shows your public IP and location fields.",
   "icon": "IP",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "GitHub Notifications (Lua)",
+  "name": "GitHub Notifications",
   "description": "Shows your unread GitHub notifications count.",
   "icon": "GH",
   "config_required": "required",

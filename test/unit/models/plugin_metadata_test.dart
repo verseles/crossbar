@@ -185,7 +185,7 @@ void main() {
     });
 
     group('defaultVariant', () {
-      test('returns first (Lua) variant', () {
+      test('returns first variant', () {
         final variant = pluginWithLua.defaultVariant;
 
         expect(variant.language, PluginLanguage.lua);

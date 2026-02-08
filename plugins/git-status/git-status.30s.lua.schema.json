@@ -1,5 +1,5 @@
 {
-  "name": "Git Status (Lua)",
+  "name": "Git Status",
   "description": "Shows current repository status.",
   "icon": "GIT",
   "config_required": "optional",

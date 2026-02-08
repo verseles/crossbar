@@ -1,5 +1,5 @@
 {
-  "name": "Emoji Clock (Lua)",
+  "name": "Emoji Clock",
   "description": "Shows time as an emoji clock face.",
   "icon": "CLOCK",
   "config_required": "optional",

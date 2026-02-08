@@ -1,5 +1,5 @@
 {
-  "name": "Weather (Lua)",
+  "name": "Weather",
   "description": "Shows current weather using OpenWeather.",
   "icon": "WX",
   "config_required": "first_run",

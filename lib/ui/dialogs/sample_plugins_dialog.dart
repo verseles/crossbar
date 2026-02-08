@@ -82,7 +82,7 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Installed ${plugin.name} (Lua)'),
+            content: Text('Installed ${plugin.name}'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),

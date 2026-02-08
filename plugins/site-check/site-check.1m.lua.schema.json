@@ -1,5 +1,5 @@
 {
-  "name": "Site Check (Lua)",
+  "name": "Site Check",
   "description": "Checks if a website responds.",
   "icon": "WEB",
   "config_required": "optional",

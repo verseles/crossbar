@@ -1,5 +1,5 @@
 {
-  "name": "Crypto Price (Lua)",
+  "name": "Crypto Price",
   "description": "Shows crypto price and 24h change.",
   "icon": "CRYPTO",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "SSH Connections (Lua)",
+  "name": "SSH Connections",
   "description": "Shows active SSH sessions.",
   "icon": "SSH",
   "config_required": "optional",

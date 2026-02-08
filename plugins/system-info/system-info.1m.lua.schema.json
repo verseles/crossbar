@@ -1,5 +1,5 @@
 {
-  "name": "System Info (Lua)",
+  "name": "System Info",
   "description": "Shows basic system information.",
   "icon": "SYS",
   "config_required": "optional",

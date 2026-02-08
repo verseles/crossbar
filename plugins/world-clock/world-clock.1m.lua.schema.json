@@ -1,5 +1,5 @@
 {
-  "name": "World Clock (Lua)",
+  "name": "World Clock",
   "description": "Shows multiple timezones.",
   "icon": "WORLD",
   "config_required": "optional",

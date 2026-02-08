@@ -1,5 +1,5 @@
 {
-  "name": "Network Status (Lua)",
+  "name": "Network Status",
   "description": "Shows connectivity and IP information.",
   "icon": "NET",
   "config_required": "optional",

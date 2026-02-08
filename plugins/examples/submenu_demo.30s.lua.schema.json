@@ -1,5 +1,5 @@
 {
-  "name": "Submenu Demo (Lua)",
+  "name": "Submenu Demo",
   "description": "Demonstrates nested menu rendering.",
   "icon": "MENU",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "Uptime (Lua)",
+  "name": "Uptime",
   "description": "Shows system uptime.",
   "icon": "UP",
   "config_required": "optional",

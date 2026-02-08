@@ -1,5 +1,5 @@
 {
-  "name": "Todo List (Lua)",
+  "name": "Todo List",
   "description": "Simple todo list stored in a text file.",
   "icon": "TODO",
   "config_required": "optional",

@@ -1,4 +1,4 @@
--- battery.2s.lua - Battery monitor with dynamic icons (Lua)
+-- battery.2s.lua - Battery monitor with dynamic icons
 -- Uses Crossbar embedded API (crossbar.battery)
 
 local function env(name, default)

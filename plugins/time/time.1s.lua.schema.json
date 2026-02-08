@@ -1,5 +1,5 @@
 {
-  "name": "Time (Lua)",
+  "name": "Time",
   "description": "Shows current time with day/night icon.",
   "icon": "TIME",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "Clock (Lua)",
+  "name": "Clock",
   "description": "Simple clock output.",
   "icon": "CLOCK",
   "config_required": "optional",

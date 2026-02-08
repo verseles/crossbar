@@ -1,5 +1,5 @@
 {
-  "name": "Quotes (Lua)",
+  "name": "Quotes",
   "description": "Shows a random quote.",
   "icon": "QUOTE",
   "config_required": "optional",

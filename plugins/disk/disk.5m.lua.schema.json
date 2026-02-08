@@ -1,5 +1,5 @@
 {
-  "name": "Disk Usage (Lua)",
+  "name": "Disk Usage",
   "description": "Shows disk usage for a path.",
   "icon": "DISK",
   "config_required": "optional",

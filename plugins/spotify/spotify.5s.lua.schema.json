@@ -1,5 +1,5 @@
 {
-  "name": "Media Now Playing (Lua)",
+  "name": "Media Now Playing",
   "description": "Shows currently playing media.",
   "icon": "MEDIA",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "Memory Monitor (Lua)",
+  "name": "Memory Monitor",
   "description": "Shows memory usage with thresholds and optional details.",
   "icon": "MEM",
   "config_required": "optional",

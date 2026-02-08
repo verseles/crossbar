@@ -1,5 +1,5 @@
 {
-  "name": "Battery Monitor (Lua)",
+  "name": "Battery Monitor",
   "description": "Shows battery status with configurable thresholds and colors.",
   "icon": "BAT",
   "config_required": "optional",

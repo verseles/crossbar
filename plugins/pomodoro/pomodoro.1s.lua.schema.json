@@ -1,5 +1,5 @@
 {
-  "name": "Pomodoro (Lua)",
+  "name": "Pomodoro",
   "description": "Pomodoro timer with work/break cycles.",
   "icon": "POMO",
   "config_required": "optional",

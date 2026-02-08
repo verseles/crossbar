@@ -1,5 +1,5 @@
 {
-  "name": "NPM Downloads (Lua)",
+  "name": "NPM Downloads",
   "description": "Shows weekly downloads for a package.",
   "icon": "NPM",
   "config_required": "optional",

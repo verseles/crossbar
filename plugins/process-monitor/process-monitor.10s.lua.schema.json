@@ -1,5 +1,5 @@
 {
-  "name": "Process Monitor (Lua)",
+  "name": "Process Monitor",
   "description": "Shows top CPU processes.",
   "icon": "PROC",
   "config_required": "optional",

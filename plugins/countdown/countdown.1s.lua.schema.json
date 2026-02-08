@@ -1,5 +1,5 @@
 {
-  "name": "Countdown (Lua)",
+  "name": "Countdown",
   "description": "Counts down to a target date/time with timezone.",
   "icon": "COUNT",
   "config_required": "optional",

@@ -1,5 +1,5 @@
 {
-  "name": "CPU Monitor (Lua)",
+  "name": "CPU Monitor",
   "description": "Shows CPU usage with thresholds and optional details.",
   "icon": "CPU",
   "config_required": "optional",
