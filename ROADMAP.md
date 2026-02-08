@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.11.1 (Configuration Engine v1.1 for Lua sample plugins)
-**Próximo Ciclo:** v1.11.2+ (Tray Icon Phases 2-3)
+**Status Atual:** v1.12.0 (17 new config field types across sample plugins)
+**Próximo Ciclo:** v1.12.1+ (Tray Icon Phases 2-3)
 
 ---
 
