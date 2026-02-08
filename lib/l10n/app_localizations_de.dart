@@ -587,6 +587,32 @@ class AppLocalizationsDe extends AppLocalizations {
       'Crossbar - Universelles Plugin-System\n\nCopyright (C) 2025\n\nDieses Programm ist freie Software: Sie können es unter den Bedingungen der GNU Affero General Public License wie von der Free Software Foundation veröffentlicht, entweder Version 3 der Lizenz oder (nach Ihrer Wahl) jeder späteren Version, weitergeben und/oder modifizieren.\n\nDieses Programm wird in der Hoffnung verteilt, dass es nützlich sein wird, aber OHNE JEDE GARANTIE; sogar ohne die implizite Garantie der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK. Siehe die GNU Affero General Public License für weitere Details.\n\nSie sollten eine Kopie der GNU Affero General Public License zusammen mit diesem Programm erhalten haben. Falls nicht, siehe <https://www.gnu.org/licenses/>.';
 
   @override
+  String get notificationStyle => 'Notification Style';
+
+  @override
+  String get notificationStyleCombined => 'Combined';
+
+  @override
+  String get notificationStyleIndividual => 'Individual';
+
+  @override
+  String get notificationStyleBoth => 'Both';
+
+  @override
+  String get notificationStyleCombinedDesc =>
+      'Single notification grouping all plugins';
+
+  @override
+  String get notificationStyleIndividualDesc => 'One notification per plugin';
+
+  @override
+  String get notificationStyleBothDesc =>
+      'Combined summary + individual notifications';
+
+  @override
+  String get desktopOnly => 'Desktop only';
+
+  @override
   String get widgetConfiguration => 'Widget-Konfiguration';
 
   @override

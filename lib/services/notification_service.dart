@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -19,6 +20,11 @@ class NotificationService {
   static const String channelId = 'crossbar_plugins';
   static const String channelName = 'Plugin Notifications';
   static const String channelDescription = 'Notifications from Crossbar plugins';
+
+  // Notification group key for Android 7+ grouping
+  static const String _groupKey = 'crossbar_plugins_group';
+  static const int _combinedNotificationId = 8000;
+  static const int _individualIdBase = 8100;
 
   // Persistent notification channel (for foreground service)
   static const String persistentChannelId = 'crossbar_service';
@@ -166,6 +172,123 @@ class NotificationService {
       body: text,
       icon: icon,
     );
+  }
+
+  /// Shows a combined InboxStyle notification grouping all active plugins.
+  Future<void> showCombinedNotification(
+    Map<String, PluginOutput> outputs,
+  ) async {
+    if (!_initialized || !Platform.isAndroid && !Platform.isIOS) return;
+    if (outputs.isEmpty) return;
+
+    final lines = <String>[];
+    for (final entry in outputs.entries) {
+      final output = entry.value;
+      if (output.hasError) continue;
+      final icon = output.icon.isNotEmpty ? '${output.icon} ' : '';
+      final title = output.title ?? entry.key;
+      final text = output.text ?? '--';
+      lines.add('$icon$title: $text');
+    }
+
+    if (lines.isEmpty) return;
+
+    final summary = '${lines.length} plugin(s) active';
+
+    final androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@drawable/ic_stat_crossbar',
+      groupKey: _groupKey,
+      setAsGroupSummary: true,
+      styleInformation: InboxStyleInformation(
+        lines.take(6).toList(),
+        contentTitle: 'Crossbar - ${lines.length} plugins',
+        summaryText: summary,
+      ),
+    );
+
+    const iosDetails = DarwinNotificationDetails();
+    const linuxDetails = LinuxNotificationDetails();
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+      macOS: iosDetails,
+      linux: linuxDetails,
+    );
+
+    await _notifications.show(
+      _combinedNotificationId,
+      'Crossbar',
+      summary,
+      details,
+      payload: 'combined',
+    );
+  }
+
+  /// Shows an individual notification for a specific plugin.
+  Future<void> showIndividualNotification(
+    String pluginId,
+    PluginOutput output,
+  ) async {
+    if (!_initialized || !Platform.isAndroid && !Platform.isIOS) return;
+
+    final id = _individualIdBase + pluginId.hashCode.abs() % 900;
+    final icon = output.icon.isNotEmpty ? '${output.icon} ' : '';
+    final title = output.title ?? pluginId;
+    final text = output.text ?? '--';
+
+    // Build expanded text with menu info
+    final expandedLines = <String>[text];
+    for (final item in output.menu.take(4)) {
+      if (item.separator) continue;
+      final itemText = item.text ?? '';
+      if (itemText.isEmpty) continue;
+      expandedLines.add(itemText);
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@drawable/ic_stat_crossbar',
+      groupKey: _groupKey,
+      styleInformation: BigTextStyleInformation(
+        expandedLines.join('\n'),
+        contentTitle: '$icon$title',
+        summaryText: title,
+      ),
+    );
+
+    const iosDetails = DarwinNotificationDetails();
+    const linuxDetails = LinuxNotificationDetails();
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+      macOS: iosDetails,
+      linux: linuxDetails,
+    );
+
+    await _notifications.show(
+      id,
+      '$icon$title',
+      text,
+      details,
+      payload: pluginId,
+    );
+  }
+
+  /// Cancel all plugin output notifications (combined + individual).
+  Future<void> cancelPluginNotifications() async {
+    await _notifications.cancel(_combinedNotificationId);
+    // Individual notifications are overwritten by stable IDs, no need to cancel all
   }
 
   Future<void> cancelNotification(int id) async {

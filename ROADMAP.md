@@ -2,8 +2,8 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.12.0 (17 new config field types across sample plugins)
-**Próximo Ciclo:** v1.12.1+ (Tray Icon Phases 2-3)
+**Status Atual:** v1.13.0 (Mobile notifications & widget menus)
+**Próximo Ciclo:** v1.13.1+ (Tray Icon Phases 2-3)
 
 ---
 
@@ -321,3 +321,32 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 
 - [ ] **Android Widgets - ImageView:** Migrar de TextView para ImageView com tint dinâmico
 - [ ] **iOS Widgets - SF Symbols:** Suporte a prefixo `sf:` para ícones nativos
+
+---
+
+## 📱 Epic v1.13.0: Mobile Notifications & Widget Menus (ADR-015)
+
+**Objetivo:** Tornar menu items de plugins acessíveis no mobile via widgets e notificações configuráveis.
+
+**Status:** 🟢 Concluído
+
+### Fase 1: Settings Mobile — Seção Notifications ✅
+
+- [x] **NotificationStyle enum:** Adicionado em `SettingsService` com valores `combined`, `individual`, `both` e persistência via SharedPreferences
+- [x] **Settings UI:** Seção "System Tray" substituída por "Notifications" no mobile (Android/iOS) com dialog de estilo. Toggle "Keep on Background" movido de Behavior para Notifications no mobile. Desktop mantém System Tray inalterado.
+- [x] **i18n:** Chaves adicionadas em `app_en.arb` e `app_pt.arb` (`notificationStyle`, `notificationStyleCombined`, etc.)
+
+### Fase 2: Widget Menu Button + WidgetMenuActivity ✅
+
+- [x] **ic_more_vert.xml:** Vector drawable (3 pontos verticais, branco) para botão de menu
+- [x] **Layouts atualizados:** Botão menu adicionado em small (end|bottom), medium (stacked vertical com edit), large (20dp por plugin row)
+- [x] **WidgetMenuActivity.kt:** Activity Kotlin pura, dialog-themed, UI programática com bottom-sheet, dark mode, submenus inline, href abre browser, bash desabilitado
+- [x] **CrossbarWidgetBase.kt:** `hasMenuItems()` verifica menu, `setupMenuClickHandler()` configura PendingIntent com offsets diferenciados
+- [x] **AndroidManifest.xml:** WidgetMenuActivity registrada
+
+### Fase 3: Notificações Combinadas + Individuais ✅
+
+- [x] **NotificationService:** `showCombinedNotification()` (InboxStyle, até 6 linhas) e `showIndividualNotification()` (BigTextStyle com menu items expandidos)
+- [x] **SchedulerService:** Integrado com `NotificationStyle` — chama método apropriado após cada output de plugin
+- [x] **Grouping:** Usa `setGroup("crossbar_plugins_group")` para agrupamento no Android 7+
+- [x] **IDs estáveis:** `pluginId.hashCode` para atualização sem duplicação

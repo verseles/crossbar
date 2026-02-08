@@ -99,39 +99,60 @@ class _SettingsTabState extends State<SettingsTab> {
                       settings.startWithSystem = value;
                     },
                   ),
-                  SwitchListTile(
-                    title: Text(
-                      Platform.isAndroid
-                          ? l10n.keepOnBackground
-                          : l10n.minimizeToTray,
+                  if (!Platform.isAndroid && !Platform.isIOS)
+                    SwitchListTile(
+                      title: Text(l10n.minimizeToTray),
+                      subtitle: Text(l10n.keepInTray),
+                      value: settings.showInTray,
+                      onChanged: (value) {
+                        settings.showInTray = value;
+                      },
                     ),
-                    subtitle: Text(
-                      Platform.isAndroid
-                          ? l10n.showPersistentNotification
-                          : l10n.keepInTray,
-                    ),
-                    value: settings.showInTray,
-                    onChanged: (value) {
-                      settings.showInTray = value;
-                    },
-                  ),
                 ],
               ),
               const SizedBox(height: 16),
-              _buildSection(
-                title: l10n.systemTray,
-                icon: Icons.apps,
-                children: [
-                  ListTile(
-                    title: Text(l10n.displayMode),
-                    subtitle: Text(
-                      _getTrayModeLabel(settings.trayDisplayMode, l10n),
+              if (Platform.isAndroid || Platform.isIOS)
+                _buildSection(
+                  title: l10n.notifications,
+                  icon: Icons.notifications,
+                  children: [
+                    ListTile(
+                      title: Text(l10n.notificationStyle),
+                      subtitle: Text(
+                        _getNotificationStyleLabel(
+                          settings.notificationStyle,
+                          l10n,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          _showNotificationStyleDialog(settings, l10n),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showTrayModeDialog(settings, l10n),
-                  ),
-                ],
-              ),
+                    SwitchListTile(
+                      title: Text(l10n.keepOnBackground),
+                      subtitle: Text(l10n.showPersistentNotification),
+                      value: settings.showInTray,
+                      onChanged: (value) {
+                        settings.showInTray = value;
+                      },
+                    ),
+                  ],
+                ),
+              if (!Platform.isAndroid && !Platform.isIOS)
+                _buildSection(
+                  title: l10n.systemTray,
+                  icon: Icons.apps,
+                  children: [
+                    ListTile(
+                      title: Text(l10n.displayMode),
+                      subtitle: Text(
+                        _getTrayModeLabel(settings.trayDisplayMode, l10n),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _showTrayModeDialog(settings, l10n),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 16),
               _buildSection(
                 title: l10n.pluginsTab,
@@ -384,6 +405,73 @@ class _SettingsTabState extends State<SettingsTab> {
       case TrayDisplayMode.smartOverflow:
         return l10n.smartOverflow;
     }
+  }
+
+  String _getNotificationStyleLabel(
+    NotificationStyle style,
+    AppLocalizations l10n,
+  ) {
+    switch (style) {
+      case NotificationStyle.combined:
+        return l10n.notificationStyleCombined;
+      case NotificationStyle.individual:
+        return l10n.notificationStyleIndividual;
+      case NotificationStyle.both:
+        return l10n.notificationStyleBoth;
+    }
+  }
+
+  void _showNotificationStyleDialog(
+    SettingsService settings,
+    AppLocalizations l10n,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.notificationStyle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<NotificationStyle>(
+              title: Text(l10n.notificationStyleCombined),
+              subtitle: Text(l10n.notificationStyleCombinedDesc),
+              value: NotificationStyle.combined,
+              groupValue: settings.notificationStyle,
+              onChanged: (value) {
+                settings.notificationStyle = value!;
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<NotificationStyle>(
+              title: Text(l10n.notificationStyleIndividual),
+              subtitle: Text(l10n.notificationStyleIndividualDesc),
+              value: NotificationStyle.individual,
+              groupValue: settings.notificationStyle,
+              onChanged: (value) {
+                settings.notificationStyle = value!;
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<NotificationStyle>(
+              title: Text(l10n.notificationStyleBoth),
+              subtitle: Text(l10n.notificationStyleBothDesc),
+              value: NotificationStyle.both,
+              groupValue: settings.notificationStyle,
+              onChanged: (value) {
+                settings.notificationStyle = value!;
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showTrayModeDialog(SettingsService settings, AppLocalizations l10n) {

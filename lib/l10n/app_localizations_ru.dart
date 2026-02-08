@@ -581,6 +581,32 @@ class AppLocalizationsRu extends AppLocalizations {
       'Crossbar - Универсальная Система Плагинов\n\nCopyright (C) 2025\n\nЭта программа является свободным программным обеспечением: вы можете распространять её и/или модифицировать в соответствии с условиями GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 Лицензии или (по вашему выбору) любой более поздней версии.\n\nЭта программа распространяется в надежде, что она будет полезной, но БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ; даже без подразумеваемой гарантии ТОВАРНОЙ ПРИГОДНОСТИ или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЁННОЙ ЦЕЛИ. См. GNU Affero General Public License для получения дополнительной информации.\n\nВы должны были получить копию GNU Affero General Public License вместе с этой программой. Если нет, см. <https://www.gnu.org/licenses/>.';
 
   @override
+  String get notificationStyle => 'Notification Style';
+
+  @override
+  String get notificationStyleCombined => 'Combined';
+
+  @override
+  String get notificationStyleIndividual => 'Individual';
+
+  @override
+  String get notificationStyleBoth => 'Both';
+
+  @override
+  String get notificationStyleCombinedDesc =>
+      'Single notification grouping all plugins';
+
+  @override
+  String get notificationStyleIndividualDesc => 'One notification per plugin';
+
+  @override
+  String get notificationStyleBothDesc =>
+      'Combined summary + individual notifications';
+
+  @override
+  String get desktopOnly => 'Desktop only';
+
+  @override
   String get widgetConfiguration => 'Настройка Виджета';
 
   @override

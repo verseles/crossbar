@@ -1188,6 +1188,54 @@ abstract class AppLocalizations {
   /// **'Crossbar - Universal Plugin System\n\nCopyright (C) 2025\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n\nYou should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.'**
   String get licenseText;
 
+  /// No description provided for @notificationStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Style'**
+  String get notificationStyle;
+
+  /// No description provided for @notificationStyleCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined'**
+  String get notificationStyleCombined;
+
+  /// No description provided for @notificationStyleIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual'**
+  String get notificationStyleIndividual;
+
+  /// No description provided for @notificationStyleBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get notificationStyleBoth;
+
+  /// No description provided for @notificationStyleCombinedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Single notification grouping all plugins'**
+  String get notificationStyleCombinedDesc;
+
+  /// No description provided for @notificationStyleIndividualDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'One notification per plugin'**
+  String get notificationStyleIndividualDesc;
+
+  /// No description provided for @notificationStyleBothDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined summary + individual notifications'**
+  String get notificationStyleBothDesc;
+
+  /// No description provided for @desktopOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop only'**
+  String get desktopOnly;
+
   /// No description provided for @widgetConfiguration.
   ///
   /// In en, this message translates to:

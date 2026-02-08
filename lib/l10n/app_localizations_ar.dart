@@ -579,6 +579,32 @@ class AppLocalizationsAr extends AppLocalizations {
       'Crossbar - نظام إضافات عالمي\n\nحقوق الطبع والنشر (C) 2025\n\nهذا البرنامج هو برنامج حر: يمكنك إعادة توزيعه و/أو تعديله بموجب شروط رخصة GNU Affero العمومية التي نشرتها مؤسسة البرمجيات الحرة، إما الإصدار 3 من الرخصة، أو (حسب اختيارك) أي إصدار لاحق.\n\nيتم توزيع هذا البرنامج على أمل أن يكون مفيدًا، ولكن بدون أي ضمان؛ حتى بدون الضمان الضمني للتسويق أو الملاءمة لغرض معين. راجع رخصة GNU Affero العمومية لمزيد من التفاصيل.\n\nيجب أن تكون قد تلقيت نسخة من رخصة GNU Affero العمومية مع هذا البرنامج. إن لم تفعل، انظر <https://www.gnu.org/licenses/>.';
 
   @override
+  String get notificationStyle => 'Notification Style';
+
+  @override
+  String get notificationStyleCombined => 'Combined';
+
+  @override
+  String get notificationStyleIndividual => 'Individual';
+
+  @override
+  String get notificationStyleBoth => 'Both';
+
+  @override
+  String get notificationStyleCombinedDesc =>
+      'Single notification grouping all plugins';
+
+  @override
+  String get notificationStyleIndividualDesc => 'One notification per plugin';
+
+  @override
+  String get notificationStyleBothDesc =>
+      'Combined summary + individual notifications';
+
+  @override
+  String get desktopOnly => 'Desktop only';
+
+  @override
   String get widgetConfiguration => 'إعداد الأداة';
 
   @override

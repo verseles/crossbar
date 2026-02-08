@@ -11,6 +11,9 @@ enum TrayDisplayMode { unified, separate, smartCollapse, smartOverflow }
 /// Theme mode options: light, dark, or system (auto-detect)
 enum ThemeModeOption { light, dark, system }
 
+/// Mobile notification style for plugin outputs
+enum NotificationStyle { combined, individual, both }
+
 class SettingsService extends ChangeNotifier {
   factory SettingsService() => _instance;
 
@@ -30,6 +33,7 @@ class SettingsService extends ChangeNotifier {
   static const String _keyEmptyDiscoveryThreshold = 'empty_discovery_threshold';
   static const String _keyWidgetLogStorageMode = 'widget_log_storage_mode';
   static const String _keyGlobalHotkeyEnabled = 'global_hotkey_enabled';
+  static const String _keyNotificationStyle = 'notification_style';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
@@ -46,6 +50,8 @@ class SettingsService extends ChangeNotifier {
   static const int _defaultEmptyDiscoveryThreshold = 2;
   static const WidgetLogStorageMode _defaultWidgetLogStorageMode =
       WidgetLogStorageMode.persistent;
+  static const NotificationStyle _defaultNotificationStyle =
+      NotificationStyle.combined;
 
   // State
   ThemeModeOption _themeMode = _defaultThemeMode;
@@ -57,6 +63,7 @@ class SettingsService extends ChangeNotifier {
   int _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
   WidgetLogStorageMode _widgetLogStorageMode = _defaultWidgetLogStorageMode;
   bool _globalHotkeyEnabled = _defaultGlobalHotkeyEnabled;
+  NotificationStyle _notificationStyle = _defaultNotificationStyle;
 
   /// System brightness detected externally (e.g. gsettings on Linux).
   /// Used to override ThemeMode.system when Flutter doesn't propagate changes.
@@ -78,6 +85,7 @@ class SettingsService extends ChangeNotifier {
   int get trayClusterThreshold => _trayClusterThreshold;
   int get emptyDiscoveryThreshold => _emptyDiscoveryThreshold;
   WidgetLogStorageMode get widgetLogStorageMode => _widgetLogStorageMode;
+  NotificationStyle get notificationStyle => _notificationStyle;
 
   /// Returns the system brightness detected via platform-specific monitors
   /// (e.g. gsettings on Linux). Null if not detected or not applicable.
@@ -275,6 +283,14 @@ X-GNOME-Autostart-enabled=true
     }
   }
 
+  set notificationStyle(NotificationStyle value) {
+    if (_notificationStyle != value) {
+      _notificationStyle = value;
+      _saveString(_keyNotificationStyle, value.name);
+      notifyListeners();
+    }
+  }
+
   Future<void> init() async {
     if (_initialized) return;
 
@@ -339,6 +355,19 @@ X-GNOME-Autostart-enabled=true
         }
       } else {
         _widgetLogStorageMode = _defaultWidgetLogStorageMode;
+      }
+
+      final notifStyle = _prefs.getString(_keyNotificationStyle);
+      if (notifStyle != null) {
+        try {
+          _notificationStyle = NotificationStyle.values.firstWhere(
+            (e) => e.name == notifStyle,
+          );
+        } catch (_) {
+          _notificationStyle = _defaultNotificationStyle;
+        }
+      } else {
+        _notificationStyle = _defaultNotificationStyle;
       }
 
       _globalHotkeyEnabled =
@@ -416,6 +445,7 @@ X-GNOME-Autostart-enabled=true
     _trayClusterThreshold = _defaultTrayClusterThreshold;
     _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
     _widgetLogStorageMode = _defaultWidgetLogStorageMode;
+    _notificationStyle = _defaultNotificationStyle;
   }
 }
 

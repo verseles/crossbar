@@ -131,6 +131,29 @@ class SchedulerService {
         pluginId: pluginId,
         error: output.errorMessage ?? 'Unknown error',
       );
+      return;
+    }
+
+    // Show plugin output notifications based on configured style
+    final style = SettingsService().notificationStyle;
+    switch (style) {
+      case NotificationStyle.combined:
+        await _notificationService.showCombinedNotification(
+          _refreshService.lastOutputs,
+        );
+      case NotificationStyle.individual:
+        await _notificationService.showIndividualNotification(
+          pluginId,
+          output,
+        );
+      case NotificationStyle.both:
+        await _notificationService.showCombinedNotification(
+          _refreshService.lastOutputs,
+        );
+        await _notificationService.showIndividualNotification(
+          pluginId,
+          output,
+        );
     }
   }
 

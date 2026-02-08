@@ -581,6 +581,32 @@ class AppLocalizationsBn extends AppLocalizations {
       'Crossbar - সার্বজনীন প্লাগইন সিস্টেম\n\nকপিরাইট (C) 2025\n\nএই প্রোগ্রামটি বিনামূল্যে সফ্টওয়্যার: আপনি এটি Free Software Foundation দ্বারা প্রকাশিত GNU Affero General Public License-এর শর্তাবলীর অধীনে পুনরায় বিতরণ এবং/অথবা সংশোধন করতে পারেন, হয় লাইসেন্সের সংস্করণ 3, অথবা (আপনার পছন্দে) পরবর্তী কোন সংস্করণ।\n\nএই প্রোগ্রামটি এই আশায় বিতরণ করা হয় যে এটি উপকারী হবে, কিন্তু কোন ওয়ারেন্টি ছাড়া; এমনকি ব্যবসায়িকতা বা বিশেষ উদ্দেশ্যে মানানসই হওয়ার অন্তর্নিহিত ওয়ারেন্টিও ছাড়া। আরও বিস্তারিত জানতে GNU Affero General Public License দেখুন।\n\nআপনার এই প্রোগ্রামের সাথে GNU Affero General Public License-এর একটি কপি পাওয়া উচিত ছিল। যদি না পান, <https://www.gnu.org/licenses/> দেখুন।';
 
   @override
+  String get notificationStyle => 'Notification Style';
+
+  @override
+  String get notificationStyleCombined => 'Combined';
+
+  @override
+  String get notificationStyleIndividual => 'Individual';
+
+  @override
+  String get notificationStyleBoth => 'Both';
+
+  @override
+  String get notificationStyleCombinedDesc =>
+      'Single notification grouping all plugins';
+
+  @override
+  String get notificationStyleIndividualDesc => 'One notification per plugin';
+
+  @override
+  String get notificationStyleBothDesc =>
+      'Combined summary + individual notifications';
+
+  @override
+  String get desktopOnly => 'Desktop only';
+
+  @override
   String get widgetConfiguration => 'উইজেট কনফিগারেশন';
 
   @override

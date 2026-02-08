@@ -209,7 +209,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         appWidgetId: Int
     ) {
         val pluginDataJson = getPluginData(widgetData, pluginId, appWidgetId, context)
-        
+
         if (pluginDataJson == null) {
             WidgetLogStore.append(
                 context,
@@ -225,7 +225,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
         try {
             val pluginData = JSONObject(pluginDataJson)
-            
+
             val icon = pluginData.optString("icon", "📊")
             val text = pluginData.optString("text", "--")
             val rawTitle = pluginData.optString("title", "")
@@ -241,7 +241,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
 
             if (layoutId == R.layout.crossbar_widget_medium) {
                 views.setTextViewText(R.id.widget_title, formatPluginTitle(title))
-                
+
                 if (tooltip.isNotEmpty()) {
                     views.setTextViewText(R.id.widget_subtitle, tooltip)
                     views.setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
@@ -258,6 +258,13 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                 } catch (e: Exception) {
                     // Ignore invalid colors
                 }
+            }
+
+            // Show/hide menu button based on whether plugin has menu items
+            val hasMenu = hasMenuItems(pluginData)
+            views.setViewVisibility(R.id.widget_menu, if (hasMenu) View.VISIBLE else View.GONE)
+            if (hasMenu) {
+                setupMenuClickHandler(context, views, R.id.widget_menu, pluginId, appWidgetId + 4000)
             }
 
         } catch (e: Exception) {
@@ -293,6 +300,9 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         val valueIds = listOf(
             R.id.plugin_1_value, R.id.plugin_2_value, R.id.plugin_3_value, R.id.plugin_4_value
         )
+        val menuIds = listOf(
+            R.id.plugin_1_menu, R.id.plugin_2_menu, R.id.plugin_3_menu, R.id.plugin_4_menu
+        )
 
         itemContainerIds.forEach { views.setViewVisibility(it, View.GONE) }
 
@@ -303,7 +313,7 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
             if (pluginDataJson != null) {
                 try {
                     val pluginData = JSONObject(pluginDataJson)
-                    
+
                     val icon = pluginData.optString("icon", "📊")
                     val text = pluginData.optString("text", "--")
                     val rawTitle = pluginData.optString("title", "")
@@ -317,6 +327,16 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
                     views.setTextViewText(iconIds[index], icon)
                     views.setTextViewText(titleIds[index], formatPluginTitle(title))
                     views.setTextViewText(valueIds[index], text)
+
+                    // Show/hide menu button for this row
+                    val hasMenu = hasMenuItems(pluginData)
+                    views.setViewVisibility(menuIds[index], if (hasMenu) View.VISIBLE else View.GONE)
+                    if (hasMenu) {
+                        setupMenuClickHandler(
+                            context, views, menuIds[index], pluginId,
+                            appWidgetId + 5000 + (index * 100)
+                        )
+                    }
 
                 } catch (e: Exception) {
                     android.util.Log.e(TAG, "Error parsing plugin data for $pluginId", e)
@@ -436,5 +456,40 @@ abstract class CrossbarWidgetBase : HomeWidgetProvider() {
         return pluginId
             .substringBefore(".")
             .replaceFirstChar { it.uppercase() }
+    }
+
+    /**
+     * Check if plugin data contains non-empty menu items (excluding separators).
+     */
+    private fun hasMenuItems(pluginData: JSONObject): Boolean {
+        val menu = pluginData.optJSONArray("menu") ?: return false
+        for (i in 0 until menu.length()) {
+            val item = menu.optJSONObject(i) ?: continue
+            if (!item.optBoolean("separator", false)) return true
+        }
+        return false
+    }
+
+    /**
+     * Set up a PendingIntent that opens WidgetMenuActivity for a specific plugin.
+     */
+    private fun setupMenuClickHandler(
+        context: Context,
+        views: RemoteViews,
+        viewId: Int,
+        pluginId: String,
+        requestCode: Int
+    ) {
+        val menuIntent = Intent(context, WidgetMenuActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            putExtra(WidgetMenuActivity.EXTRA_PLUGIN_ID, pluginId)
+        }
+        val menuPendingIntent = PendingIntent.getActivity(
+            context,
+            requestCode,
+            menuIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(viewId, menuPendingIntent)
     }
 }

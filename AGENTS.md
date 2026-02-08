@@ -80,7 +80,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.12.0+20` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.13.0+21` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do plano original concluídas.
@@ -657,6 +657,47 @@ GNOME Settings → gsettings monitor (Process)
 - Consistência: todos os samples funcionam em todas as plataformas
 - Trade-off: desenvolvedores que preferem bash/python precisam criar plugins próprios
 - Marketplace e execução de plugins do usuario NÃO são afetados
+
+### ADR-015: Mobile Notification & Widget Menu Architecture (2026-02-08)
+
+**Status**: ✅ Accepted
+**Context**: No desktop, plugins exibem menus no systray (submenus do tray icon). No mobile (Android/iOS), os widgets ignoravam completamente os menu items dos plugins, e a seção Settings exibia opções de "System Tray" irrelevantes (Unified/Separate/SmartCollapse). Não havia forma de acessar links ou informações dos menu items no mobile.
+
+**Decision**:
+1. **Settings Mobile**: Substituir seção "System Tray" por "Notifications" no mobile, com opção de `NotificationStyle` (Combined/Individual/Both). Mover toggle "Keep on Background" de Behavior para Notifications no mobile. Desktop mantém System Tray inalterado.
+2. **Widget Menu**: Adicionar botão ⋮ (more_vert) nos widgets Android. Ao clicar, abre `WidgetMenuActivity` — Activity Kotlin pura (sem Flutter engine), dialog-themed (`Theme.Translucent.NoTitleBar`), que lê menu items do SharedPreferences e renderiza como bottom-sheet programático. Items com `href` abrem browser, items com `bash` aparecem desabilitados ("Desktop only"). Suporta submenus (indentação), separadores, cores customizadas e dark mode.
+3. **Notificações**: Implementar `showCombinedNotification()` (InboxStyle, até 6 linhas) e `showIndividualNotification()` (BigTextStyle com menu items expandidos). Notificações usam `setGroup()` para agrupamento no Android 7+. IDs estáveis via `pluginId.hashCode` para atualização sem duplicação.
+
+**Architecture**:
+```
+Widget (RemoteViews) → PendingIntent → WidgetMenuActivity
+                                         ↓
+                                       SharedPreferences → plugin_<id> JSON → menu[]
+                                         ↓
+                                       Programmatic UI (LinearLayout + ScrollView)
+                                         ↓ href items
+                                       Intent.ACTION_VIEW → Browser
+
+SchedulerService._onPluginOutput()
+    ↓ check NotificationStyle
+    ↓ combined → NotificationService.showCombinedNotification() → InboxStyle
+    ↓ individual → NotificationService.showIndividualNotification() → BigTextStyle
+    ↓ both → ambos acima
+```
+
+**PendingIntent offsets** (para evitar colisão):
+- Container (open app): `appWidgetId`
+- Edit: `appWidgetId + 2000`
+- Menu (single plugin widget): `appWidgetId + 4000`
+- Menu (large widget row N): `appWidgetId + 5000 + (N * 100)`
+
+**Consequences**:
+- ✅ Menu items de plugins acessíveis no mobile via widgets e notificações
+- ✅ `WidgetMenuActivity` não depende de Flutter engine (startup instantâneo)
+- ✅ Notificações configuráveis pelo usuário (Combined/Individual/Both)
+- ⚠️ Items com `bash` desabilitados no mobile (sem shell)
+- ⚠️ `WidgetMenuActivity` constrói UI programaticamente (sem XML layout) — mais flexível mas menos padrão
+- ℹ️ Dark mode detectado via `Configuration.uiMode`
 
 ### Template para Novas ADRs
 
