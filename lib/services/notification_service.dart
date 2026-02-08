@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationService {
 
@@ -100,10 +102,27 @@ class NotificationService {
   }
 
   void _onNotificationResponse(NotificationResponse response) {
+    final actionId = response.actionId;
     final payload = response.payload;
-    if (payload != null) {
-      // Handle notification tap - could open specific plugin
-      // or execute an action
+
+    // Handle action button taps (open URL)
+    if (actionId != null && actionId.startsWith('open_url:') && payload != null) {
+      try {
+        final data = jsonDecode(payload) as Map<String, dynamic>;
+        final url = data[actionId] as String?;
+        if (url != null) {
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        }
+      } catch (_) {
+        // Payload is not JSON - ignore
+      }
+      return;
+    }
+
+    // Handle "More" action - open the app
+    if (actionId == 'more') {
+      // App will be brought to foreground by showsUserInterface: true
+      return;
     }
   }
 
@@ -195,6 +214,46 @@ class NotificationService {
 
     final summary = '${lines.length} plugin(s) active';
 
+    // Collect first 2 href items across all plugins for action buttons
+    final actions = <AndroidNotificationAction>[];
+    final actionPayload = <String, String>{};
+    var actionIndex = 0;
+    for (final entry in outputs.entries) {
+      if (actionIndex >= 2) break;
+      final output = entry.value;
+      for (final item in output.menu) {
+        if (actionIndex >= 2) break;
+        if (item.separator || item.href == null) continue;
+        final label = item.text ?? entry.key;
+        final actionId = 'open_url:$actionIndex';
+        actions.add(AndroidNotificationAction(
+          actionId,
+          label.length > 20 ? '${label.substring(0, 17)}...' : label,
+          showsUserInterface: true,
+          cancelNotification: false,
+        ));
+        actionPayload[actionId] = item.href!;
+        actionIndex++;
+      }
+    }
+    // Add "More" button if there are additional href items
+    final totalHrefs = outputs.values
+        .expand((o) => o.menu)
+        .where((m) => !m.separator && m.href != null)
+        .length;
+    if (totalHrefs > 2) {
+      actions.add(const AndroidNotificationAction(
+        'more',
+        'More...',
+        showsUserInterface: true,
+        cancelNotification: false,
+      ));
+    }
+
+    final payload = actionPayload.isNotEmpty
+        ? jsonEncode(actionPayload)
+        : 'combined';
+
     final androidDetails = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -204,6 +263,7 @@ class NotificationService {
       icon: '@drawable/ic_stat_crossbar',
       groupKey: _groupKey,
       setAsGroupSummary: true,
+      actions: actions,
       styleInformation: InboxStyleInformation(
         lines.take(6).toList(),
         contentTitle: 'Crossbar - ${lines.length} plugins',
@@ -226,7 +286,7 @@ class NotificationService {
       'Crossbar',
       summary,
       details,
-      payload: 'combined',
+      payload: payload,
     );
   }
 
@@ -251,6 +311,41 @@ class NotificationService {
       expandedLines.add(itemText);
     }
 
+    // Extract first 2 menu items with href as action buttons
+    final actions = <AndroidNotificationAction>[];
+    final actionPayload = <String, String>{};
+    var actionIndex = 0;
+    for (final item in output.menu) {
+      if (actionIndex >= 2) break;
+      if (item.separator || item.href == null) continue;
+      final label = item.text ?? 'Open';
+      final actionId = 'open_url:$actionIndex';
+      actions.add(AndroidNotificationAction(
+        actionId,
+        label.length > 20 ? '${label.substring(0, 17)}...' : label,
+        showsUserInterface: true,
+        cancelNotification: false,
+      ));
+      actionPayload[actionId] = item.href!;
+      actionIndex++;
+    }
+    // Add "More" button if there are additional actionable items
+    final totalHrefs = output.menu
+        .where((m) => !m.separator && m.href != null)
+        .length;
+    if (totalHrefs > 2) {
+      actions.add(const AndroidNotificationAction(
+        'more',
+        'More...',
+        showsUserInterface: true,
+        cancelNotification: false,
+      ));
+    }
+
+    final payload = actionPayload.isNotEmpty
+        ? jsonEncode(actionPayload)
+        : pluginId;
+
     final androidDetails = AndroidNotificationDetails(
       channelId,
       channelName,
@@ -259,6 +354,7 @@ class NotificationService {
       priority: Priority.defaultPriority,
       icon: '@drawable/ic_stat_crossbar',
       groupKey: _groupKey,
+      actions: actions,
       styleInformation: BigTextStyleInformation(
         expandedLines.join('\n'),
         contentTitle: '$icon$title',
@@ -281,7 +377,7 @@ class NotificationService {
       '$icon$title',
       text,
       details,
-      payload: pluginId,
+      payload: payload,
     );
   }
 

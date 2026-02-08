@@ -68,19 +68,18 @@
 
     </LinearLayout>
 
-    <!-- Action buttons on the right (stacked vertically) -->
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <!-- Action buttons on the right (edit top, menu bottom) -->
+    <FrameLayout
+        android:layout_width="28dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="12dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:layout_marginStart="12dp">
 
-        <!-- Edit action -->
+        <!-- Edit action (top) -->
         <ImageView
             android:id="@+id/widget_edit"
             android:layout_width="28dp"
             android:layout_height="28dp"
+            android:layout_gravity="top|center_horizontal"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/action_edit_widget"
             android:padding="2dp"
@@ -88,16 +87,12 @@
             android:tint="@color/widget_icon_tint"
             tools:ignore="UseAppTint" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <!-- Menu button (visible when plugin has menu items) -->
+        <!-- Menu button (bottom, visible when plugin has menu items) -->
         <ImageView
             android:id="@+id/widget_menu"
             android:layout_width="28dp"
             android:layout_height="28dp"
+            android:layout_gravity="bottom|center_horizontal"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/action_plugin_menu"
             android:padding="2dp"
@@ -106,6 +101,6 @@
             android:visibility="gone"
             tools:ignore="UseAppTint" />
 
-    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>
