@@ -7,13 +7,14 @@ import 'commands/bluetooth_command.dart';
 import 'commands/clipboard_command.dart';
 import 'commands/dnd_command.dart';
 import 'commands/filesystem_commands.dart';
-import 'commands/media_command.dart';
 import 'commands/location_command.dart';
+import 'commands/media_command.dart';
 import 'commands/network_command.dart';
 import 'commands/plugin_commands.dart';
 import 'commands/power_command.dart';
 import 'commands/qr_command.dart';
 import 'commands/screen_command.dart';
+import 'commands/screenshot_command.dart';
 import 'commands/system_info_commands.dart';
 import 'commands/utility_commands.dart';
 import 'commands/vpn_command.dart';
@@ -54,6 +55,7 @@ void _registerCommands() {
   _register(NotifyCommand());
   _register(OpenCommand());
   _register(QrCommand());
+  _register(ScreenshotCommand());
 
   // Misc
   _register(TimeCommand());
@@ -224,6 +226,7 @@ Utilities:
   open file <path>          Open file
   open app <name>           Launch application
   qr <text>                 Generate QR Code
+  screenshot [path]         Take screenshot (or --clipboard)
 
   time                      Current time
   date                      Current date
