@@ -16,7 +16,9 @@ This file consolidates the architectural decisions for Crossbar. Operational rul
 - ADR-010: Android Native APIs via Method Channel (2025-12-21)
 - ADR-011: Monorepo with Separate Packages (2025-12-22)
 - ADR-012: Multi-Icon Tray Architecture for Linux (2025-12-23)
-- ADR-013: Full-Screen Plugin Config Dialogs on Mobile (2026-02-03)
+- ADR-013: Platform Theme Detection & Monochrome Icons (2026-02-06)
+- ADR-014: Lua-First Sample Plugin System (2026-02-06)
+- ADR-015: Mobile Notification & Widget Menu Architecture (2026-02-08)
 
 ---
 
@@ -223,18 +225,87 @@ Consequences:
 
 ---
 
-## ADR-013: Full-Screen Plugin Config Dialogs on Mobile (2026-02-03)
+## ADR-013: Platform Theme Detection & Monochrome Icons (2026-02-06)
 
 Status: Accepted
 
 Context:
-- Plugin configuration forms were cramped on mobile due to dialog constraints.
-- Users need more vertical space for multi-field schemas and validation feedback.
+- Flutter's `platformDispatcher.onPlatformBrightnessChanged` does not fire when the user toggles light/dark mode in GNOME Settings. The initial value is read correctly, but runtime changes are not propagated by the GTK event loop.
+- Android and GNOME both require monochrome (white + transparent) icons for notifications and status bars.
 
 Decision:
-- Present plugin configuration dialogs as full-screen on Android/iOS.
-- Keep desktop behavior as a constrained dialog.
+- Use `gsettings monitor org.gnome.desktop.interface color-scheme` as an external process to detect theme changes in real time on Linux. The stdout events propagate brightness to `SettingsService.detectedSystemBrightness`, triggering `notifyListeners()` and a `MaterialApp` rebuild. Flutter's `onPlatformBrightnessChanged` is kept as a fallback.
+- Generate monochrome PNGs (white + transparency via ImageMagick `CopyOpacity`) in 5 Android densities (`ic_stat_crossbar.png`). Reference via `AndroidNotificationDetails.icon`. The foreground service Kotlin code also uses `R.drawable.ic_stat_crossbar`.
 
 Consequences:
-- Better usability for plugin configuration on mobile devices.
-- Dialog layout must account for full-screen scroll and safe areas.
+- App theme and tray icon react in real time to GNOME theme changes.
+- Monochrome notification icons work correctly on Android and GNOME.
+- Depends on `gsettings` (available on GNOME/GTK; fails silently on KDE/others).
+- One additional external process on Linux (minimal overhead, event-driven).
+- `AndroidInitializationSettings` must use `@mipmap/ic_launcher`, never a custom drawable (causes silent failure).
+
+---
+
+## ADR-014: Lua-First Sample Plugin System (2026-02-06)
+
+Status: Accepted
+
+Context:
+- Crossbar supported 8 languages for sample plugins (Bash, Python, Node.js, Dart, Go, Rust, Lua, YAML). Each plugin maintained 2-8 variants, totaling ~80 files, UI complexity (language dropdown per plugin), and unnecessary assets in the bundle. All 25 plugins already had a working Lua version. Lua is the only language with an embedded interpreter (`lua_dardo`), working on all platforms without external dependencies.
+
+Decision:
+- Make official samples Lua-only (remove bash/python/node/dart/go/rust/yaml variants).
+- Keep the full `PluginLanguage` enum and execution core intact (users can create plugins in any language).
+- Simplify the sample dialog UI (remove language dropdown).
+- Scaffolding (`crossbar init`) and marketplace continue supporting all languages.
+
+Consequences:
+- ~47 fewer files in the bundle (~43 scripts + 4 schemas).
+- Dramatically simplified UI (no language dropdown).
+- Smaller APK/bundle size.
+- All samples work on all platforms.
+- Trade-off: developers who prefer bash/python must create their own plugins.
+- Marketplace and user plugin execution are not affected.
+
+---
+
+## ADR-015: Mobile Notification & Widget Menu Architecture (2026-02-08)
+
+Status: Accepted
+
+Context:
+- On desktop, plugins display menus in the systray (tray icon submenus). On mobile (Android/iOS), widgets completely ignored plugin menu items, and the Settings section showed irrelevant "System Tray" options (Unified/Separate/SmartCollapse). There was no way to access links or information from menu items on mobile.
+
+Decision:
+1. Replace "System Tray" settings section with "Notifications" on mobile, with a `NotificationStyle` option (Combined/Individual/Both). Move "Keep on Background" toggle from Behavior to Notifications on mobile. Desktop keeps System Tray unchanged.
+2. Add a more_vert (three dots) button on Android widgets. Clicking opens `WidgetMenuActivity` — a pure Kotlin Activity (no Flutter engine), dialog-themed (`Theme.Translucent.NoTitleBar`), that reads menu items from SharedPreferences and renders a programmatic bottom-sheet. Items with `href` open browser, items with `bash` appear disabled ("Desktop only"). Supports inline submenus, separators, custom colors, and dark mode.
+3. Implement `showCombinedNotification()` (InboxStyle, up to 6 lines) and `showIndividualNotification()` (BigTextStyle with expanded menu items). Notifications use `setGroup()` for Android 7+ grouping. Stable IDs via `pluginId.hashCode` for updates without duplication.
+
+Architecture:
+
+```
+Widget (RemoteViews) -> PendingIntent -> WidgetMenuActivity
+                                           -> SharedPreferences -> plugin_<id> JSON -> menu[]
+                                           -> Programmatic UI (LinearLayout + ScrollView)
+                                           -> href items: Intent.ACTION_VIEW -> Browser
+
+SchedulerService._onPluginOutput()
+    -> check NotificationStyle
+    -> combined: NotificationService.showCombinedNotification() -> InboxStyle
+    -> individual: NotificationService.showIndividualNotification() -> BigTextStyle
+    -> both: both above
+```
+
+PendingIntent offsets (to avoid collision):
+- Container (open app): `appWidgetId`
+- Edit: `appWidgetId + 2000`
+- Menu (single plugin widget): `appWidgetId + 4000`
+- Menu (large widget row N): `appWidgetId + 5000 + (N * 100)`
+
+Consequences:
+- Plugin menu items are accessible on mobile via widgets and notifications.
+- `WidgetMenuActivity` does not depend on Flutter engine (instant startup).
+- Notifications are user-configurable (Combined/Individual/Both).
+- Items with `bash` are disabled on mobile (no shell available).
+- `WidgetMenuActivity` builds UI programmatically (no XML layout) — more flexible but less standard.
+- Dark mode detected via `Configuration.uiMode`.
