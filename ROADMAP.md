@@ -30,7 +30,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 ### 🚧 O que é "Fachada" (Precisa de Implementação)
 
 - **Tray Avançado:** Modos "Smart Collapse" e "Overflow" são apenas enums sem lógica.
-- **API Gaps:** Comando `--location` (geocoding) não tem lógica implementada. Screenshot tem API mas sem comando CLI exposto.
+- **API Gaps:** Comando `--location` (geocoding) não tem lógica implementada.
 
 ---
 
@@ -150,7 +150,7 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [x] Linux: `gnome-screenshot`, `scrot`, `spectacle` (fallback chain).
   - [x] Windows: PowerShell snippet para captura.
   - [x] macOS: `screencapture`.
-  - [ ] Expor como comando CLI (API existe, falta wiring no CLI handler).
+  - [x] Expor como comando CLI (`crossbar screenshot [path] [--clipboard]`).
 
 ### Fase 2: Marketplace Engine
 
