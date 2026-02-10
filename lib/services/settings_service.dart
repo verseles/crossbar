@@ -34,6 +34,10 @@ class SettingsService extends ChangeNotifier {
   static const String _keyWidgetLogStorageMode = 'widget_log_storage_mode';
   static const String _keyGlobalHotkeyEnabled = 'global_hotkey_enabled';
   static const String _keyNotificationStyle = 'notification_style';
+  static const String _keyWindowX = 'window_x';
+  static const String _keyWindowY = 'window_y';
+  static const String _keyWindowWidth = 'window_width';
+  static const String _keyWindowHeight = 'window_height';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
@@ -91,12 +95,42 @@ class SettingsService extends ChangeNotifier {
   /// (e.g. gsettings on Linux). Null if not detected or not applicable.
   Brightness? get detectedSystemBrightness => _detectedSystemBrightness;
 
+  /// Returns the stored window position and size, or null if not set.
+  Rect? get windowRect {
+    if (!_initialized) return null;
+    final x = _prefs.getDouble(_keyWindowX);
+    final y = _prefs.getDouble(_keyWindowY);
+    final w = _prefs.getDouble(_keyWindowWidth);
+    final h = _prefs.getDouble(_keyWindowHeight);
+    if (x != null && y != null && w != null && h != null) {
+      return Rect.fromLTWH(x, y, w, h);
+    }
+    return null;
+  }
+
   /// Called by external monitors (e.g. gsettings) when system brightness changes.
   /// Triggers a rebuild of the MaterialApp to update the theme.
   void updateSystemBrightness(Brightness brightness) {
     if (_detectedSystemBrightness != brightness) {
       _detectedSystemBrightness = brightness;
       notifyListeners();
+    }
+  }
+
+  /// Persists the window position and size.
+  Future<void> saveWindowRect(Rect rect) async {
+    if (!_initialized) return;
+    try {
+      await _prefs.setDouble(_keyWindowX, rect.left);
+      await _prefs.setDouble(_keyWindowY, rect.top);
+      await _prefs.setDouble(_keyWindowWidth, rect.width);
+      await _prefs.setDouble(_keyWindowHeight, rect.height);
+    } catch (e, stackTrace) {
+      LoggerService().error(
+        'Failed to save window rect: $rect',
+        e,
+        stackTrace,
+      );
     }
   }
 

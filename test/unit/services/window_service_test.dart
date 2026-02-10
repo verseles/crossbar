@@ -36,6 +36,7 @@ void main() {
             case 'focus':
             case 'destroy':
             case 'setSkipTaskbar':
+            case 'setPosition':
               return null;
             case 'isMinimized':
             case 'isVisible':
@@ -43,6 +44,13 @@ void main() {
             case 'isPreventClose':
             case 'isSkipTaskbar':
               return false;
+            case 'getBounds':
+              return {
+                'x': 100.0,
+                'y': 100.0,
+                'width': 800.0,
+                'height': 600.0,
+              };
             default:
               return null;
           }

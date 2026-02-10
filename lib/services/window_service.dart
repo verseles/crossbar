@@ -23,10 +23,12 @@ class WindowService with WindowListener {
 
     await windowManager.ensureInitialized();
 
+    final savedBounds = SettingsService().windowRect;
+
     final windowOptions = WindowOptions(
-      size: const Size(900, 600),
+      size: savedBounds?.size ?? const Size(900, 600),
       minimumSize: const Size(600, 400),
-      center: true,
+      center: savedBounds == null,
       backgroundColor: Colors.transparent,
       skipTaskbar: startMinimized,
       titleBarStyle: TitleBarStyle.normal,
@@ -43,6 +45,9 @@ class WindowService with WindowListener {
     await hotKeyManager.unregisterAll();
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (savedBounds != null) {
+        await windowManager.setPosition(savedBounds.topLeft);
+      }
       if (!startMinimized) {
         await show();
       }
@@ -101,6 +106,7 @@ class WindowService with WindowListener {
   }
 
   Future<void> hide() async {
+    await _saveWindowState();
     await windowManager.hide();
     // Ensure it is skipped in taskbar when hidden (if supported)
     try {
@@ -111,7 +117,17 @@ class WindowService with WindowListener {
   }
 
   Future<void> quit() async {
+    await _saveWindowState();
     await windowManager.destroy();
+  }
+
+  Future<void> _saveWindowState() async {
+    try {
+      final bounds = await windowManager.getBounds();
+      await SettingsService().saveWindowRect(bounds);
+    } catch (_) {
+      // Ignore errors during window state save
+    }
   }
 
   @override

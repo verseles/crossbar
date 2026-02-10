@@ -102,5 +102,22 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('global_hotkey_enabled'), false);
     });
+
+    test('Window rect is persisted', () async {
+      await settingsService.init();
+
+      expect(settingsService.windowRect, isNull);
+
+      const rect = Rect.fromLTWH(100, 200, 800, 600);
+      await settingsService.saveWindowRect(rect);
+
+      expect(settingsService.windowRect, rect);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getDouble('window_x'), 100);
+      expect(prefs.getDouble('window_y'), 200);
+      expect(prefs.getDouble('window_width'), 800);
+      expect(prefs.getDouble('window_height'), 600);
+    });
   });
 }
