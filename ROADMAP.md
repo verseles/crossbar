@@ -123,11 +123,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
   - [ ] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
 - [ ] **Menu Builder:** Refatorar a construção do menu para suportar aninhamento dinâmico (Plugin A -> [Output, Actions]).
 
-### Fase 3: Window State Persistence
+### Fase 3: Window State Persistence ✅
 
-- [ ] **Persistência:** Em `lib/services/window_service.dart`:
-  - [ ] Salvar `Rect` (posição e tamanho) no `shared_preferences` ao fechar/ocultar.
-  - [ ] Restaurar `Rect` ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
+- [x] **Persistência:** Em `lib/services/window_service.dart`:
+  - [x] Salvar `Rect` (posição e tamanho) e estado maximizado no `shared_preferences` ao fechar/ocultar/blur/maximize.
+  - [x] Restaurar `Rect` e estado maximizado ao iniciar o app (evitar que abra sempre no centro ou tamanho default).
+  - [x] Adicionar testes completos para persistência e restauração de estado.
 
 ---
 

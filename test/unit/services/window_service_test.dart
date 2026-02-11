@@ -14,7 +14,7 @@ void main() {
       // Mock HotKeyManager channel
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
-        const MethodChannel('hotkey_manager'),
+        const MethodChannel('dev.leanflutter.plugins/hotkey_manager'),
         (MethodCall methodCall) async {
           log.add(methodCall);
           return null;
