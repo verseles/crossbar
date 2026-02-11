@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'settings_service.dart';
@@ -14,14 +15,22 @@ class WindowService with WindowListener {
   static final WindowService _instance = WindowService._internal();
 
   bool _isInitialized = false;
+  SharedPreferences? _prefs;
 
   bool get isInitialized => _isInitialized;
+
+  @visibleForTesting
+  void resetForTesting() {
+    _isInitialized = false;
+    _prefs = null;
+  }
 
   Future<void> init({bool startMinimized = false}) async {
     if (_isInitialized) return;
     if (!Platform.isLinux && !Platform.isMacOS && !Platform.isWindows) return;
 
     await windowManager.ensureInitialized();
+    _prefs = await SharedPreferences.getInstance();
 
     final windowOptions = WindowOptions(
       size: const Size(900, 600),
@@ -43,6 +52,7 @@ class WindowService with WindowListener {
     await hotKeyManager.unregisterAll();
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await _restoreWindowState();
       if (!startMinimized) {
         await show();
       }
@@ -101,6 +111,7 @@ class WindowService with WindowListener {
   }
 
   Future<void> hide() async {
+    await _saveWindowState();
     await windowManager.hide();
     // Ensure it is skipped in taskbar when hidden (if supported)
     try {
@@ -111,15 +122,79 @@ class WindowService with WindowListener {
   }
 
   Future<void> quit() async {
+    await _saveWindowState();
     await windowManager.destroy();
   }
 
   @override
   void onWindowClose() async {
+    await _saveWindowState();
     if (SettingsService().showInTray) {
       await hide();
     } else {
       await quit();
+    }
+  }
+
+  @override
+  void onWindowBlur() {
+    _saveWindowState();
+    super.onWindowBlur();
+  }
+
+  @override
+  void onWindowMaximize() {
+    _saveWindowState();
+    super.onWindowMaximize();
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    _saveWindowState();
+    super.onWindowUnmaximize();
+  }
+
+  Future<void> _saveWindowState() async {
+    if (_prefs == null) return;
+
+    try {
+      final isMaximized = await windowManager.isMaximized();
+      await _prefs!.setBool('window_maximized', isMaximized);
+
+      if (!isMaximized) {
+        final bounds = await windowManager.getBounds();
+        await _prefs!.setDouble('window_x', bounds.left);
+        await _prefs!.setDouble('window_y', bounds.top);
+        await _prefs!.setDouble('window_width', bounds.width);
+        await _prefs!.setDouble('window_height', bounds.height);
+      }
+    } catch (e) {
+      // Ignore errors when window is already destroyed or not available
+    }
+  }
+
+  Future<void> _restoreWindowState() async {
+    if (_prefs == null) return;
+
+    try {
+      final maximized = _prefs!.getBool('window_maximized') ?? false;
+      if (maximized) {
+        await windowManager.maximize();
+      } else {
+        final x = _prefs!.getDouble('window_x');
+        final y = _prefs!.getDouble('window_y');
+        final w = _prefs!.getDouble('window_width');
+        final h = _prefs!.getDouble('window_height');
+
+        if (x != null && y != null && w != null && h != null) {
+          // Verify bounds are reasonable (width > 0, height > 0)
+          if (w > 0 && h > 0) {
+            await windowManager.setBounds(Rect.fromLTWH(x, y, w, h));
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore errors
     }
   }
 }
