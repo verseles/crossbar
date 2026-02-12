@@ -47,14 +47,26 @@ class TrayService with TrayListener {
   Brightness? _lastBrightness;
   Process? _gsettingsProcess;
 
+  // Tracks the last used mode to detect changes
+  bool _wasSeparateMode = false;
+
   /// Returns the current tray display mode from settings.
   TrayDisplayMode get _displayMode => SettingsService().trayDisplayMode;
 
-  /// Returns true if separate mode is active and supported.
-  bool get _useSeparateMode =>
-      _displayMode == TrayDisplayMode.separate &&
-      _backend != null &&
-      _backend!.supportsMultipleIcons;
+  /// Returns true if separate mode should be active based on settings and support.
+  bool get _shouldUseSeparateMode {
+    if (_backend == null || !_backend!.supportsMultipleIcons) return false;
+
+    if (_displayMode == TrayDisplayMode.separate) return true;
+
+    if (_displayMode == TrayDisplayMode.smartOverflow) {
+      final enabledCount =
+          _pluginManager.plugins.where((p) => p.enabled).length;
+      return enabledCount <= SettingsService().trayClusterThreshold;
+    }
+
+    return false;
+  }
 
   Future<void> init() async {
     if (_initialized) return;
@@ -79,7 +91,9 @@ class TrayService with TrayListener {
     }
 
     // Set up tray based on mode
-    if (_useSeparateMode) {
+    _wasSeparateMode = _shouldUseSeparateMode;
+
+    if (_shouldUseSeparateMode) {
       // SEPARATE MODE: Use BOTH tray_manager (crossbar control) + SNI daemons (plugins)
       LoggerService().info('TrayService: Using separate mode (mixed)');
       // Initialize tray_manager for crossbar control icon (Show/Quit)
@@ -97,9 +111,14 @@ class TrayService with TrayListener {
     }
 
     RefreshService().addListChangedListener(_onPluginListChanged);
+    SettingsService().addListener(_onSettingsChanged);
 
     _initialized = true;
     LoggerService().info('Tray service initialized');
+  }
+
+  void _onSettingsChanged() {
+    unawaited(refreshMenu());
   }
 
   /// Initializes the unified tray using tray_manager.
@@ -272,7 +291,7 @@ class TrayService with TrayListener {
     final menuItems = <MenuItem>[];
 
     // Plugin outputs - only show in unified mode (in separate mode they have their own icons)
-    if (!_useSeparateMode) {
+    if (!_shouldUseSeparateMode) {
       for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
         final output = _pluginOutputs[plugin.id];
         if (output != null && output.text != null && output.text!.isNotEmpty) {
@@ -298,7 +317,7 @@ class TrayService with TrayListener {
     }
 
     // Standard menu items
-    if (_useSeparateMode) {
+    if (_shouldUseSeparateMode) {
       // In separate mode, only Show and Quit (no Refresh All since plugins have their own)
       menuItems.addAll([
         MenuItem(key: 'show', label: 'Show'),
@@ -315,7 +334,7 @@ class TrayService with TrayListener {
     }
 
     LoggerService().info(
-      'TrayService: Setting menu with ${menuItems.length} items, separateMode=$_useSeparateMode',
+      'TrayService: Setting menu with ${menuItems.length} items, separateMode=$_shouldUseSeparateMode',
     );
 
     try {
@@ -382,10 +401,10 @@ class TrayService with TrayListener {
     _pluginOutputs[pluginId] = output;
 
     LoggerService().info(
-      'TrayService: updatePluginOutput for $pluginId, mode separate: $_useSeparateMode',
+      'TrayService: updatePluginOutput for $pluginId, mode separate: $_shouldUseSeparateMode',
     );
 
-    if (_useSeparateMode) {
+    if (_shouldUseSeparateMode) {
       _updateSeparateIcon(pluginId, output);
     } else {
       _updateUnifiedMenu();
@@ -487,7 +506,25 @@ class TrayService with TrayListener {
 
   /// Public method to refresh the tray menu.
   Future<void> refreshMenu() async {
-    if (_useSeparateMode) {
+    final newSeparateMode = _shouldUseSeparateMode;
+
+    if (newSeparateMode != _wasSeparateMode) {
+      LoggerService().info(
+        'TrayService: Mode switching from $_wasSeparateMode to $newSeparateMode',
+      );
+
+      if (newSeparateMode) {
+        // Switching TO Separate Mode
+        // Unified menu needs to be simplified (Show/Quit only) which happens in _updateUnifiedMenu later
+      } else {
+        // Switching TO Unified Mode
+        // Separate icons need to be destroyed
+        await _cleanupSeparateIcons(forceAll: true);
+      }
+      _wasSeparateMode = newSeparateMode;
+    }
+
+    if (newSeparateMode) {
       await _cleanupSeparateIcons();
       // Recreate icons for all enabled plugins with output
       for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
@@ -496,13 +533,15 @@ class TrayService with TrayListener {
           await _updateSeparateIcon(plugin.id, output);
         }
       }
+      // Ensure unified tray has simplified menu
+      await _updateUnifiedMenu();
     } else {
       await _updateUnifiedMenu();
     }
   }
 
   /// Removes separate icons for plugins that are no longer enabled.
-  Future<void> _cleanupSeparateIcons() async {
+  Future<void> _cleanupSeparateIcons({bool forceAll = false}) async {
     if (_backend == null) return;
 
     final enabledPluginIds = _pluginManager.plugins
@@ -512,7 +551,7 @@ class TrayService with TrayListener {
 
     final iconsToRemove = <String>[];
     for (final pluginId in _pluginIconIds.keys) {
-      if (!enabledPluginIds.contains(pluginId)) {
+      if (forceAll || !enabledPluginIds.contains(pluginId)) {
         iconsToRemove.add(pluginId);
       }
     }
@@ -576,7 +615,7 @@ class TrayService with TrayListener {
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
 
-    if (_useSeparateMode) {
+    if (_shouldUseSeparateMode) {
       final iconId = _pluginIconIds.remove(pluginId);
       if (iconId != null) {
         _backend?.destroyIcon(iconId);
@@ -645,6 +684,7 @@ class TrayService with TrayListener {
     if (!_initialized) return;
 
     RefreshService().removeListChangedListener(_onPluginListChanged);
+    SettingsService().removeListener(_onSettingsChanged);
 
     // Kill gsettings monitor process
     _gsettingsProcess?.kill();
