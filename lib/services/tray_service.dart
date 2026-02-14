@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:path/path.dart' as p;
 import 'package:tray_manager/tray_manager.dart';
@@ -47,14 +48,32 @@ class TrayService with TrayListener {
   Brightness? _lastBrightness;
   Process? _gsettingsProcess;
 
+  @visibleForTesting
+  set backendForTesting(TrayBackend? backend) {
+    _backend = backend;
+  }
+
   /// Returns the current tray display mode from settings.
   TrayDisplayMode get _displayMode => SettingsService().trayDisplayMode;
 
   /// Returns true if separate mode is active and supported.
-  bool get _useSeparateMode =>
-      _displayMode == TrayDisplayMode.separate &&
-      _backend != null &&
-      _backend!.supportsMultipleIcons;
+  bool get _useSeparateMode {
+    if (_backend == null || !_backend!.supportsMultipleIcons) {
+      return false;
+    }
+
+    if (_displayMode == TrayDisplayMode.separate) {
+      return true;
+    }
+
+    if (_displayMode == TrayDisplayMode.smartOverflow) {
+      final enabledCount =
+          _pluginManager.plugins.where((p) => p.enabled).length;
+      return enabledCount <= SettingsService().trayClusterThreshold;
+    }
+
+    return false;
+  }
 
   Future<void> init() async {
     if (_initialized) return;
@@ -66,13 +85,18 @@ class TrayService with TrayListener {
     await _resolveIconPath();
 
     // Initialize the hybrid backend for potential multi-icon support
-    _backend = HybridTrayBackend();
+    if (_backend == null) {
+      _backend = HybridTrayBackend();
+    }
     final backendInitialized = await _backend!.init();
 
     if (backendInitialized) {
-      LoggerService().info(
-        'TrayService: Backend initialized - ${(_backend as HybridTrayBackend).activeBackendName}',
-      );
+      // Only log backend name if it is HybridTrayBackend (it might be a mock)
+      if (_backend is HybridTrayBackend) {
+        LoggerService().info(
+          'TrayService: Backend initialized - ${(_backend as HybridTrayBackend).activeBackendName}',
+        );
+      }
       LoggerService().info(
         'TrayService: Multi-icon support: ${_backend!.supportsMultipleIcons}',
       );
@@ -487,8 +511,18 @@ class TrayService with TrayListener {
 
   /// Public method to refresh the tray menu.
   Future<void> refreshMenu() async {
-    if (_useSeparateMode) {
+    final useSeparate = _useSeparateMode;
+
+    LoggerService().info('TrayService: refreshMenu, useSeparate=$useSeparate');
+
+    if (useSeparate) {
+      // Switching TO separate mode or refreshing separate mode
+      // Make sure unified menu is cleaned (only Show/Quit)
+      await _updateUnifiedMenu();
+
+      // Clean up icons for disabled plugins
       await _cleanupSeparateIcons();
+
       // Recreate icons for all enabled plugins with output
       for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
         final output = _pluginOutputs[plugin.id];
@@ -497,8 +531,25 @@ class TrayService with TrayListener {
         }
       }
     } else {
+      // Switching TO unified mode or refreshing unified mode
+      // Remove all separate icons first
+      await _destroyAllSeparateIcons();
+
+      // Update unified menu (include plugins)
       await _updateUnifiedMenu();
     }
+  }
+
+  /// Destroy all separate icons (used when switching to unified mode).
+  Future<void> _destroyAllSeparateIcons() async {
+    if (_backend == null) return;
+
+    final iconIds = _pluginIconIds.values.toList();
+    for (final iconId in iconIds) {
+      await _backend!.destroyIcon(iconId);
+    }
+    _pluginIconIds.clear();
+    LoggerService().info('Destroyed all separate tray icons');
   }
 
   /// Removes separate icons for plugins that are no longer enabled.
