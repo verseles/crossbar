@@ -51,6 +51,11 @@ void main() {
         final result = await api.seek('-15s');
         expect(result, isA<bool>());
       });
+
+      test('seek handles absolute position', () async {
+        final result = await api.seek('30');
+        expect(result, isA<bool>());
+      });
     });
 
     group('getPlaying', () {

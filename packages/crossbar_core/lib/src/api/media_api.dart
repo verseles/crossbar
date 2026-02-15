@@ -175,27 +175,43 @@ class MediaApi {
     }
   }
 
-  /// Seek relative position (e.g., "+30", "-10" in seconds)
+  /// Seek relative or absolute position (e.g., "+30", "-10", "60")
   Future<bool> seek(String offset) async {
     try {
-      // Parse offset string like "+30s", "-10s", "+30", "-10"
-      final cleanOffset = offset.replaceAll('s', '');
+      final isRelative =
+          offset.trim().startsWith('+') || offset.trim().startsWith('-');
+
+      // Parse offset string like "+30s", "-10s", "+30", "-10", "60"
+      final cleanOffset = offset.replaceAll('s', '').replaceAll('+', '');
       final seconds = int.tryParse(cleanOffset) ?? 0;
 
       if (Platform.isLinux) {
-        // playerctl position expects offset in seconds with +/- prefix
+        // playerctl position:
+        // - "+10" or "-10" -> relative seek
+        // - "10" -> absolute seek
+        String arg;
+        if (isRelative) {
+          arg = '${seconds >= 0 ? '+' : ''}$seconds';
+        } else {
+          arg = '$seconds';
+        }
+
         final result = await Process.run('playerctl', [
           'position',
-          '${seconds >= 0 ? '+' : ''}$seconds',
+          arg,
         ]);
         return result.exitCode == 0;
       }
       if (Platform.isMacOS) {
+        final script = isRelative
+            ? 'set player position to (player position + $seconds)'
+            : 'set player position to $seconds';
+
         final result = await Process.run('osascript', [
           '-e',
           '''
           tell application "Music"
-            set player position to (player position + $seconds)
+            $script
           end tell
           ''',
         ]);
