@@ -80,7 +80,7 @@ Quando terminar as tarefas solicitadas faça as seguintes etapas:
 ## 2. Identidade do Projeto
 
 - **Nome**: Crossbar (Universal Plugin System)
-- **Versão Atual**: `1.13.0+22` (atualize ao final de cada sessão).
+- **Versão Atual**: `1.14.0+23` (atualize ao final de cada sessão).
 - **Stack**: Flutter `3.38.3` (CI), Dart `3.10+`.
 - **Objetivo**: Sistema de plugins compatível com BitBar/Argos para Linux, Windows, macOS, Android e iOS.
 - **Status**: Estável (v1.0+). Todas as fases do plano original concluídas.
@@ -216,12 +216,15 @@ Plugins usam a própria CLI do Crossbar para obter dados.
 
 | Ação                    | Comando                                                                   |
 | ----------------------- | ------------------------------------------------------------------------- |
+| Validação Rápida        | `make check` (analyze + test, sem builds)                                 |
 | Rodar Testes            | `flutter test --coverage`                                                 |
 | Testes (sem hardware)   | `flutter test --exclude-tags=hardware` (evita glitches locais)            |
-| Verificar Coverage      | Verificar se coverage está >= 35% (lcov --summary coverage/lcov.info)     |
+| Verificar Coverage      | `bash tool/ci/check_coverage.sh 35`                                       |
 | Build Release (Linux)   | `make linux`                                                              |
 | Build Release (Android) | `make android` ou `make android CAPTION="- Feature 1\n- Fix 2"`           |
-| Analisar Código         | `flutter analyze --no-fatal-infos`                                        |
+| Analisar Código         | `make analyze` (com budget gate de 100 issues)                            |
+| Verificar Ícones        | `make icons-check`                                                        |
+| Release Automático      | `make release V=patch\|minor\|major`                                      |
 | Monitorar CI            | `gh run watch`                                                            |
 | **Matar GUI + Reabrir** | `pkill -9 -f crossbar-gui; ./build/linux/x64/release/bundle/crossbar gui` |
 
@@ -698,6 +701,39 @@ SchedulerService._onPluginOutput()
 - ⚠️ Items com `bash` desabilitados no mobile (sem shell)
 - ⚠️ `WidgetMenuActivity` constrói UI programaticamente (sem XML layout) — mais flexível mas menos padrão
 - ℹ️ Dark mode detectado via `Configuration.uiMode`
+
+### ADR-016: Build Tooling & Quality Gates Standardization (2026-02-15)
+
+**Status**: ✅ Accepted
+**Context**: Build tooling and quality gates were inconsistent between local development and CI. Coverage checking was inline in the Makefile, analyzer just used `--no-fatal-infos` without issue budget, and there was no quick validation target separate from the full `precommit` sequence. Patterns from sibling projects (codewalk, dash-for-cf) demonstrated better practices: reusable CI scripts, analyzer budgets, `make check` for fast feedback, `make release` for automated versioning, TTY-aware output suppression, and tab persistence in the UI.
+
+**Decision**:
+1. **Reusable CI scripts** in `tool/ci/`: `check_analyze_budget.sh` (max 100 issues) and `check_coverage.sh` (configurable threshold)
+2. **`make check`**: Quick validation (analyze + test, no builds) for fast developer feedback
+3. **`make release V=patch|minor|major`**: Automated version bump, commit, tag, and push
+4. **`make icons-check`**: Validate icon artifacts exist after generation
+5. **TTY detection**: Suppress verbose build output in non-interactive mode (CI/agents)
+6. **Analyzer budget**: Cap info+warning issues at 100 to prevent quality degradation
+7. **CI workflow refactor**: Renamed `test` job to `quality`, uses reusable scripts
+8. **Smoke test workflow**: Cross-platform CLI validation on major releases
+9. **Token sanitization**: `LoggerService.sanitize()` redacts potential secrets in log exports
+10. **AMOLED black mode**: Pure black (#000000) theme for OLED screens via `amoledBlack` setting
+11. **Tab persistence**: Last active tab saved/restored via `lastTabIndex` in SharedPreferences
+12. **Tab preloading**: `IndexedStack` keeps all tabs alive for instant switching
+13. **Test tags**: Added `slow` and `requires_network` tags to `dart_test.yaml`
+14. **Fixture reader**: `test/support/fixture_reader.dart` for centralized test fixture loading
+15. **ROADMAP archive**: Completed epics moved to `ROADMAP.archive.done.md`
+16. **ai-docs/**: Directory for external API documentation reference
+
+**Consequences**:
+- ✅ Consistent quality gates between local and CI environments
+- ✅ Faster developer feedback via `make check` (~30s vs ~5min for `precommit`)
+- ✅ Automated releases reduce human error in version management
+- ✅ Secret leak prevention in exported logs
+- ✅ Better battery life on AMOLED screens in dark mode
+- ✅ Smoother tab switching with preloaded content
+- ⚠️ IndexedStack uses more memory (all 3 tabs rendered simultaneously)
+- ⚠️ Analyzer budget needs periodic adjustment as codebase grows
 
 ### Template para Novas ADRs
 

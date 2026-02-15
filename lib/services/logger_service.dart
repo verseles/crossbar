@@ -55,10 +55,10 @@ class LogEntry {
   String toExportString() {
     final buffer = StringBuffer();
     buffer.write(
-      '[${formattedTimestamp}] [${level.name.toUpperCase()}] $message',
+      '[${formattedTimestamp}] [${level.name.toUpperCase()}] ${LoggerService.sanitize(message)}',
     );
     if (details != null && details!.isNotEmpty) {
-      final indented = details!.split('\n').join('\n  ');
+      final indented = LoggerService.sanitize(details!).split('\n').join('\n  ');
       buffer.write('\n  -> $indented');
     }
     return buffer.toString();
@@ -73,6 +73,22 @@ class LoggerService {
 
   LoggerService._internal();
   static final LoggerService _instance = LoggerService._internal();
+
+  /// Pattern matching potential secrets: API keys, tokens, long hex strings.
+  /// Matches sequences of 20+ alphanumeric characters that look like tokens.
+  static final RegExp _secretPattern = RegExp(
+    r'(?<=[=: "\x27])([A-Za-z0-9_\-]{20,})(?=[\s",\x27})\]]|$)',
+  );
+
+  /// Sanitizes a string by redacting potential secrets/tokens.
+  /// Tokens longer than 20 chars are replaced with first 4 chars + [REDACTED].
+  static String sanitize(String input) {
+    return input.replaceAllMapped(_secretPattern, (match) {
+      final token = match.group(1)!;
+      if (token.length < 20) return token;
+      return '${token.substring(0, 4)}...[REDACTED]';
+    });
+  }
 
   static const int _maxFileSize = 5 * 1024 * 1024; // 5MB
   static const int _maxFiles = 5;
@@ -267,7 +283,11 @@ class LoggerService {
 
     try {
       _rotateIfNeeded();
-      _currentLogFile!.writeAsStringSync('$message\n', mode: FileMode.append);
+      // Sanitize before writing to file to prevent secret leaks in logs
+      _currentLogFile!.writeAsStringSync(
+        '${sanitize(message)}\n',
+        mode: FileMode.append,
+      );
     } catch (_) {
       // Silently fail if logging fails
     }

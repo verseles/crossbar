@@ -34,6 +34,8 @@ class SettingsService extends ChangeNotifier {
   static const String _keyWidgetLogStorageMode = 'widget_log_storage_mode';
   static const String _keyGlobalHotkeyEnabled = 'global_hotkey_enabled';
   static const String _keyNotificationStyle = 'notification_style';
+  static const String _keyAmoledBlack = 'amoled_black';
+  static const String _keyLastTabIndex = 'last_tab_index';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
@@ -52,6 +54,8 @@ class SettingsService extends ChangeNotifier {
       WidgetLogStorageMode.persistent;
   static const NotificationStyle _defaultNotificationStyle =
       NotificationStyle.combined;
+  static const bool _defaultAmoledBlack = false;
+  static const int _defaultLastTabIndex = 0;
 
   // State
   ThemeModeOption _themeMode = _defaultThemeMode;
@@ -64,6 +68,8 @@ class SettingsService extends ChangeNotifier {
   WidgetLogStorageMode _widgetLogStorageMode = _defaultWidgetLogStorageMode;
   bool _globalHotkeyEnabled = _defaultGlobalHotkeyEnabled;
   NotificationStyle _notificationStyle = _defaultNotificationStyle;
+  bool _amoledBlack = _defaultAmoledBlack;
+  int _lastTabIndex = _defaultLastTabIndex;
 
   /// System brightness detected externally (e.g. gsettings on Linux).
   /// Used to override ThemeMode.system when Flutter doesn't propagate changes.
@@ -86,6 +92,12 @@ class SettingsService extends ChangeNotifier {
   int get emptyDiscoveryThreshold => _emptyDiscoveryThreshold;
   WidgetLogStorageMode get widgetLogStorageMode => _widgetLogStorageMode;
   NotificationStyle get notificationStyle => _notificationStyle;
+
+  /// Whether to use pure black (#000000) background in dark mode (AMOLED screens)
+  bool get amoledBlack => _amoledBlack;
+
+  /// Last active tab index for persistence across restarts
+  int get lastTabIndex => _lastTabIndex;
 
   /// Returns the system brightness detected via platform-specific monitors
   /// (e.g. gsettings on Linux). Null if not detected or not applicable.
@@ -291,6 +303,22 @@ X-GNOME-Autostart-enabled=true
     }
   }
 
+  set amoledBlack(bool value) {
+    if (_amoledBlack != value) {
+      _amoledBlack = value;
+      _saveBool(_keyAmoledBlack, value);
+      notifyListeners();
+    }
+  }
+
+  set lastTabIndex(int value) {
+    if (_lastTabIndex != value) {
+      _lastTabIndex = value;
+      _saveInt(_keyLastTabIndex, value);
+      // No notifyListeners - tab change doesn't need UI rebuild
+    }
+  }
+
   Future<void> init() async {
     if (_initialized) return;
 
@@ -370,6 +398,9 @@ X-GNOME-Autostart-enabled=true
         _notificationStyle = _defaultNotificationStyle;
       }
 
+      _amoledBlack = _prefs.getBool(_keyAmoledBlack) ?? _defaultAmoledBlack;
+      _lastTabIndex = _prefs.getInt(_keyLastTabIndex) ?? _defaultLastTabIndex;
+
       _globalHotkeyEnabled =
           _prefs.getBool(_keyGlobalHotkeyEnabled) ?? _defaultGlobalHotkeyEnabled;
       if (_globalHotkeyEnabled) {
@@ -446,6 +477,8 @@ X-GNOME-Autostart-enabled=true
     _emptyDiscoveryThreshold = _defaultEmptyDiscoveryThreshold;
     _widgetLogStorageMode = _defaultWidgetLogStorageMode;
     _notificationStyle = _defaultNotificationStyle;
+    _amoledBlack = _defaultAmoledBlack;
+    _lastTabIndex = _defaultLastTabIndex;
   }
 }
 

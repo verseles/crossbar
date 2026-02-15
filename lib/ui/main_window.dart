@@ -31,6 +31,27 @@ class MainWindow extends StatelessWidget {
     }
   }
 
+  /// Build dark theme, optionally using pure black for AMOLED screens
+  ThemeData _buildDarkTheme(SettingsService settings) {
+    final base = ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.dark,
+    );
+
+    if (settings.amoledBlack) {
+      return ThemeData(
+        colorScheme: base.copyWith(
+          surface: Colors.black,
+          onSurface: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+        useMaterial3: true,
+      );
+    }
+
+    return ThemeData(colorScheme: base, useMaterial3: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -60,13 +81,7 @@ class MainWindow extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
-              brightness: Brightness.dark,
-            ),
-            useMaterial3: true,
-          ),
+          darkTheme: _buildDarkTheme(settings),
           themeMode: _getThemeMode(settings),
           onGenerateRoute: (routeSettings) {
             final uri = Uri.parse(routeSettings.name ?? '/');
@@ -104,13 +119,28 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   final List<Widget> _tabs = const [
     PluginsTab(),
     SettingsTab(),
     MarketplaceTab(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Restore last active tab
+    final saved = SettingsService().lastTabIndex;
+    _currentIndex = (saved >= 0 && saved < 3) ? saved : 0;
+  }
+
+  void _onTabChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    SettingsService().lastTabIndex = index;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,14 +185,10 @@ class _MainScreenState extends State<MainScreen> {
         scrolledUnderElevation: 4.0,
         shadowColor: Theme.of(context).shadowColor,
       ),
-      body: _tabs[_currentIndex],
+      body: IndexedStack(index: _currentIndex, children: _tabs),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onDestinationSelected: _onTabChanged,
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.extension_outlined),
@@ -191,11 +217,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           NavigationRail(
             selectedIndex: _currentIndex,
-            onDestinationSelected: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
+            onDestinationSelected: _onTabChanged,
             labelType: NavigationRailLabelType.all,
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -234,7 +256,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: _tabs[_currentIndex],
+            child: IndexedStack(index: _currentIndex, children: _tabs),
           ),
         ],
       ),

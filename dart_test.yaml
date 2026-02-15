@@ -5,9 +5,19 @@ tags:
   hardware:
     # Tests that interact with real hardware (audio, screen, wifi, bluetooth)
     # These tests modify system state and may cause glitches when run locally.
-    # 
+    #
     # To skip hardware tests locally:
     #   flutter test --exclude-tags=hardware
     #
     # CI runs all tests, but hardware commands may fail gracefully
     # since containers don't have real hardware.
+
+  slow:
+    # Tests that take longer than 10 seconds to complete.
+    # Useful for running quick feedback loops during development:
+    #   flutter test --exclude-tags=slow
+
+  requires_network:
+    # Tests that require network access (marketplace, web cache, API calls).
+    # Skip when working offline:
+    #   flutter test --exclude-tags=requires_network

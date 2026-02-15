@@ -64,6 +64,18 @@ class _SettingsTabState extends State<SettingsTab> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showThemeModeDialog(settings, l10n),
                   ),
+                  SwitchListTile(
+                    title: const Text('AMOLED Black'),
+                    subtitle: const Text(
+                      'Pure black background for OLED screens',
+                    ),
+                    value: settings.amoledBlack,
+                    onChanged: settings.themeMode == ThemeModeOption.light
+                        ? null
+                        : (value) {
+                            settings.amoledBlack = value;
+                          },
+                  ),
                   ListTile(
                     title: Text(l10n.language),
                     subtitle: Text(

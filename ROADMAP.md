@@ -2,8 +2,10 @@
 
 Este documento é o **Manual de Execução Técnica** do Crossbar. Ele traduz a visão do `original_plan.md` em tarefas de engenharia atômicas, granulares e verificáveis.
 
-**Status Atual:** v1.13.0 (Mobile notifications & widget menus)
-**Próximo Ciclo:** v1.13.1+ (Tray Icon Phases 2-3)
+**Status Atual:** v1.14.0 (Build tooling & quality gates standardization)
+**Próximo Ciclo:** v1.14.1+ (Tray Icon Phases 2-3)
+
+> **Nota:** Epics completadas foram movidas para [`ROADMAP.archive.done.md`](./ROADMAP.archive.done.md).
 
 ---
 

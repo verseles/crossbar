@@ -1,5 +1,5 @@
 .PHONY: all coverage linux macos windows android clean test analyze setup-linux setup-macos setup-windows mix icons \
-	install install-linux uninstall precommit help
+	install install-linux uninstall precommit help check release icons-check deps test-cli run-gui rebuild
 
 .DEFAULT_GOAL := help
 
@@ -23,6 +23,18 @@ else
     DEFAULT_TARGET = linux
 endif
 
+# TTY detection: suppress verbose output in non-interactive mode (CI/agents)
+ifneq ($(shell test -t 1 && echo yes),yes)
+    LOG = /tmp/crossbar-make.log
+    QUIET = > $(LOG) 2>&1 || (cat $(LOG) && exit 1)
+else
+    LOG = /dev/null
+    QUIET =
+endif
+
+# Analyzer budget: maximum number of info+warning issues allowed
+ANALYZE_BUDGET ?= 100
+
 help: ## Show this help
 	@echo "Usage: make [target]"
 	@echo ""
@@ -32,12 +44,29 @@ help: ## Show this help
 all: $(DEFAULT_TARGET) ## Build for detected OS (alias for linux/macos/windows)
 	@echo "Building for detected OS: $(DEFAULT_TARGET)"
 
+check: ## Quick validation (analyze + test, no builds)
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  QUICK CHECK"
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "Step 1/2: Static Analysis (budget: $(ANALYZE_BUDGET))"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) analyze
+	@echo ""
+	@echo "Step 2/2: Tests"
+	@echo "──────────────────────────────────────────────────────────────"
+	$(MAKE) test
+	@echo ""
+	@echo "══════════════════════════════════════════════════════════════"
+	@echo "  CHECK PASSED"
+	@echo "══════════════════════════════════════════════════════════════"
+
 precommit: ## Run full pre-commit sequence (analyze, coverage, linux, android)
 	@echo "══════════════════════════════════════════════════════════════"
 	@echo "  PRECOMMIT VERIFICATION (AGENTS.md)"
 	@echo "══════════════════════════════════════════════════════════════"
 	@echo ""
-	@echo "Step 1/4: Static Analysis"
+	@echo "Step 1/4: Static Analysis (budget: $(ANALYZE_BUDGET))"
 	@echo "──────────────────────────────────────────────────────────────"
 	$(MAKE) analyze
 	@echo ""
@@ -54,18 +83,18 @@ precommit: ## Run full pre-commit sequence (analyze, coverage, linux, android)
 	$(MAKE) android
 	@echo ""
 	@echo "══════════════════════════════════════════════════════════════"
-	@echo "  ✅ PRECOMMIT PASSED - Safe to commit!"
+	@echo "  PRECOMMIT PASSED - Safe to commit!"
 	@echo "══════════════════════════════════════════════════════════════"
 
 linux: ## Build for Linux (Flutter GUI + CLI + Tray Daemon)
 	@echo "Building Flutter GUI..."
-	flutter build linux --release
+	flutter build linux --release $(QUIET)
 	@echo "Setting up unified architecture..."
 	mv $(LINUX_BUNDLE)/crossbar $(LINUX_BUNDLE)/crossbar-gui
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
-	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(LINUX_BUNDLE)/crossbar $(QUIET)
 	@echo "Compiling tray daemon for multi-icon support..."
-	dart build cli --target=bin/crossbar_tray_daemon.dart --output=build/tray_daemon_tmp
+	dart build cli --target=bin/crossbar_tray_daemon.dart --output=build/tray_daemon_tmp $(QUIET)
 	cp build/tray_daemon_tmp/bundle/bin/crossbar_tray_daemon $(LINUX_BUNDLE)/crossbar_tray_daemon
 	rm -rf build/tray_daemon_tmp
 	@echo "Copying desktop integration files..."
@@ -110,7 +139,7 @@ install-linux: ## Run checks/builds and install Crossbar to ~/.local/ (Linux onl
 	@# Update icon cache
 	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
 	@echo ""
-	@echo "✅ Crossbar installed successfully!"
+	@echo "Crossbar installed successfully!"
 	@echo ""
 	@echo "Make sure $(INSTALL_DIR)/bin is in your PATH:"
 	@echo "  export PATH=\"$$HOME/.local/bin:$$PATH\""
@@ -132,29 +161,29 @@ uninstall: ## Uninstall Crossbar from ~/.local/
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/256x256/apps/com.verseles.crossbar.png
 	@rm -f $(INSTALL_DIR)/share/icons/hicolor/symbolic/apps/com.verseles.crossbar-symbolic.svg
 	@gtk-update-icon-cache $(INSTALL_DIR)/share/icons/hicolor 2>/dev/null || true
-	@echo "✅ Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
+	@echo "Crossbar uninstalled. User data in ~/.crossbar/ was preserved."
 
 macos: ## Build for macOS (Flutter GUI + CLI)
 	@echo "Building Flutter GUI..."
-	flutter build macos --release
+	flutter build macos --release $(QUIET)
 	@echo "Setting up unified architecture..."
 	mv $(MACOS_BUNDLE)/crossbar $(MACOS_BUNDLE)/crossbar-gui
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
-	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(MACOS_BUNDLE)/crossbar
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(MACOS_BUNDLE)/crossbar $(QUIET)
 	@echo "Done! Binaries at $(MACOS_BUNDLE)/"
 
 windows: ## Build for Windows (Flutter GUI + CLI)
 	@echo "Building Flutter GUI..."
-	flutter build windows --release
+	flutter build windows --release $(QUIET)
 	@echo "Setting up unified architecture..."
 	mv $(WINDOWS_BUNDLE)/crossbar.exe $(WINDOWS_BUNDLE)/crossbar-gui.exe
 	@echo "Compiling unified CLI from packages/crossbar_cli..."
-	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(WINDOWS_BUNDLE)/crossbar.exe
+	cd packages/crossbar_cli && dart compile exe bin/crossbar.dart -o ../../$(WINDOWS_BUNDLE)/crossbar.exe $(QUIET)
 	@echo "Done! Binaries at $(WINDOWS_BUNDLE)/"
 
 CAPTION ?=
 android: ## Build Android APK (and upload if configured)
-	flutter build apk --release --target-platform android-arm64
+	flutter build apk --release --target-platform android-arm64 $(QUIET)
 	@if command -v tdl >/dev/null 2>&1; then \
 		VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
 		if [ -n "$(CAPTION)" ]; then \
@@ -172,16 +201,10 @@ test: ## Run unit/widget tests (excluding hardware)
 
 coverage: ## Run tests with coverage report
 	flutter test --exclude-tags=hardware --coverage
-	@echo "Filtering generated code from coverage..."
-	lcov --remove coverage/lcov.info 'lib/l10n/*' 'lib/ui/dialogs/*' 'lib/core/paths/*' -o coverage/lcov_filtered.info 2>/dev/null
-	@echo ""
-	@echo "=== Coverage Summary (excluding generated code) ==="
-	lcov --summary coverage/lcov_filtered.info 2>&1 | grep -E "lines|source"
-	@echo ""
-	@echo "Target: 35% (see AGENTS.md for rationale)"
+	@bash tool/ci/check_coverage.sh 35
 
-analyze: ## Run static analysis
-	flutter analyze --no-fatal-infos
+analyze: ## Run static analysis (with budget gate)
+	@bash tool/ci/check_analyze_budget.sh $(ANALYZE_BUDGET)
 
 clean: ## Clean build artifacts
 	flutter clean
@@ -249,3 +272,69 @@ icons: ## Generate icons from assets
 	@echo "Generating launcher icons (Android, Windows, macOS)..."
 	dart run flutter_launcher_icons
 	@echo "Done! All icons generated."
+
+icons-check: ## Validate icon artifacts exist and have correct dimensions
+	@echo "Checking icon artifacts..."
+	@ERRORS=0; \
+	for f in assets/icons/icon.png assets/icons/icon_opaque.png assets/icons/icon_linux.png \
+		assets/icons/icon_monochrome.png assets/icons/tray_icon_light.png \
+		assets/icons/tray_icon_dark.png assets/icons/tray_icon_macos.png \
+		assets/icons/tray_icon.ico assets/icons/com.verseles.crossbar-symbolic.svg; do \
+		if [ ! -f "$$f" ]; then \
+			echo "MISSING: $$f"; ERRORS=$$((ERRORS+1)); \
+		fi; \
+	done; \
+	for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do \
+		f="android/app/src/main/res/drawable-$$density/ic_stat_crossbar.png"; \
+		if [ ! -f "$$f" ]; then \
+			echo "MISSING: $$f"; ERRORS=$$((ERRORS+1)); \
+		fi; \
+	done; \
+	if [ "$$ERRORS" -gt 0 ]; then \
+		echo "::error::$$ERRORS icon artifacts missing. Run 'make icons' to regenerate."; \
+		exit 1; \
+	fi; \
+	echo "All icon artifacts present."
+
+# Automated release: bump version, commit, tag, push
+# Usage: make release V=patch|minor|major
+V ?= patch
+release: ## Bump version, commit, tag, and push (V=patch|minor|major)
+	@if [ "$(V)" != "patch" ] && [ "$(V)" != "minor" ] && [ "$(V)" != "major" ]; then \
+		echo "Invalid version type: $(V). Use V=patch, V=minor, or V=major"; \
+		exit 1; \
+	fi
+	@echo "Releasing $(V) version..."
+	@# Extract current version from pubspec.yaml
+	$(eval CURRENT := $(shell grep '^version:' pubspec.yaml | sed 's/version: //'))
+	$(eval MAJOR := $(shell echo $(CURRENT) | cut -d. -f1))
+	$(eval MINOR := $(shell echo $(CURRENT) | cut -d. -f2))
+	$(eval PATCH := $(shell echo $(CURRENT) | cut -d+ -f1 | cut -d. -f3))
+	$(eval BUILD := $(shell echo $(CURRENT) | cut -d+ -f2))
+	$(eval NEW_BUILD := $(shell echo $$(($(BUILD)+1))))
+	@# Calculate new version
+	$(eval ifeq ($(V),major) \
+		NEW_VERSION := $(shell echo $$(($(MAJOR)+1))).0.0+$(NEW_BUILD) \
+	else ifeq ($(V),minor) \
+		NEW_VERSION := $(MAJOR).$(shell echo $$(($(MINOR)+1))).0+$(NEW_BUILD) \
+	else \
+		NEW_VERSION := $(MAJOR).$(MINOR).$(shell echo $$(($(PATCH)+1)))+$(NEW_BUILD) \
+	endif endif)
+	@# Fallback calculation using shell
+	@NEW_VER=$$(python3 -c "\
+	v='$(CURRENT)'; \
+	parts=v.split('+'); \
+	semver=parts[0].split('.'); \
+	build=int(parts[1])+1; \
+	maj,mi,pat=int(semver[0]),int(semver[1]),int(semver[2]); \
+	t='$(V)'; \
+	maj,mi,pat = (maj+1,0,0) if t=='major' else ((maj,mi+1,0) if t=='minor' else (maj,mi,pat+1)); \
+	print(f'{maj}.{mi}.{pat}+{build}')"); \
+	echo "$(CURRENT) -> $$NEW_VER"; \
+	sed -i "s/^version: .*/version: $$NEW_VER/" pubspec.yaml; \
+	SEMVER=$$(echo $$NEW_VER | cut -d+ -f1); \
+	git add pubspec.yaml; \
+	git commit -m "release: cut v$$SEMVER"; \
+	git tag "v$$SEMVER"; \
+	git push && git push --tags; \
+	echo "Released v$$SEMVER ($$NEW_VER)"
