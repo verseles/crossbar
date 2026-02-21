@@ -56,8 +56,9 @@ print('Refresh | refresh=true')
 - Window management and theming
 - **Tray Display Mode** (Settings → System Tray):
   - _Unified_: Single tray icon with menu for all plugins (default)
-  - _Separate_: One tray icon per plugin (Linux only, coming soon)
-  - _Smart Collapse/Overflow_: Automatic modes (coming soon)
+  - _Separate_: One tray icon per plugin (Linux only)
+  - _Smart Overflow_: Shows all plugins as separate icons until count exceeds threshold, then switches to Unified.
+  - _Smart Collapse_: Shows first N plugins as separate icons, others in Unified menu.
 
 #### Mobile (Android/iOS)
 

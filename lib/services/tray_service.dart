@@ -57,22 +57,56 @@ class TrayService with TrayListener {
   TrayDisplayMode get _displayMode => SettingsService().trayDisplayMode;
 
   /// Returns true if separate mode is active and supported.
-  bool get _useSeparateMode {
+  ///
+  /// Note: In smartCollapse mode, this returns true because at least some
+  /// plugins use separate icons.
+  bool get _hasSeparateIcons {
     if (_backend == null || !_backend!.supportsMultipleIcons) {
       return false;
     }
 
-    if (_displayMode == TrayDisplayMode.separate) {
-      return true;
-    }
+    final mode = _displayMode;
+    if (mode == TrayDisplayMode.unified) return false;
+    if (mode == TrayDisplayMode.separate) return true;
+    if (mode == TrayDisplayMode.smartCollapse) return true;
 
-    if (_displayMode == TrayDisplayMode.smartOverflow) {
+    if (mode == TrayDisplayMode.smartOverflow) {
       final enabledCount =
           _pluginManager.plugins.where((p) => p.enabled).length;
       return enabledCount <= SettingsService().trayClusterThreshold;
     }
 
     return false;
+  }
+
+  /// Helper to determine if a specific plugin should be in the overflow menu
+  /// (unified tray) or have its own separate icon.
+  bool _isPluginOverflowing(String pluginId) {
+    if (_backend == null || !_backend!.supportsMultipleIcons) {
+      return true; // No multi-icon support -> always overflow
+    }
+
+    final mode = _displayMode;
+    if (mode == TrayDisplayMode.unified) return true;
+    if (mode == TrayDisplayMode.separate) return false;
+
+    final enabledPlugins =
+        _pluginManager.plugins.where((p) => p.enabled).toList();
+    final threshold = SettingsService().trayClusterThreshold;
+
+    if (mode == TrayDisplayMode.smartOverflow) {
+      // All or nothing
+      return enabledPlugins.length > threshold;
+    }
+
+    if (mode == TrayDisplayMode.smartCollapse) {
+      // First N separate, rest overflow
+      final index = enabledPlugins.indexWhere((p) => p.id == pluginId);
+      if (index == -1) return true; // Should not happen for enabled plugin
+      return index >= threshold;
+    }
+
+    return true;
   }
 
   Future<void> init() async {
@@ -102,18 +136,9 @@ class TrayService with TrayListener {
       );
     }
 
-    // Set up tray based on mode
-    if (_useSeparateMode) {
-      // SEPARATE MODE: Use BOTH tray_manager (crossbar control) + SNI daemons (plugins)
-      LoggerService().info('TrayService: Using separate mode (mixed)');
-      // Initialize tray_manager for crossbar control icon (Show/Quit)
-      await _initUnifiedTray();
-      // Plugin icons will be created via daemons when plugins output is received
-    } else {
-      // UNIFIED MODE: Use tray_manager for single icon with all plugins
-      LoggerService().info('TrayService: Using unified mode (tray_manager)');
-      await _initUnifiedTray();
-    }
+    // Initialize tray_manager (always needed for Show/Quit or Unified menu)
+    LoggerService().info('TrayService: Initializing unified tray (mode=$_displayMode)');
+    await _initUnifiedTray();
 
     // Listen for theme changes on Linux
     if (Platform.isLinux) {
@@ -294,12 +319,14 @@ class TrayService with TrayListener {
     if (!_unifiedTrayActive) return;
 
     final menuItems = <MenuItem>[];
+    bool hasPlugins = false;
 
-    // Plugin outputs - only show in unified mode (in separate mode they have their own icons)
-    if (!_useSeparateMode) {
-      for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+    // Plugin outputs - add if overflowing
+    for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+      if (_isPluginOverflowing(plugin.id)) {
         final output = _pluginOutputs[plugin.id];
         if (output != null && output.text != null && output.text!.isNotEmpty) {
+          hasPlugins = true;
           if (output.menu.isNotEmpty) {
             final submenuItems = _convertMenuItems(output.menu);
             menuItems.add(
@@ -315,21 +342,24 @@ class TrayService with TrayListener {
           }
         }
       }
+    }
 
-      if (menuItems.isNotEmpty) {
-        menuItems.add(MenuItem.separator());
-      }
+    if (hasPlugins) {
+      menuItems.add(MenuItem.separator());
     }
 
     // Standard menu items
-    if (_useSeparateMode) {
-      // In separate mode, only Show and Quit (no Refresh All since plugins have their own)
+    if (_hasSeparateIcons && !hasPlugins) {
+      // If we have separate icons AND no plugins in unified menu (pure separate mode),
+      // we only need Show/Quit.
+      // But if we have mixed mode (smartCollapse) and plugins in overflow, we show full menu.
       menuItems.addAll([
         MenuItem(key: 'show', label: 'Show'),
         MenuItem.separator(),
         MenuItem(key: 'quit', label: 'Quit'),
       ]);
     } else {
+      // Unified mode or Mixed mode with overflow items
       menuItems.addAll([
         MenuItem(key: 'show', label: 'Show Crossbar'),
         MenuItem(key: 'refresh', label: 'Refresh All Plugins'),
@@ -339,7 +369,7 @@ class TrayService with TrayListener {
     }
 
     LoggerService().info(
-      'TrayService: Setting menu with ${menuItems.length} items, separateMode=$_useSeparateMode',
+      'TrayService: Setting menu with ${menuItems.length} items, hasSeparate=$_hasSeparateIcons',
     );
 
     try {
@@ -404,16 +434,30 @@ class TrayService with TrayListener {
 
   void updatePluginOutput(String pluginId, plugin_model.PluginOutput output) {
     _pluginOutputs[pluginId] = output;
+    final isOverflow = _isPluginOverflowing(pluginId);
 
     LoggerService().info(
-      'TrayService: updatePluginOutput for $pluginId, mode separate: $_useSeparateMode',
+      'TrayService: updatePluginOutput for $pluginId, isOverflow: $isOverflow',
     );
 
-    if (_useSeparateMode) {
-      _updateSeparateIcon(pluginId, output);
-    } else {
+    if (isOverflow) {
+      // Ensure no separate icon exists (transition case)
+      if (_pluginIconIds.containsKey(pluginId)) {
+        final iconId = _pluginIconIds.remove(pluginId);
+        if (iconId != null) {
+          _backend?.destroyIcon(iconId);
+        }
+      }
       _updateUnifiedMenu();
-      _updateUnifiedTitle(pluginId, output);
+      // Only update title if we are effectively in unified mode (all overflow)
+      // In mixed mode, we probably don't want the unified tray title to flicker with overflow items
+      if (!_hasSeparateIcons || _displayMode == TrayDisplayMode.smartOverflow) {
+        _updateUnifiedTitle(pluginId, output);
+      }
+    } else {
+      _updateSeparateIcon(pluginId, output);
+      // Ensure it's removed from unified menu if it was there
+      _updateUnifiedMenu();
     }
 
     _updateTooltip();
@@ -511,33 +555,21 @@ class TrayService with TrayListener {
 
   /// Public method to refresh the tray menu.
   Future<void> refreshMenu() async {
-    final useSeparate = _useSeparateMode;
+    LoggerService().info('TrayService: refreshMenu');
 
-    LoggerService().info('TrayService: refreshMenu, useSeparate=$useSeparate');
+    // Clean up icons that should not exist (disabled or overflowing)
+    await _cleanupSeparateIcons();
 
-    if (useSeparate) {
-      // Switching TO separate mode or refreshing separate mode
-      // Make sure unified menu is cleaned (only Show/Quit)
-      await _updateUnifiedMenu();
-
-      // Clean up icons for disabled plugins
-      await _cleanupSeparateIcons();
-
-      // Recreate icons for all enabled plugins with output
-      for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
-        final output = _pluginOutputs[plugin.id];
-        if (output != null) {
-          await _updateSeparateIcon(plugin.id, output);
-        }
+    // Recreate/Update icons for all enabled, non-overflowing plugins
+    for (final plugin in _pluginManager.plugins.where((p) => p.enabled)) {
+      final output = _pluginOutputs[plugin.id];
+      if (output != null && !_isPluginOverflowing(plugin.id)) {
+        await _updateSeparateIcon(plugin.id, output);
       }
-    } else {
-      // Switching TO unified mode or refreshing unified mode
-      // Remove all separate icons first
-      await _destroyAllSeparateIcons();
-
-      // Update unified menu (include plugins)
-      await _updateUnifiedMenu();
     }
+
+    // Update unified menu (will include overflowing plugins)
+    await _updateUnifiedMenu();
   }
 
   /// Destroy all separate icons (used when switching to unified mode).
@@ -552,7 +584,7 @@ class TrayService with TrayListener {
     LoggerService().info('Destroyed all separate tray icons');
   }
 
-  /// Removes separate icons for plugins that are no longer enabled.
+  /// Removes separate icons for plugins that are no longer enabled OR are now overflowing.
   Future<void> _cleanupSeparateIcons() async {
     if (_backend == null) return;
 
@@ -563,7 +595,9 @@ class TrayService with TrayListener {
 
     final iconsToRemove = <String>[];
     for (final pluginId in _pluginIconIds.keys) {
-      if (!enabledPluginIds.contains(pluginId)) {
+      // Remove if disabled OR if it should now be overflowing (unified)
+      if (!enabledPluginIds.contains(pluginId) ||
+          _isPluginOverflowing(pluginId)) {
         iconsToRemove.add(pluginId);
       }
     }
@@ -627,14 +661,14 @@ class TrayService with TrayListener {
   void clearPluginOutput(String pluginId) {
     _pluginOutputs.remove(pluginId);
 
-    if (_useSeparateMode) {
-      final iconId = _pluginIconIds.remove(pluginId);
-      if (iconId != null) {
-        _backend?.destroyIcon(iconId);
-      }
-    } else {
-      _updateUnifiedMenu();
+    // Try to remove separate icon just in case
+    final iconId = _pluginIconIds.remove(pluginId);
+    if (iconId != null) {
+      _backend?.destroyIcon(iconId);
     }
+
+    // Always update unified menu to reflect removal
+    _updateUnifiedMenu();
   }
 
   @override

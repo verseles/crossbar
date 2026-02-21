@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ Features
+
+- **Tray Overflow Logic (Smart Collapse)**: Implemented `TrayDisplayMode.smartCollapse` which shows separate icons for the first N plugins (configurable threshold) and groups the rest in the unified tray menu.
+- **Improved Smart Overflow**: Refined `TrayDisplayMode.smartOverflow` logic to cleanly switch between "All Separate" and "All Unified" modes based on plugin count.
+
 ### 🔧 Tooling
 
 - Added `make help` command to list all Makefile targets dynamically.

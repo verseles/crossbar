@@ -119,11 +119,12 @@ Antes de avançar, reconhecemos o que existe e o que falta para atingir a promes
 
 ### Fase 2: Tray Overflow Logic
 
-- [ ] **Lógica:** Em `lib/services/tray_service.dart`:
-  - [ ] Implementar lógica para `TrayDisplayMode.smartOverflow`.
-  - [ ] Se `plugins.length > threshold`, renderizar apenas 1 ícone genérico na tray.
-  - [ ] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
-- [ ] **Menu Builder:** Refatorar a construção do menu para suportar aninhamento dinâmico (Plugin A -> [Output, Actions]).
+- [x] **Lógica:** Em `lib/services/tray_service.dart`:
+  - [x] Implementar lógica para `TrayDisplayMode.smartOverflow` (All Separate vs All Unified based on threshold).
+  - [x] Implementar lógica para `TrayDisplayMode.smartCollapse` (First N separate, rest in Unified menu).
+  - [x] Se `plugins.length > threshold`, renderizar apenas 1 ícone genérico na tray (smartOverflow behavior).
+  - [x] Renderizar o menu de contexto contendo submenus para cada plugin ativo.
+- [x] **Menu Builder:** Refatorar a construção do menu para suportar aninhamento dinâmico (Plugin A -> [Output, Actions]).
 
 ### Fase 3: Window State Persistence ✅
 
