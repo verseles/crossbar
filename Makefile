@@ -184,15 +184,11 @@ windows: ## Build for Windows (Flutter GUI + CLI)
 CAPTION ?=
 android: ## Build Android APK (and upload if configured)
 	flutter build apk --release --target-platform android-arm64 $(QUIET)
-	@if command -v tdl >/dev/null 2>&1; then \
-		VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
-		if [ -n "$(CAPTION)" ]; then \
-			tdl up -t 6 -c 5891714407 --path=./build/app/outputs/apk/release/crossbar.apk \
-				--caption "\"<b>Crossbar v$$VERSION</b>\\n\\n$(CAPTION)\"" ; \
-		else \
-			tdl up -t 6 -c 5891714407 --path=./build/app/outputs/apk/release/crossbar.apk \
-				--caption "\"<b>Crossbar v$$VERSION</b>\"" ; \
-		fi; \
+	@VERSION=$$(grep '^version:' pubspec.yaml | cut -d' ' -f2); \
+	if [ -n "$(CAPTION)" ]; then \
+		~/bin/hey -f ./build/app/outputs/apk/release/crossbar.apk "<b>Crossbar v$$VERSION</b>\n\n$(CAPTION)"; \
+	else \
+		~/bin/hey -f ./build/app/outputs/apk/release/crossbar.apk "<b>Crossbar v$$VERSION</b>"; \
 	fi
 	@echo "Done! APK at build/app/outputs/apk/release/crossbar.apk"
 

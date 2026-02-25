@@ -57,6 +57,17 @@
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
             android:exported="false" />
 
+        <!-- FileProvider to share downloaded APK with system package installer -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -137,6 +148,8 @@
     </queries>
     <!-- Add internet permission for marketplace and network features -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required to open downloaded APK with system package installer -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- Add network state permission -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Add wake lock for scheduler -->

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -17,6 +18,7 @@ import 'services/sample_plugins_service.dart';
 import 'services/scheduler_service.dart';
 import 'services/settings_service.dart';
 import 'services/tray_service.dart';
+import 'services/update_service.dart';
 import 'services/widget_service.dart';
 import 'services/window_service.dart';
 import 'ui/main_window.dart';
@@ -107,6 +109,11 @@ void main(List<String> args) async {
     final settings = SettingsService();
     await settings.init();
     logger.info('Settings initialized');
+
+    // Initialize update service and run silent startup check in background.
+    final updateService = UpdateService();
+    await updateService.init();
+    unawaited(updateService.performStartupCheck());
 
     // Check for existing instance EARLY - before initializing scheduler/tray
     final ipcServer = IpcServer();

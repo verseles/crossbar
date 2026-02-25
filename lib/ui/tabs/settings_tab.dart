@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
+import '../../services/update_service.dart';
 import '../pages/debug_logs_page.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -42,9 +43,10 @@ class _SettingsTabState extends State<SettingsTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return ListenableBuilder(
-      listenable: SettingsService(),
+      listenable: Listenable.merge([SettingsService(), UpdateService()]),
       builder: (context, _) {
         final settings = SettingsService();
+        final update = UpdateService();
         final languages = _getLanguages(l10n);
 
         return Scaffold(
@@ -192,6 +194,58 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               const SizedBox(height: 16),
               _buildSection(
+                title: 'Updates',
+                icon: Icons.system_update_outlined,
+                children: [
+                  SwitchListTile(
+                    title: const Text('Check for updates on open'),
+                    value: update.checkOnOpen,
+                    onChanged: (v) => update.setCheckOnOpen(v),
+                  ),
+                  ListTile(
+                    title: const Text('Check for updates'),
+                    trailing: update.checkingForUpdate
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh),
+                    onTap: update.checkingForUpdate
+                        ? null
+                        : () => update.checkForUpdate(),
+                  ),
+                  if (update.hasUpdate) ...[
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'v${update.result!.latestVersion} available',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if ((update.result!.releaseNotes ?? '').isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                update.result!.releaseNotes!.length > 300
+                                    ? '${update.result!.releaseNotes!.substring(0, 300)}…'
+                                    : update.result!.releaseNotes!,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          const SizedBox(height: 12),
+                          _buildInstallControl(context, update),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSection(
                 title: l10n.about,
                 icon: Icons.info,
                 children: [
@@ -266,6 +320,56 @@ class _SettingsTabState extends State<SettingsTab> {
         );
       },
     );
+  }
+
+  Widget _buildInstallControl(BuildContext context, UpdateService update) {
+    switch (update.installState) {
+      case UpdateInstallState.downloading:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinearProgressIndicator(value: update.installProgress),
+            const SizedBox(height: 6),
+            Text(
+              'Downloading… ${(update.installProgress * 100).toStringAsFixed(0)}%',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        );
+      case UpdateInstallState.installing:
+        return const Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 8),
+            Text('Installing…'),
+          ],
+        );
+      case UpdateInstallState.done:
+        return const Text('Restart the app to apply the update.');
+      default:
+        return Row(
+          children: [
+            FilledButton.icon(
+              icon: const Icon(Icons.download, size: 18),
+              label: Text(
+                update.installState == UpdateInstallState.failed
+                    ? 'Retry install'
+                    : 'Install update',
+              ),
+              onPressed: () => update.startInstall(),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => update.dismissUpdate(),
+              child: const Text('Dismiss'),
+            ),
+          ],
+        );
+    }
   }
 
   Widget _buildSection({

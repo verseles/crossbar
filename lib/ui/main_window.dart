@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
+import '../../services/update_service.dart';
 import 'dialogs/widget_config_dialog.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
@@ -130,9 +131,91 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    // Restore last active tab
+    // Restore last active tab.
     final saved = SettingsService().lastTabIndex;
     _currentIndex = (saved >= 0 && saved < 3) ? saved : 0;
+    // Listen for update state changes (startup toast, install progress).
+    UpdateService().addListener(_onUpdateStateChanged);
+    // Check once after frame in case startup check already completed.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkStartupToast());
+  }
+
+  @override
+  void dispose() {
+    UpdateService().removeListener(_onUpdateStateChanged);
+    super.dispose();
+  }
+
+  void _onUpdateStateChanged() {
+    _checkStartupToast();
+    _handleInstallState();
+  }
+
+  void _checkStartupToast() {
+    final update = UpdateService();
+    if (!update.pendingStartupToast || !mounted) return;
+    update.acknowledgeStartupToast();
+    final version = update.result?.latestVersion ?? '';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Update available: v$version'),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: 'Install',
+          onPressed: () => update.startInstall(),
+        ),
+      ),
+    );
+  }
+
+  void _handleInstallState() {
+    if (!mounted) return;
+    final update = UpdateService();
+    switch (update.installState) {
+      case UpdateInstallState.idle:
+        // Reset guards so next install cycle can show snackbars again.
+        update.shownProgressSnackBar = false;
+        update.shownDoneSnackBar = false;
+        update.shownFailedSnackBar = false;
+      case UpdateInstallState.downloading:
+        if (!update.shownProgressSnackBar) {
+          update.shownProgressSnackBar = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Downloading update…'),
+              duration: Duration(days: 1), // dismissed programmatically
+            ),
+          );
+        }
+      case UpdateInstallState.done:
+        if (!update.shownDoneSnackBar) {
+          update.shownDoneSnackBar = true;
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Update installed. Restart to apply.'),
+              duration: Duration(seconds: 8),
+            ),
+          );
+        }
+      case UpdateInstallState.failed:
+        if (!update.shownFailedSnackBar) {
+          update.shownFailedSnackBar = true;
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Install failed.'),
+              duration: const Duration(seconds: 8),
+              action: SnackBarAction(
+                label: 'Retry',
+                onPressed: () => UpdateService().startInstall(),
+              ),
+            ),
+          );
+        }
+      default:
+        break;
+    }
   }
 
   void _onTabChanged(int index) {

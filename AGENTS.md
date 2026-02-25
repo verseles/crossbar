@@ -252,7 +252,7 @@ pkill -9 -f crossbar-gui; pkill -9 -f crossbar; flutter build linux --release &&
 
 ### 📱 Build Android com Upload para Telegram
 
-O comando `make android` gera `crossbar.apk` e faz upload via `tdl` (se instalado).
+O comando `make android` gera `crossbar.apk` e faz upload via `~/bin/hey -f`.
 
 **Uso básico** (sem legenda):
 ```bash
