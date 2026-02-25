@@ -150,6 +150,8 @@ install_macos() {
   mkdir -p "$MAC_APPS_DIR" "$BIN_DIR" "$PLUGINS_DIR"
   rm -rf "$MAC_APP_DEST"
   cp -R "$APP_SRC" "$MAC_APP_DEST"
+  # Remove macOS quarantine attribute so Gatekeeper does not block the app.
+  xattr -cr "$MAC_APP_DEST" 2>/dev/null || true
 
   chmod +x "$MAC_APP_DEST/Contents/MacOS/crossbar" 2>/dev/null || true
   chmod +x "$MAC_APP_DEST/Contents/MacOS/crossbar-gui" 2>/dev/null || true
