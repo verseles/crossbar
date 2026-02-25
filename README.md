@@ -75,14 +75,19 @@ print('Refresh | refresh=true')
 **Linux / macOS:**
 
 ```bash
-curl -fsSL https://install.cat/verseles/crossbar | sh
+curl -fsSL install.cat/verseles/crossbar | sh
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-irm https://install.cat/verseles/crossbar?format=ps1 | iex
+irm install.cat/verseles/crossbar?format=ps1 | iex
 ```
+
+**Android:**
+
+Download the latest APK directly:
+[crossbar-android-arm64.apk](https://github.com/verseles/crossbar/releases/latest/download/crossbar-android-arm64.apk)
 
 On Linux this installs Crossbar to `~/.local/share/crossbar` with a symlink at `~/.local/bin/crossbar`.  
 On macOS this installs `Crossbar.app` to `~/Applications/Crossbar.app` and creates `~/.local/bin/crossbar`.  
