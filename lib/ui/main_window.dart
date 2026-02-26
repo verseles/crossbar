@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 import '../../services/update_service.dart';
+import 'animations/animation_constants.dart';
 import 'dialogs/widget_config_dialog.dart';
 import 'tabs/marketplace_tab.dart';
 import 'tabs/plugins_tab.dart';
@@ -119,8 +120,11 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen>
+    with SingleTickerProviderStateMixin {
   late int _currentIndex;
+  late final AnimationController _tabFadeController;
+  late final Animation<double> _tabFadeAnimation;
 
   final List<Widget> _tabs = const [
     PluginsTab(),
@@ -134,6 +138,20 @@ class _MainScreenState extends State<MainScreen> {
     // Restore last active tab.
     final saved = SettingsService().lastTabIndex;
     _currentIndex = (saved >= 0 && saved < 3) ? saved : 0;
+
+    // Fade animation for tab transitions: brief opacity dip (1→0→1).
+    // IndexedStack stays alive — only the visual opacity pulses.
+    _tabFadeController = AnimationController(
+      vsync: this,
+      duration: Anim.medium,
+    );
+    _tabFadeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 60),
+    ]).animate(
+      CurvedAnimation(parent: _tabFadeController, curve: Anim.standard),
+    );
+
     // Listen for update state changes (startup toast, install progress).
     UpdateService().addListener(_onUpdateStateChanged);
     // Check once after frame in case startup check already completed.
@@ -142,6 +160,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
+    _tabFadeController.dispose();
     UpdateService().removeListener(_onUpdateStateChanged);
     super.dispose();
   }
@@ -219,6 +238,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onTabChanged(int index) {
+    if (index == _currentIndex) return;
+    // Animate a brief opacity dip on tab switch while preserving IndexedStack state.
+    _tabFadeController.forward(from: 0.0);
     setState(() {
       _currentIndex = index;
     });
@@ -268,7 +290,10 @@ class _MainScreenState extends State<MainScreen> {
         scrolledUnderElevation: 4.0,
         shadowColor: Theme.of(context).shadowColor,
       ),
-      body: IndexedStack(index: _currentIndex, children: _tabs),
+      body: FadeTransition(
+        opacity: _tabFadeAnimation,
+        child: IndexedStack(index: _currentIndex, children: _tabs),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onTabChanged,
@@ -339,7 +364,10 @@ class _MainScreenState extends State<MainScreen> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: IndexedStack(index: _currentIndex, children: _tabs),
+            child: FadeTransition(
+              opacity: _tabFadeAnimation,
+              child: IndexedStack(index: _currentIndex, children: _tabs),
+            ),
           ),
         ],
       ),

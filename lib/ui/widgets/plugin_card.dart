@@ -1,6 +1,8 @@
 import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
 
+import '../animations/animation_constants.dart';
+
 class PluginCard extends StatelessWidget {
   const PluginCard({
     required this.plugin,
@@ -22,13 +24,22 @@ class PluginCard extends StatelessWidget {
     final hasError = output?.hasError ?? false;
     final isDisabled = !plugin.enabled;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      color: hasError
-          ? colorScheme.errorContainer.withAlpha(50)
-          : isDisabled
-          ? colorScheme.surfaceContainerHighest.withAlpha(50)
-          : null,
+    // Animate card background color between states (error/disabled/normal)
+    final cardColor = hasError
+        ? colorScheme.errorContainer.withAlpha(50)
+        : isDisabled
+        ? colorScheme.surfaceContainerHighest.withAlpha(50)
+        : null;
+
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(end: cardColor),
+      duration: Anim.short,
+      curve: Anim.standard,
+      builder: (context, color, child) => Card(
+        clipBehavior: Clip.antiAlias,
+        color: color,
+        child: child,
+      ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -123,20 +134,24 @@ class PluginCard extends StatelessWidget {
   }
 
   Widget _buildOutput(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        output!.text!,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: output!.color != null ? Color(output!.color!) : null,
-          fontWeight: FontWeight.w500,
+    return AnimatedSwitcher(
+      duration: Anim.short,
+      child: Container(
+        key: ValueKey(output!.text),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(4),
         ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+        child: Text(
+          output!.text!,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: output!.color != null ? Color(output!.color!) : null,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }

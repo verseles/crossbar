@@ -48,6 +48,7 @@ dependencies:
 
   # UI Components
   flutter_colorpicker: ^1.1.0
+  flutter_animate: ^4.5.2
   url_launcher: ^6.3.1
 
   # Open downloaded APK with system package installer

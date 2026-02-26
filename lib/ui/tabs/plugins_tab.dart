@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:clipboard/clipboard.dart';
 import 'package:crossbar_core/crossbar_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
@@ -10,6 +11,8 @@ import '../../services/plugin_config_service.dart';
 import '../../services/refresh_service.dart';
 import '../../services/scheduler_service.dart';
 import '../../services/tray_service.dart';
+import '../animations/animation_constants.dart';
+import '../animations/animated_dialog.dart';
 import '../dialogs/plugin_config_dialog.dart';
 import '../dialogs/sample_plugins_dialog.dart';
 
@@ -203,13 +206,26 @@ class _PluginsTabState extends State<PluginsTab> {
           // Search and Filter Bar
           _buildSearchAndFilterBar(theme, l10n),
 
-          // Content
+          // Content with crossfade between loading and list
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _refreshService.plugins.isEmpty
-                ? _buildEmptyState(l10n)
-                : _buildPluginList(theme, l10n),
+            child: AnimatedSwitcher(
+              duration: Anim.medium,
+              switchInCurve: Anim.enter,
+              child: _isLoading
+                  ? const Center(
+                      key: ValueKey('loading'),
+                      child: CircularProgressIndicator(),
+                    )
+                  : _refreshService.plugins.isEmpty
+                  ? KeyedSubtree(
+                      key: const ValueKey('empty'),
+                      child: _buildEmptyState(l10n),
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey('list'),
+                      child: _buildPluginList(theme, l10n),
+                    ),
+            ),
           ),
         ],
       ),
@@ -242,12 +258,16 @@ class _PluginsTabState extends State<PluginsTab> {
             decoration: InputDecoration(
               hintText: l10n.searchPlugins,
               prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => setState(() => _searchQuery = ''),
-                    )
-                  : null,
+              suffixIcon: AnimatedSwitcher(
+                duration: Anim.short,
+                child: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        key: const ValueKey('clear'),
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => setState(() => _searchQuery = ''),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('empty')),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -387,6 +407,11 @@ class _PluginsTabState extends State<PluginsTab> {
               ),
             ),
           ],
+        ).animate().fadeIn(duration: Anim.medium, curve: Anim.enter).scale(
+          begin: const Offset(0.95, 0.95),
+          end: const Offset(1.0, 1.0),
+          duration: Anim.medium,
+          curve: Anim.enter,
         ),
       );
     }
@@ -436,10 +461,23 @@ class _PluginsTabState extends State<PluginsTab> {
               ),
             ],
 
-            // Plugin cards
-            ...groupPlugins.map(
-              (plugin) =>
-                  _buildExpandablePluginCard(context, plugin, theme, l10n),
+            // Plugin cards with staggered entrance animation
+            ...groupPlugins.asMap().entries.map(
+              (entry) => _buildExpandablePluginCard(
+                context,
+                entry.value,
+                theme,
+                l10n,
+              ).animate().fadeIn(
+                duration: Anim.medium,
+                curve: Anim.enter,
+              ).slideY(
+                begin: 0.05,
+                end: 0,
+                duration: Anim.medium,
+                curve: Anim.enter,
+                delay: Anim.staggerInterval * entry.key.clamp(0, 15),
+              ),
             ),
           ],
         );
@@ -478,8 +516,10 @@ class _PluginsTabState extends State<PluginsTab> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  // Language icon
-                  Container(
+                  // Language icon with color transition on enable/disable
+                  AnimatedContainer(
+                    duration: Anim.short,
+                    curve: Anim.standard,
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
@@ -564,26 +604,37 @@ class _PluginsTabState extends State<PluginsTab> {
                     onChanged: (_) => _handleTogglePlugin(plugin),
                   ),
 
-                  // Expand indicator
-                  Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.colorScheme.outline,
+                  // Expand indicator with rotation animation
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0.0,
+                    duration: Anim.short,
+                    curve: Anim.standard,
+                    child: Icon(
+                      Icons.expand_more,
+                      color: theme.colorScheme.outline,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          // Expanded content
-          if (isExpanded)
-            _buildExpandedContent(
-              context,
-              plugin,
-              theme,
-              output,
-              isRunning,
-              l10n,
-            ),
+          // Expanded content with smooth height animation
+          AnimatedSize(
+            duration: Anim.medium,
+            curve: Anim.standard,
+            alignment: Alignment.topCenter,
+            child: isExpanded
+                ? _buildExpandedContent(
+                    context,
+                    plugin,
+                    theme,
+                    output,
+                    isRunning,
+                    l10n,
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
@@ -712,17 +763,27 @@ class _PluginsTabState extends State<PluginsTab> {
                         tooltip: l10n.copyOutput,
                       ),
                     const SizedBox(width: 4),
-                    // Run button
+                    // Run button with icon crossfade
                     FilledButton.tonalIcon(
                       onPressed: isRunning ? null : () => _runPlugin(plugin),
-                      icon: isRunning
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.play_arrow, size: 18),
-                      label: Text(isRunning ? l10n.running : l10n.runNow),
+                      icon: AnimatedSwitcher(
+                        duration: Anim.short,
+                        child: isRunning
+                            ? const SizedBox(
+                                key: ValueKey('spinner'),
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.play_arrow, key: ValueKey('play'), size: 18),
+                      ),
+                      label: AnimatedSwitcher(
+                        duration: Anim.short,
+                        child: Text(
+                          isRunning ? l10n.running : l10n.runNow,
+                          key: ValueKey(isRunning ? 'running' : 'run'),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -1040,6 +1101,11 @@ class _PluginsTabState extends State<PluginsTab> {
             label: Text(l10n.addPlugin),
           ),
         ],
+      ).animate().fadeIn(duration: Anim.medium, curve: Anim.enter).scale(
+        begin: const Offset(0.95, 0.95),
+        end: const Offset(1.0, 1.0),
+        duration: Anim.medium,
+        curve: Anim.enter,
       ),
     );
   }
@@ -1101,7 +1167,7 @@ class _PluginsTabState extends State<PluginsTab> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.addPlugin),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../animations/animation_constants.dart';
+import '../animations/animated_dialog.dart';
 
 class MarketplaceTab extends StatefulWidget {
   const MarketplaceTab({super.key});
@@ -83,7 +85,14 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           ),
         ),
       ),
-      body: _buildBody(),
+      body: AnimatedSwitcher(
+        duration: Anim.medium,
+        switchInCurve: Anim.enter,
+        child: KeyedSubtree(
+          key: ValueKey(_isLoading ? 'loading' : 'content'),
+          child: _buildBody(),
+        ),
+      ),
     );
   }
 
@@ -161,7 +170,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
     final l10n = AppLocalizations.of(context)!;
     final urlController = TextEditingController();
 
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Install from URL'),

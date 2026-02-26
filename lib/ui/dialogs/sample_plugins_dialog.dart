@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/refresh_service.dart';
 import '../../services/sample_plugins_service.dart';
+import '../animations/animation_constants.dart';
+import '../animations/animated_dialog.dart';
 
 /// Dialog to browse and install sample/example plugins.
 class SamplePluginsDialog extends StatefulWidget {
@@ -10,7 +12,7 @@ class SamplePluginsDialog extends StatefulWidget {
 
   /// Shows the dialog and returns the list of installed variant filenames
   static Future<List<String>?> show(BuildContext context) {
-    return showDialog<List<String>>(
+    return showAnimatedDialog<List<String>>(
       context: context,
       builder: (_) => const SamplePluginsDialog(),
     );
@@ -305,7 +307,8 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
     return ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: plugins.length,
-      itemBuilder: (context, index) => _buildPluginCard(theme, plugins[index]),
+      itemBuilder: (context, index) =>
+          _buildPluginCard(theme, plugins[index]),
     );
   }
 
@@ -416,47 +419,52 @@ class _SamplePluginsDialogState extends State<SamplePluginsDialog> {
                   ),
                 ),
                 const Spacer(),
-                // Install button
-                if (isInstalling)
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else if (!isInstalled)
-                  FilledButton.tonal(
-                    onPressed: () => _installPlugin(plugin),
-                    child: Text(AppLocalizations.of(context)!.install),
-                  )
-                else
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          AppLocalizations.of(context)!.installed,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.primary,
+                // Install button with crossfade transition
+                AnimatedSwitcher(
+                  duration: Anim.short,
+                  child: isInstalling
+                      ? const SizedBox(
+                          key: ValueKey('installing'),
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : !isInstalled
+                      ? FilledButton.tonal(
+                          key: const ValueKey('install'),
+                          onPressed: () => _installPlugin(plugin),
+                          child: Text(AppLocalizations.of(context)!.install),
+                        )
+                      : Container(
+                          key: const ValueKey('installed'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check,
+                                size: 16,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                AppLocalizations.of(context)!.installed,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                ),
               ],
             ),
           ],

@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 import '../../services/update_service.dart';
+import '../animations/animated_dialog.dart';
 import '../pages/debug_logs_page.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -401,7 +402,7 @@ class _SettingsTabState extends State<SettingsTab> {
   void _showLanguageDialog(AppLocalizations l10n) {
     final settings = SettingsService();
     final languages = _getLanguages(l10n);
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.language),
@@ -436,7 +437,7 @@ class _SettingsTabState extends State<SettingsTab> {
 
   void _showLicenseDialog() {
     final l10n = AppLocalizations.of(context)!;
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.license),
@@ -463,7 +464,7 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 
   void _showThemeModeDialog(SettingsService settings, AppLocalizations l10n) {
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.darkTheme),
@@ -541,7 +542,7 @@ class _SettingsTabState extends State<SettingsTab> {
     SettingsService settings,
     AppLocalizations l10n,
   ) {
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.notificationStyle),
@@ -591,7 +592,7 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 
   void _showTrayModeDialog(SettingsService settings, AppLocalizations l10n) {
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.trayDisplayMode),
