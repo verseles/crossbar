@@ -17,6 +17,7 @@ import 'commands/screen_command.dart';
 import 'commands/screenshot_command.dart';
 import 'commands/system_info_commands.dart';
 import 'commands/utility_commands.dart';
+import 'commands/volume_command.dart';
 import 'commands/vpn_command.dart';
 import 'commands/wallpaper_command.dart';
 import 'commands/web_command.dart';
@@ -31,6 +32,7 @@ void _registerCommands() {
 
   // Audio & Media
   _register(AudioCommand());
+  _register(VolumeCommand());
   _register(MediaCommand());
 
   // System & Hardware
@@ -154,6 +156,7 @@ System Info (Simple Getters):
 
 Audio Controls (audio):
   audio volume [0-100]      Get volume or Set volume
+  volume [0-100]            Alias for 'audio volume'
   audio mute                Toggle mute
   audio output [device]     Get output or Set device
   audio output --list       List output devices
