@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../animations/animation_constants.dart';
 import '../animations/animated_dialog.dart';
+import '../../services/marketplace_service.dart';
 
 class MarketplaceTab extends StatefulWidget {
   const MarketplaceTab({super.key});
@@ -213,7 +214,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
     );
   }
 
-  void _installFromUrl(String url) {
+  Future<void> _installFromUrl(String url) async {
     if (url.isEmpty) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -222,15 +223,26 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
       ),
     );
 
-    // TODO: Implement actual installation
-    Future<void>.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
+    final service = MarketplaceService();
+    final success = await service.installFromUrl(url);
+
+    if (mounted) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Plugin installation coming soon!'),
+            content: Text('Plugin installed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final error = service.lastError ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to install plugin: $error'),
+            backgroundColor: Colors.red,
           ),
         );
       }
-    });
+    }
   }
 }

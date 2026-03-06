@@ -158,6 +158,54 @@ class MarketplaceService {
     return _plugins;
   }
 
+  Future<bool> installFromUrl(String url) async {
+    try {
+      _lastError = null;
+
+      final response = await _dio.get(
+        url,
+        options: Options(receiveTimeout: const Duration(seconds: 30)),
+      );
+
+      if (response.statusCode != 200) {
+        _lastError = 'Failed to download plugin: ${response.statusCode}';
+        return false;
+      }
+
+      final uri = Uri.parse(url);
+      final filename = uri.pathSegments.last;
+
+      if (filename.isEmpty || !filename.contains('.')) {
+        _lastError = 'Invalid plugin URL: must point to a file with an extension';
+        return false;
+      }
+
+      final pluginDir = await _pluginManager.pluginsDirectory;
+      final dir = Directory(pluginDir);
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+
+      final filePath = p.join(pluginDir, filename);
+      final file = File(filePath);
+      final content = response.data is String ? response.data : jsonEncode(response.data);
+      await file.writeAsString(content);
+
+      // Make executable on Unix systems
+      if (Platform.isLinux || Platform.isMacOS) {
+        await Process.run('chmod', ['+x', filePath]);
+      }
+
+      // Reload plugins
+      await _pluginManager.discoverPlugins();
+
+      return true;
+    } catch (e) {
+      _lastError = e.toString();
+      return false;
+    }
+  }
+
   Future<bool> installPlugin(MarketplacePlugin plugin) async {
     try {
       _lastError = null;
