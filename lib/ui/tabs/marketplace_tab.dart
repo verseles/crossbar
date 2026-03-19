@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../animations/animation_constants.dart';
 import '../animations/animated_dialog.dart';
+import '../../services/marketplace_service.dart';
 
 class MarketplaceTab extends StatefulWidget {
   const MarketplaceTab({super.key});
@@ -120,15 +121,15 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           Text(
             'Search for plugins on GitHub',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tag your repository with #crossbar to appear here',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 32),
           FilledButton.icon(
@@ -158,9 +159,7 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Marketplace search coming soon!'),
-          ),
+          const SnackBar(content: Text('Marketplace search coming soon!')),
         );
       }
     });
@@ -191,8 +190,8 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
             Text(
               'Example: https://github.com/verseles/crossbar-weather',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ],
         ),
@@ -213,24 +212,33 @@ class _MarketplaceTabState extends State<MarketplaceTab> {
     );
   }
 
-  void _installFromUrl(String url) {
+  Future<void> _installFromUrl(String url) async {
     if (url.isEmpty) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Installing from $url...'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Installing from $url...')));
 
-    // TODO: Implement actual installation
-    Future<void>.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
+    final service = MarketplaceService();
+    final success = await service.installFromUrl(url);
+
+    if (mounted) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Plugin installation coming soon!'),
+            content: Text('Plugin installed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final error = service.lastError ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to install plugin: $error'),
+            backgroundColor: Colors.red,
           ),
         );
       }
-    });
+    }
   }
 }

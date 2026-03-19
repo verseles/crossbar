@@ -1,8 +1,10 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/plugin_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/settings_service.dart';
 import '../../services/update_service.dart';
@@ -140,8 +142,7 @@ class _SettingsTabState extends State<SettingsTab> {
                         ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () =>
-                          _showNotificationStyleDialog(settings, l10n),
+                      onTap: () => _showNotificationStyleDialog(settings, l10n),
                     ),
                     SwitchListTile(
                       title: Text(l10n.keepOnBackground),
@@ -178,8 +179,9 @@ class _SettingsTabState extends State<SettingsTab> {
                     subtitle: const Text('~/.crossbar/plugins'),
                     trailing: IconButton(
                       icon: const Icon(Icons.folder_open),
-                      onPressed: () {
-                        // TODO: Open folder
+                      onPressed: () async {
+                        final path = await PluginManager().pluginsDirectory;
+                        await OpenFilex.open(path);
                       },
                     ),
                   ),

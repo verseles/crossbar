@@ -7,7 +7,6 @@ import 'package:path/path.dart' as p;
 import '../core/plugin_manager.dart';
 
 class MarketplaceService {
-
   factory MarketplaceService() => _instance;
 
   MarketplaceService._internal();
@@ -37,8 +36,7 @@ class MarketplaceService {
       _lastError = null;
 
       // Search for plugins in the official repository
-      final pluginsListUrl =
-          '$_rawContentBase/$owner/$repo/main/plugins.json';
+      final pluginsListUrl = '$_rawContentBase/$owner/$repo/main/plugins.json';
 
       final response = await _dio.get(
         pluginsListUrl,
@@ -95,7 +93,9 @@ class MarketplaceService {
   }
 
   Future<List<MarketplacePlugin>> _searchViaGitHubApi({
-    required String owner, required String repo, String? query,
+    required String owner,
+    required String repo,
+    String? query,
     String? language,
     String? category,
   }) async {
@@ -140,22 +140,72 @@ class MarketplaceService {
           continue;
         }
 
-        _plugins.add(MarketplacePlugin(
-          id: name,
-          name: _formatPluginName(name),
-          description: 'Plugin from $owner/$repo',
-          author: owner,
-          language: pluginLanguage,
-          category: category ?? 'General',
-          version: '1.0.0',
-          downloadUrl: item['download_url'] ?? '',
-          stars: 0,
-          downloads: 0,
-        ));
+        _plugins.add(
+          MarketplacePlugin(
+            id: name,
+            name: _formatPluginName(name),
+            description: 'Plugin from $owner/$repo',
+            author: owner,
+            language: pluginLanguage,
+            category: category ?? 'General',
+            version: '1.0.0',
+            downloadUrl: item['download_url'] ?? '',
+            stars: 0,
+            downloads: 0,
+          ),
+        );
       }
     }
 
     return _plugins;
+  }
+
+  Future<bool> installFromUrl(String url) async {
+    try {
+      _lastError = null;
+
+      final response = await _dio.get(
+        url,
+        options: Options(receiveTimeout: const Duration(seconds: 30)),
+      );
+
+      if (response.statusCode != 200) {
+        _lastError = 'Failed to download plugin: ${response.statusCode}';
+        return false;
+      }
+
+      final uri = Uri.parse(url);
+      final filename = uri.pathSegments.last;
+
+      if (filename.isEmpty || !filename.contains('.')) {
+        _lastError =
+            'Invalid plugin URL: must point to a file with an extension';
+        return false;
+      }
+
+      final pluginDir = await _pluginManager.pluginsDirectory;
+      final dir = Directory(pluginDir);
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+
+      final filePath = p.join(pluginDir, filename);
+      final file = File(filePath);
+      final content = response.data is String
+          ? response.data
+          : jsonEncode(response.data);
+      await file.writeAsString(content);
+
+      if (Platform.isLinux || Platform.isMacOS) {
+        await Process.run('chmod', ['+x', filePath]);
+      }
+
+      await _pluginManager.discoverPlugins();
+      return true;
+    } catch (e) {
+      _lastError = e.toString();
+      return false;
+    }
   }
 
   Future<bool> installPlugin(MarketplacePlugin plugin) async {
@@ -180,7 +230,9 @@ class MarketplaceService {
 
       final filePath = p.join(pluginDir, plugin.id);
       final file = File(filePath);
-      final content = response.data is String ? response.data : jsonEncode(response.data);
+      final content = response.data is String
+          ? response.data
+          : jsonEncode(response.data);
       await file.writeAsString(content);
 
       // Make executable on Unix systems
@@ -245,7 +297,9 @@ class MarketplaceService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data is String ? jsonDecode(response.data) : response.data;
+        final data = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
         return MarketplacePlugin.fromJson(data);
       }
 
@@ -260,8 +314,7 @@ class MarketplaceService {
           language: _extensionToLanguage(p.extension(pluginId)) ?? 'unknown',
           category: 'General',
           version: '1.0.0',
-          downloadUrl:
-              '$_rawContentBase/$owner/$repo/main/plugins/$pluginId',
+          downloadUrl: '$_rawContentBase/$owner/$repo/main/plugins/$pluginId',
           stars: 0,
           downloads: 0,
         ),
@@ -306,16 +359,17 @@ class MarketplaceService {
     name = name
         .replaceAll(RegExp('[_-]'), ' ')
         .split(' ')
-        .map((w) => w.isNotEmpty
-            ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}'
-            : '')
+        .map(
+          (w) => w.isNotEmpty
+              ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}'
+              : '',
+        )
         .join(' ');
     return name;
   }
 }
 
 class MarketplacePlugin {
-
   const MarketplacePlugin({
     required this.id,
     required this.name,
@@ -341,14 +395,16 @@ class MarketplacePlugin {
       language: json['language'] as String? ?? '',
       category: json['category'] as String? ?? 'General',
       version: json['version'] as String? ?? '1.0.0',
-      downloadUrl: json['downloadUrl'] as String? ?? json['download_url'] as String? ?? '',
+      downloadUrl:
+          json['downloadUrl'] as String? ??
+          json['download_url'] as String? ??
+          '',
       stars: json['stars'] as int? ?? 0,
       downloads: json['downloads'] as int? ?? 0,
       readme: json['readme'] as String?,
       screenshot: json['screenshot'] as String?,
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((t) => t.toString())
-              .toList() ??
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((t) => t.toString()).toList() ??
           [],
     );
   }
