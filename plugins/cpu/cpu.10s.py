@@ -30,6 +30,7 @@ try:
         color = "green"
 except ValueError:
     cpu = 0
+    cpu_str = "0.0"
     color = "gray"
 
 print(f"⚡ {cpu_str}% | color={color}")

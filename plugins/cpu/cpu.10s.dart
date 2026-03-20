@@ -13,7 +13,11 @@ String? crossbar(List<String> args) {
 
 void main() {
   // Get CPU from Crossbar API
-  final cpuStr = crossbar(['cpu']) ?? 'N/A';
+  var cpuStr = crossbar(['cpu']) ?? 'N/A';
+
+  if (cpuStr == 'N/A') {
+    cpuStr = '0.0';
+  }
   
   final cpu = double.tryParse(cpuStr) ?? 0;
   String color;
