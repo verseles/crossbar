@@ -36,6 +36,7 @@ class SettingsService extends ChangeNotifier {
   static const String _keyNotificationStyle = 'notification_style';
   static const String _keyAmoledBlack = 'amoled_black';
   static const String _keyLastTabIndex = 'last_tab_index';
+  static const String _keyDefaultRefreshInterval = 'default_refresh_interval';
 
   // Default Values
   static const ThemeModeOption _defaultThemeMode = ThemeModeOption.system;
@@ -56,6 +57,7 @@ class SettingsService extends ChangeNotifier {
       NotificationStyle.combined;
   static const bool _defaultAmoledBlack = false;
   static const int _defaultLastTabIndex = 0;
+  static const int _defaultRefreshIntervalSecs = 300;
 
   // State
   ThemeModeOption _themeMode = _defaultThemeMode;
@@ -70,6 +72,7 @@ class SettingsService extends ChangeNotifier {
   NotificationStyle _notificationStyle = _defaultNotificationStyle;
   bool _amoledBlack = _defaultAmoledBlack;
   int _lastTabIndex = _defaultLastTabIndex;
+  int _defaultRefreshInterval = _defaultRefreshIntervalSecs;
 
   /// System brightness detected externally (e.g. gsettings on Linux).
   /// Used to override ThemeMode.system when Flutter doesn't propagate changes.
@@ -98,6 +101,8 @@ class SettingsService extends ChangeNotifier {
 
   /// Last active tab index for persistence across restarts
   int get lastTabIndex => _lastTabIndex;
+
+  int get defaultRefreshInterval => _defaultRefreshInterval;
 
   /// Returns the system brightness detected via platform-specific monitors
   /// (e.g. gsettings on Linux). Null if not detected or not applicable.
@@ -318,6 +323,14 @@ X-GNOME-Autostart-enabled=true
       // No notifyListeners - tab change doesn't need UI rebuild
     }
   }
+  set defaultRefreshInterval(int value) {
+    if (_defaultRefreshInterval != value) {
+      _defaultRefreshInterval = value;
+      _saveInt(_keyDefaultRefreshInterval, value);
+      notifyListeners();
+    }
+  }
+
 
   Future<void> init() async {
     if (_initialized) return;
@@ -400,6 +413,9 @@ X-GNOME-Autostart-enabled=true
 
       _amoledBlack = _prefs.getBool(_keyAmoledBlack) ?? _defaultAmoledBlack;
       _lastTabIndex = _prefs.getInt(_keyLastTabIndex) ?? _defaultLastTabIndex;
+      _defaultRefreshInterval =
+          _prefs.getInt(_keyDefaultRefreshInterval) ?? _defaultRefreshIntervalSecs;
+
 
       _globalHotkeyEnabled =
           _prefs.getBool(_keyGlobalHotkeyEnabled) ?? _defaultGlobalHotkeyEnabled;
@@ -479,6 +495,7 @@ X-GNOME-Autostart-enabled=true
     _notificationStyle = _defaultNotificationStyle;
     _amoledBlack = _defaultAmoledBlack;
     _lastTabIndex = _defaultLastTabIndex;
+    _defaultRefreshInterval = _defaultRefreshIntervalSecs;
   }
 }
 

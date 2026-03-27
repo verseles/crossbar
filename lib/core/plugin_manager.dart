@@ -315,7 +315,7 @@ class PluginManager {
         case 'h':
           interval = Duration(hours: value.round());
         default:
-          interval = const Duration(minutes: 5);
+          interval = Duration(seconds: SettingsService().defaultRefreshInterval);
       }
 
       if (interval < const Duration(seconds: 1)) {
@@ -325,7 +325,7 @@ class PluginManager {
       return interval;
     }
 
-    return const Duration(minutes: 5);
+    return Duration(seconds: SettingsService().defaultRefreshInterval);
   }
 
   Future<List<PluginOutput>> runAllEnabled() async {
