@@ -205,7 +205,12 @@ class SystemApi {
       if (Platform.isLinux || Platform.isAndroid) {
         return _getLinuxMemoryUsageSync();
       }
-      // TODO: Implement sync for macOS/Windows if needed
+      if (Platform.isMacOS) {
+        return _getMacOsMemoryUsageSync();
+      }
+      if (Platform.isWindows) {
+        return _getWindowsMemoryUsageSync();
+      }
       return 'Unknown';
     } catch (e) {
       return 'Unknown';
@@ -239,7 +244,16 @@ class SystemApi {
   Future<String> _getMacOsMemoryUsage() async {
     final result = await Process.run('vm_stat', []);
     final output = result.stdout as String;
+    return _parseMacOsMemory(output);
+  }
 
+  String _getMacOsMemoryUsageSync() {
+    final result = Process.runSync('vm_stat', []);
+    final output = result.stdout as String;
+    return _parseMacOsMemory(output);
+  }
+
+  String _parseMacOsMemory(String output) {
     const pageSize = 4096;
     final freeMatch = RegExp(r'Pages free:\s+(\d+)').firstMatch(output);
     final activeMatch = RegExp(r'Pages active:\s+(\d+)').firstMatch(output);
@@ -268,8 +282,19 @@ class SystemApi {
       'wmic',
       ['OS', 'get', 'FreePhysicalMemory,TotalVisibleMemorySize'],
     );
+    return _parseWindowsMemory(result.stdout as String);
+  }
 
-    final lines = (result.stdout as String).split('\n');
+  String _getWindowsMemoryUsageSync() {
+    final result = Process.runSync(
+      'wmic',
+      ['OS', 'get', 'FreePhysicalMemory,TotalVisibleMemorySize'],
+    );
+    return _parseWindowsMemory(result.stdout as String);
+  }
+
+  String _parseWindowsMemory(String output) {
+    final lines = output.split('\n');
     for (final line in lines) {
       final parts = line.trim().split(RegExp(r'\s+'));
       if (parts.length >= 2) {
