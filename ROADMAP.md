@@ -288,7 +288,7 @@ Para cada Epic, a seguinte "Definition of Done" deve ser respeitada:
 
 #### Próximas Melhorias de Testes
 
-- [ ] Refatorar `scheduler_service_test.dart` para usar classe real
+- [x] Refatorar `scheduler_service_test.dart` para usar classe real
 - [ ] Adicionar testes de widget/UI para `plugins_tab.dart` (ver Epic v1.9.1)
 - [ ] Adicionar edge cases para `output_parser.dart` (ver Epic v1.9.1)
 - [ ] Excluir arquivos `l10n/*` do cálculo de coverage (gerados automaticamente)
